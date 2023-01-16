@@ -1,0 +1,101 @@
+
+app:
+  name: tiklab-xcode
+
+APP_HOME: ${APP_HOME}
+application: xcode
+
+spring:
+  config:
+    import: optional:classpath:/config/${env:dev}/application.yaml
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8080
+
+jdbc:
+  driverClassName: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://localhost:3306/tiklab_xcode?characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  username: root
+  password: darth2020
+
+#plugin config
+PROJECT_HOME: ${user.home}/pipeline/${app.name}
+plugin:
+  path: ${PROJECT_HOME}/plugin
+
+#dfs config
+dfs:
+  server:
+    enabled: false
+    mode: server
+    port: 4000
+    datapath: ${PROJECT_HOME}/files
+  client:
+    url: 127.0.0.1:4000
+    bucket: ${app.name}
+
+#dcs config
+dcs:
+  server:
+    enabled: false
+    mode: server
+    port: 5000
+    datapath: ${PROJECT_HOME}/caches
+  client:
+    url: 127.0.0.1:5000
+    bucket: ${app.name}
+
+#dcs config
+dss:
+  server:
+    enabled: false
+    mode: server
+    port: 6000
+    datapath: ${PROJECT_HOME}/index
+  client:
+    url: 127.0.0.1:6000
+    bucket: ${app.name}
+
+datapath: ${PROJECT_HOME}/caches
+
+eas:
+  embbed:
+    enable: true
+
+message:
+  sms:
+    enabled: true
+
+base:
+  url: http://xcode-ce.tiklab.net
+
+mysql:
+  embbed:
+    enable: true
+  database: tiklab_xcode
+
+#homes
+homes:
+  address: http://192.168.10.19:8080
+
+#license
+licences:
+  path: ${APP_HOME}/licences
+
+#file
+file:
+  path: http://file.tiklab.net
+
+
+
+
+
+
+
+
+
+
+
+
