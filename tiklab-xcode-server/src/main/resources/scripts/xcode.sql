@@ -27,6 +27,7 @@ create table code_branch(
     branch_id            varchar(255)  comment '分支id',
     code_id              varchar(255)  comment '仓库id',
     user_id              varchar(255)  comment '创建人',
+    branch_name          varchar(255)  comment '分支名称',
     type                 int  comment '分支类型',
     remarks            int  comment '描述',
     create_time          varchar(255)  comment '创建时间',

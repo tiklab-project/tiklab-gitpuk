@@ -1,34 +1,49 @@
 package net.tiklab.xcode.commit.model;
 
+import java.util.Date;
 import java.util.List;
 
+/**
+ * 提交信息
+ */
 public class CommitMessage {
 
+    /**
+     * commitId
+     */
     private String commitId;
 
+    /**
+     * 提交信息
+     */
     private String commitMessage;
 
+    /**
+     * 提交人
+     */
     private String commitUser;
 
+    /**
+     * 提交时间
+     */
     private String commitTime;
 
-    private String dateTime;
+    /**
+     * 提交时间
+     */
+    private Date dateTime;
 
-    List<CommitMessage> list;
+    /**
+     * 提交记录
+     */
+    private List<CommitMessage> commitMessageList;
 
-    public List<CommitMessage> getList() {
-        return list;
-    }
 
-    public void setList(List<CommitMessage> list) {
-        this.list = list;
-    }
-
-    public String getDateTime() {
+    public Date getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(String dateTime) {
+    public void setDateTime(Date dateTime) {
         this.dateTime = dateTime;
     }
 
@@ -62,5 +77,13 @@ public class CommitMessage {
 
     public void setCommitTime(String commitTime) {
         this.commitTime = commitTime;
+    }
+
+    public List<CommitMessage> getCommitMessageList() {
+        return commitMessageList;
+    }
+
+    public void setCommitMessageList(List<CommitMessage> commitMessageList) {
+        this.commitMessageList = commitMessageList;
     }
 }

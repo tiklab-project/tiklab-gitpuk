@@ -1,6 +1,7 @@
 package net.tiklab.xcode.until;
 
 import net.tiklab.core.exception.ApplicationException;
+import net.tiklab.xcode.code.model.CodeGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,56 +93,6 @@ public class CodeUntil {
 
 
     /**
-     * 创建目录
-     * @param address 文件地址
-     * @throws ApplicationException 文件创建失败
-     */
-    public static void createDirectory(String address) throws ApplicationException {
-        File file = new File(address);
-        if (file.exists()) {
-            return;
-        }
-        int i = 0;
-        boolean b = false;
-        if (!file.exists()) {
-            while (!b && i <= 10) {
-                b = file.mkdirs();
-                i++;
-            }
-        }
-        if (i >= 10) {
-            throw new ApplicationException(address + "创建失败。");
-        }
-    }
-
-
-    /**
-     * 创建文件
-     * @param address 文件地址
-     * @throws ApplicationException 文件创建失败
-     */
-    public static String createFile(String address) throws ApplicationException {
-        File file = new File(address);
-        String parent = file.getParent();
-        File parentFile = new File(parent);
-        try {
-            if (!parentFile.exists()){
-                createDirectory(parent);
-            }
-            boolean newFile = file.createNewFile();
-        } catch (IOException | ApplicationException e) {
-            throw new ApplicationException("文件创建失败。");
-        }
-        return file.getAbsolutePath();
-
-    }
-
-    public static String updateUrl(String defaultPath ,String path){
-       return path.replace(defaultPath, "").replace("\\", "/");
-    }
-
-
-    /**
      * 返回系统时间
      * @param type 时间类型 1.(yyyy-MM-dd HH:mm:ss) 2.(yyyy-MM-dd) 3.(HH:mm:ss) 4.([format]) 5.(HH:mm)
      * @return 时间
@@ -202,27 +153,18 @@ public class CodeUntil {
 
 
     /**
-     * 删除文件
-     * @param file 文件地址
-     * @return 是否删除 true 删除成功,false 删除失败
+     * 获取仓库地址
+     * @param address 仓库地址
+     * @param codeGroup 仓库组
+     * @return 仓库详细地址
      */
-    public static Boolean deleteFile(File file){
-        if (file.isDirectory()) {
-            String[] children = file.list();
-            //递归删除目录中的子目录下
-            if (children != null) {
-                for (String child : children) {
-                    boolean state = deleteFile(new File(file, child));
-                    int tryCount = 0;
-                    while (!state && tryCount ++ < 10) {
-                        System.gc();
-                        state = file.delete();
-                    }
-                }
-            }
-            // 目录此时为空，删除
+    public static String findRepositoryAddress(String address, CodeGroup codeGroup){
+        String s = defaultPath() + "/" + address;
+
+        if (codeGroup != null){
+            s =  defaultPath() + "/" + codeGroup.getName() + "/" + address;
         }
-        return file.delete();
+        return s;
     }
 
 

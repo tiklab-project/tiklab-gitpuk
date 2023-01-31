@@ -2,6 +2,7 @@ package net.tiklab.xcode;
 
 
 import net.tiklab.utils.property.PropertyAndYamlSourceFactory;
+import net.tiklab.xcode.until.CodeFileUntil;
 import net.tiklab.xcode.until.CodeUntil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,7 +22,7 @@ public class XcodeApplication {
 
 		SpringApplication.run(XcodeApplication.class, args);
 
-		CodeUntil.createDirectory(CodeUntil.defaultPath());
+		CodeFileUntil.createDirectory(CodeUntil.defaultPath());
 	}
 
 }

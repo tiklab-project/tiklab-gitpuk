@@ -19,9 +19,9 @@ public class Code {
 
     //仓库组id
     @Mappings({
-            @Mapping(source = "codeId",target = "groupId")
+            @Mapping(source = "codeGroup.groupId",target = "groupId")
     })
-    @JoinQuery(key = "codeId")
+    @JoinQuery(key = "groupId")
     private CodeGroup codeGroup;
 
     @ApiProperty(name="name",desc="仓库名称")

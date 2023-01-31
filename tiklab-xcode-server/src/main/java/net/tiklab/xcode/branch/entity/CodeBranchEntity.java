@@ -4,12 +4,15 @@ import net.tiklab.dal.jpa.annotation.*;
 
 @Entity
 @Table(name="code_branch")
-public class CodeBranch {
+public class CodeBranchEntity {
 
     @Id
     @GeneratorValue
     @Column(name = "branch_id")
     private String branchId;
+
+    @Column(name = "branch_name")
+    private String branchName;
 
     @Column(name = "code_id")
     private String codeId;
@@ -84,6 +87,14 @@ public class CodeBranch {
 
     public void setState(int state) {
         this.state = state;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
     }
 }
 

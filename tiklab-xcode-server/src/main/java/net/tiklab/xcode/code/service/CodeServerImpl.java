@@ -9,7 +9,9 @@ import net.tiklab.xcode.code.entity.CodeEntity;
 import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.model.CodeGroup;
 import net.tiklab.xcode.code.model.CodeMessage;
+import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
+import net.tiklab.xcode.until.CodeFileUntil;
 import net.tiklab.xcode.until.CodeUntil;
 import net.tiklab.xcode.until.FileTree;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -20,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -41,6 +44,7 @@ public class CodeServerImpl implements CodeServer{
     @Override
     public String createCode(Code code) {
         Code initCode = initCode(code);
+        initCode.setCreateTime(CodeUntil.date(1,new Date()));
         CodeEntity groupEntity = BeanMapper.map(initCode, CodeEntity.class);
         return codeDao.createCode(groupEntity);
     }
@@ -110,26 +114,27 @@ public class CodeServerImpl implements CodeServer{
 
 
     //初始化仓库信息
-    private Code initCode(Code code) throws ApplicationException{
+    private Code initCode(Code code) throws ApplicationException {
+
         joinTemplate.joinQuery(code);
 
         CodeGroup codeGroup = code.getCodeGroup();
+        //工作路径
         String s  = CodeUntil.defaultPath() ;
         //是否存在仓库组
-        if (codeGroup != null){
+        if (codeGroup != null && codeGroup.getGroupId() != null){
             String groupName = codeGroup.getName();
-            code.setName(groupName+"/"+ code.getName());
             s = CodeUntil.defaultPath() + "/" + groupName;
             //创建工作目录
             File file = new File(s);
             try {
-                CodeUntil.createDirectory(file.getAbsolutePath());
+                CodeFileUntil.createDirectory(file.getAbsolutePath());
             } catch (ApplicationException e) {
-                throw new ApplicationException(e);
+                throw new ApplicationException("仓库工作目录创建失败："+e);
             }
         }
-
-        GitUntil.createRepository(s,code.getName());
+        //创建裸仓库
+        GitUntil.createRepository(s,code.getAddress());
         return code;
     }
 
@@ -142,23 +147,29 @@ public class CodeServerImpl implements CodeServer{
     public List<FileTree> findFileTree(CodeMessage codeMessage){
         Code code = findOneCode(codeMessage.getCodeId());
         String name = code.getName();
-        String s = CodeUntil.defaultPath() + "/" + name;
 
-        CodeGroup codeGroup = code.getCodeGroup();
-        if (codeGroup != null){
-            s =  CodeUntil.defaultPath() + "/" + codeGroup.getName() + "/" + name;
-        }
+        String s = CodeUntil.findRepositoryAddress(code.getAddress(),code.getCodeGroup()) ;
+
         List<FileTree> fileTrees = null;
 
         codeMessage.setRepositoryAddress(s);
+        codeMessage.setRepositoryName(name);
+        codeMessage.setAddress(code.getAddress());
         try {
-            fileTrees = GitUntil.fileTree(codeMessage,name);
+            fileTrees = CodeFileUntil.fileTree(codeMessage);
         } catch (GitAPIException | IOException e) {
             throw new ApplicationException("仓库信息获取失败："+e);
         }
         return fileTrees;
 
     }
+
+
+
+
+
+
+
 
 
     

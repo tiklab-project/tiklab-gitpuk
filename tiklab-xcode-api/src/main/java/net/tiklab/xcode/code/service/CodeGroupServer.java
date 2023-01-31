@@ -30,7 +30,7 @@ public interface CodeGroupServer {
      * 更新仓库组
      * @param codeGroup 仓库组信息
      */
-    void updateGroup(CodeGroup codeGroup);
+    void updateCodeGroup(CodeGroup codeGroup);
 
     /**
      * 查询单个仓库组
@@ -50,5 +50,33 @@ public interface CodeGroupServer {
 
     @FindList
     List<CodeGroup> findAllCodeGroupList(List<String> idList);
+
+    /**
+     * 查询用户仓库组
+     * @param userId 用户id
+     * @return 仓库组集合
+     */
+    List<CodeGroup> findUserGroup(String userId);
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

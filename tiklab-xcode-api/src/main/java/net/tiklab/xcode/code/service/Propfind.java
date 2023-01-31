@@ -6,8 +6,7 @@ import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-// @HttpMethod(value = "PROPFIND")
-@HttpMethod(value = "Propfind")
+@HttpMethod(value = "PROPFIND")
 @Documented
 public @interface Propfind {
 }

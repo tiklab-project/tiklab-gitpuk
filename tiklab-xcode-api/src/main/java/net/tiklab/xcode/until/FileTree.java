@@ -17,8 +17,15 @@ public class FileTree {
     //提交信息
     private String commitMessage;
 
-    //提交时间
+    /**
+     * 提交时间
+     */
     private String commitTime;
+
+    /**
+     * 类型
+     */
+    private String type;
 
 
     private String path;
@@ -100,6 +107,14 @@ public class FileTree {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
 

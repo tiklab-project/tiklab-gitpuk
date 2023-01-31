@@ -10,7 +10,6 @@ import net.tiklab.xcode.until.FileTree;
 
 import java.util.List;
 
-
 @JoinProvider(model = Code.class)
 public interface CodeServer {
 

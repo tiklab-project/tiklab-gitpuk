@@ -2,6 +2,7 @@ package net.tiklab.xcode.code.service;
 
 import net.tiklab.beans.BeanMapper;
 import net.tiklab.join.JoinTemplate;
+import net.tiklab.rpc.annotation.Exporter;
 import net.tiklab.xcode.code.dao.CodeGroupDao;
 import net.tiklab.xcode.code.entity.CodeGroupEntity;
 import net.tiklab.xcode.code.model.CodeGroup;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Exporter
 public class CodeGroupServerImpl implements CodeGroupServer {
 
     @Autowired
@@ -46,7 +48,7 @@ public class CodeGroupServerImpl implements CodeGroupServer {
      * @param codeGroup 仓库组信息
      */
     @Override
-    public void updateGroup(CodeGroup codeGroup) {
+    public void updateCodeGroup(CodeGroup codeGroup) {
         CodeGroupEntity groupEntity = BeanMapper.map(codeGroup, CodeGroupEntity.class);
         codeGroupDao.updateCodeGroup(groupEntity);
     }
@@ -84,4 +86,38 @@ public class CodeGroupServerImpl implements CodeGroupServer {
         joinTemplate.joinQuery(list);
         return list;
     }
+
+    /**
+     * 查询用户仓库组
+     * @param userId 用户id
+     * @return 仓库组集合
+     */
+    @Override
+    public List<CodeGroup> findUserGroup(String userId) {
+        return findAllCodeGroup();
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

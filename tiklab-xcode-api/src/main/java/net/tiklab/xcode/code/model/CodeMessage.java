@@ -2,12 +2,22 @@ package net.tiklab.xcode.code.model;
 
 public class CodeMessage {
 
+    //仓库id
     private String codeId;
 
+    //仓库地址
     private String repositoryAddress;
 
+    //仓库路径
+    private String address;
+
+    //仓库名称
+    private String repositoryName;
+
+    //分支
     private String branch;
 
+    //文件地址
     private String path;
 
 
@@ -41,6 +51,22 @@ public class CodeMessage {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
+    public void setRepositoryName(String repositoryName) {
+        this.repositoryName = repositoryName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
 
