@@ -32,7 +32,7 @@ public class CodeFileUntil {
             writer.write(str);
             writer.flush();
         } catch (Exception e) {
-            throw new ApplicationException("文件写入失败。");
+            throw new ApplicationException("文件写入失败。"+e.getMessage());
         }
     }
 
@@ -110,6 +110,17 @@ public class CodeFileUntil {
         return s.toString();
     }
 
+    /**
+     * 修改文件名称
+     * @param fileAddress 文件上级目录
+     * @param oldName 旧名称
+     * @param newName 新名称
+     */
+    public static boolean updateFileName(String fileAddress,String oldName,String newName){
+        File file = new File(fileAddress + "/" + oldName);
+        return file.renameTo(new File(fileAddress + "/" + newName));
+    }
+
 
     /**
      * 删除文件及文件夹
@@ -146,7 +157,6 @@ public class CodeFileUntil {
 
         String repositoryAddress = codeMessage.getRepositoryAddress();
 
-        String path = codeMessage.getPath();
         String name = codeMessage.getRepositoryName();
         String branch = codeMessage.getBranch();
         String address = codeMessage.getAddress();
@@ -154,29 +164,26 @@ public class CodeFileUntil {
         String defaultAddress =CodeUntil.defaultPath().replace("\\","/");
 
         //判断仓库是否为空仓库
-        boolean commit = GitCommitUntil.findRepositoryCommit(repositoryAddress, branch);
+        boolean commit = GitCommitUntil.findRepositoryIsNotNull(repositoryAddress+".git", branch);
         if (!commit){
             throw new  ApplicationException(100,"空仓库");
         }
 
         //判断仓库文件目录是否存在
-        File files = new File(repositoryAddress);
+        File files = new File(repositoryAddress+"_"+branch);
         if (!files.exists()){
             GitUntil.cloneRepository(repositoryAddress,branch);
         }else {
-            GitUntil.pullRepository(repositoryAddress);
+            GitUntil.pullRepository(repositoryAddress,branch);
         }
 
-        //去除地址中的分支，项目，类型
-        if (!CodeUntil.isNoNull(path)){
-            path = repositoryAddress;
-        }else {
-            String replace = path.replace(name+"/blob/"+branch, "")
-                    .replace(name+"/tree/" + branch, "");
-            path = repositoryAddress + "/" + replace;
-        }
 
-        //判断文件夹是否存在
+
+        //判断仓库文件是否存在
+        String path = repositoryAddress+"_"+branch;
+        if (CodeUntil.isNoNull(codeMessage.getPath())){
+            path = path + codeMessage.getPath();;
+        }
         File pathFile = new File(path);
         if (!pathFile.exists()){
             throw new  ApplicationException(50001,"路径不存在。");
@@ -208,10 +215,11 @@ public class CodeFileUntil {
 
             fileTree.setFileParent(parent);
             fileTree.setFileAddress(fileAddress);
-            fileTree.setType("tree");
+
 
             //文件类型
             String suffix = null;
+            fileTree.setType("tree");
             if (!f.isDirectory() ){
                 String fileName = f.getName();
                 if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
@@ -221,11 +229,13 @@ public class CodeFileUntil {
             }
             fileTree.setFileType(suffix);
 
-            Map<String, String> fileCommit =GitCommitUntil.findFileCommit(repositoryAddress, branch, f);
+            String s1 = "/" + address+"_"+branch;
 
-            String s = fileAddress.replace("/"+address ,"");
+            String s = fileAddress.substring(fileAddress.indexOf(s1)+s1.length()) ;
 
             s = "/" + name +"/" + fileTree.getType() + "/" + branch + s ;
+
+            Map<String, String> fileCommit =GitCommitUntil.findFileCommit(repositoryAddress, branch, f);
 
             fileTree.setPath(s);
             fileTree.setCommitMessage(fileCommit.get("message"));

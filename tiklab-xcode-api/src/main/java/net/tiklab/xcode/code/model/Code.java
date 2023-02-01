@@ -52,6 +52,16 @@ public class Code {
     @ApiProperty(name="state",desc="仓库状态")
     private int state;
 
+    /**
+     * 默认分支
+     */
+    private String defaultBranch;
+
+    /**
+     * 是否为空仓库
+     */
+    private boolean notNull;
+
 
     public String getCodeId() {
         return codeId;
@@ -134,6 +144,21 @@ public class Code {
     }
 
 
+    public String getDefaultBranch() {
+        return defaultBranch;
+    }
+
+    public void setDefaultBranch(String defaultBranch) {
+        this.defaultBranch = defaultBranch;
+    }
+
+    public boolean isNotNull() {
+        return notNull;
+    }
+
+    public void setNotNull(boolean notNull) {
+        this.notNull = notNull;
+    }
 }
 
 

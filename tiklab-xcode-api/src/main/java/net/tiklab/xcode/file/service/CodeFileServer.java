@@ -21,11 +21,10 @@ public interface CodeFileServer {
 
     /**
      * 读取文件
-     * @param codeId 仓库id
-     * @param fileAddress 文件地址
+     * @param codeFile 文件信息
      * @return 文件信息
      */
-    CodeFileMessage readFile(String codeId, String fileAddress);
+    CodeFileMessage readFile(CodeFile codeFile);
 
     /**
      * 写入文件

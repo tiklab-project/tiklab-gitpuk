@@ -2,6 +2,7 @@ package net.tiklab.xcode.git;
 
 import net.tiklab.xcode.branch.model.CodeBranch;
 import net.tiklab.xcode.commit.model.CommitMessage;
+import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -107,6 +108,25 @@ public class GitBranchUntil {
         git.close();
         return list;
     }
+
+    /**
+     * 返回项目默认分支
+     * @param repositoryAddress 仓库地址
+     * @return 默认分支 无返回 DEFAULT_MASTER
+     * @throws IOException 仓库不存在
+     */
+    public   static String findDefaultBranch(String repositoryAddress) throws IOException {
+        List<CodeBranch> codeBranches = repositoryBranch(repositoryAddress);
+
+        for (CodeBranch codeBranch : codeBranches) {
+            if (codeBranch.isDefaultBranch()){
+                return codeBranch.getBranchName();
+            }
+        }
+        return CodeFinal.DEFAULT_MASTER;
+    }
+
+
 
 
 

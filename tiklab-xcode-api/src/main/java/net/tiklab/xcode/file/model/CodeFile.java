@@ -1,5 +1,8 @@
 package net.tiklab.xcode.file.model;
 
+/**
+ * 更改文件信息
+ */
 public class CodeFile {
 
     /**
@@ -8,14 +11,24 @@ public class CodeFile {
     private String codeId;
 
     /**
-     * 文件名称
+     * 文件新名称
      */
-    private String fileName;
+    private String newFileName;
+
+    /**
+     * 文件旧名称
+     */
+    private String oldFileName;
 
     /**
      * 文件地址
      */
     private String fileAddress;
+
+    /**
+     * 文件内容
+     */
+    private String fileContent;
 
     /**
      * 提交信息
@@ -28,12 +41,20 @@ public class CodeFile {
     private String commitBranch;
 
 
-    public String getFileName() {
-        return fileName;
+    public String getNewFileName() {
+        return newFileName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setNewFileName(String newFileName) {
+        this.newFileName = newFileName;
+    }
+
+    public String getOldFileName() {
+        return oldFileName;
+    }
+
+    public void setOldFileName(String oldFileName) {
+        this.oldFileName = oldFileName;
     }
 
     public String getFileAddress() {
@@ -66,5 +87,13 @@ public class CodeFile {
 
     public void setCodeId(String codeId) {
         this.codeId = codeId;
+    }
+
+    public String getFileContent() {
+        return fileContent;
+    }
+
+    public void setFileContent(String fileContent) {
+        this.fileContent = fileContent;
     }
 }

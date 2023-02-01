@@ -5,6 +5,7 @@ import net.tiklab.postin.annotation.Api;
 import net.tiklab.postin.annotation.ApiMethod;
 import net.tiklab.postin.annotation.ApiParam;
 import net.tiklab.xcode.code.model.Code;
+import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.until.FileTree;
@@ -78,6 +79,28 @@ public class CodeController {
         List<FileTree> fileTree = codeServer.findFileTree(codeMessage);
 
         return Result.ok(fileTree);
+    }
+
+
+    @RequestMapping(path="/findCloneAddress",method = RequestMethod.POST)
+    @ApiMethod(name = "findCloneAddress",desc = "查询仓库克隆地址")
+    @ApiParam(name = "codeId",desc = "仓库id",required = true)
+    public Result<CodeCloneAddress> findCloneAddress(@NotNull String codeId){
+
+        CodeCloneAddress cloneAddress = codeServer.findCloneAddress(codeId);
+
+        return Result.ok(cloneAddress);
+    }
+
+
+    @RequestMapping(path="/findNameCode",method = RequestMethod.POST)
+    @ApiMethod(name = "findNameCode",desc = "查询仓库名称")
+    @ApiParam(name = "codeName",desc = "仓库名称",required = true)
+    public Result<Code> findNameCode(@NotNull String codeName){
+
+        Code nameCode = codeServer.findNameCode(codeName);
+
+        return Result.ok(nameCode);
     }
     
     

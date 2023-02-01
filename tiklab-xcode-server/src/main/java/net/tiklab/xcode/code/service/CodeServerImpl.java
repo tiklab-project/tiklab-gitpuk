@@ -4,11 +4,14 @@ import net.tiklab.beans.BeanMapper;
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.join.JoinTemplate;
 import net.tiklab.rpc.annotation.Exporter;
+import net.tiklab.utils.context.LoginContext;
 import net.tiklab.xcode.code.dao.CodeDao;
 import net.tiklab.xcode.code.entity.CodeEntity;
 import net.tiklab.xcode.code.model.Code;
+import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeGroup;
 import net.tiklab.xcode.code.model.CodeMessage;
+import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
 import net.tiklab.xcode.until.CodeFileUntil;
@@ -16,12 +19,15 @@ import net.tiklab.xcode.until.CodeUntil;
 import net.tiklab.xcode.until.FileTree;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -88,7 +94,11 @@ public class CodeServerImpl implements CodeServer{
      */
     @Override
     public List<Code> findUserCode(String userId) {
-        return findAllCode();
+        List<Code> allCode = findAllCode();
+        if (allCode == null || allCode.size() == 0){
+            return Collections.emptyList();
+        }
+        return allCode;
     }
 
     /**
@@ -112,8 +122,47 @@ public class CodeServerImpl implements CodeServer{
         return list;
     }
 
+    /**
+     * 根据仓库名称查询仓库信息
+     * @param codeName 仓库名称
+     * @return 仓库信息
+     */
+    @Override
+    public Code findNameCode(String codeName) {
+        String loginId = LoginContext.getLoginId();
+        List<Code> userCode = findUserCode(loginId);
+        if (userCode.size() == 0 ){
+            return null;
+        }
+        try {
+            for (Code code : userCode) {
+                String address = code.getAddress();
+                if (!address.equals(codeName)){
+                    continue;
+                }
+                String repositoryAddress = CodeUntil.findRepositoryAddress(address, code.getCodeGroup())+".git";
+                String defaultBranch = GitBranchUntil.findDefaultBranch(repositoryAddress);
+                boolean isNotNull = GitCommitUntil.findRepositoryIsNotNull(repositoryAddress, defaultBranch);
+                code.setDefaultBranch(defaultBranch);
+                code.setNotNull(isNotNull);
+                return code;
+            }
+        } catch (IOException e) {
+            throw new ApplicationException("仓库不存在"+e);
+        }
 
-    //初始化仓库信息
+
+
+        return null;
+    }
+
+
+    /**
+     * 初始化仓库文件信息
+     * @param code 仓库信息
+     * @return 信息
+     * @throws ApplicationException 初始化失败
+     */
     private Code initCode(Code code) throws ApplicationException {
 
         joinTemplate.joinQuery(code);
@@ -145,12 +194,13 @@ public class CodeServerImpl implements CodeServer{
      */
     @Override
     public List<FileTree> findFileTree(CodeMessage codeMessage){
+
         Code code = findOneCode(codeMessage.getCodeId());
         String name = code.getName();
 
         String s = CodeUntil.findRepositoryAddress(code.getAddress(),code.getCodeGroup()) ;
 
-        List<FileTree> fileTrees = null;
+        List<FileTree> fileTrees ;
 
         codeMessage.setRepositoryAddress(s);
         codeMessage.setRepositoryName(name);
@@ -161,6 +211,52 @@ public class CodeServerImpl implements CodeServer{
             throw new ApplicationException("仓库信息获取失败："+e);
         }
         return fileTrees;
+
+    }
+
+
+    @Value("${server.port:8080}")
+    private String port;
+
+    /**
+     * 获取克隆地址
+     * @param codeId 仓库id
+     * @return 地址信息
+     */
+    @Override
+    public CodeCloneAddress findCloneAddress(String codeId){
+        Code code = findOneCode(codeId);
+        CodeGroup group = code.getCodeGroup();
+        String path = code.getAddress();
+        if (group != null){
+            String name = group.getName();
+            path = name + "/"+path;
+        }
+
+        String  ip ;
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            ip = "172.0.0.1";
+        }
+
+        CodeCloneAddress codeCloneAddress = new CodeCloneAddress();
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
+        codeCloneAddress.setFileAddress(repositoryAddress + ".git");
+
+        String property = System.getProperty("user.home").replace("\\", "/");
+
+        String replace1 = repositoryAddress.replace("\\", "/");
+        String replace = replace1.replace(property+"/", "");
+
+        String http = "http://"+ip+":"+port+"/"+path+".git";
+
+        String SSH = "admin@"+ip+":"+replace+".git";
+
+        codeCloneAddress.setHttpAddress(http);
+        codeCloneAddress.setSSHAddress(SSH);
+
+        return codeCloneAddress;
 
     }
 

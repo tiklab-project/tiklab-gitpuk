@@ -5,6 +5,7 @@ import net.tiklab.join.annotation.FindList;
 import net.tiklab.join.annotation.FindOne;
 import net.tiklab.join.annotation.JoinProvider;
 import net.tiklab.xcode.code.model.Code;
+import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.until.FileTree;
 
@@ -58,6 +59,12 @@ public interface CodeServer {
     @FindList
     List<Code> findAllCodeList(List<String> idList);
 
+    /**
+     * 根据仓库名称查询仓库信息
+     * @param codeName 仓库名称
+     * @return 仓库信息
+     */
+    Code findNameCode(String codeName);
 
 
     /**
@@ -66,6 +73,14 @@ public interface CodeServer {
      * @return 文件集合
      */
     List<FileTree> findFileTree(CodeMessage codeMessage);
+
+
+    /**
+     * 获取克隆地址
+     * @param codeId 仓库id
+     * @return 地址信息
+     */
+    CodeCloneAddress findCloneAddress(String codeId);
 
 
 

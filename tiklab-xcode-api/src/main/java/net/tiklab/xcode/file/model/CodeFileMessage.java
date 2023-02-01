@@ -1,5 +1,8 @@
 package net.tiklab.xcode.file.model;
 
+/**
+ * 返回前端文件信息
+ */
 public class CodeFileMessage {
 
 
