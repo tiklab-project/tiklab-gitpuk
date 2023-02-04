@@ -98,18 +98,20 @@ public class GitCommitUntil {
 
     /**
      * 获取指定文件的提交信息
-     * @param repositoryAddress 仓库地址
+     * @param repo 仓库
      * @param branch 分支
      * @param file 指定文件
      * @return 指定文件的提交信息
      * @throws IOException 仓库不存在
      * @throws GitAPIException 提交信息获取失败
      */
-    public static Map<String, String> findFileCommit(String repositoryAddress, String branch, File file) throws IOException, GitAPIException {
+    public static Map<String, String> findFileCommit(Repository repo, String branch, File file) throws IOException, GitAPIException {
 
         Map<String, String> map = new HashMap<>();
 
-        List<CommitMessage> branchCommit = findBranchCommit(repositoryAddress+".git", branch);
+        File directory = repo.getDirectory();
+
+        List<CommitMessage> branchCommit = findBranchCommit(directory.getAbsolutePath(), branch);
 
         map.put("message",branchCommit.get(0).getCommitMessage());
         map.put("time",branchCommit.get(0).getCommitTime());
@@ -118,13 +120,8 @@ public class GitCommitUntil {
             return map;
         }
 
-        Repository repo = new FileRepositoryBuilder()
-                .setMustExist(true)
-                .addCeilingDirectory(new File(repositoryAddress+"_"+branch))
-                .findGitDir(new File(repositoryAddress+"_"+branch))
-                .build();
+        //获取仓库信息
         RevWalk walk = new RevWalk(repo);
-
         for (int i = 0; i < branchCommit.size()-1; i++) {
 
             //最近一次的提交记录
@@ -145,19 +142,14 @@ public class GitCommitUntil {
 
                 String fileName = file.getName();
 
-                //获取查询的文件名称
-                // String defaultAddress =CodeUntil.defaultPath().replace("\\","/");
-                // String replace = file.getAbsolutePath().replace("\\", "/").replace(defaultAddress, "");
-                // String substring = replace.substring(replace.indexOf("/",1));
-
                 String message = branchCommit.get(i).getCommitMessage();
                 String time = branchCommit.get(i).getCommitTime();
+
                 if (!file.isDirectory() && newPath.equals(fileName)){
                     map.put("message",message);
                     map.put("time",time);
                     walk.dispose();
                     walk.close();
-                    repo.close();
                     return map;
                 }
                 if (file.isDirectory() && newPath.contains(fileName)){
@@ -165,17 +157,12 @@ public class GitCommitUntil {
                     map.put("time",time);
                     walk.dispose();
                     walk.close();
-                    repo.close();
                     return map;
                 }
             }
-
-
         }
         walk.dispose();
         walk.close();
-        repo.close();
-
         return map;
     }
 

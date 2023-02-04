@@ -7,6 +7,7 @@ import net.tiklab.xcode.file.model.CodeFile;
 import net.tiklab.xcode.file.model.CodeFileMessage;
 import net.tiklab.xcode.git.GitUntil;
 import net.tiklab.xcode.until.CodeFileUntil;
+import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class CodeFileServerImpl implements  CodeFileServer {
         String branch = codeFile.getCommitBranch();
 
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.FALSE);
         String s = repositoryAddress+"_"+branch + fileAddress;
         CodeFileMessage fileMessage = new CodeFileMessage();
         String file = CodeFileUntil.readFile(s);
@@ -87,7 +88,7 @@ public class CodeFileServerImpl implements  CodeFileServer {
 
         String fileAddress = codeFile.getFileAddress();
 
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.FALSE);
 
         File file = new File(repositoryAddress + fileAddress);
         String newFileName = codeFile.getNewFileName();

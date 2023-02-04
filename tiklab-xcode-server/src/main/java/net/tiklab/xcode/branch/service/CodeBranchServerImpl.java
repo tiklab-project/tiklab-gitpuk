@@ -7,6 +7,7 @@ import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitUntil;
+import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +32,11 @@ public class CodeBranchServerImpl implements CodeBranchServer {
     @Override
     public List<CodeBranch> findAllBranch(String codeId) {
         Code code = codeServer.findOneCode(codeId);
-        String address = code.getAddress();
-        String s = CodeUntil.findRepositoryAddress(address,code.getCodeGroup());
+
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         List<CodeBranch> codeBranches;
         try {
-            codeBranches = GitBranchUntil.repositoryBranch(s + ".git");
+            codeBranches = GitBranchUntil.findAllBranch(repositoryAddress);
         } catch (IOException e) {
             throw new ApplicationException("分支信息获取失败："+e);
         }
@@ -51,9 +52,9 @@ public class CodeBranchServerImpl implements CodeBranchServer {
     public void createBranch(BranchMessage branchMessage) {
         String codeId = branchMessage.getCodeId();
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         try {
-            GitBranchUntil.createRepositoryBranch(repositoryAddress + ".git", branchMessage.getBranchName(), branchMessage.getPoint());
+            GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
         } catch (IOException | GitAPIException e) {
             throw new ApplicationException("分支创建失败"+e);
         }
@@ -67,9 +68,9 @@ public class CodeBranchServerImpl implements CodeBranchServer {
     public void deleteBranch(BranchMessage branchMessage){
         String codeId = branchMessage.getCodeId();
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         try {
-            GitBranchUntil.deleteRepositoryBranch(repositoryAddress + ".git", branchMessage.getBranchName());
+            GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());
         } catch (IOException | GitAPIException e) {
             throw new ApplicationException("分支删除失败"+e);
         }

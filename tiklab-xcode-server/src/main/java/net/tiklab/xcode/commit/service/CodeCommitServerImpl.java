@@ -6,6 +6,7 @@ import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.code.service.CodeServerImpl;
 import net.tiklab.xcode.commit.model.CommitMessage;
 import net.tiklab.xcode.git.GitCommitUntil;
+import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,10 +33,10 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     public List<CommitMessage> findBranchCommit(String codeId, String branchName) {
 
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         List<CommitMessage> branchCommit;
         try {
-            branchCommit = GitCommitUntil.findBranchCommit(repositoryAddress+".git", branchName);
+            branchCommit = GitCommitUntil.findBranchCommit(repositoryAddress, branchName);
         } catch (IOException e) {
             throw new ApplicationException("提交记录获取失败："+e);
         }

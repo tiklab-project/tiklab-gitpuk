@@ -4,7 +4,9 @@ import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.io.File;
@@ -100,7 +102,6 @@ public class CodeFileUntil {
         List<String> lines = null;
         try {
             lines = Files.readAllLines(path,StandardCharsets.UTF_8);
-            // lines = Files.readAllLines(path,Charset.forName("GBK"));
             for (String line : lines) {
                 s.append(line).append("\n");
             }
@@ -163,27 +164,22 @@ public class CodeFileUntil {
 
         String defaultAddress =CodeUntil.defaultPath().replace("\\","/");
 
-        //判断仓库是否为空仓库
-        boolean commit = GitCommitUntil.findRepositoryIsNotNull(repositoryAddress+".git", branch);
-        if (!commit){
-            throw new  ApplicationException(100,"空仓库");
-        }
-
         //判断仓库文件目录是否存在
         File files = new File(repositoryAddress+"_"+branch);
-        if (!files.exists()){
-            GitUntil.cloneRepository(repositoryAddress,branch);
-        }else {
-            GitUntil.pullRepository(repositoryAddress,branch);
+        if (files.exists() && !CodeUntil.isNoNull(codeMessage.getPath())){
+            CodeFileUntil.deleteFile(files);
         }
 
-
+        //克隆最新的仓库
+        String path = repositoryAddress+"_"+branch;
+        String messagePath = codeMessage.getPath();
+        if (CodeUntil.isNoNull(messagePath)){
+            path = path + codeMessage.getPath();;
+        }else {
+            GitUntil.cloneRepository(repositoryAddress,branch);
+        }
 
         //判断仓库文件是否存在
-        String path = repositoryAddress+"_"+branch;
-        if (CodeUntil.isNoNull(codeMessage.getPath())){
-            path = path + codeMessage.getPath();;
-        }
         File pathFile = new File(path);
         if (!pathFile.exists()){
             throw new  ApplicationException(50001,"路径不存在。");
@@ -197,13 +193,20 @@ public class CodeFileUntil {
 
         List<FileTree> fileTrees = new ArrayList<>();
 
+
+        Git git = Git.open(new File(repositoryAddress+".git"));
+        Repository repo = git.getRepository();
+
         for (File f : fa) {
 
             FileTree fileTree = new FileTree();
             fileTree.setFileName(f.getName());
             fileTree.setBranch(branch);
+
+            String s2 = defaultAddress + "/" + name + "_" + branch;
+
             //忽略.git文件夹
-            if (f.getName().equals(".git")){
+            if (f.getName().equals(".git") && new File(s2).getName().equals(new File(f.getParent()).getName())){
                 continue;
             }
 
@@ -235,7 +238,7 @@ public class CodeFileUntil {
 
             s = "/" + name +"/" + fileTree.getType() + "/" + branch + s ;
 
-            Map<String, String> fileCommit =GitCommitUntil.findFileCommit(repositoryAddress, branch, f);
+            Map<String, String> fileCommit =GitCommitUntil.findFileCommit(repo, branch, f);
 
             fileTree.setPath(s);
             fileTree.setCommitMessage(fileCommit.get("message"));
@@ -244,6 +247,8 @@ public class CodeFileUntil {
 
         }
         fileTrees.sort(Comparator.comparing(FileTree::getType).reversed());
+        repo.close();
+        git.close();
 
         return fileTrees;
     }

@@ -1,6 +1,7 @@
 package net.tiklab.xcode.until;
 
 import net.tiklab.core.exception.ApplicationException;
+import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.model.CodeGroup;
 
 import java.io.File;
@@ -154,16 +155,17 @@ public class CodeUntil {
 
     /**
      * 获取仓库地址
-     * @param address 仓库地址
-     * @param codeGroup 仓库组
+     * @param code 仓库地址
+     * @param b true:裸仓库地址 false:默认分支地址
      * @return 仓库详细地址
      */
-    public static String findRepositoryAddress(String address, CodeGroup codeGroup){
+    public static String findRepositoryAddress(Code code ,boolean b){
+        String address = code.getAddress();
         String s = defaultPath() + "/" + address;
-
-        if (codeGroup != null){
-            s =  defaultPath() + "/" + codeGroup.getName() + "/" + address;
+        if (b){
+            return s + ".git";
         }
+
         return s;
     }
 

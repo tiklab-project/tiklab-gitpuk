@@ -4,7 +4,10 @@ import net.tiklab.beans.BeanMapper;
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.join.JoinTemplate;
 import net.tiklab.rpc.annotation.Exporter;
+import net.tiklab.user.user.model.User;
+import net.tiklab.user.user.service.UserService;
 import net.tiklab.utils.context.LoginContext;
+import net.tiklab.xcode.branch.model.CodeBranch;
 import net.tiklab.xcode.code.dao.CodeDao;
 import net.tiklab.xcode.code.entity.CodeEntity;
 import net.tiklab.xcode.code.model.Code;
@@ -15,6 +18,7 @@ import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
 import net.tiklab.xcode.until.CodeFileUntil;
+import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import net.tiklab.xcode.until.FileTree;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -61,7 +65,30 @@ public class CodeServerImpl implements CodeServer{
      */
     @Override
     public void deleteCode(String codeId) {
+        Code code = findOneCode(codeId);
         codeDao.deleteCode(codeId);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.FALSE);
+        try {
+            List<CodeBranch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress + ".git");
+            if (allBranch.isEmpty()){
+                File file = new File(repositoryAddress+".git");
+                CodeFileUntil.deleteFile(file);
+                return;
+            }
+            //删除源文件信息
+            for (CodeBranch branch : allBranch) {
+                String branchName = branch.getBranchName();
+                File file = new File(repositoryAddress + "_" + branchName);
+                if (!file.exists()){
+                    continue;
+                }
+                CodeFileUntil.deleteFile(file);
+            }
+            File file = new File(repositoryAddress+".git");
+            CodeFileUntil.deleteFile(file);
+        } catch (IOException e) {
+            throw new ApplicationException("仓库不存在："+e);
+        }
     }
 
     /**
@@ -110,6 +137,9 @@ public class CodeServerImpl implements CodeServer{
         List<CodeEntity> groupEntityList = codeDao.findAllCode();
         List<Code> list = BeanMapper.mapList(groupEntityList, Code.class);
         joinTemplate.joinQuery(list);
+        if (list == null){
+            return Collections.emptyList();
+        }
         return list;
     }
 
@@ -136,11 +166,17 @@ public class CodeServerImpl implements CodeServer{
         }
         try {
             for (Code code : userCode) {
+                CodeGroup codeGroup = code.getCodeGroup();
+                if (codeGroup == null || codeGroup.getName() == null){
+                    String nickname = code.getUser().getName();
+                    codeName = codeName.replace(nickname+"/","");
+                }
                 String address = code.getAddress();
+
                 if (!address.equals(codeName)){
                     continue;
                 }
-                String repositoryAddress = CodeUntil.findRepositoryAddress(address, code.getCodeGroup())+".git";
+                String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
                 String defaultBranch = GitBranchUntil.findDefaultBranch(repositoryAddress);
                 boolean isNotNull = GitCommitUntil.findRepositoryIsNotNull(repositoryAddress, defaultBranch);
                 code.setDefaultBranch(defaultBranch);
@@ -150,9 +186,6 @@ public class CodeServerImpl implements CodeServer{
         } catch (IOException e) {
             throw new ApplicationException("仓库不存在"+e);
         }
-
-
-
         return null;
     }
 
@@ -166,24 +199,17 @@ public class CodeServerImpl implements CodeServer{
     private Code initCode(Code code) throws ApplicationException {
 
         joinTemplate.joinQuery(code);
-
+        //获取用户名
         CodeGroup codeGroup = code.getCodeGroup();
-        //工作路径
-        String s  = CodeUntil.defaultPath() ;
-        //是否存在仓库组
+        //不存在仓库组
         if (codeGroup != null && codeGroup.getGroupId() != null){
             String groupName = codeGroup.getName();
-            s = CodeUntil.defaultPath() + "/" + groupName;
+            String s = CodeUntil.defaultPath() + "/" + groupName;
             //创建工作目录
-            File file = new File(s);
-            try {
-                CodeFileUntil.createDirectory(file.getAbsolutePath());
-            } catch (ApplicationException e) {
-                throw new ApplicationException("仓库工作目录创建失败："+e);
-            }
+            CodeFileUntil.createDirectory(new File(s).getAbsolutePath());
+            code.setAddress(groupName+"/"+code.getAddress());
         }
-        //创建裸仓库
-        GitUntil.createRepository(s,code.getAddress());
+        GitUntil.createRepository(CodeUntil.defaultPath(),code.getAddress());
         return code;
     }
 
@@ -198,11 +224,11 @@ public class CodeServerImpl implements CodeServer{
         Code code = findOneCode(codeMessage.getCodeId());
         String name = code.getName();
 
-        String s = CodeUntil.findRepositoryAddress(code.getAddress(),code.getCodeGroup()) ;
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.FALSE) ;
 
         List<FileTree> fileTrees ;
 
-        codeMessage.setRepositoryAddress(s);
+        codeMessage.setRepositoryAddress(repositoryAddress);
         codeMessage.setRepositoryName(name);
         codeMessage.setAddress(code.getAddress());
         try {
@@ -241,8 +267,10 @@ public class CodeServerImpl implements CodeServer{
         }
 
         CodeCloneAddress codeCloneAddress = new CodeCloneAddress();
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code.getAddress(), code.getCodeGroup());
-        codeCloneAddress.setFileAddress(repositoryAddress + ".git");
+
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.TRUE);
+
+        codeCloneAddress.setFileAddress(repositoryAddress);
 
         String property = System.getProperty("user.home").replace("\\", "/");
 
@@ -251,7 +279,7 @@ public class CodeServerImpl implements CodeServer{
 
         String http = "http://"+ip+":"+port+"/"+path+".git";
 
-        String SSH = "admin@"+ip+":"+replace+".git";
+        String SSH = "admin@"+ip+":"+replace;
 
         codeCloneAddress.setHttpAddress(http);
         codeCloneAddress.setSSHAddress(SSH);

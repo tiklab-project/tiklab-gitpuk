@@ -86,10 +86,6 @@ public class GitUntil {
         git.close();
     }
 
-
-
-
-
     /**
      * 仓库提交
      * @param repositoryAddress 仓库地址
@@ -101,7 +97,7 @@ public class GitUntil {
     public static void repositoryCommit(String repositoryAddress,String branch,String commitMessage,String fileAddress) throws IOException, GitAPIException, URISyntaxException {
 
         //判断分支是否存在
-        List<CodeBranch> branches = GitBranchUntil.repositoryBranch(repositoryAddress);
+        List<CodeBranch> branches = GitBranchUntil.findAllBranch(repositoryAddress);
         boolean isBranch = false;
         for (CodeBranch codeBranch : branches) {
             String branchName = codeBranch.getBranchName();

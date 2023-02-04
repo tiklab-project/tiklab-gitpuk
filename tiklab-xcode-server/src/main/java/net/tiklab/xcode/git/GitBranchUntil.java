@@ -15,6 +15,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -80,7 +81,7 @@ public class GitBranchUntil {
      * @return 分支集合
      * @throws IOException 仓库不存在
      */
-    public static List<CodeBranch> repositoryBranch(String repositoryAddress) throws IOException {
+    public static List<CodeBranch> findAllBranch(String repositoryAddress) throws IOException {
         Git git = Git.open(new File(repositoryAddress));
 
         Repository repository = git.getRepository();
@@ -104,8 +105,12 @@ public class GitBranchUntil {
             codeBranch.setBranchName(s);
             list.add(codeBranch);
         }
-
         git.close();
+
+        if (list.isEmpty()){
+            return Collections.emptyList();
+        }
+
         return list;
     }
 
@@ -116,7 +121,7 @@ public class GitBranchUntil {
      * @throws IOException 仓库不存在
      */
     public   static String findDefaultBranch(String repositoryAddress) throws IOException {
-        List<CodeBranch> codeBranches = repositoryBranch(repositoryAddress);
+        List<CodeBranch> codeBranches = findAllBranch(repositoryAddress);
 
         for (CodeBranch codeBranch : codeBranches) {
             if (codeBranch.isDefaultBranch()){
