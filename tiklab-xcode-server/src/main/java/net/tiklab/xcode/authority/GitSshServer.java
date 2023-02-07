@@ -42,7 +42,6 @@ public class GitSshServer {
         }
         sshServer.setCommandFactory(new SshCommandFactory());
 
-
     }
 
     //效验账户名密码

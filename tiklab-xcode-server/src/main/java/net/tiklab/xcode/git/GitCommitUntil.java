@@ -83,8 +83,7 @@ public class GitCommitUntil {
             String name = revCommit.getAuthorIdent().getName();//提交人
             commitMessage.setCommitUser(name);
             commitMessage.setDateTime(date);
-            String time = CodeUntil.time(date);//转换时间
-            commitMessage.setCommitTime(time+"前");
+            commitMessage.setCommitTime(CodeUntil.time(date)+"前");//转换时间
             treeWalk.close();
             revCommit.disposeBody();
             list.add(commitMessage);
@@ -161,6 +160,7 @@ public class GitCommitUntil {
                 }
             }
         }
+
         walk.dispose();
         walk.close();
         return map;
@@ -222,22 +222,27 @@ public class GitCommitUntil {
         return returnDiffs;
     }
 
-    private static void gitLog(Git git) throws IOException, GitAPIException {
+    /**
+     * 获取单个文件的提交历史
+     * @param git git实例
+     * @param file 文件名称
+     * @return 提交历史
+     * @throws GitAPIException 信息获取失败
+     */
+    public static List<Map<String,String>> gitFileCommitLog(Git git,String file) throws  GitAPIException {
         List<Map<String,String>> list = new ArrayList<>();
-
-        Iterable<RevCommit> call = git.log()
-                .addPath("src")
+        Iterable<RevCommit> log = git.log()
+                .addPath(file)
                 .call();
-        for (RevCommit revCommit : call) {
-            int commitTime = revCommit.getCommitTime();
-            String shortMessage = revCommit.getShortMessage();
-
-
-            System.out.println("时间："+commitTime);
-            System.out.println("消息："+shortMessage);
+        for (RevCommit revCommit : log) {
+            Map<String,String> map = new HashMap<>();
+            Date date = revCommit.getAuthorIdent().getWhen();
+            String message = revCommit.getShortMessage();
+            map.put("message",message);//转换时间
+            map.put("time",CodeUntil.time(date)+"前");
+            list.add(map);
         }
-
-
+        return list;
     }
 
 

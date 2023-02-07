@@ -30,15 +30,15 @@ public class CloneController {
 
     private static final Logger logger = LoggerFactory.getLogger(CloneController.class);
 
-    // @Propfind
-    // @RequestMapping(path="/**" )
-    // @ApiMethod(name = "createCode",desc = "创建仓库")
-    // public Result<Void> clone(ServletRequest request, ServletResponse response, String service){
-    //
-    //      codeServer.clone(request, response, service);
-    //
-    //     return Result.ok();
-    // }
+    @Propfind
+    @RequestMapping(path="/**" )
+    @ApiMethod(name = "createCode",desc = "创建仓库")
+    public Result<Void> clone(ServletRequest request, ServletResponse response, String service){
+
+         codeServer.clone(request, response, service);
+
+        return Result.ok();
+    }
 
 }
 

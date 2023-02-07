@@ -234,7 +234,7 @@ public class CodeServerImpl implements CodeServer{
         try {
             fileTrees = CodeFileUntil.fileTree(codeMessage);
         } catch (GitAPIException | IOException e) {
-            throw new ApplicationException("仓库信息获取失败："+e);
+            throw new ApplicationException( "仓库信息获取失败：" + e);
         }
         return fileTrees;
 
@@ -266,9 +266,9 @@ public class CodeServerImpl implements CodeServer{
         String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.TRUE);
         codeCloneAddress.setFileAddress(repositoryAddress);
 
-        String http = "http://"+ip+":"+port+"/"+path+".git";
+        String http = "http://" + ip + ":" + port + "/"+ path + ".git";
 
-        String SSH = "ssh://"+ip+":"+ CodeFinal.SSH_PORT +"/"+path+".git";
+        String SSH = "ssh://"+ip + ":" + CodeFinal.SSH_PORT +"/" + path + ".git";
 
         codeCloneAddress.setHttpAddress(http);
         codeCloneAddress.setSSHAddress(SSH);

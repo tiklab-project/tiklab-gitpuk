@@ -53,7 +53,6 @@ public class CloneCodeServerImpl implements CloneCodeServer {
     @Override
     public void clone(ServletRequest request, ServletResponse response, String service) {
 
-         // restTemplate.exchange("url", HttpMethod.POST, HttpEntity.EMPTY, String.class);
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -123,92 +122,6 @@ public class CloneCodeServerImpl implements CloneCodeServer {
 
 
 
-
-
-    private void receivePack(String path ,String codeName){
-
-        File file = new File(codeName);
-
-        String order = "git receive-pack "+ " " + file.getAbsolutePath();
-
-        try {
-            Process process = CodeUntil.process(path, order);
-            log(process.getInputStream(),process.getErrorStream(),"UTF-8");
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
-    }
-
-    /**
-     * 字符串写入文件
-     * @param str 字符串
-     * @param path 文件地址
-     * @throws ApplicationException 写入失败
-     */
-    public  void logWriteFile(String str, String path) throws ApplicationException {
-        File file = new File(path);
-        if (file.exists()){
-            System.out.println("文件不存在。");
-        }
-
-        try (FileWriter writer = new FileWriter(path, StandardCharsets.UTF_8,true)) {
-            writer.write(str);
-            writer.flush();
-        } catch (Exception e) {
-            throw new ApplicationException("文件写入失败。");
-        }
-    }
-
-    /**
-     * 执行日志
-     * @param inputStream 执行信息
-     * @return map 执行状态
-     */
-    public void log( InputStream inputStream, InputStream errInputStream,String enCode) throws IOException {
-
-        InputStreamReader inputStreamReader = encode(inputStream, enCode);
-        BufferedReader  bufferedReader ;
-
-        String s;
-        bufferedReader = new BufferedReader(inputStreamReader);
-
-        int a= 0 ;
-        //更新日志信息
-        while ((s = bufferedReader.readLine()) != null || a > 0) {
-            a++;
-            logger.info("input的数据为:"+s);
-        }
-
-        inputStreamReader = encode(errInputStream, enCode);
-        bufferedReader = new BufferedReader(inputStreamReader);
-        while ((s = bufferedReader.readLine()) != null) {
-            logger.info("errInput的数据为:"+s);
-        }
-        inputStreamReader.close();
-        bufferedReader.close();
-
-    }
-
-    /**
-     * 格式化输出流
-     * @param inputStream 流
-     * @param encode  GBK,US-ASCII,ISO-8859-1,ISO-8859-1,UTF-16BE ,UTF-16LE, UTF-16,UTF-8
-     * @return 输出流
-     */
-    public static InputStreamReader encode(InputStream inputStream,String encode){
-        if (inputStream == null){
-            return null;
-        }
-
-        if (encode != null){
-            return  new InputStreamReader(inputStream, Charset.forName(encode));
-        }
-        if (findSystemType() == 1){
-            return new InputStreamReader(inputStream, Charset.forName("GBK"));
-        }else {
-            return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        }
-    }
 
 
 }

@@ -219,7 +219,6 @@ public class CodeFileUntil {
             fileTree.setFileParent(parent);
             fileTree.setFileAddress(fileAddress);
 
-
             //文件类型
             String suffix = null;
             fileTree.setType("tree");
@@ -238,7 +237,9 @@ public class CodeFileUntil {
 
             s = "/" + name +"/" + fileTree.getType() + "/" + branch + s ;
 
-            Map<String, String> fileCommit =GitCommitUntil.findFileCommit(repo, branch, f);
+            List<Map<String, String>> list = GitCommitUntil.gitFileCommitLog(git, f.getName());
+
+            Map<String, String> fileCommit = list.get(0);
 
             fileTree.setPath(s);
             fileTree.setCommitMessage(fileCommit.get("message"));
