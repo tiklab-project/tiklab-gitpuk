@@ -39,6 +39,9 @@ public class SSHAuth  {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        // sshServer.setCommandFactory(new SshCommandFactory());
+
     }
 
     private boolean validUserNamePassword(String username,String password){
