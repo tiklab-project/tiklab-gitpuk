@@ -1,7 +1,6 @@
 package net.tiklab.xcode.authority;
 
 import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.service.CloneCodeServerImpl;
 import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.until.CodeFinal;
 import org.apache.sshd.server.SshServer;
@@ -11,20 +10,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 
+/**
+ * 使用sshd效验ssh连接
+ */
 
 @Configuration
-public class SSHAuth  {
+public class GitSshServer {
 
     @Autowired
     private  CodeServer codeServer;
 
-    private static final Logger logger = LoggerFactory.getLogger(SSHAuth.class);
+    private static final Logger logger = LoggerFactory.getLogger(GitSshServer.class);
 
     @Bean
     public  void sshAuthority()  {
@@ -39,11 +40,12 @@ public class SSHAuth  {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        sshServer.setCommandFactory(new SshCommandFactory());
 
-        // sshServer.setCommandFactory(new SshCommandFactory());
 
     }
 
+    //效验账户名密码
     private boolean validUserNamePassword(String username,String password){
         List<Code> allCode = codeServer.findAllCode();
         int size = allCode.size();

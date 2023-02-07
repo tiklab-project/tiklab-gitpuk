@@ -252,12 +252,8 @@ public class CodeServerImpl implements CodeServer{
     @Override
     public CodeCloneAddress findCloneAddress(String codeId){
         Code code = findOneCode(codeId);
-        CodeGroup group = code.getCodeGroup();
+
         String path = code.getAddress();
-        if (group != null){
-            String name = group.getName();
-            path = name + "/"+path;
-        }
 
         String  ip ;
         try {
@@ -267,19 +263,12 @@ public class CodeServerImpl implements CodeServer{
         }
 
         CodeCloneAddress codeCloneAddress = new CodeCloneAddress();
-
         String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.TRUE);
-
         codeCloneAddress.setFileAddress(repositoryAddress);
-
-        String property = System.getProperty("user.home").replace("\\", "/");
-
-        String replace1 = repositoryAddress.replace("\\", "/");
-        String replace = replace1.replace(property+"/", "");
 
         String http = "http://"+ip+":"+port+"/"+path+".git";
 
-        String SSH = "admin@"+ip+":"+replace;
+        String SSH = "ssh://"+ip+":"+ CodeFinal.SSH_PORT +"/"+path+".git";
 
         codeCloneAddress.setHttpAddress(http);
         codeCloneAddress.setSSHAddress(SSH);

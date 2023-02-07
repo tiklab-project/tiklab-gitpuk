@@ -222,7 +222,23 @@ public class GitCommitUntil {
         return returnDiffs;
     }
 
+    private static void gitLog(Git git) throws IOException, GitAPIException {
+        List<Map<String,String>> list = new ArrayList<>();
 
+        Iterable<RevCommit> call = git.log()
+                .addPath("src")
+                .call();
+        for (RevCommit revCommit : call) {
+            int commitTime = revCommit.getCommitTime();
+            String shortMessage = revCommit.getShortMessage();
+
+
+            System.out.println("时间："+commitTime);
+            System.out.println("消息："+shortMessage);
+        }
+
+
+    }
 
 
 }

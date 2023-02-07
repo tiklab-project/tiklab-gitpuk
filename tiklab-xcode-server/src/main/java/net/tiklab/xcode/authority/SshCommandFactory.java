@@ -1,31 +1,54 @@
 package net.tiklab.xcode.authority;
 
-import org.apache.sshd.server.Environment;
-import org.apache.sshd.server.ExitCallback;
+
+import net.tiklab.xcode.until.CodeUntil;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.command.CommandFactory;
-import org.apache.sshd.server.session.ServerSession;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.ReceivePack;
+import org.eclipse.jgit.transport.UploadPack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
+/**
+ * 处理不同的ssh请求
+ */
 
 public class SshCommandFactory implements CommandFactory {
 
+    private static final Logger logger = LoggerFactory.getLogger(SshCommandFactory.class);
 
-    /**
-     * Create a command with the given name. If the command is not known, a dummy command should be returned to allow
-     * the display output to be sent back to the client.
-     *
-     * @param channel The {@link ChannelSession} through which the command has been received
-     * @param command The command that will be run
-     * @return a non {@code null} {@link Command} instance
-     * @throws IOException if failed to create the instance
-     */
+    public SshCommandFactory() {
+    }
+
     @Override
-    public Command createCommand(ChannelSession channel, String command) throws IOException {
-        return new CodeCmdCommand(command);
+    public Command createCommand(ChannelSession channelSession, String command) throws IOException {
+        String cmd  = command.replace("'","");
+        File file = new File(CodeUntil.defaultPath() + cmd.split(" ")[1]);
+        String repositoryPath = file.getAbsolutePath();
+
+        logger.info("ssh clone repository address " + " "+ repositoryPath);
+
+        try {
+            Repository repo = Git.open(new File(repositoryPath)).getRepository();
+            if (command.startsWith("git-upload-pack")) {
+                UploadPack uploadPack = new UploadPack(repo);
+                repo.close();
+                return new GitUploadPackCommand(uploadPack);
+            }else if (command.startsWith("git-receive-pack")){
+                ReceivePack receivePack = new ReceivePack(repo);
+                repo.close();
+                return new GitReceivePackCommand(receivePack);
+            }
+        } catch (IOException e) {
+           return null;
+        }
+        return null;
     }
 
 
