@@ -1,6 +1,7 @@
 package net.tiklab.xcode.authority;
 
 
+import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.until.CodeUntil;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
@@ -27,26 +28,32 @@ public class SshCommandFactory implements CommandFactory {
     }
 
     @Override
-    public Command createCommand(ChannelSession channelSession, String command) throws IOException {
+    public Command createCommand(ChannelSession channelSession, String command) {
         String cmd  = command.replace("'","");
         File file = new File(CodeUntil.defaultPath() + cmd.split(" ")[1]);
         String repositoryPath = file.getAbsolutePath();
 
-        logger.info("ssh clone repository address " + " "+ repositoryPath);
+        logger.info("ssh repository address " + " "+ repositoryPath);
 
         try {
-            Repository repo = Git.open(new File(repositoryPath)).getRepository();
+            File file1 = new File(repositoryPath);
+
+            if (!file1.exists()){
+                throw  new ApplicationException("仓库不存在");
+            }
+            Repository repo = Git.open(file1).getRepository();
+
             if (command.startsWith("git-upload-pack")) {
                 UploadPack uploadPack = new UploadPack(repo);
                 repo.close();
-                return new GitUploadPackCommand(uploadPack);
+                return new UploadPackCommand(uploadPack);
             }else if (command.startsWith("git-receive-pack")){
                 ReceivePack receivePack = new ReceivePack(repo);
                 repo.close();
-                return new GitReceivePackCommand(receivePack);
+                return new ReceivePackCommand(receivePack);
             }
         } catch (IOException e) {
-           return null;
+           throw  new ApplicationException("仓库不存在");
         }
         return null;
     }

@@ -57,40 +57,51 @@ public class GitCommitUntil {
      * @throws ApplicationException 分支不存在
      */
     public static List<CommitMessage> findBranchCommit(String repositoryAddress, String branch) throws IOException , ApplicationException {
+
         Git git = Git.open(new File(repositoryAddress));
         Repository repository = git.getRepository();
+
         //分支为空设置为默认
         if (branch == null) {
             branch = repository.getBranch();
         }
+
         //分支是否存在
         Ref head = repository.findRef(branch);
         if (head == null) {
+            repository.close();
+            git.close();
             throw new ApplicationException("分支"+branch+"不存在。");
         }
+
         ObjectId objectId = head.getObjectId();
         RevWalk revWalk = new RevWalk(repository);
         revWalk.markStart(revWalk.parseCommit(objectId));
 
         List<CommitMessage> list = new ArrayList<>();
         for (RevCommit revCommit : revWalk) {
-            CommitMessage commitMessage = new CommitMessage();
             TreeWalk treeWalk = new TreeWalk(repository);
             treeWalk.reset(revCommit.getTree());
-            commitMessage.setCommitId(revCommit.getId().getName());//commitId
-            commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
+
             Date date = revCommit.getAuthorIdent().getWhen();//时间
             String name = revCommit.getAuthorIdent().getName();//提交人
+
+            CommitMessage commitMessage = new CommitMessage();
+            commitMessage.setCommitId(revCommit.getId().getName());//commitId
+            commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
             commitMessage.setCommitUser(name);
             commitMessage.setDateTime(date);
             commitMessage.setCommitTime(CodeUntil.time(date)+"前");//转换时间
+            list.add(commitMessage);
+
             treeWalk.close();
             revCommit.disposeBody();
-            list.add(commitMessage);
+
         }
-        revWalk.dispose();
         revWalk.close();
+        // repository.close();
         git.close();
+
         list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
         return list;
     }

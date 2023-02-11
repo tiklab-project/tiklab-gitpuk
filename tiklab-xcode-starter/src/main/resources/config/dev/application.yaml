@@ -78,6 +78,10 @@ mysql:
     enable: false
   database: tiklab_xcode
 
+xcode:
+  ssh:
+    port: 8082
+
 #homes
 homes:
   address: http://192.168.10.19:8080

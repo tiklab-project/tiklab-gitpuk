@@ -14,7 +14,7 @@ import java.io.OutputStream;
  * 该类实现类git-receive-pack钩子
  */
 
-public class GitReceivePackCommand  implements Command, Runnable {
+public class ReceivePackCommand implements Command, Runnable {
     private final ReceivePack receivePack;
     private InputStream in;
     private OutputStream out;
@@ -22,7 +22,7 @@ public class GitReceivePackCommand  implements Command, Runnable {
 
     private ExitCallback exit;
 
-    public GitReceivePackCommand(ReceivePack receivePack) {
+    public ReceivePackCommand(ReceivePack receivePack) {
         this.receivePack = receivePack;
     }
 

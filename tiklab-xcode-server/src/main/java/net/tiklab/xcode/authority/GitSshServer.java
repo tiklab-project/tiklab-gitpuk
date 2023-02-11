@@ -8,10 +8,12 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -25,14 +27,18 @@ public class GitSshServer {
     @Autowired
     private  CodeServer codeServer;
 
+    @Value("${xcode.ssh.port:8082}")
+    private int sshPort;
+
     private static final Logger logger = LoggerFactory.getLogger(GitSshServer.class);
 
     @Bean
     public  void sshAuthority()  {
         SshServer sshServer = SshServer.setUpDefaultServer();
-        sshServer.setPort(CodeFinal.SSH_PORT);
+        sshServer.setPort(sshPort);
         sshServer.setHost (CodeFinal.SSH_HOST);
-        SimpleGeneratorHostKeyProvider keyProvider = new SimpleGeneratorHostKeyProvider(Paths.get("C:\\Users\\admin\\.ssh\\id_rsa"));
+        Path path = Paths.get("C:\\Users\\admin\\.ssh\\id_rsa");
+        SimpleGeneratorHostKeyProvider keyProvider = new SimpleGeneratorHostKeyProvider(path);
         sshServer.setKeyPairProvider(keyProvider);
         sshServer.setPasswordAuthenticator((username, password, session) -> validUserNamePassword(username,password));
         try {
@@ -41,7 +47,6 @@ public class GitSshServer {
             throw new RuntimeException(e);
         }
         sshServer.setCommandFactory(new SshCommandFactory());
-
     }
 
     //效验账户名密码
@@ -50,9 +55,6 @@ public class GitSshServer {
         int size = allCode.size();
         logger.info("认证用户名为："+ username);
         logger.info("认证密码为："+ password);
-        if (size > 0){
-            logger.info("认证成功。。。");
-        }
         return size > 0;
     }
 

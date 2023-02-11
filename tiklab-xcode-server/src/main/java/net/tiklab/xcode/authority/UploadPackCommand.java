@@ -15,7 +15,7 @@ import java.io.OutputStream;
  */
 
 
-public class GitUploadPackCommand implements Command, Runnable {
+public class UploadPackCommand implements Command, Runnable {
     private final UploadPack uploadPack;
     private InputStream in;
     private OutputStream out;
@@ -23,7 +23,7 @@ public class GitUploadPackCommand implements Command, Runnable {
 
     private ExitCallback exit;
 
-    public GitUploadPackCommand(UploadPack uploadPack) {
+    public UploadPackCommand(UploadPack uploadPack) {
         this.uploadPack = uploadPack;
     }
 

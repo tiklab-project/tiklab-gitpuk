@@ -244,6 +244,10 @@ public class CodeServerImpl implements CodeServer{
     @Value("${server.port:8080}")
     private String port;
 
+    @Value("${xcode.ssh.port:8082}")
+    private int sshPort;
+
+
     /**
      * 获取克隆地址
      * @param codeId 仓库id
@@ -266,9 +270,9 @@ public class CodeServerImpl implements CodeServer{
         String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.TRUE);
         codeCloneAddress.setFileAddress(repositoryAddress);
 
-        String http = "http://" + ip + ":" + port + "/"+ path + ".git";
+        String http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
 
-        String SSH = "ssh://"+ip + ":" + CodeFinal.SSH_PORT +"/" + path + ".git";
+        String SSH = "ssh://"+ip + ":" + sshPort +"/" + path + ".git";
 
         codeCloneAddress.setHttpAddress(http);
         codeCloneAddress.setSSHAddress(SSH);

@@ -99,21 +99,19 @@
 			<version>6.4.0.202211300538-r</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.http.server -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.http.server</artifactId>
+			<version>6.4.0.202211300538-r</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-core -->
 		<dependency>
 			<groupId>org.apache.sshd</groupId>
 			<artifactId>sshd-core</artifactId>
-			<version>2.7.0</version>
+			<version>2.9.2</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.25</version>
-		</dependency>
-
-
-
 
 	</dependencies>
 

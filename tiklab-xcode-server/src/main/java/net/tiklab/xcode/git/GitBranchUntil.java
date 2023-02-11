@@ -82,29 +82,35 @@ public class GitBranchUntil {
      * @throws IOException 仓库不存在
      */
     public static List<CodeBranch> findAllBranch(String repositoryAddress) throws IOException {
-        Git git = Git.open(new File(repositoryAddress));
 
+        Git git = Git.open(new File(repositoryAddress));
         Repository repository = git.getRepository();
+
         List<CodeBranch> list = new ArrayList<>();
-        List<Ref> refs1 = repository.getRefDatabase().getRefs();
+        List<Ref> refs = repository.getRefDatabase().getRefs();
+
         String defaultBranch = " ";
-        for (Ref ref : refs1) {
+        for (Ref ref : refs) {
+            CodeBranch codeBranch = new CodeBranch();
             String name = ref.getName();
             if (name.equals("HEAD")){
                 Ref target = ref.getTarget();
                 defaultBranch = target.getName();
                 continue;
             }
-            CodeBranch codeBranch = new CodeBranch();
+
             String Id = ref.getObjectId().getName();
+            String s = name.replace("refs/heads/", "");
             codeBranch.setBranchId(Id);
+            //判断是否为默认分支
             if (defaultBranch.equals(name)){
                 codeBranch.setDefaultBranch(true);
             }
-            String s = name.replace("refs/heads/", "");
             codeBranch.setBranchName(s);
             list.add(codeBranch);
         }
+
+        // repository.close();
         git.close();
 
         if (list.isEmpty()){

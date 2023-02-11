@@ -174,7 +174,7 @@ public class CodeFileUntil {
         String path = repositoryAddress+"_"+branch;
         String messagePath = codeMessage.getPath();
         if (CodeUntil.isNoNull(messagePath)){
-            path = path + codeMessage.getPath();;
+            path = path + messagePath;
         }else {
             GitUntil.cloneRepository(repositoryAddress,branch);
         }
@@ -205,7 +205,7 @@ public class CodeFileUntil {
 
             String s2 = defaultAddress + "/" + name + "_" + branch;
 
-            //忽略.git文件夹
+            //忽略git仓库的.git文件夹
             if (f.getName().equals(".git") && new File(s2).getName().equals(new File(f.getParent()).getName())){
                 continue;
             }
@@ -248,7 +248,7 @@ public class CodeFileUntil {
 
         }
         fileTrees.sort(Comparator.comparing(FileTree::getType).reversed());
-        repo.close();
+        // repo.close();
         git.close();
 
         return fileTrees;

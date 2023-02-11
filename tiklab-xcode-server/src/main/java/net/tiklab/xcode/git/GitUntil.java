@@ -65,12 +65,12 @@ public class GitUntil {
      * @throws GitAPIException 克隆失败
      */
     public static void cloneRepository(String repositoryAddress,String branch) throws GitAPIException {
-        Git call = Git.cloneRepository()
+        Git git = Git.cloneRepository()
                 .setURI(repositoryAddress + ".git")
                 .setDirectory(new File(repositoryAddress+"_"+branch))
                 .setBranch(branch)
                 .call();
-        call.close();
+        git.close();
     }
 
     /**
@@ -129,7 +129,6 @@ public class GitUntil {
                 .setRefSpecs(new RefSpec(branch))
                 .call();
         git.close();
-
 
         remoteRepositoryFile(repositoryAddress,branch);
 
