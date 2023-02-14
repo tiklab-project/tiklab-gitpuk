@@ -2,12 +2,12 @@ package net.tiklab.xcode.until;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.code.model.CodeMessage;
+import net.tiklab.xcode.file.model.FileTree;
 import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -60,7 +60,6 @@ public class CodeFileUntil {
             throw new ApplicationException("项目工作目录创建失败。");
         }
     }
-
 
     /**
      * 创建文件

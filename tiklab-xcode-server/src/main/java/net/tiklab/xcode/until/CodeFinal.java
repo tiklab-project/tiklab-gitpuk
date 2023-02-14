@@ -12,6 +12,16 @@ public class CodeFinal {
      */
     public final static Integer SSH_PORT = 8082;
 
+    /**
+     * 树
+     */
+    public final static String FILE_TYPE_TREE = "tree";
+
+    /**
+     * 文件
+     */
+    public final static String FILE_TYPE_BLOB = "blob";
+
 
     /**
      * ssh监听地址

@@ -7,7 +7,7 @@ import net.tiklab.join.annotation.JoinProvider;
 import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeMessage;
-import net.tiklab.xcode.until.FileTree;
+import net.tiklab.xcode.file.model.FileTree;
 
 import java.util.List;
 

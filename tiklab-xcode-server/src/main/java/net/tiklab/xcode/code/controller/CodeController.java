@@ -8,7 +8,7 @@ import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.code.service.CodeServer;
-import net.tiklab.xcode.until.FileTree;
+import net.tiklab.xcode.file.model.FileTree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

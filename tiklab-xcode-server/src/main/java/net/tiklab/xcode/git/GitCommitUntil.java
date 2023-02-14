@@ -1,18 +1,14 @@
 package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.commit.model.CommitMessage;
 import net.tiklab.xcode.until.CodeUntil;
-import net.tiklab.xcode.until.FileTree;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.attributes.Attributes;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 

@@ -1,4 +1,4 @@
-package net.tiklab.xcode.until;
+package net.tiklab.xcode.file.model;
 
 public class FileTree {
 

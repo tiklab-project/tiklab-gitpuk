@@ -6,6 +6,7 @@ import org.eclipse.jgit.transport.http.HttpConnection;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
@@ -32,35 +33,47 @@ public class GitHttpServlet extends GitServlet {
                 setRepositoryResolver(new HttpRepositoryResolver());
                 setUploadPackFactory(new HttpUploadPackFactory());
                 setReceivePackFactory(new HttpReceivePackFactory());
+                setUploadPackErrorHandler(new HttpUploadPackErrorHandler());
+                setReceivePackErrorHandler(new HttpReceivePackErrorHandler());
                 super.init(config);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
