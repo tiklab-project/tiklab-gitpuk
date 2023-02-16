@@ -1,4 +1,4 @@
-package net.tiklab.xcode.authority;
+package net.tiklab.xcode.ssh;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;

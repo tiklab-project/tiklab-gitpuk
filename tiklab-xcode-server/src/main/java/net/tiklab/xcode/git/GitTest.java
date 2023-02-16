@@ -1,129 +1,78 @@
 package net.tiklab.xcode.git;
 
-import net.tiklab.xcode.file.model.FileTreeMessage;
-import net.tiklab.xcode.until.CodeFinal;
-import net.tiklab.xcode.until.CodeUntil;
-import net.tiklab.xcode.file.model.FileTree;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class GitTest {
 
 
     public static void main(String[] args) throws Exception {
+        // key();
 
-        findFileTree();
-    }
+        // PublicKey publicKey = getPublicKeyFromString(keyString);
+        // String algorithm = publicKey.getAlgorithm();
+        // String format = publicKey.getFormat();
+        //
+        // System.out.println(algorithm);
+        // System.out.println(format);
 
-    private static void findFileTree(Repository repository, FileTreeMessage message) throws IOException {
-        List<FileTree> list = new ArrayList<>();
-
-        String commitId = message.getBranch();
-        //判断是读取提交文件还是分支文件
-        if (message.isFindCommitId()){
-            commitId = repository.resolve("refs/heads/" + commitId).getName();
-        }
-
-        ObjectId commitIdObject = ObjectId.fromString(commitId);
-        RevWalk walk = new RevWalk(repository);
-        RevTree tree = walk.parseCommit(commitIdObject).getTree();
-        TreeWalk treeWalk = new TreeWalk(repository);
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(false);
-        while (treeWalk.next()) {
-            // String path = message.getPath();
-            // if (!CodeUntil.isNoNull(path)){
-            //     FileTree fileTree = findFileTreeMessage(message.getPath(),treeWalk,commitId);
-            //     list.add(fileTree);
-            //     continue;
-            // }
-            // String[] strings = path.split("/");
-
-            String pathString = treeWalk.getPathString();
-            System.out.println(pathString);
+        String encode = Base64.getEncoder().encodeToString(keyString.getBytes());
+        System.out.println(encode);
 
 
-        }
-    }
-
-    private static TreeWalk findTreeWalkFile(TreeWalk treeWalk,String path) throws IOException {
-        String[] strings = path.substring(1).split("/");
-        int length = strings.length;
-        int i = 0;
-        while (treeWalk.next()) {
-
-
-        }
-        return treeWalk;
 
     }
 
 
-    private static FileTree findFileTreeMessage(String file ,TreeWalk treeWalk,String commitId ){
-        FileTree fileTree = new FileTree();
-        if (!CodeUntil.isNoNull(file)){
-            String fileType = CodeFinal.FILE_TYPE_BLOB;
-            if (treeWalk.isSubtree()){
-                fileType = CodeFinal.FILE_TYPE_TREE;
-            }
-            fileTree.setFileName(treeWalk.getNameString());
-            fileTree.setFileType(fileType);
-            String path = "/" +
-                    fileType +
-                    "/" +
-                    commitId +
-                    treeWalk.getNameString();
-            fileTree.setPath(path);
-        }
-        return fileTree;
+    public static void key() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        // 生成密钥对
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        keyGen.initialize(1024);
+        KeyPair keyPair = keyGen.generateKeyPair();
+
+        // 获取Signature实例并初始化
+        Signature sig = Signature.getInstance("DSA");
+        sig.initSign(keyPair.getPrivate());
+
+        // 更新要签名的数据
+        byte[] data = "Hello, world!".getBytes();
+        sig.update(data);
+
+        // 生成签名
+        byte[] signature = sig.sign();
+
+        // 验证签名
+        sig.initVerify(keyPair.getPublic());
+        sig.update(data);
+        boolean verified = sig.verify(signature);
+        System.out.println("Signature verified: " + verified);
     }
 
-
-
-
-    private static void findFileTree() throws IOException {
-        Git git = Git.open(new File("C:\\Users\\admin\\xcode\\repository\\aa.git"));
-
-        Repository repository = git.getRepository();
-
-        //获取分支id
-        String branchName = "master";
-        ObjectId head = repository.resolve("refs/heads/" + branchName);
-
-        //获取提交id
-        String commitId = "15cf56258d062bce0c1aa199b3230d3a70ec38eb";
-
-        ObjectId commitIdObject = ObjectId.fromString(head.getName());
-
-        RevWalk walk = new RevWalk(repository);
-        RevTree tree = walk.parseCommit(commitIdObject).getTree();
-        TreeWalk treeWalk = new TreeWalk(repository);
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(true);
-        while (treeWalk.next()) {
-            System.out.println("信息: " + treeWalk.getNameString());
-            System.out.println("文件: " + treeWalk.getPathString());
-        }
+    public static PublicKey getPublicKeyFromString(String keyString) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        String keyBytes;
+        keyBytes = Base64.getEncoder().encodeToString(keyString.getBytes());
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes.getBytes());
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+        return publicKey;
     }
+    static String keyString = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDpc86W7JvuWqVAXJuX36DnXZlWhY6s" +
+            "mjL9flhyjXMrCwN39xVOl2MmXSrxi3F7XaCoHa948cxYX7LTf5rYTAnxsPwoGApHOUyNsokbRBNP7IEN" +
+            "ltzya8XPbznMOHYA09l0o5povMIhb9sWKJeYD72/s8qC6Th7UBv6D5vTj9" +
+            "B3uZYolrlIe5lsyXO7OH7/osx8ZHux/rsuLR91TQ00cJm1N1CTFQ0eVT" +
+            "mrVPqOCClyR3Os8xT3ufd+PztoDJMt1YnYammq5b/MOzJWBJVJ+4E" +
+            "ZumvuE7fHVOrdE6aBCqTZPA9B2TzxdEC0a5q5IfEJlOVKU/xlBD3N" +
+            "l3YWKkk4PP6hbOSlUSX7RjsoPSVB1Ou3l4tiP9qmwrjafwuNCjhe" +
+            "eo5+NFIJ+A+NmY+QAF8QoEfKXDxVfSSk6w6mRdvLaEPoVmsY+7JNo" +
+            "ePUd5hSL4YiufPhzOeMRePb/X+nfy8TtkR+aKpW3llsin/zr/NsCa2W" +
+            "pGy2w5DCCA4SHV7KtRTkEoc= admin@DESKTOP-UNOU1SR\n";
 
-    private static void findTree(TreeWalk treeWalk,  RevTree tree) throws IOException {
 
-
-    }
-
-    private static void readFile(Repository repository,TreeWalk treeWalk) throws IOException {
-        ObjectId objectId = treeWalk.getObjectId(0);
-        ObjectLoader loader = repository.open(objectId);
-        String s = new String(loader.getBytes());
-        System.out.println(s);
-    }
 
 
 

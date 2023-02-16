@@ -5,10 +5,12 @@ import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.file.model.CodeFile;
 import net.tiklab.xcode.file.model.CodeFileMessage;
+import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
 import net.tiklab.xcode.until.CodeFileUntil;
 import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,25 +56,19 @@ public class CodeFileServerImpl implements  CodeFileServer {
         String branch = codeFile.getCommitBranch();
 
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.FALSE);
-        String s = repositoryAddress+"_"+branch + fileAddress;
-        CodeFileMessage fileMessage = new CodeFileMessage();
-        String file = CodeFileUntil.readFile(s);
-        //获取文件类型
-        File file1 = new File(s);
-        String suffix = null;
-        String fileName = file1.getName();
-        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
-            suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
-        }
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        CodeFileMessage fileMessage = null;
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+            fileMessage =  CodeFileUntil.readBranchFile(git.getRepository(), branch, fileAddress.substring(1), codeFile.isFindCommitId());
+            git.close();
+            // float fileSize = (float)file1.length() / 1024 ;
+            // String str = String.format("%.2f", fileSize)+"KB";
+            // fileMessage.setFileSize(str);
 
-        float fileSize = (float)file1.length() / 1024 ;
-        String str = String.format("%.2f", fileSize)+"KB";
-        fileMessage.setFileName(fileName);
-        fileMessage.setFilePath(file1.getAbsolutePath());
-        fileMessage.setFileType(suffix);
-        fileMessage.setFileMessage(file);
-        fileMessage.setFileSize(str);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return fileMessage;
     }

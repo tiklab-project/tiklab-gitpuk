@@ -1,4 +1,4 @@
-package net.tiklab.xcode.authority;
+package net.tiklab.xcode.http;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.until.CodeFinal;
@@ -14,6 +14,7 @@ import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 
 /**
  * 处理仓库地址
@@ -40,7 +41,6 @@ public class HttpRepositoryResolver implements RepositoryResolver<HttpServletReq
         }
         return repository;
     }
-
 
 }
 

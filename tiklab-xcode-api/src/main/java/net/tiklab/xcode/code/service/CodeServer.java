@@ -8,6 +8,7 @@ import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.file.model.FileTree;
+import net.tiklab.xcode.file.model.FileTreeMessage;
 
 import java.util.List;
 
@@ -69,10 +70,10 @@ public interface CodeServer {
 
     /**
      * 获取文件信息
-     * @param codeMessage 信息
+     * @param message 信息
      * @return 文件集合
      */
-    List<FileTree> findFileTree(CodeMessage codeMessage);
+    List<FileTree> findFileTree(FileTreeMessage message);
 
 
     /**

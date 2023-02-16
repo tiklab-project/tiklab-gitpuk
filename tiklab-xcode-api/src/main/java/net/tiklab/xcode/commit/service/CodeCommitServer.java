@@ -1,5 +1,6 @@
 package net.tiklab.xcode.commit.service;
 
+import net.tiklab.xcode.commit.model.Commit;
 import net.tiklab.xcode.commit.model.CommitMessage;
 
 import java.util.List;
@@ -8,20 +9,18 @@ public interface CodeCommitServer {
 
     /**
      * 获取分支提交记录
-     * @param codeId 仓库id
-     * @param branchName 分支
+     * @param commit 仓库id
      * @return 提交记录
      */
-    List<CommitMessage> findBranchCommit(String codeId ,String branchName);
+    List<CommitMessage> findBranchCommit(Commit commit);
 
 
     /**
      * 获取最近一次的提交记录
-     * @param codeId 仓库id
-     * @param branchName 分支
+     * @param commit 仓库id
      * @return 提交记录
      */
-    CommitMessage findLatelyBranchCommit(String codeId, String branchName);
+    CommitMessage findLatelyBranchCommit(Commit commit);
 
 
 

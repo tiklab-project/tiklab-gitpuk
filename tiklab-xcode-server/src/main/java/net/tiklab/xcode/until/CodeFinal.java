@@ -22,6 +22,11 @@ public class CodeFinal {
      */
     public final static String FILE_TYPE_BLOB = "blob";
 
+    /**
+     * commitId唯一标识
+     */
+    public final static String COMMIT_ONLY_ID = "commit_id";
+
 
     /**
      * ssh监听地址

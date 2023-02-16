@@ -6,9 +6,12 @@ import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
@@ -52,25 +55,28 @@ public class GitCommitUntil {
      * @throws IOException 仓库不存在
      * @throws ApplicationException 分支不存在
      */
-    public static List<CommitMessage> findBranchCommit(String repositoryAddress, String branch) throws IOException , ApplicationException {
+    public static List<CommitMessage> findBranchCommit(String repositoryAddress, String branch, boolean isCommitId) throws IOException , ApplicationException {
 
         Git git = Git.open(new File(repositoryAddress));
         Repository repository = git.getRepository();
 
-        //分支为空设置为默认
-        if (branch == null) {
-            branch = repository.getBranch();
-        }
+        ObjectId objectId;
+        if (!isCommitId){
+            //分支为空设置为默认
+            if (branch == null) {
+                branch = repository.getBranch();
+            }
 
-        //分支是否存在
-        Ref head = repository.findRef(branch);
-        if (head == null) {
-            repository.close();
-            git.close();
-            throw new ApplicationException("分支"+branch+"不存在。");
+            //分支是否存在
+            Ref head = repository.findRef(branch);
+            if (head == null) {
+                git.close();
+                return Collections.emptyList();
+            }
+            objectId = head.getObjectId();
+        }else {
+            objectId = ObjectId.fromString(branch);
         }
-
-        ObjectId objectId = head.getObjectId();
         RevWalk revWalk = new RevWalk(repository);
         revWalk.markStart(revWalk.parseCommit(objectId));
 
@@ -89,89 +95,17 @@ public class GitCommitUntil {
             commitMessage.setDateTime(date);
             commitMessage.setCommitTime(CodeUntil.time(date)+"前");//转换时间
             list.add(commitMessage);
-
             treeWalk.close();
             revCommit.disposeBody();
 
         }
         revWalk.close();
-        // repository.close();
         git.close();
 
         list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
         return list;
     }
 
-    /**
-     * 获取指定文件的提交信息
-     * @param repo 仓库
-     * @param branch 分支
-     * @param file 指定文件
-     * @return 指定文件的提交信息
-     * @throws IOException 仓库不存在
-     * @throws GitAPIException 提交信息获取失败
-     */
-    public static Map<String, String> findFileCommit(Repository repo, String branch, File file) throws IOException, GitAPIException {
-
-        Map<String, String> map = new HashMap<>();
-
-        File directory = repo.getDirectory();
-
-        List<CommitMessage> branchCommit = findBranchCommit(directory.getAbsolutePath(), branch);
-
-        map.put("message",branchCommit.get(0).getCommitMessage());
-        map.put("time",branchCommit.get(0).getCommitTime());
-
-        if (branchCommit.size() == 1){
-            return map;
-        }
-
-        //获取仓库信息
-        RevWalk walk = new RevWalk(repo);
-        for (int i = 0; i < branchCommit.size()-1; i++) {
-
-            //最近一次的提交记录
-            String newCommit = branchCommit.get(i).getCommitId();
-            ObjectId newObjectId=repo.resolve(newCommit);
-            RevCommit newRevCommit=walk.parseCommit(newObjectId);
-
-            //上一次提交记录
-            String oldCommit = branchCommit.get(i+1).getCommitId();
-            ObjectId oldObjectId=repo.resolve(oldCommit);
-            RevCommit oldRevCommit=walk.parseCommit(oldObjectId);
-
-            List<DiffEntry> diffFix = findChangedFileList(newRevCommit,oldRevCommit,repo);
-
-            for (DiffEntry entry : diffFix) {
-                //更改的文件名称
-                String newPath = entry.getNewPath();
-
-                String fileName = file.getName();
-
-                String message = branchCommit.get(i).getCommitMessage();
-                String time = branchCommit.get(i).getCommitTime();
-
-                if (!file.isDirectory() && newPath.equals(fileName)){
-                    map.put("message",message);
-                    map.put("time",time);
-                    walk.dispose();
-                    walk.close();
-                    return map;
-                }
-                if (file.isDirectory() && newPath.contains(fileName)){
-                    map.put("message",message);
-                    map.put("time",time);
-                    walk.dispose();
-                    walk.close();
-                    return map;
-                }
-            }
-        }
-
-        walk.dispose();
-        walk.close();
-        return map;
-    }
 
     /**
      * 获取上一次提交信息
@@ -236,9 +170,15 @@ public class GitCommitUntil {
      * @return 提交历史
      * @throws GitAPIException 信息获取失败
      */
-    public static List<Map<String,String>> gitFileCommitLog(Git git,String file) throws  GitAPIException {
+    public static List<Map<String,String>> gitFileCommitLog(Git git,String commitId,String file) throws GitAPIException, IOException {
         List<Map<String,String>> list = new ArrayList<>();
+
+        ObjectId objectId = ObjectId.fromString(commitId);
+
+        RevCommit revCommits = git.getRepository().parseCommit(objectId);
+
         Iterable<RevCommit> log = git.log()
+                .add(revCommits)
                 .addPath(file)
                 .call();
         for (RevCommit revCommit : log) {

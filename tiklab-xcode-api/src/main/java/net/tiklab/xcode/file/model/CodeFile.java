@@ -41,6 +41,11 @@ public class CodeFile {
      */
     private String commitBranch;
 
+    /**
+     * 是否为commitId
+     */
+    public boolean findCommitId;
+
 
     public String getNewFileName() {
         return newFileName;
@@ -96,5 +101,13 @@ public class CodeFile {
 
     public void setFileContent(String fileContent) {
         this.fileContent = fileContent;
+    }
+
+    public boolean isFindCommitId() {
+        return findCommitId;
+    }
+
+    public void setFindCommitId(boolean findCommitId) {
+        this.findCommitId = findCommitId;
     }
 }

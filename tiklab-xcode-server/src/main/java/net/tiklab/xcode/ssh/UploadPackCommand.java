@@ -1,4 +1,4 @@
-package net.tiklab.xcode.authority;
+package net.tiklab.xcode.ssh;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -56,32 +56,18 @@ public class UploadPackCommand implements Command, Runnable {
         }
     }
 
-    /**
-     * @param exit
-     */
     @Override
     public void setExitCallback(ExitCallback exit) {
         this.exit = exit;
     }
 
-
-    /**
-     * @param channelSession
-     * @param environment
-     * @throws IOException
-     */
     @Override
     public void start(ChannelSession channelSession, Environment environment) throws IOException {
         new Thread(this).start();
     }
 
-    /**
-     * @param channelSession
-     * @throws Exception
-     */
     @Override
     public void destroy(ChannelSession channelSession) throws Exception {
-
     }
 
 }

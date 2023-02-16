@@ -4,6 +4,8 @@ import net.tiklab.beans.BeanMapper;
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.join.JoinTemplate;
 import net.tiklab.rpc.annotation.Exporter;
+import net.tiklab.user.user.model.User;
+import net.tiklab.user.user.service.UserService;
 import net.tiklab.utils.context.LoginContext;
 import net.tiklab.xcode.branch.model.CodeBranch;
 import net.tiklab.xcode.code.dao.CodeDao;
@@ -12,6 +14,7 @@ import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeGroup;
 import net.tiklab.xcode.code.model.CodeMessage;
+import net.tiklab.xcode.file.model.FileTreeMessage;
 import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
@@ -19,7 +22,9 @@ import net.tiklab.xcode.until.CodeFileUntil;
 import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import net.tiklab.xcode.file.model.FileTree;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -212,29 +217,31 @@ public class CodeServerImpl implements CodeServer{
 
     /**
      * 获取文件信息
-     * @param codeMessage 信息
+     * @param message 信息
      * @return 文件集合
      */
     @Override
-    public List<FileTree> findFileTree(CodeMessage codeMessage){
+    public List<FileTree> findFileTree(FileTreeMessage message){
 
-        Code code = findOneCode(codeMessage.getCodeId());
-        String name = code.getName();
+        Code code = findOneCode(message.getCodeId());
 
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.FALSE) ;
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE) ;
 
         List<FileTree> fileTrees ;
-
-        codeMessage.setRepositoryAddress(repositoryAddress);
-        codeMessage.setRepositoryName(name);
-        codeMessage.setAddress(code.getAddress());
         try {
-            fileTrees = CodeFileUntil.fileTree(codeMessage);
-        } catch (GitAPIException | IOException e) {
+            List<CodeBranch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress);
+            if (allBranch.isEmpty()){
+                return null;
+            }
+            Git git = Git.open(new File(repositoryAddress));
+            fileTrees = CodeFileUntil.findFileTree(git,message);
+            git.close();
+        } catch (IOException e) {
             throw new ApplicationException( "仓库信息获取失败：" + e);
+        } catch (GitAPIException e) {
+            throw new ApplicationException( "提交信息获取失败：" + e);
         }
         return fileTrees;
-
     }
 
 
@@ -244,6 +251,8 @@ public class CodeServerImpl implements CodeServer{
     @Value("${xcode.ssh.port:8082}")
     private int sshPort;
 
+    @Autowired
+    private UserService userService;
 
     /**
      * 获取克隆地址
@@ -266,10 +275,14 @@ public class CodeServerImpl implements CodeServer{
         CodeCloneAddress codeCloneAddress = new CodeCloneAddress();
         String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.TRUE);
         codeCloneAddress.setFileAddress(repositoryAddress);
+        // String username = System.getProperty("user.name");
+        String loginId = LoginContext.getLoginId();
+
+        User user = userService.findOne(loginId);
 
         String http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
 
-        String SSH = "ssh://"+ip + ":" + sshPort +"/" + path + ".git";
+        String SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
 
         codeCloneAddress.setHttpAddress(http);
         codeCloneAddress.setSSHAddress(SSH);

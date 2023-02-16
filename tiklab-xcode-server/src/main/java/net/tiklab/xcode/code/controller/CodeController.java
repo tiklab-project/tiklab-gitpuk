@@ -9,6 +9,7 @@ import net.tiklab.xcode.code.model.CodeCloneAddress;
 import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.file.model.FileTree;
+import net.tiklab.xcode.file.model.FileTreeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,10 +74,10 @@ public class CodeController {
 
     @RequestMapping(path="/findFileTree",method = RequestMethod.POST)
     @ApiMethod(name = "findFileTree",desc = "查询仓库")
-    @ApiParam(name = "codeId",desc = "仓库id",required = true)
-    public Result< List<FileTree>> findFileTree(@RequestBody @NotNull @Valid CodeMessage codeMessage){
+    @ApiParam(name = "message",desc = "文件信息",required = true)
+    public Result< List<FileTree>> findFileTree(@RequestBody @NotNull @Valid FileTreeMessage message){
 
-        List<FileTree> fileTree = codeServer.findFileTree(codeMessage);
+        List<FileTree> fileTree = codeServer.findFileTree(message);
 
         return Result.ok(fileTree);
     }

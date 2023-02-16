@@ -2,14 +2,14 @@ package net.tiklab.xcode.git;
 
 import net.tiklab.xcode.branch.model.CodeBranch;
 import net.tiklab.xcode.commit.model.CommitMessage;
+import net.tiklab.xcode.file.model.FileTree;
 import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.io.File;
@@ -137,8 +137,45 @@ public class GitBranchUntil {
         return CodeFinal.DEFAULT_MASTER;
     }
 
+    /**
+     * 获取指定commitId的提交树
+     * @param repository 仓库
+     * @param branch 分支
+     * @return commitId
+     * @throws IOException 仓库不存在
+     */
+    public static RevTree findBarthCommitRevTree(Repository repository,String branch,boolean b) throws IOException {
+        // //如果不存在默认分支设置master为默认分支
+        // if (repository.getFullBranch() == null){
+        //     RefUpdate updateRef = repository.updateRef("HEAD");
+        //     updateRef.link("refs/heads/master");
+        // }
+        ObjectId commitIdObject = findBarthCommitId(repository,branch,b);
+        RevWalk walk = new RevWalk(repository);
+        RevTree tree = walk.parseCommit(commitIdObject).getTree();
+        walk.close();
+        return tree;
+    }
 
+    /**
+     * 获取指定分支的commitId
+     * @param repository 仓库
+     * @param branch 分支
+     * @return commitId
+     * @throws IOException 仓库不存在
+     */
+    public static ObjectId findBarthCommitId(Repository repository,String branch,boolean b) throws IOException {
 
+        //如果不存在默认分支设置master为默认分支
+        if (repository.getFullBranch() == null){
+            RefUpdate updateRef = repository.updateRef("HEAD");
+            updateRef.link("refs/heads/master");
+        }
+        if (!b){
+            branch = repository.resolve("refs/heads/" + branch).getName();
+        }
+        return ObjectId.fromString(branch);
+    }
 
 
 

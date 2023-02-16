@@ -1,4 +1,4 @@
-package net.tiklab.xcode.authority;
+package net.tiklab.xcode.http;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.UploadPack;

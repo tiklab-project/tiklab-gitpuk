@@ -4,6 +4,7 @@ import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.service.CodeServer;
 import net.tiklab.xcode.code.service.CodeServerImpl;
+import net.tiklab.xcode.commit.model.Commit;
 import net.tiklab.xcode.commit.model.CommitMessage;
 import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.until.CodeFinal;
@@ -12,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CodeCommitServerImpl implements CodeCommitServer {
@@ -25,33 +23,38 @@ public class CodeCommitServerImpl implements CodeCommitServer {
 
     /**
      * 获取分支提交记录
-     * @param codeId 仓库id
-     * @param branchName 分支
+     * @param commit 信息
      * @return 提交记录
      */
     @Override
-    public List<CommitMessage> findBranchCommit(String codeId, String branchName) {
-
+    public List<CommitMessage> findBranchCommit(Commit commit) {
+        String codeId = commit.getCodeId();
+        String branch = commit.getBranch();
         Code code = codeServer.findOneCode(codeId);
         String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         List<CommitMessage> branchCommit;
         try {
-            branchCommit = GitCommitUntil.findBranchCommit(repositoryAddress, branchName);
+            branchCommit = GitCommitUntil.findBranchCommit(repositoryAddress, branch,commit.isFindCommitId());
         } catch (IOException e) {
             throw new ApplicationException("提交记录获取失败："+e);
+        }
+        if (branchCommit.isEmpty()){
+           return Collections.emptyList();
         }
         return commitSort(branchCommit, new ArrayList<>());
     }
 
     /**
      * 获取最近一次的提交记录
-     * @param codeId 仓库id
-     * @param branchName 分支
+     * @param commit 仓库id
      * @return 提交记录
      */
     @Override
-    public CommitMessage findLatelyBranchCommit(String codeId, String branchName) {
-        List<CommitMessage> branchCommit = findBranchCommit(codeId, branchName);
+    public CommitMessage findLatelyBranchCommit(Commit commit) {
+        List<CommitMessage> branchCommit = findBranchCommit(commit);
+        if (branchCommit.isEmpty()){
+            return null;
+        }
         return branchCommit.get(0).getCommitMessageList().get(0);
     }
 
