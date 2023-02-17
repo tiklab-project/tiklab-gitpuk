@@ -43,6 +43,21 @@ public class CodeFinal {
      */
     public final static boolean FALSE = false;
 
+    /**
+     * 秘钥编码类型RSA
+     */
+    public final static String SSH_ENCODER_RSA = "RSA";
+
+    /**
+     * 以ssh-rsa开头的私钥
+     */
+    public final static String Key_TYPE_OPENSSH_RSA = "ssh-rsa";
+
+    /**
+     * 以-----BEGIN开头的私钥
+     */
+    public final static String Key_TYPE_SSH_RSA = "-----BEGIN ";
+
 
 
 }

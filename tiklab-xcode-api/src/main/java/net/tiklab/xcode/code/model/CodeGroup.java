@@ -14,7 +14,7 @@ import net.tiklab.user.user.model.User;
 @Mapper(targetAlias = "CodeGroupEntity")
 public class CodeGroup {
 
-    @ApiProperty(name="groupId",desc="仓库id")
+    @ApiProperty(name="groupId",desc="仓库组id")
     private String groupId;
 
     @ApiProperty(name="name",desc="仓库组名称")

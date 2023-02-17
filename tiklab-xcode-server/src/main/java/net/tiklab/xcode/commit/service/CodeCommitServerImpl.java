@@ -19,7 +19,7 @@ import java.util.*;
 public class CodeCommitServerImpl implements CodeCommitServer {
 
     @Autowired
-    CodeServer codeServer;
+    private CodeServer codeServer;
 
     /**
      * 获取分支提交记录
@@ -58,8 +58,6 @@ public class CodeCommitServerImpl implements CodeCommitServer {
         return branchCommit.get(0).getCommitMessageList().get(0);
     }
 
-
-
     /**
      * 提交记录根据日期排序（按天）
      * @param branchCommit 提交记录
@@ -87,6 +85,8 @@ public class CodeCommitServerImpl implements CodeCommitServer {
         }
         return list;
     }
+
+
 
 
 

@@ -11,6 +11,10 @@ spring:
   freemarker:
     checkTemplateLocation: false
 
+xcode:
+  ssh:
+    port: 8082
+    key: tiklab-xcode-starter\src\main\resources\id_rsa
 
 jdbc:
   driverClassName: com.mysql.cj.jdbc.Driver
@@ -78,9 +82,6 @@ mysql:
     enable: false
   database: tiklab_xcode
 
-xcode:
-  ssh:
-    port: 8082
 
 #homes
 homes:

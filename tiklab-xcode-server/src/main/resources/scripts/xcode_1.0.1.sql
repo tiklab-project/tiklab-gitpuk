@@ -1,0 +1,1 @@
+alter table code_auth add user_time varchar(256)
