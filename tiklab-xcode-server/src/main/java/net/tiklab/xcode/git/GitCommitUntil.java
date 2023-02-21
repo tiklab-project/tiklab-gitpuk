@@ -1,10 +1,8 @@
 package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.commit.model.CommitFileDiff;
-import net.tiklab.xcode.commit.model.CommitFileDiffList;
-import net.tiklab.xcode.commit.model.CommitMessage;
-import net.tiklab.xcode.commit.model.FileDiffEntry;
+import net.tiklab.xcode.XcodeServerAutoConfiguration;
+import net.tiklab.xcode.commit.model.*;
 import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
@@ -60,29 +58,27 @@ public class GitCommitUntil {
 
     /**
      * 获取分支的提交记录
-     * @param repositoryAddress 仓库地址
-     * @param branch 分支
+     * @param repository 仓库
+     * @param commit 提交信息
      * @return 提交记录
      * @throws IOException 仓库不存在
      * @throws ApplicationException 分支不存在
      */
-    public static List<CommitMessage> findBranchCommit(String repositoryAddress, String branch, boolean isCommitId)
+    public static List<CommitMessage> findBranchCommit(Repository repository , Commit commit)
             throws IOException , ApplicationException {
-
-        Git git = Git.open(new File(repositoryAddress));
-        Repository repository = git.getRepository();
+        String branch = commit.getBranch();
+        boolean isCommitId = commit.isFindCommitId();
 
         ObjectId objectId;
+
         if (!isCommitId){
             //分支为空设置为默认
             if (branch == null) {
                 branch = repository.getBranch();
             }
-
             //分支是否存在
             Ref head = repository.findRef(branch);
             if (head == null) {
-                git.close();
                 return Collections.emptyList();
             }
             objectId = head.getObjectId();
@@ -92,8 +88,36 @@ public class GitCommitUntil {
         RevWalk revWalk = new RevWalk(repository);
         revWalk.markStart(revWalk.parseCommit(objectId));
 
+        int i = 0;
+        String number = commit.getNumber();
         List<CommitMessage> list = new ArrayList<>();
         for (RevCommit revCommit : revWalk) {
+
+            if (number != null && i < 50){
+                i++;
+                continue;
+            }
+
+            if (number == null && i >= 50){
+                revCommit.disposeBody();
+                revWalk.close();
+                list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
+                return list;
+            }
+
+            // int begin = commit.getBegin();
+            // //判断是否是需要获取的数据
+            // if (i < begin){
+            //     continue;
+            // }
+            // //判断需要获取的数据是否足够
+            // if (i >= commit.getBegin()+ commit.getEnd()){
+            //     revCommit.disposeBody();
+            //     revWalk.close();
+            //     list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
+            //     return list;
+            // }
+
             TreeWalk treeWalk = new TreeWalk(repository);
             treeWalk.reset(revCommit.getTree());
 
@@ -109,9 +133,9 @@ public class GitCommitUntil {
             list.add(commitMessage);
             treeWalk.close();
             revCommit.disposeBody();
+            i++;
         }
         revWalk.close();
-        git.close();
 
         list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
         return list;
@@ -188,12 +212,10 @@ public class GitCommitUntil {
         }else {
             diffEntries =  diffFormatter.scan(oldCommit, newCommit);
         }
+
         FileDiffEntry fileDiffEntry = new FileDiffEntry();
         List<CommitFileDiffList> list = new ArrayList<>();
         for (DiffEntry diffEntry : diffEntries) {
-            diffFormatter.format(diffEntry);
-            String diffText = out.toString();
-            String[] diffLines = diffText.split("\n");
             CommitFileDiffList commitFileDiffList = new CommitFileDiffList();
             String name = diffEntry.getChangeType().name();
             String oldPath = diffEntry.getOldPath();
@@ -209,8 +231,17 @@ public class GitCommitUntil {
             commitFileDiffList.setFileType(newPath.substring(i+1));
             int addLine = 0;
             int deleteLine = 0;
+
+            String path ;
+            if (!newPath.equals(CodeFinal.FILE_PATH_NULL)){
+                path = newPath;
+            }else {
+                path = oldPath;
+            }
+
+            String[]  diffLines = findFileChangedList(repo,newCommit,oldCommit,path);
             for (String line : diffLines) {
-                if (line.startsWith("+++") || line.startsWith("---") ||line.startsWith("@@") ){
+                if (line.startsWith("+++") || line.startsWith("---")){
                     continue;
                 }
                 if (line.startsWith("-")  ){
@@ -229,15 +260,58 @@ public class GitCommitUntil {
         CommitMessage branchCommit = GitCommitUntil.findOneBranchCommit(repo, newCommit.getId().getName());
 
         if (branchCommit != null){
+            fileDiffEntry.setCommitMessage(branchCommit.getCommitMessage());
             fileDiffEntry.setCommitTime(branchCommit.getCommitTime());
             fileDiffEntry.setCommitUser(branchCommit.getCommitUser());
         }
         return fileDiffEntry;
-        // DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-        // df.setRepository(repo);
-        // df.setDiffComparator(RawTextComparator.DEFAULT);
-        // df.setDetectRenames(true);
-        // return df.scan(oldCommit, newCommit);
+    }
+
+    /**
+     * 对比两棵树中具体文件的提交
+     * @param repo 仓库信息
+     * @param newCommit 新树
+     * @param oldCommit 旧树
+     * @param filePath  文件地址
+     * @return 文件对比信息
+     * @throws IOException 扫描失败
+     */
+    public static  String[] findFileChangedList(Repository repo, RevCommit newCommit, RevCommit oldCommit, String filePath)
+            throws IOException {
+
+        // 获取文件的详细差异
+        ObjectReader reader = repo.newObjectReader();
+        CanonicalTreeParser oldTreeIter = null;
+        if (oldCommit != null){
+            oldTreeIter = new CanonicalTreeParser();
+            oldTreeIter.reset(reader, oldCommit.getTree());
+        }
+
+        CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+        newTreeIter.reset(reader, newCommit.getTree());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DiffFormatter diffFormatter = new DiffFormatter(out);
+        diffFormatter.setRepository(repo);
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+        diffFormatter.setDetectRenames(true);
+        //过滤指定文件
+        PathFilter pathFilter = PathFilter.create(filePath);
+        diffFormatter.setPathFilter(pathFilter);
+        List<DiffEntry> diffs;
+        if (oldTreeIter == null){
+            diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
+        }else {
+            diffs =  diffFormatter.scan(oldCommit, newCommit);
+        }
+        String[] diffLines = new String[0];
+        for (DiffEntry diff : diffs) {
+            diffFormatter.format(diff);
+            String diffText = out.toString();
+             diffLines = diffText.split("\n");
+        }
+
+        return diffLines;
     }
 
     /**
@@ -337,7 +411,6 @@ public class GitCommitUntil {
                 list.add(fileDiff);
             }
         }
-
 
         return list;
     }

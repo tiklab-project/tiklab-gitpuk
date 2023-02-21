@@ -59,6 +59,11 @@ public class CodeFinal {
     public final static String FILE_DOWN = "down";
 
     /**
+     * 地址为空
+     */
+    public final static String FILE_PATH_NULL = "/dev/null";
+
+    /**
      * 向下
      */
     public final static String FILE_UP = "up";

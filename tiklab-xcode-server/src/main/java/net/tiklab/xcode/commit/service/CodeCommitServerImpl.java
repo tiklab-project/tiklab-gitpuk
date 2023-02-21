@@ -41,12 +41,16 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     @Override
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String codeId = commit.getCodeId();
-        String branch = commit.getBranch();
+
+
         Code code = codeServer.findOneCode(codeId);
         String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         List<CommitMessage> branchCommit;
         try {
-            branchCommit = GitCommitUntil.findBranchCommit(repositoryAddress, branch,commit.isFindCommitId());
+            Git git = Git.open(new File(repositoryAddress));
+            Repository repository = git.getRepository();
+            branchCommit = GitCommitUntil.findBranchCommit(repository,commit);
+            git.close();
         } catch (IOException e) {
             throw new ApplicationException("提交记录获取失败："+e);
         }
@@ -112,7 +116,49 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     }
 
     /**
-     * 获取提交的具体文件的文件内容
+     * 提交文件模糊查询
+     * @param commit 查询信息
+     * @return 查询结果
+     */
+    @Override
+    public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
+        Code code = codeServer.findOneCode(commit.getCodeId());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+            Repository repository = git.getRepository();
+
+            RevWalk walk = new RevWalk(repository);
+            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository,
+                    commit.getBranch(), commit.isFindCommitId());;
+            RevCommit revCommit =  walk.parseCommit(objectId);
+
+            //获取旧树
+            RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+
+            FileDiffEntry changedList = GitCommitUntil.findFileChangedList(repository, revCommit,
+                    oldRevCommit);
+            List<CommitFileDiffList> diffList = changedList.getDiffList();
+            List<CommitFileDiffList> lists = new ArrayList<>();
+            String likePath = commit.getLikePath();
+            for (CommitFileDiffList list : diffList) {
+                String newFilePath = list.getNewFilePath();
+                String oldFilePath = list.getOldFilePath();
+                if (!newFilePath.contains(likePath) && !oldFilePath.contains(likePath)){
+                    continue;
+                }
+                lists.add(list);
+            }
+            changedList.setDiffList(lists);
+
+            return changedList;
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    /**
+     * 获取提交的具体文件的改变内容
      * @param commit commitId
      * @return 文件列表
      */
@@ -141,12 +187,12 @@ public class CodeCommitServerImpl implements CodeCommitServer {
         }
     }
 
-
     /**
      * 读取指定提交下的指定文件的指定行数
      * @param commit 提交信息
      * @return 文件内容
      */
+    @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
         Code code = codeServer.findOneCode(commit.getCodeId());
         String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
@@ -174,19 +220,22 @@ public class CodeCommitServerImpl implements CodeCommitServer {
                 if (number >= 0){
                     i = number;
                 }
+                if (count == -1){
+                    i = 0;
+                }
             }
             //向下获取
             if (direction.equals(CodeFinal.FILE_DOWN)){
                 int number = newStn + count - split.length;
                 i = newStn;
-                if (number >= 0){
+                if (number >= 0 || count == -1){
                     length = split.length;
                 }else {
                     length = newStn + count;
                 }
             }
 
-            for (int i1 = i; i1 < length; i1++) {
+            for (int i1 = i; i1 < length-1; i1++) {
                 CommitFileDiff fileDiff = new CommitFileDiff();
                 fileDiff.setText(split[i1]);
                 fileDiff.setLeft(i1 + (newStn-oldStn));

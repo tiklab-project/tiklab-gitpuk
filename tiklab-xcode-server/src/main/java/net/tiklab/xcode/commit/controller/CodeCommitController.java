@@ -66,6 +66,17 @@ public class CodeCommitController {
     }
 
 
+    @RequestMapping(path="/findLikeCommitDiffFileList",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitFileDiff",desc = "文件具体内容信息")
+    @ApiParam(name = "commit",desc = "commitId",required = true)
+    public Result<FileDiffEntry> findLikeCommitDiffFileList( @RequestBody @Valid @NotNull Commit commit){
+
+        FileDiffEntry commitFileDiffList = commitServer.findLikeCommitDiffFileList(commit);
+
+        return Result.ok(commitFileDiffList);
+    }
+
+
     @RequestMapping(path="/findCommitLineFile",method = RequestMethod.POST)
     @ApiMethod(name = "findCommitLineFile",desc = "文件具体内容信息")
     @ApiParam(name = "commit",desc = "commitId",required = true)

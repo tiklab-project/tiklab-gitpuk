@@ -29,6 +29,13 @@ public interface CodeCommitServer {
     FileDiffEntry findCommitDiffFileList(Commit commit);
 
     /**
+     * 提交文件模糊查询
+     * @param commit 查询信息
+     * @return 查询结果
+     */
+    FileDiffEntry findLikeCommitDiffFileList(Commit commit);
+
+    /**
      * 获取提交的具体文件的文件内容
      * @param commit commitId
      * @return 文件列表

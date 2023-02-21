@@ -8,6 +8,9 @@ import java.util.List;
 
 public class FileDiffEntry {
 
+    /**
+     * 提交文件
+     */
     List<CommitFileDiffList> diffList;
 
     /**
@@ -21,6 +24,11 @@ public class FileDiffEntry {
     private String commitUser;
 
     /**
+     * 提交信息
+     */
+    private String commitMessage;
+
+    /**
      * 添加行
      */
     private int addLine;
@@ -29,6 +37,15 @@ public class FileDiffEntry {
      * 删除行
      */
     private  int deleteLine;
+
+
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    public void setCommitMessage(String commitMessage) {
+        this.commitMessage = commitMessage;
+    }
 
     public List<CommitFileDiffList> getDiffList() {
         return diffList;

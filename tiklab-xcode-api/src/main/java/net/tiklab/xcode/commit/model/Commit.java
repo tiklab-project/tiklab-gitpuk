@@ -25,6 +25,42 @@ public class Commit {
      */
     private String filePath;
 
+    /**
+     * 模糊查询地址
+     */
+    private String likePath;
+
+    /**
+     * 开始数量
+     */
+    private int begin;
+
+    /**
+     * 结束数量
+     */
+    private int end;
+
+    /**
+     * 查询所有
+     */
+    private String number;
+
+
+    public int getBegin() {
+        return begin;
+    }
+
+    public void setBegin(int begin) {
+        this.begin = begin;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public void setEnd(int end) {
+        this.end = end;
+    }
 
     public String getCodeId() {
         return codeId;
@@ -56,6 +92,22 @@ public class Commit {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getLikePath() {
+        return likePath;
+    }
+
+    public void setLikePath(String likePath) {
+        this.likePath = likePath;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
     }
 }
 

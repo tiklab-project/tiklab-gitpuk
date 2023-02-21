@@ -145,11 +145,6 @@ public class GitBranchUntil {
      * @throws IOException 仓库不存在
      */
     public static RevTree findBarthCommitRevTree(Repository repository,String branch,boolean b) throws IOException {
-        // //如果不存在默认分支设置master为默认分支
-        // if (repository.getFullBranch() == null){
-        //     RefUpdate updateRef = repository.updateRef("HEAD");
-        //     updateRef.link("refs/heads/master");
-        // }
         ObjectId commitIdObject = findBarthCommitId(repository,branch,b);
         RevWalk walk = new RevWalk(repository);
         RevTree tree = walk.parseCommit(commitIdObject).getTree();
