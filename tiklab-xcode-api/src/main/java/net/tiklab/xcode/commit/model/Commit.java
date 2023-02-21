@@ -20,6 +20,11 @@ public class Commit {
      */
     private boolean findCommitId;
 
+    /**
+     * 文件地址
+     */
+    private String filePath;
+
 
     public String getCodeId() {
         return codeId;
@@ -44,4 +49,34 @@ public class Commit {
     public void setFindCommitId(boolean findCommitId) {
         this.findCommitId = findCommitId;
     }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

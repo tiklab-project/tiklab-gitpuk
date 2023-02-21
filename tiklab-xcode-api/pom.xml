@@ -61,7 +61,19 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
-<!--        <dependency>-->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>6.4.0.202211300538-r</version>
+            <scope>compile</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>6.4.0.202211300538-r</version>
+			<scope>compile</scope>
+		</dependency>
+		<!--        <dependency>-->
 <!--            <groupId>jakarta.ws.rs</groupId>-->
 <!--            <artifactId>jakarta.ws.rs-api</artifactId>-->
 <!--            <version>3.1.0</version>-->

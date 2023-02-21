@@ -12,6 +12,7 @@ import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,15 +58,14 @@ public class CodeFileServerImpl implements  CodeFileServer {
 
         Code code = codeServer.findOneCode(codeId);
         String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
-        CodeFileMessage fileMessage = null;
+        CodeFileMessage fileMessage ;
         try {
             Git git = Git.open(new File(repositoryAddress));
-            fileMessage =  CodeFileUntil.readBranchFile(git.getRepository(), branch, fileAddress.substring(1), codeFile.isFindCommitId());
+            Repository repository = git.getRepository();
+            boolean findCommitId = codeFile.isFindCommitId();
+            String substring = fileAddress.substring(1);
+            fileMessage =  CodeFileUntil.readBranchFile(repository, branch, substring, findCommitId);
             git.close();
-            // float fileSize = (float)file1.length() / 1024 ;
-            // String str = String.format("%.2f", fileSize)+"KB";
-            // fileMessage.setFileSize(str);
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

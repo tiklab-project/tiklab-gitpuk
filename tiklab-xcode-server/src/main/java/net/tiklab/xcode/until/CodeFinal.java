@@ -8,9 +8,9 @@ public class CodeFinal {
     public final static String DEFAULT_MASTER = "master";
 
     /**
-     * ssh监听端口
+     * 项目名称
      */
-    public final static Integer SSH_PORT = 8082;
+    public final static String APP_NAME = "xcode";
 
     /**
      * 树
@@ -42,6 +42,42 @@ public class CodeFinal {
      * 返回false
      */
     public final static boolean FALSE = false;
+
+    /**
+     * 文件内容添加
+     */
+    public final static String DIFF_TYPE_ADD = "+";
+
+    /**
+     * 文件内容删除
+     */
+    public final static String DIFF_TYPE_DELETE = "-";
+
+    /**
+     * 向上
+     */
+    public final static String FILE_DOWN = "down";
+
+    /**
+     * 向下
+     */
+    public final static String FILE_UP = "up";
+
+    /**
+     * 文件内容未改变
+     */
+    public final static String DIFF_TYPE_TEXT = " ";
+
+
+    /**
+     * 解析DIFF文件发生变化的信息
+     */
+    public final static String DIFF_REGEX = "@@ -(\\d+)(?:,(\\d+))? \\+(\\d+)(?:,(\\d+))? @@.*";
+
+    /**
+     * DIFF变化
+     */
+    public final static String DIFF_TYPE = "\u0000";
 
     /**
      * 秘钥编码类型RSA

@@ -4,8 +4,7 @@ import net.tiklab.core.Result;
 import net.tiklab.postin.annotation.Api;
 import net.tiklab.postin.annotation.ApiMethod;
 import net.tiklab.postin.annotation.ApiParam;
-import net.tiklab.xcode.commit.model.Commit;
-import net.tiklab.xcode.commit.model.CommitMessage;
+import net.tiklab.xcode.commit.model.*;
 import net.tiklab.xcode.commit.service.CodeCommitServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +42,38 @@ public class CodeCommitController {
         CommitMessage allBranch = commitServer.findLatelyBranchCommit(commit);
 
         return Result.ok(allBranch);
+    }
+
+
+    @RequestMapping(path="/findCommitFileDiffList",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitDiffFileList",desc = "文件提交对比")
+    @ApiParam(name = "commit",desc = "commitId",required = true)
+    public Result<FileDiffEntry> findCommitDiffFileList( @RequestBody @Valid @NotNull Commit commit){
+
+        FileDiffEntry commitFileDiffList = commitServer.findCommitDiffFileList(commit);
+
+        return Result.ok(commitFileDiffList);
+    }
+
+    @RequestMapping(path="/findCommitFileDiff",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitFileDiff",desc = "文件具体内容信息")
+    @ApiParam(name = "commit",desc = "commitId",required = true)
+    public Result< List<CommitFileDiff>> findCommitDiffFile( @RequestBody @Valid @NotNull Commit commit){
+
+        List<CommitFileDiff> fileDiff = commitServer.findCommitFileDiff(commit);
+
+        return Result.ok(fileDiff);
+    }
+
+
+    @RequestMapping(path="/findCommitLineFile",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitLineFile",desc = "文件具体内容信息")
+    @ApiParam(name = "commit",desc = "commitId",required = true)
+    public Result< List<CommitFileDiff>> findCommitDiffFile( @RequestBody @Valid @NotNull CommitFile commit){
+
+        List<CommitFileDiff> fileDiff = commitServer.findCommitLineFile(commit);
+
+        return Result.ok(fileDiff);
     }
 
 

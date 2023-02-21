@@ -288,115 +288,14 @@ public class CodeFileUntil {
             fileMessage.setFileSize(str);
             fileMessage.setFileName(name);
             fileMessage.setFilePath(treeWalk.getPathString());
-            fileMessage.setFileType(name.substring(name.lastIndexOf(".")+1));
+            int i = name.lastIndexOf(".") + 1;
+            String substring = name.substring(i);
+            fileMessage.setFileType(substring);
             fileMessage.setFileMessage(content);
         }
         return fileMessage;
     }
 
-    // /**
-    //  * 获取仓库路径下的文件树
-    //  * @param codeMessage 仓库地址
-    //  * @return 文件信息
-    //  * @throws GitAPIException 获取仓库文件失败
-    //  */
-    // public static List<FileTree> fileTree(CodeMessage codeMessage) throws GitAPIException, ApplicationException, IOException {
-    //
-    //     String repositoryAddress = codeMessage.getRepositoryAddress();
-    //
-    //     String name = codeMessage.getRepositoryName();
-    //     String branch = codeMessage.getBranch();
-    //     String address = codeMessage.getAddress();
-    //
-    //     String defaultAddress =CodeUntil.defaultPath().replace("\\","/");
-    //
-    //     //判断仓库文件目录是否存在
-    //     File files = new File(repositoryAddress+"_"+branch);
-    //     if (files.exists() && !CodeUntil.isNoNull(codeMessage.getPath())){
-    //         CodeFileUntil.deleteFile(files);
-    //     }
-    //
-    //     //克隆最新的仓库
-    //     String path = repositoryAddress+"_"+branch;
-    //     String messagePath = codeMessage.getPath();
-    //     if (CodeUntil.isNoNull(messagePath)){
-    //         path = path + messagePath;
-    //     }else {
-    //         GitUntil.cloneRepository(repositoryAddress,branch);
-    //     }
-    //
-    //     //判断仓库文件是否存在
-    //     File pathFile = new File(path);
-    //     if (!pathFile.exists()){
-    //         throw new  ApplicationException(50001,"路径不存在。");
-    //     }
-    //
-    //     //是否文空文件夹
-    //     File[] fa = pathFile.listFiles();
-    //     if (fa == null){
-    //         return null;
-    //     }
-    //
-    //     List<FileTree> fileTrees = new ArrayList<>();
-    //
-    //
-    //     Git git = Git.open(new File(repositoryAddress+".git"));
-    //     Repository repo = git.getRepository();
-    //
-    //     for (File f : fa) {
-    //
-    //         FileTree fileTree = new FileTree();
-    //         fileTree.setFileName(f.getName());
-    //         fileTree.setBranch(branch);
-    //
-    //         String s2 = defaultAddress + "/" + name + "_" + branch;
-    //
-    //         //忽略git仓库的.git文件夹
-    //         if (f.getName().equals(".git") && new File(s2).getName().equals(new File(f.getParent()).getName())){
-    //             continue;
-    //         }
-    //
-    //         String replace = f.getAbsolutePath().replace("\\", "/");
-    //         String parentReplace = f.getParent().replace("\\", "/");
-    //
-    //         String parent = parentReplace.replace(defaultAddress,"");
-    //         String fileAddress =replace.replace(defaultAddress,"");
-    //
-    //         fileTree.setFileParent(parent);
-    //         fileTree.setFileAddress(fileAddress);
-    //
-    //         //文件类型
-    //         String suffix = null;
-    //         fileTree.setType("tree");
-    //         if (!f.isDirectory() ){
-    //             String fileName = f.getName();
-    //             if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
-    //                 suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
-    //             }
-    //             fileTree.setType("blob");
-    //         }
-    //         fileTree.setFileType(suffix);
-    //
-    //         String s1 = "/" + address+"_"+branch;
-    //
-    //         String s = fileAddress.substring(fileAddress.indexOf(s1)+s1.length()) ;
-    //
-    //         s = "/" + name +"/" + fileTree.getType() + "/" + branch + s ;
-    //
-    //         List<Map<String, String>> list = GitCommitUntil.gitFileCommitLog(git, f.getName());
-    //         Map<String, String> fileCommit = list.get(0);
-    //         fileTree.setPath(s);
-    //         fileTree.setCommitMessage(fileCommit.get("message"));
-    //         fileTree.setCommitTime(fileCommit.get("time"));
-    //         fileTrees.add(fileTree);
-    //
-    //     }
-    //     fileTrees.sort(Comparator.comparing(FileTree::getType).reversed());
-    //     // repo.close();
-    //     git.close();
-    //
-    //     return fileTrees;
-    // }
 
 
 }

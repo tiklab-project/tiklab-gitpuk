@@ -126,7 +126,7 @@ public class GitBranchUntil {
      * @return 默认分支 无返回 DEFAULT_MASTER
      * @throws IOException 仓库不存在
      */
-    public   static String findDefaultBranch(String repositoryAddress) throws IOException {
+    public static String findDefaultBranch(String repositoryAddress) throws IOException {
         List<CodeBranch> codeBranches = findAllBranch(repositoryAddress);
 
         for (CodeBranch codeBranch : codeBranches) {

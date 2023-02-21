@@ -30,6 +30,13 @@
             <outputDirectory>/conf</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>id_rsa</include>
+            </includes>
+            <outputDirectory>/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${basedir}</directory>
             <includes>
                 <include>Dockerfile</include>

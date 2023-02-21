@@ -130,7 +130,6 @@ public class GitUntil {
                 .setUri(new URIish(repositoryAddress+".git"))
                 .call();
         git.push()
-                // .setRefSpecs(new RefSpec(branch))
                 .setPushAll()
                 .call();
         git.close();

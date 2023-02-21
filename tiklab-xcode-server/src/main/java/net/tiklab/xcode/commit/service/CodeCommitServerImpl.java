@@ -3,15 +3,27 @@ package net.tiklab.xcode.commit.service;
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.code.model.Code;
 import net.tiklab.xcode.code.service.CodeServer;
-import net.tiklab.xcode.code.service.CodeServerImpl;
-import net.tiklab.xcode.commit.model.Commit;
-import net.tiklab.xcode.commit.model.CommitMessage;
+import net.tiklab.xcode.commit.model.*;
+import net.tiklab.xcode.file.model.CodeFileMessage;
+import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
+import net.tiklab.xcode.until.CodeFileUntil;
 import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.attributes.Attribute;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -56,6 +68,137 @@ public class CodeCommitServerImpl implements CodeCommitServer {
             return null;
         }
         return branchCommit.get(0).getCommitMessageList().get(0);
+    }
+
+    /**
+     * 获取提交的文件信息
+     * @param commit commitId
+     * @return 文件列表
+     */
+    @Override
+    public FileDiffEntry findCommitDiffFileList(Commit commit) {
+
+        Code code = codeServer.findOneCode(commit.getCodeId());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+            Repository repository = git.getRepository();
+
+            RevWalk walk = new RevWalk(repository);
+            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository,
+                    commit.getBranch(), commit.isFindCommitId());;
+            RevCommit revCommit =  walk.parseCommit(objectId);
+
+            //获取旧树
+            RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+
+            FileDiffEntry changedList = GitCommitUntil.findFileChangedList(repository, revCommit,
+                    oldRevCommit);
+            List<CommitFileDiffList> diffList = changedList.getDiffList();
+            int allAddLine = 0;
+            int allDeleteLine = 0;
+            for (CommitFileDiffList list : diffList) {
+                int addLine = list.getAddLine();
+                int deleteLine = list.getDeleteLine();
+                allAddLine = allAddLine + addLine;
+                allDeleteLine = allDeleteLine + deleteLine;
+            }
+            changedList.setDeleteLine(allDeleteLine);
+            changedList.setAddLine(allAddLine);
+            return changedList;
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    /**
+     * 获取提交的具体文件的文件内容
+     * @param commit commitId
+     * @return 文件列表
+     */
+    @Override
+    public List<CommitFileDiff> findCommitFileDiff(Commit commit) {
+        Code code = codeServer.findOneCode(commit.getCodeId());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+            Repository repository = git.getRepository();
+
+            RevWalk walk = new RevWalk(repository);
+            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository,
+                    commit.getBranch(), commit.isFindCommitId());;
+            RevCommit revCommit =  walk.parseCommit(objectId);
+
+            //获取旧树
+            RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+
+            List<CommitFileDiff> fileChanged = GitCommitUntil.findFileChanged(repository,
+                    revCommit, oldRevCommit, commit.getFilePath());
+            git.close();
+            return fileChanged;
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+
+    /**
+     * 读取指定提交下的指定文件的指定行数
+     * @param commit 提交信息
+     * @return 文件内容
+     */
+    public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
+        Code code = codeServer.findOneCode(commit.getCodeId());
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+            Repository repository = git.getRepository();
+
+            CodeFileMessage fileMessage = CodeFileUntil.readBranchFile(repository,
+                    commit.getCommitId(), commit.getPath(), true);
+            String message = fileMessage.getFileMessage();
+            String[] split = message.split("\n");
+
+            List<CommitFileDiff> list = new ArrayList<>();
+            String direction = commit.getDirection();
+            int count = commit.getCount();
+            int newStn = commit.getNewStn();
+            int oldStn = commit.getOldStn();
+
+            //向上获取
+            int i = 0;
+            int length = 0;
+            if (direction.equals(CodeFinal.FILE_UP)){
+                int number = newStn - count;
+                length = newStn;
+                if (number >= 0){
+                    i = number;
+                }
+            }
+            //向下获取
+            if (direction.equals(CodeFinal.FILE_DOWN)){
+                int number = newStn + count - split.length;
+                i = newStn;
+                if (number >= 0){
+                    length = split.length;
+                }else {
+                    length = newStn + count;
+                }
+            }
+
+            for (int i1 = i; i1 < length; i1++) {
+                CommitFileDiff fileDiff = new CommitFileDiff();
+                fileDiff.setText(split[i1]);
+                fileDiff.setLeft(i1 + (newStn-oldStn));
+                fileDiff.setRight(i1+1);
+                fileDiff.setType(CodeFinal.DIFF_TYPE_TEXT);
+                list.add(fileDiff);
+            }
+            git.close();
+            return list;
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
     }
 
     /**

@@ -64,9 +64,13 @@ public class XcodeSshServer {
         sshServer.setPort(sshPort);
         sshServer.setHost (CodeFinal.SSH_HOST);
 
-        //
         String property = System.getProperty("user.dir");
+        if (!property.endsWith(CodeFinal.APP_NAME)){
+            File file = new File(property);
+            property= file.getParent();
+        }
         Path ssh_key = Paths.get(property+"/"+sshKey);
+        logger.info("私钥地址："+ ssh_key);
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
 
