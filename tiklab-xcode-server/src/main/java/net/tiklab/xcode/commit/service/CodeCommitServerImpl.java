@@ -41,8 +41,6 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     @Override
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String codeId = commit.getCodeId();
-
-
         Code code = codeServer.findOneCode(codeId);
         String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
         List<CommitMessage> branchCommit;

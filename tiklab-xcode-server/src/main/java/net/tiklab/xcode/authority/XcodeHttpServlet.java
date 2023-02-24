@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Enumeration;
 
 /**
  * 拦截git http请求
@@ -78,11 +79,11 @@ public class XcodeHttpServlet extends GitServlet {
         /**
          * 处理仓库地址
          */
-        static class HttpRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
-
-
+        private static class HttpRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
                 @Override
-                public Repository open(HttpServletRequest req, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
+                public Repository open(HttpServletRequest req, String name)
+                        throws RepositoryNotFoundException, ServiceNotAuthorizedException,
+                        ServiceNotEnabledException, ServiceMayNotContinueException {
 
                         String s = CodeUntil.defaultPath();
                         File file = new File(s + "/" + name);
@@ -99,15 +100,15 @@ public class XcodeHttpServlet extends GitServlet {
                         }
                         return repository;
                 }
-
         }
 
         /**
          * 实现git-upload-pack钩子
          */
-        static class HttpUploadPackFactory implements UploadPackFactory<HttpServletRequest> {
+        private static class HttpUploadPackFactory implements UploadPackFactory<HttpServletRequest> {
                 @Override
-                public UploadPack create(HttpServletRequest req, Repository db) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
+                public UploadPack create(HttpServletRequest req, Repository db)
+                        throws ServiceNotEnabledException, ServiceNotAuthorizedException {
                         return new UploadPack(db);
                 }
         }
@@ -115,9 +116,10 @@ public class XcodeHttpServlet extends GitServlet {
         /**
          * 实现git-receive-pack钩子
          */
-        static class HttpReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
+        private static class HttpReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
                 @Override
-                public ReceivePack create(HttpServletRequest req, Repository db) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
+                public ReceivePack create(HttpServletRequest req, Repository db)
+                        throws ServiceNotEnabledException, ServiceNotAuthorizedException {
                         return new ReceivePack(db);
                 }
         }

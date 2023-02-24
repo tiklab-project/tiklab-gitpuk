@@ -207,7 +207,7 @@ public class GitCommitUntil {
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
         diffFormatter.setDetectRenames(true);
         List<DiffEntry> diffEntries;
-        if (oldTreeIter == null){
+        if (oldTreeIter != null){
             diffEntries = diffFormatter.scan(oldTreeIter, newTreeIter);
         }else {
             diffEntries =  diffFormatter.scan(oldCommit, newCommit);
@@ -227,16 +227,18 @@ public class GitCommitUntil {
             commitFileDiffList.setOldFileType(oldMode.toString());
             commitFileDiffList.setNewFilePath(newPath);
             commitFileDiffList.setNewFileType(newMode.toString());
-            int i = newPath.lastIndexOf(".");
-            commitFileDiffList.setFileType(newPath.substring(i+1));
             int addLine = 0;
             int deleteLine = 0;
-
+            int i;
             String path ;
             if (!newPath.equals(CodeFinal.FILE_PATH_NULL)){
                 path = newPath;
+                i = newPath.lastIndexOf(".");
+                commitFileDiffList.setFileType(newPath.substring(i+1));
             }else {
                 path = oldPath;
+                i = oldPath.lastIndexOf(".");
+                commitFileDiffList.setFileType(oldPath.substring(i+1));
             }
 
             String[]  diffLines = findFileChangedList(repo,newCommit,oldCommit,path);
@@ -299,7 +301,7 @@ public class GitCommitUntil {
         PathFilter pathFilter = PathFilter.create(filePath);
         diffFormatter.setPathFilter(pathFilter);
         List<DiffEntry> diffs;
-        if (oldTreeIter == null){
+        if (oldTreeIter != null){
             diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
         }else {
             diffs =  diffFormatter.scan(oldCommit, newCommit);
@@ -346,7 +348,7 @@ public class GitCommitUntil {
         PathFilter pathFilter = PathFilter.create(filePath);
         diffFormatter.setPathFilter(pathFilter);
         List<DiffEntry> diffs;
-        if (oldTreeIter == null){
+        if (oldTreeIter != null){
             diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
         }else {
             diffs =  diffFormatter.scan(oldCommit, newCommit);
@@ -360,6 +362,15 @@ public class GitCommitUntil {
         for (DiffEntry diff : diffs) {
             diffFormatter.format(diff);
             String diffText = out.toString();
+            int length = diffText.length();
+            // if (filePath.endsWith(".js") && length > 20000){
+            //     CommitFileDiff fileDiff = new CommitFileDiff();
+            //     fileDiff.setRight(1);
+            //     fileDiff.setLeft(1);
+            //     fileDiff.setType(CodeFinal.DIFF_TYPE_BIG);
+            //     list.add(fileDiff);
+            //     return list;
+            // }
             String[] diffLines = diffText.split("\n");
             for (int i = 3; i < diffLines.length; i++) {
                 String line = diffLines[i];
@@ -407,6 +418,7 @@ public class GitCommitUntil {
                     fileDiff.setType(CodeFinal.DIFF_TYPE_TEXT);
                     fileDiff.setText(line);
                 }
+
                 fileDiff.setIndex(i-4);
                 list.add(fileDiff);
             }

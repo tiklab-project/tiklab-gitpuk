@@ -54,6 +54,11 @@ public class CodeFinal {
     public final static String DIFF_TYPE_DELETE = "-";
 
     /**
+     * 大文件
+     */
+    public final static String DIFF_TYPE_BIG = "big";
+
+    /**
      * 向上
      */
     public final static String FILE_DOWN = "down";
