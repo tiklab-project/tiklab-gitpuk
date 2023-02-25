@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class RepositoryUntilFileUntil {
+public class RepositoryFileUntil {
 
     /**
      * 字符串写入文件
@@ -177,7 +177,7 @@ public class RepositoryUntilFileUntil {
             if (!RepositoryUntil.isNoNull(file)){
                 int i = pathString.indexOf("/");
                 if (i >= 0){
-                    type = RepositoryUntilFinal.FILE_TYPE_TREE;
+                    type = RepositoryFinal.FILE_TYPE_TREE;
                     String substring = pathString.substring(0, i);
                     String s = map.get(substring);
                     if (s != null){
@@ -186,7 +186,7 @@ public class RepositoryUntilFileUntil {
                     fileTree.setFileName(substring);
                     map.put(substring,substring);
                 }else {
-                    type = RepositoryUntilFinal.FILE_TYPE_BLOB;
+                    type = RepositoryFinal.FILE_TYPE_BLOB;
                     fileTree.setFileName(pathString);
                 }
             }
@@ -199,7 +199,7 @@ public class RepositoryUntilFileUntil {
                 String replace = pathString.replace(substring,"");
                 int i = replace.indexOf("/");
                 if (i >= 0){
-                    type = RepositoryUntilFinal.FILE_TYPE_TREE;
+                    type = RepositoryFinal.FILE_TYPE_TREE;
                     String substring1 = replace.substring(0, i);
                     fileTree.setFileName(substring1);
                     String s = map.get(substring1);
@@ -208,7 +208,7 @@ public class RepositoryUntilFileUntil {
                     }
                     map.put(substring1,substring1);
                 }else {
-                    type = RepositoryUntilFinal.FILE_TYPE_BLOB;
+                    type = RepositoryFinal.FILE_TYPE_BLOB;
                     fileTree.setFileName(replace);
                 }
             }
@@ -228,7 +228,7 @@ public class RepositoryUntilFileUntil {
 
             String branch = message.getBranch();
             if (message.isFindCommitId()){
-                branch = branch + RepositoryUntilFinal.COMMIT_ONLY_ID;
+                branch = branch + RepositoryFinal.COMMIT_ONLY_ID;
             }
 
             if (!RepositoryUntil.isNoNull(file)){

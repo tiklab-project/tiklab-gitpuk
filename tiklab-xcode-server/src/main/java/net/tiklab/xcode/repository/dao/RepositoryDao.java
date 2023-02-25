@@ -18,16 +18,16 @@ public class RepositoryDao {
      * @param repositoryEntity 仓库信息
      * @return 仓库id
      */
-    public String createCode(RepositoryEntity repositoryEntity){
+    public String createRpy(RepositoryEntity repositoryEntity){
         return jpaTemplate.save(repositoryEntity, String.class);
     }
 
     /**
      * 删除仓库
-     * @param codeId 仓库id
+     * @param rpyId 仓库id
      */
-    public void deleteCode(String codeId){
-        jpaTemplate.delete(RepositoryEntity.class,codeId);
+    public void deleteRpy(String rpyId){
+        jpaTemplate.delete(RepositoryEntity.class,rpyId);
     }
 
 
@@ -35,29 +35,29 @@ public class RepositoryDao {
      * 更新仓库
      * @param repositoryEntity 仓库信息
      */
-    public void updateCode(RepositoryEntity repositoryEntity){
+    public void updateRpy(RepositoryEntity repositoryEntity){
         jpaTemplate.update(repositoryEntity);
     }
 
     /**
      * 查询单个仓库信息
-     * @param codeId 仓库id
+     * @param rpyId 仓库id
      * @return 仓库信息
      */
-    public RepositoryEntity findOneCode(String codeId){
-        return jpaTemplate.findOne(RepositoryEntity.class,codeId);
+    public RepositoryEntity findOneRpy(String rpyId){
+        return jpaTemplate.findOne(RepositoryEntity.class,rpyId);
     }
 
     /**
      * 查询所有仓库
      * @return 仓库列表
      */
-    public List<RepositoryEntity> findAllCode(){
+    public List<RepositoryEntity> findAllRpy(){
         return jpaTemplate.findAll(RepositoryEntity.class);
     }
 
 
-    public List<RepositoryEntity> findAllCodeList(List<String> idList){
+    public List<RepositoryEntity> findAllRpyList(List<String> idList){
         return jpaTemplate.findList(RepositoryEntity.class,idList);
     }
 

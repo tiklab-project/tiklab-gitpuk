@@ -7,8 +7,8 @@ import net.tiklab.xcode.commit.model.*;
 import net.tiklab.xcode.file.model.FileMessage;
 import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
-import net.tiklab.xcode.until.RepositoryUntilFileUntil;
-import net.tiklab.xcode.until.RepositoryUntilFinal;
+import net.tiklab.xcode.until.RepositoryFileUntil;
+import net.tiklab.xcode.until.RepositoryFinal;
 import net.tiklab.xcode.until.RepositoryUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
@@ -34,8 +34,8 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitMessage> findBranchCommit(Commit commit) {
-        String codeId = commit.getCodeId();
-        Repository code = repositoryServer.findOneCode(codeId);
+        String rpyId = commit.getRpyId();
+        Repository code = repositoryServer.findOneRpy(rpyId);
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
         List<CommitMessage> branchCommit;
         try {
@@ -74,7 +74,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public FileDiffEntry findCommitDiffFileList(Commit commit) {
 
-        Repository code = repositoryServer.findOneCode(commit.getCodeId());
+        Repository code = repositoryServer.findOneRpy(commit.getRpyId());
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -112,7 +112,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
-        Repository code = repositoryServer.findOneCode(commit.getCodeId());
+        Repository code = repositoryServer.findOneRpy(commit.getRpyId());
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -150,7 +150,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitFileDiff> findCommitFileDiff(Commit commit) {
-        Repository code = repositoryServer.findOneCode(commit.getCodeId());
+        Repository code = repositoryServer.findOneRpy(commit.getRpyId());
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -180,13 +180,13 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
-        Repository code = repositoryServer.findOneCode(commit.getCodeId());
+        Repository code = repositoryServer.findOneRpy(commit.getRpyId());
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
 
-            FileMessage fileMessage = RepositoryUntilFileUntil.readBranchFile(repository,
+            FileMessage fileMessage = RepositoryFileUntil.readBranchFile(repository,
                     commit.getCommitId(), commit.getPath(), true);
             String message = fileMessage.getFileMessage();
             String[] split = message.split("\n");
@@ -200,7 +200,7 @@ public class CommitServerImpl implements CommitServer {
             //向上获取
             int i = 0;
             int length = 0;
-            if (direction.equals(RepositoryUntilFinal.FILE_UP)){
+            if (direction.equals(RepositoryFinal.FILE_UP)){
                 int number = newStn - count;
                 length = newStn;
                 if (number >= 0){
@@ -211,7 +211,7 @@ public class CommitServerImpl implements CommitServer {
                 }
             }
             //向下获取
-            if (direction.equals(RepositoryUntilFinal.FILE_DOWN)){
+            if (direction.equals(RepositoryFinal.FILE_DOWN)){
                 int number = newStn + count - split.length;
                 i = newStn;
                 if (number >= 0 || count == -1){
@@ -226,7 +226,7 @@ public class CommitServerImpl implements CommitServer {
                 fileDiff.setText(split[i1]);
                 fileDiff.setLeft(i1 + (newStn-oldStn));
                 fileDiff.setRight(i1+1);
-                fileDiff.setType(RepositoryUntilFinal.DIFF_TYPE_TEXT);
+                fileDiff.setType(RepositoryFinal.DIFF_TYPE_TEXT);
                 list.add(fileDiff);
             }
             git.close();

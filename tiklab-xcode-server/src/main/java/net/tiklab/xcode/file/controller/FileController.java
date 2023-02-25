@@ -18,9 +18,9 @@ import javax.validation.constraints.NotNull;
 
 
 @RestController
-@RequestMapping("/codeFile")
-@Api(name = "CodeFileController",desc = "文件")
-public class CodeFileController {
+@RequestMapping("/file")
+@Api(name = "FileController",desc = "文件")
+public class FileController {
 
     @Autowired
     FileServer fileServer;
@@ -37,7 +37,7 @@ public class CodeFileController {
 
     @RequestMapping(path="/writeFile",method = RequestMethod.POST)
     @ApiMethod(name = "writeFile",desc = "读取文件")
-    @ApiParam(name = "codeId",desc = "codeId",required = true)
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
     public Result<Void> writeFile(@NotNull @RequestBody @Valid FileQuery fileQuery){
 
       fileServer.writeFile(fileQuery);

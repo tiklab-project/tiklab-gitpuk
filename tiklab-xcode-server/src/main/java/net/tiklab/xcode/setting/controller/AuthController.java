@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Auth")
+@RequestMapping("/auth")
 @Api(name = "AuthController",desc = "认证")
 public class AuthController {
 

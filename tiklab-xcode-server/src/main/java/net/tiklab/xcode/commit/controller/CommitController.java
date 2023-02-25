@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/codeCommit")
+@RequestMapping("/commit")
 @Api(name = "CommitController",desc = "提交记录")
 public class CommitController {
 
@@ -26,7 +26,7 @@ public class CommitController {
 
     @RequestMapping(path="/findBranchCommit",method = RequestMethod.POST)
     @ApiMethod(name = "findBranchCommit",desc = "查询提交记录")
-    @ApiParam(name = "codeId",desc = "codeId",required = true)
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
     public Result<List<CommitMessage>> findBranchCommit(@RequestBody @Valid @NotNull Commit commit){
 
         List<CommitMessage> allBranch = commitServer.findBranchCommit(commit);
@@ -36,7 +36,7 @@ public class CommitController {
 
     @RequestMapping(path="/findLatelyBranchCommit",method = RequestMethod.POST)
     @ApiMethod(name = "findLatelyBranchCommit",desc = "最近一次提交记录")
-    @ApiParam(name = "codeId",desc = "codeId",required = true)
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
     public Result<CommitMessage> findLatelyBranchCommit(@RequestBody @Valid @NotNull Commit commit){
 
         CommitMessage allBranch = commitServer.findLatelyBranchCommit(commit);

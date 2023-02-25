@@ -15,7 +15,7 @@ public class BranchMessage {
     /**
      * 仓库id
      */
-    private String codeId;
+    private String rpyId;
 
 
     public String getBranchName() {
@@ -34,11 +34,11 @@ public class BranchMessage {
         this.point = point;
     }
 
-    public String getCodeId() {
-        return codeId;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setCodeId(String codeId) {
-        this.codeId = codeId;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 }

@@ -2,6 +2,7 @@ package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.branch.model.Branch;
+import net.tiklab.xcode.until.RepositoryFinal;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.RefSpec;
@@ -31,7 +32,25 @@ public class GitUntil {
             git = Git.init()
                     .setDirectory(file)
                     .setBare(true) //裸仓库
+                    .setInitialBranch(RepositoryFinal.DEFAULT_MASTER)
                     .call();
+            //提交文件
+            git.add()
+                    .addFilepattern("D:\\桌面\\新建文件夹\\.gitignore")
+                    // .addFilepattern("D:\\桌面\\新建文件夹\\README.md")
+                    // .setUpdate(true)
+                    .call();
+            git.commit()
+                    .setCommitter("zhangcheng", "committer@example.com")
+                    .setMessage("Initial commit")
+                    .setAllowEmpty(true)
+                    .call();
+            // git.pull()
+            //         .setRemoteBranchName(RepositoryFinal.DEFAULT_MASTER)
+            //         .setRemote(repositoryAddress)
+            //         .call();
+
+            git.close();
         } catch (GitAPIException e) {
             throw new ApplicationException("仓库创建失败。" + e);
         }

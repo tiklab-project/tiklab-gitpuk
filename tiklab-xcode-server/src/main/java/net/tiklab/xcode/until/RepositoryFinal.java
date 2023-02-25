@@ -1,6 +1,6 @@
 package net.tiklab.xcode.until;
 
-public class RepositoryUntilFinal {
+public class RepositoryFinal {
 
     /**
      * 默认分支

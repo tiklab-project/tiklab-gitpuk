@@ -1,16 +1,28 @@
 package net.tiklab.xcode.git;
 
+import net.tiklab.xcode.until.RepositoryFinal;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.transport.RefSpec;
-import java.io.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class GitTest {
 
 
     public static void main(String[] args) throws Exception {
 
-        findAllBranch("C:\\Users\\admin\\xcode\\repository\\aa.git");
+        File file = new File("C:\\Users\\admin\\xcode\\repository\\abcde.git");
+        Git git = Git.init()
+                .setDirectory(file)
+                .setBare(true) //裸仓库
+                .setInitialBranch(RepositoryFinal.DEFAULT_MASTER)
+                .call();
+        git.close();
+        createGit("C:\\Users\\admin\\xcode\\repository\\abcde.git");
 
     }
 
@@ -38,49 +50,39 @@ public class GitTest {
     }
 
 
-    // public static void createGit() throws IOException {
-    //     // 1. 初始化Git仓库
-    //     Repository repository = Git.init()
-    //             .setDirectory(new FileQuery("/path/to/repository"))
-    //             .call()
-    //             .getRepository();
-    //
-    //     // 2. 创建README.md文件
-    //     String readmeContent = "This is a README file.";
-    //     FileQuery readmeFile = new FileQuery(repository.getDirectory().getParent(), "README.md");
-    //     FileUtils.write(readmeFile, readmeContent);
-    //
-    //     // 3. 创建.gitignore文件
-    //     String gitignoreContent = "*.log\n/target/\n";
-    //     FileQuery gitignoreFile = new FileQuery(repository.getDirectory().getParent(), ".gitignore");
-    //     FileUtils.write(gitignoreFile, gitignoreContent);
-    //
-    //     // 4. 创建默认分支
-    //     RefUpdate updateRef = repository.updateRef(Constants.HEAD);
-    //     ObjectId emptyTreeId = repository.writeTree(repository.newObjectReader());
-    //     DirCache dirCache = DirCache.newInCore();
-    //     DirCacheEntry readmeEntry = new DirCacheEntry("README.md");
-    //     readmeEntry.setFileMode(FileMode.REGULAR_FILE);
-    //
-    //     readmeEntry.setObjectId(repository.getObjectDatabase().insert(Constants.OBJ_BLOB, readmeContent.getBytes()));
-    //     DirCacheEntry gitignoreEntry = new DirCacheEntry(".gitignore");
-    //     gitignoreEntry.setFileMode(FileMode.REGULAR_FILE);
-    //     gitignoreEntry.setObjectId(repository.getObjectDatabase().insert(Constants.OBJ_BLOB, gitignoreContent.getBytes()));
-    //     dirCache.add(readmeEntry);
-    //     dirCache.add(gitignoreEntry);
-    //     dirCache.write();
-    //     ObjectId treeId = dirCache.writeTree(repository.getObjectDatabase());
-    //     RevCommit initialCommit = new RevCommit(ObjectId.zeroId());
-    //     initialCommit.setTreeId(treeId);
-    //     initialCommit.setAuthor(new PersonIdent("John Doe", "john.doe@example.com"));
-    //     initialCommit.setCommitter(new PersonIdent("John Doe", "john.doe@example.com"));
-    //     initialCommit.setMessage("Initial commit");
-    //     Ref branch = updateRef.update(initialCommit);
-    //
-    //     // 5. 关闭Git仓库
-    //     repository.close();
-    // }
+    public static void createGit(String repositoryAddress) throws GitAPIException, IOException {
 
+        File file = new File(repositoryAddress);
+
+
+        Git git = Git.open(file);
+        Repository repository = git.getRepository();
+        String branch = repository.getBranch();
+        ObjectId id = repository.resolve(branch);
+        ObjectId zeroId = ObjectId.zeroId();
+        ObjectDatabase objectDatabase = repository.getObjectDatabase();
+        ObjectInserter inserter = objectDatabase.newInserter();
+        // 写入文件到对象数据库
+        File files = new File("D:\\桌面\\新建文件夹\\.gitignore");
+        FileInputStream fileInputStream = new FileInputStream(files);
+        long length = files.length();
+        ObjectId objectId = inserter.insert(Constants.OBJ_BLOB, length, fileInputStream);
+        inserter.flush();
+        inserter.close();
+
+        CommitBuilder commitBuilder = new CommitBuilder();
+        commitBuilder.setTreeId(objectId);
+        commitBuilder.setParentIds(zeroId);
+        commitBuilder.setCommitter(new PersonIdent("zhangcheng","zhang@qq.com"));
+        commitBuilder.setAuthor(new PersonIdent("zhangcheng","zhang@qq.com"));
+        // 提交更改
+        ObjectInserter objectInserter = repository.newObjectInserter();
+        objectInserter.insert(commitBuilder);
+        objectInserter.flush();
+        objectInserter.close();
+
+
+    }
 
 
 

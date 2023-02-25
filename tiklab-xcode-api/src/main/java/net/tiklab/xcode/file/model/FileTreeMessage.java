@@ -7,7 +7,7 @@ package net.tiklab.xcode.file.model;
 
 public class FileTreeMessage {
 
-    private String codeId;
+    private String rpyId;
 
 
     private String branch;
@@ -19,12 +19,12 @@ public class FileTreeMessage {
     private String path;
 
 
-    public String getCodeId() {
-        return codeId;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setCodeId(String codeId) {
-        this.codeId = codeId;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 
     public String getBranch() {

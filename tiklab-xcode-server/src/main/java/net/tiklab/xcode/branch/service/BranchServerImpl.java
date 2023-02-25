@@ -24,12 +24,12 @@ public class BranchServerImpl implements BranchServer {
 
     /**
      * 查询所有分支
-     * @param codeId 仓库id
+     * @param rpyId 仓库id
      * @return 分支信息列表
      */
     @Override
-    public List<Branch> findAllBranch(String codeId) {
-        Repository repository = repositoryServer.findOneCode(codeId);
+    public List<Branch> findAllBranch(String rpyId) {
+        Repository repository = repositoryServer.findOneRpy(rpyId);
 
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
         List<Branch> branches;
@@ -48,8 +48,8 @@ public class BranchServerImpl implements BranchServer {
      */
     @Override
     public void createBranch(BranchMessage branchMessage) {
-        String codeId = branchMessage.getCodeId();
-        Repository repository = repositoryServer.findOneCode(codeId);
+        String rpyId = branchMessage.getRpyId();
+        Repository repository = repositoryServer.findOneRpy(rpyId);
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
         try {
             GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
@@ -64,8 +64,8 @@ public class BranchServerImpl implements BranchServer {
      */
     @Override
     public void deleteBranch(BranchMessage branchMessage){
-        String codeId = branchMessage.getCodeId();
-        Repository repository = repositoryServer.findOneCode(codeId);
+        String rpyId = branchMessage.getRpyId();
+        Repository repository = repositoryServer.findOneRpy(rpyId);
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
         try {
             GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());

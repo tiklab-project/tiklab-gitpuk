@@ -1,6 +1,5 @@
 package net.tiklab.xcode.commit.model;
 
-import javax.lang.model.element.PackageElement;
 
 /**
  * 读取具体文件行信息
@@ -11,7 +10,7 @@ public class CommitFile {
     /**
      * 仓库id
      */
-    private String codeId;
+    private String rpyId;
 
     /**
      * 提交记录id
@@ -51,12 +50,12 @@ public class CommitFile {
         this.commitId = commitId;
     }
 
-    public String getCodeId() {
-        return codeId;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setCodeId(String codeId) {
-        this.codeId = codeId;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 
     public String getPath() {

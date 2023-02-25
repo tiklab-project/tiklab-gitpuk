@@ -4,7 +4,7 @@ import net.tiklab.eam.passport.user.model.UserPassport;
 import net.tiklab.eam.server.author.EamAuthenticator;
 import net.tiklab.xcode.setting.model.Auth;
 import net.tiklab.xcode.setting.service.AuthServer;
-import net.tiklab.xcode.until.RepositoryUntilFinal;
+import net.tiklab.xcode.until.RepositoryFinal;
 import net.tiklab.xcode.until.RepositoryUntil;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
@@ -62,7 +62,7 @@ public class ValidServerImpl implements ValidServer, PublickeyAuthenticator  {
     public boolean authenticate(String username, PublicKey key, ServerSession session) throws AsyncAuthException {
         // String clientAddress = session.getClientAddress().toString();
         String algorithm = key.getAlgorithm();
-        if (algorithm.equals(RepositoryUntilFinal.SSH_ENCODER_RSA)){
+        if (algorithm.equals(RepositoryFinal.SSH_ENCODER_RSA)){
             List<Auth> userAuth = authServer.findUserAuth();
             if (userAuth.isEmpty()){
                 return false;
@@ -99,12 +99,12 @@ public class ValidServerImpl implements ValidServer, PublickeyAuthenticator  {
      */
     private static String findKeyBase64(String key){
         try {
-            if (key.startsWith(RepositoryUntilFinal.Key_TYPE_OPENSSH_RSA)){
+            if (key.startsWith(RepositoryFinal.Key_TYPE_OPENSSH_RSA)){
                 //截取ssh-rsa中的Base64编码数据
                 int i = key.indexOf(" ");
                 int i1 = key.lastIndexOf(" ");
                 return key.substring(i+1,i1);
-            }else if (key.startsWith(RepositoryUntilFinal.Key_TYPE_SSH_RSA)){
+            }else if (key.startsWith(RepositoryFinal.Key_TYPE_SSH_RSA)){
                 return null;
             }
         }catch (Exception e){
@@ -129,7 +129,7 @@ public class ValidServerImpl implements ValidServer, PublickeyAuthenticator  {
 
             String algorithm = readString(byteBuffer, position);
             //判断是否为 Key_TYPE_OPENSSH_RSA格式的公钥
-            if (!RepositoryUntilFinal.Key_TYPE_OPENSSH_RSA.equals(algorithm)){
+            if (!RepositoryFinal.Key_TYPE_OPENSSH_RSA.equals(algorithm)){
                 return null;
             }
 
@@ -139,7 +139,7 @@ public class ValidServerImpl implements ValidServer, PublickeyAuthenticator  {
 
             //字节转换成PublicKey公钥
             RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, publicExponent);
-            KeyFactory kf = KeyFactory.getInstance(RepositoryUntilFinal.SSH_ENCODER_RSA);
+            KeyFactory kf = KeyFactory.getInstance(RepositoryFinal.SSH_ENCODER_RSA);
             return kf.generatePublic(keySpec);
 
         } catch (Exception e) {

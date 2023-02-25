@@ -3,7 +3,7 @@ package net.tiklab.xcode.repository.model;
 public class RepositoryMessage {
 
     //仓库id
-    private String codeId;
+    private String rpyId;
 
     //仓库地址
     private String repositoryAddress;
@@ -21,12 +21,12 @@ public class RepositoryMessage {
     private String path;
 
 
-    public String getCodeId() {
-        return codeId;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setCodeId(String codeId) {
-        this.codeId = codeId;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 
     public String getRepositoryAddress() {

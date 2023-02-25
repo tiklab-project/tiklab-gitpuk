@@ -9,7 +9,7 @@ public class FileQuery {
     /**
      * 仓库id
      */
-    private String codeId;
+    private String rpyId;
 
     /**
      * 文件新名称
@@ -87,12 +87,12 @@ public class FileQuery {
         this.commitBranch = commitBranch;
     }
 
-    public String getCodeId() {
-        return codeId;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setCodeId(String codeId) {
-        this.codeId = codeId;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 
     public String getFileContent() {

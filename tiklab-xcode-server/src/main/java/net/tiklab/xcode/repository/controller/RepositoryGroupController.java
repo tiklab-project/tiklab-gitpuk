@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/codeGroup")
+@RequestMapping("/rpyGroup")
 @Api(name = "RepositoryGroupController",desc = "仓库组")
 public class RepositoryGroupController {
 
@@ -30,15 +30,15 @@ public class RepositoryGroupController {
     @ApiParam(name = "code",desc = "code",required = true)
     public Result<String> createGroup(@RequestBody @NotNull @Valid RepositoryGroup group){
 
-        String codeId = groupServer.createCodeGroup(group);
+        String rpyId = groupServer.createCodeGroup(group);
 
-        return Result.ok(codeId);
+        return Result.ok(rpyId);
     }
 
 
     @RequestMapping(path="/deleteGroup",method = RequestMethod.POST)
     @ApiMethod(name = "deleteGroup",desc = "删除仓库组")
-    @ApiParam(name = "codeId",desc = "仓库组id",required = true)
+    @ApiParam(name = "rpyId",desc = "仓库组id",required = true)
     public Result<Void> deleteGroup(@NotNull String groupId){
 
         groupServer.deleteCodeGroup(groupId);

@@ -13,10 +13,10 @@ public interface BranchServer {
 
     /**
      * 查询所有分支
-     * @param codeId 仓库id
+     * @param rpyId 仓库id
      * @return 分支信息列表
      */
-    List<Branch> findAllBranch(String codeId);
+    List<Branch> findAllBranch(String rpyId);
 
     /**
      * 创建分支

@@ -6,7 +6,7 @@ import net.tiklab.xcode.repository.model.Repository;
 import net.tiklab.xcode.repository.service.RepositoryServer;
 import net.tiklab.xcode.file.model.FileMessage;
 import net.tiklab.xcode.git.GitUntil;
-import net.tiklab.xcode.until.RepositoryUntilFileUntil;
+import net.tiklab.xcode.until.RepositoryFileUntil;
 import net.tiklab.xcode.until.RepositoryUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -48,11 +48,11 @@ public class FileServerImpl implements FileServer {
      */
     @Override
     public FileMessage readFile(FileQuery fileQuery) {
-        String codeId = fileQuery.getCodeId();
+        String rpyId = fileQuery.getRpyId();
         String fileAddress = fileQuery.getFileAddress();
         String branch = fileQuery.getCommitBranch();
 
-        Repository code = repositoryServer.findOneCode(codeId);
+        Repository code = repositoryServer.findOneRpy(rpyId);
         String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
         FileMessage fileMessage ;
         try {
@@ -60,7 +60,7 @@ public class FileServerImpl implements FileServer {
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
             boolean findCommitId = fileQuery.isFindCommitId();
             String substring = fileAddress.substring(1);
-            fileMessage =  RepositoryUntilFileUntil.readBranchFile(repository, branch, substring, findCommitId);
+            fileMessage =  RepositoryFileUntil.readBranchFile(repository, branch, substring, findCommitId);
             git.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -75,8 +75,8 @@ public class FileServerImpl implements FileServer {
      */
     @Override
     public void writeFile(FileQuery repositoryFileQuery) {
-        String codeId = repositoryFileQuery.getCodeId();
-        Repository repository = repositoryServer.findOneCode(codeId);
+        String rpyId = repositoryFileQuery.getRpyId();
+        Repository repository = repositoryServer.findOneRpy(rpyId);
 
         String fileAddress = repositoryFileQuery.getFileAddress();
 
@@ -89,7 +89,7 @@ public class FileServerImpl implements FileServer {
         try {
             //判断文件名称是否更改
             if (!oldFileName.equals(newFileName)){
-                boolean b = RepositoryUntilFileUntil.updateFileName(file.getParent(), newFileName, oldFileName);
+                boolean b = RepositoryFileUntil.updateFileName(file.getParent(), newFileName, oldFileName);
                 if (!b){
                     throw new ApplicationException("文件名称更改失败");
                 }
@@ -103,7 +103,7 @@ public class FileServerImpl implements FileServer {
 
         //写入文件信息
         String fileContent = repositoryFileQuery.getFileContent();
-        RepositoryUntilFileUntil.writeFile(fileContent,file.getParent()+"/"+newFileName);
+        RepositoryFileUntil.writeFile(fileContent,file.getParent()+"/"+newFileName);
 
         try {
             GitUntil.repositoryCommit(repositoryAddress, repositoryFileQuery.getCommitBranch(),

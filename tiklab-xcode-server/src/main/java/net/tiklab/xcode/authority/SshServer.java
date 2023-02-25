@@ -3,7 +3,7 @@ package net.tiklab.xcode.authority;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.setting.service.AuthServer;
-import net.tiklab.xcode.until.RepositoryUntilFinal;
+import net.tiklab.xcode.until.RepositoryFinal;
 import net.tiklab.xcode.until.RepositoryUntil;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
@@ -57,10 +57,10 @@ public class SshServer {
     public  void sshAuthority()  {
         org.apache.sshd.server.SshServer sshServer = org.apache.sshd.server.SshServer.setUpDefaultServer();
         sshServer.setPort(sshPort);
-        sshServer.setHost (RepositoryUntilFinal.SSH_HOST);
+        sshServer.setHost (RepositoryFinal.SSH_HOST);
 
         String property = System.getProperty("user.dir");
-        if (!property.endsWith(RepositoryUntilFinal.APP_NAME)){
+        if (!property.endsWith(RepositoryFinal.APP_NAME)){
             File file = new File(property);
             property= file.getParent();
         }

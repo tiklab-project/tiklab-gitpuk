@@ -8,7 +8,7 @@ public class Commit {
     /**
      * 仓库id
      */
-    private String codeId;
+    private String rpyId;
 
     /**
      * 分支
@@ -62,12 +62,12 @@ public class Commit {
         this.end = end;
     }
 
-    public String getCodeId() {
-        return codeId;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setCodeId(String codeId) {
-        this.codeId = codeId;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 
     public String getBranch() {

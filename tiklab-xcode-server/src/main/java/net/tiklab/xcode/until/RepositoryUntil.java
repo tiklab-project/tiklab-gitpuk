@@ -154,17 +154,11 @@ public class RepositoryUntil {
         if (repositoryGroup == null){
             String s = defaultPath() + "/" + address+ ".git";
             File file = new File(s);
-            if (!file.exists()){
-                throw new ApplicationException("仓库不存在："+s);
-            }
             return file.getAbsolutePath();
         }
         String groupAddress = repositoryGroup.getAddress();
         String s = defaultPath()+"/"+groupAddress + "/" + address+ ".git";
         File file = new File(s);
-        if (!file.exists()){
-            throw new ApplicationException("仓库不存在："+s);
-        }
         return file.getAbsolutePath();
     }
 

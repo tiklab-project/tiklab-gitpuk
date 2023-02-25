@@ -68,7 +68,7 @@ public class AuthServerImpl implements AuthServer {
     public Auth findOneAuth(String AuthId) {
         AuthEntity groupEntity = AuthDao.findOneAuth(AuthId);
         Auth auth = BeanMapper.map(groupEntity, Auth.class);
-        joinTemplate.joinQuery(auth);
+        // joinTemplate.joinQuery(auth);
         return auth;
     }
 
@@ -80,7 +80,7 @@ public class AuthServerImpl implements AuthServer {
     public List<Auth> findAllAuth() {
         List<AuthEntity> groupEntityList = AuthDao.findAllAuth();
         List<Auth> list = BeanMapper.mapList(groupEntityList, Auth.class);
-        joinTemplate.joinQuery(list);
+        // joinTemplate.joinQuery(list);
         if (list == null || list.isEmpty()){
             return Collections.emptyList();
         }
@@ -92,7 +92,7 @@ public class AuthServerImpl implements AuthServer {
     public List<Auth> findAllAuthList(List<String> idList) {
         List<AuthEntity> groupEntities = AuthDao.findAllAuthList(idList);
         List<Auth> list = BeanMapper.mapList(groupEntities, Auth.class);
-        joinTemplate.joinQuery(list);
+        // joinTemplate.joinQuery(list);
         return list;
     }
 

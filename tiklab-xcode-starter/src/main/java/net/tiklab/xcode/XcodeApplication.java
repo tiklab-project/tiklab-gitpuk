@@ -2,7 +2,7 @@ package net.tiklab.xcode;
 
 
 import net.tiklab.utils.property.PropertyAndYamlSourceFactory;
-import net.tiklab.xcode.until.RepositoryUntilFileUntil;
+import net.tiklab.xcode.until.RepositoryFileUntil;
 import net.tiklab.xcode.until.RepositoryUntil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,7 +21,7 @@ public class XcodeApplication {
 
 		SpringApplication.run(XcodeApplication.class, args);
 
-		RepositoryUntilFileUntil.createDirectory(RepositoryUntil.defaultPath());
+		RepositoryFileUntil.createDirectory(RepositoryUntil.defaultPath());
 	}
 
 

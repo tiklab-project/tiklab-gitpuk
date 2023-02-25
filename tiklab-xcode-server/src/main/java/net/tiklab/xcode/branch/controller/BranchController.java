@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/codeBranch")
+@RequestMapping("/branch")
 @Api(name = "BranchController",desc = "分支")
 public class BranchController {
 
@@ -27,10 +27,10 @@ public class BranchController {
 
     @RequestMapping(path="/findAllBranch",method = RequestMethod.POST)
     @ApiMethod(name = "findAllBranch",desc = "查询分支")
-    @ApiParam(name = "codeId",desc = "codeId",required = true)
-    public Result<List<Branch>> findAllBranch(@NotNull String codeId){
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    public Result<List<Branch>> findAllBranch(@NotNull String rpyId){
 
-        List<Branch> allBranch = branchServer.findAllBranch(codeId);
+        List<Branch> allBranch = branchServer.findAllBranch(rpyId);
 
         return Result.ok(allBranch);
     }

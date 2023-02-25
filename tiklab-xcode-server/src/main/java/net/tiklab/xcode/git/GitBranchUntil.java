@@ -1,7 +1,7 @@
 package net.tiklab.xcode.git;
 
 import net.tiklab.xcode.branch.model.Branch;
-import net.tiklab.xcode.until.RepositoryUntilFinal;
+import net.tiklab.xcode.until.RepositoryFinal;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
@@ -130,7 +130,7 @@ public class GitBranchUntil {
                 return branch.getBranchName();
             }
         }
-        return RepositoryUntilFinal.DEFAULT_MASTER;
+        return RepositoryFinal.DEFAULT_MASTER;
     }
 
     /**
