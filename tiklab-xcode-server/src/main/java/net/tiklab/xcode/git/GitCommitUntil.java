@@ -1,25 +1,20 @@
 package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.XcodeServerAutoConfiguration;
 import net.tiklab.xcode.commit.model.*;
-import net.tiklab.xcode.until.CodeFinal;
-import net.tiklab.xcode.until.CodeUntil;
+import net.tiklab.xcode.until.RepositoryUntilFinal;
+import net.tiklab.xcode.until.RepositoryUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -116,7 +111,7 @@ public class GitCommitUntil {
             commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
             commitMessage.setCommitUser(name);
             commitMessage.setDateTime(date);
-            commitMessage.setCommitTime(CodeUntil.time(date)+"前");//转换时间
+            commitMessage.setCommitTime(RepositoryUntil.time(date)+"前");//转换时间
             list.add(commitMessage);
             treeWalk.close();
             revCommit.disposeBody();
@@ -156,7 +151,7 @@ public class GitCommitUntil {
             commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
             commitMessage.setCommitUser(name);
             commitMessage.setDateTime(date);
-            commitMessage.setCommitTime(CodeUntil.time(date)+"前");//转换时间
+            commitMessage.setCommitTime(RepositoryUntil.time(date)+"前");//转换时间
 
             treeWalk.close();
             revCommit.disposeBody();
@@ -218,7 +213,7 @@ public class GitCommitUntil {
             int deleteLine = 0;
             int i;
             String path ;
-            if (!newPath.equals(CodeFinal.FILE_PATH_NULL)){
+            if (!newPath.equals(RepositoryUntilFinal.FILE_PATH_NULL)){
                 path = newPath;
                 i = newPath.lastIndexOf(".");
                 commitFileDiffList.setFileType(newPath.substring(i+1));
@@ -354,7 +349,7 @@ public class GitCommitUntil {
             //     CommitFileDiff fileDiff = new CommitFileDiff();
             //     fileDiff.setRight(1);
             //     fileDiff.setLeft(1);
-            //     fileDiff.setType(CodeFinal.DIFF_TYPE_BIG);
+            //     fileDiff.setType(RepositoryUntilFinal.DIFF_TYPE_BIG);
             //     list.add(fileDiff);
             //     return list;
             // }
@@ -367,7 +362,7 @@ public class GitCommitUntil {
                 }
                 CommitFileDiff fileDiff = new CommitFileDiff();
                 if (line.startsWith("@@") && line.endsWith("@@")){
-                    Pattern pattern = Pattern.compile(CodeFinal.DIFF_REGEX);
+                    Pattern pattern = Pattern.compile(RepositoryUntilFinal.DIFF_REGEX);
                     Matcher matcher = pattern.matcher(line);
                     //解析文件变更信息
                     if (matcher.matches()){
@@ -376,7 +371,7 @@ public class GitCommitUntil {
                         newStart = Integer.parseInt(matcher.group(3));
                         newLines = matcher.group(4) != null ? Integer.parseInt(matcher.group(4)) : 0;
                     }
-                    fileDiff.setType(CodeFinal.DIFF_TYPE);
+                    fileDiff.setType(RepositoryUntilFinal.DIFF_TYPE);
                     left = 0;right = 0;number = 0;
                     fileDiff.setText(line);
                 }
@@ -385,24 +380,24 @@ public class GitCommitUntil {
                 fileDiff.setLeft(oldStart + number + left);
 
                 //文件添加内容
-                boolean addWith = line.startsWith(CodeFinal.DIFF_TYPE_ADD);
+                boolean addWith = line.startsWith(RepositoryUntilFinal.DIFF_TYPE_ADD);
                 if (addWith){
                     right++;
-                    fileDiff.setType(CodeFinal.DIFF_TYPE_ADD);
+                    fileDiff.setType(RepositoryUntilFinal.DIFF_TYPE_ADD);
                     fileDiff.setText(line.substring(1));
                 }
                 //文件删除内容
-                boolean deleteWith = line.startsWith(CodeFinal.DIFF_TYPE_DELETE);
+                boolean deleteWith = line.startsWith(RepositoryUntilFinal.DIFF_TYPE_DELETE);
                 if (deleteWith){
                     left++;
-                    fileDiff.setType(CodeFinal.DIFF_TYPE_DELETE);
+                    fileDiff.setType(RepositoryUntilFinal.DIFF_TYPE_DELETE);
                     fileDiff.setText(line.substring(1));
                 }
                 //未改变内容
                 boolean b = !line.startsWith("@@") || !line.endsWith("@@");
                 if(b && !addWith && !deleteWith ) {
                     number++;
-                    fileDiff.setType(CodeFinal.DIFF_TYPE_TEXT);
+                    fileDiff.setType(RepositoryUntilFinal.DIFF_TYPE_TEXT);
                     fileDiff.setText(line);
                 }
 
@@ -460,7 +455,7 @@ public class GitCommitUntil {
             Date date = revCommit.getAuthorIdent().getWhen();
             String message = revCommit.getShortMessage();
             map.put("message",message);//转换时间
-            map.put("time",CodeUntil.time(date)+"前");
+            map.put("time", RepositoryUntil.time(date)+"前");
             list.add(map);
         }
         return list;

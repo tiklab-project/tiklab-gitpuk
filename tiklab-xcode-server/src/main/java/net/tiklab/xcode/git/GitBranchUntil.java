@@ -1,14 +1,10 @@
 package net.tiklab.xcode.git;
 
-import net.tiklab.xcode.branch.model.CodeBranch;
-import net.tiklab.xcode.commit.model.CommitMessage;
-import net.tiklab.xcode.file.model.FileTree;
-import net.tiklab.xcode.until.CodeFinal;
-import net.tiklab.xcode.until.CodeUntil;
+import net.tiklab.xcode.branch.model.Branch;
+import net.tiklab.xcode.until.RepositoryUntilFinal;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -81,17 +77,17 @@ public class GitBranchUntil {
      * @return 分支集合
      * @throws IOException 仓库不存在
      */
-    public static List<CodeBranch> findAllBranch(String repositoryAddress) throws IOException {
+    public static List<Branch> findAllBranch(String repositoryAddress) throws IOException {
 
         Git git = Git.open(new File(repositoryAddress));
         Repository repository = git.getRepository();
 
-        List<CodeBranch> list = new ArrayList<>();
+        List<Branch> list = new ArrayList<>();
         List<Ref> refs = repository.getRefDatabase().getRefs();
 
         String defaultBranch = " ";
         for (Ref ref : refs) {
-            CodeBranch codeBranch = new CodeBranch();
+            Branch branch = new Branch();
             String name = ref.getName();
             if (name.equals("HEAD")){
                 Ref target = ref.getTarget();
@@ -101,13 +97,13 @@ public class GitBranchUntil {
 
             String Id = ref.getObjectId().getName();
             String s = name.replace("refs/heads/", "");
-            codeBranch.setBranchId(Id);
+            branch.setBranchId(Id);
             //判断是否为默认分支
             if (defaultBranch.equals(name)){
-                codeBranch.setDefaultBranch(true);
+                branch.setDefaultBranch(true);
             }
-            codeBranch.setBranchName(s);
-            list.add(codeBranch);
+            branch.setBranchName(s);
+            list.add(branch);
         }
 
         // repository.close();
@@ -127,14 +123,14 @@ public class GitBranchUntil {
      * @throws IOException 仓库不存在
      */
     public static String findDefaultBranch(String repositoryAddress) throws IOException {
-        List<CodeBranch> codeBranches = findAllBranch(repositoryAddress);
+        List<Branch> branches = findAllBranch(repositoryAddress);
 
-        for (CodeBranch codeBranch : codeBranches) {
-            if (codeBranch.isDefaultBranch()){
-                return codeBranch.getBranchName();
+        for (Branch branch : branches) {
+            if (branch.isDefaultBranch()){
+                return branch.getBranchName();
             }
         }
-        return CodeFinal.DEFAULT_MASTER;
+        return RepositoryUntilFinal.DEFAULT_MASTER;
     }
 
     /**

@@ -1,7 +1,7 @@
 package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.branch.model.CodeBranch;
+import net.tiklab.xcode.branch.model.Branch;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.RefSpec;
@@ -78,9 +78,9 @@ public class GitUntil {
             throws IOException, GitAPIException, URISyntaxException {
 
         //判断分支是否存在
-        List<CodeBranch> branches = GitBranchUntil.findAllBranch(repositoryAddress);
+        List<Branch> branches = GitBranchUntil.findAllBranch(repositoryAddress);
         boolean isBranch = false;
-        for (CodeBranch codeBranch : branches) {
+        for (Branch codeBranch : branches) {
             String branchName = codeBranch.getBranchName();
             if (branch.equals(branchName)) {
                 isBranch = true;

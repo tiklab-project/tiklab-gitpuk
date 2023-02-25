@@ -1,11 +1,7 @@
 package net.tiklab.xcode.git;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import java.io.*;
 
@@ -45,18 +41,18 @@ public class GitTest {
     // public static void createGit() throws IOException {
     //     // 1. 初始化Git仓库
     //     Repository repository = Git.init()
-    //             .setDirectory(new File("/path/to/repository"))
+    //             .setDirectory(new FileQuery("/path/to/repository"))
     //             .call()
     //             .getRepository();
     //
     //     // 2. 创建README.md文件
     //     String readmeContent = "This is a README file.";
-    //     File readmeFile = new File(repository.getDirectory().getParent(), "README.md");
+    //     FileQuery readmeFile = new FileQuery(repository.getDirectory().getParent(), "README.md");
     //     FileUtils.write(readmeFile, readmeContent);
     //
     //     // 3. 创建.gitignore文件
     //     String gitignoreContent = "*.log\n/target/\n";
-    //     File gitignoreFile = new File(repository.getDirectory().getParent(), ".gitignore");
+    //     FileQuery gitignoreFile = new FileQuery(repository.getDirectory().getParent(), ".gitignore");
     //     FileUtils.write(gitignoreFile, gitignoreContent);
     //
     //     // 4. 创建默认分支
