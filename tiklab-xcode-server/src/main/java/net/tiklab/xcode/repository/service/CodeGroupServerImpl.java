@@ -1,12 +1,11 @@
-package net.tiklab.xcode.code.service;
+package net.tiklab.xcode.repository.service;
 
 import net.tiklab.beans.BeanMapper;
 import net.tiklab.join.JoinTemplate;
 import net.tiklab.rpc.annotation.Exporter;
-import net.tiklab.xcode.code.dao.CodeGroupDao;
-import net.tiklab.xcode.code.entity.CodeGroupEntity;
-import net.tiklab.xcode.code.model.CodeGroup;
-import org.apache.catalina.Pipeline;
+import net.tiklab.xcode.repository.dao.CodeGroupDao;
+import net.tiklab.xcode.repository.entity.CodeGroupEntity;
+import net.tiklab.xcode.repository.model.CodeGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

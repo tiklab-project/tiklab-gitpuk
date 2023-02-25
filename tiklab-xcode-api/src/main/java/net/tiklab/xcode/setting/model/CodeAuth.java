@@ -8,7 +8,7 @@ import net.tiklab.join.annotation.JoinQuery;
 import net.tiklab.postin.annotation.ApiModel;
 import net.tiklab.postin.annotation.ApiProperty;
 import net.tiklab.user.user.model.User;
-import net.tiklab.xcode.code.model.Code;
+import net.tiklab.xcode.repository.model.Code;
 
 
 @ApiModel

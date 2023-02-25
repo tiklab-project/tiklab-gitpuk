@@ -1,35 +1,13 @@
 package net.tiklab.xcode.git;
 
-
-import com.github.difflib.UnifiedDiffUtils;
-import com.github.difflib.patch.Patch;
-import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.branch.model.CodeBranch;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.pkcs.RSAPublicKey;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
-import org.eclipse.jgit.api.DiffCommand;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.*;
+import org.eclipse.jgit.dircache.DirCache;
+import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.treewalk.AbstractTreeIterator;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.PathFilter;
-import org.eclipse.jgit.util.io.DisabledOutputStream;
-
+import org.eclipse.jgit.transport.RefSpec;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class GitTest {
 
@@ -42,29 +20,70 @@ public class GitTest {
 
     public static void findAllBranch(String repositoryAddress) throws IOException {
 
+        // 2. 获取Git对象
         Git git = Git.open(new File(repositoryAddress));
         Repository repository = git.getRepository();
+        // 3. 设置分支保护
+        RefUpdate branch = repository.updateRef("refs/heads/master");
+        branch.setForceUpdate(false);
+        branch.setRefLogMessage("Protected branch", false);
+        RefSpec spec = new RefSpec("+refs/heads/master");
+        spec.setForceUpdate(false);
+        ObjectId objectId = repository.resolve("master");
+        branch.setExpectedOldObjectId(objectId);
+        branch.setNewObjectId(objectId);
+        PersonIdent ident = new PersonIdent("John Doe", "john.doe@example.com");
+        branch.setRefLogIdent(ident);
+        branch.update();
 
-        List<Ref> refs = repository.getRefDatabase().getRefs();
-
-        String defaultBranch = " ";
-        for (Ref ref : refs) {
-
-            String name = ref.getName();
-            if (name.equals("HEAD")) {
-                Ref target = ref.getTarget();
-                defaultBranch = target.getName();
-                continue;
-            }
-            Ref.Storage storage = ref.getStorage();
-            String name1 = storage.name();
-            String Id = ref.getObjectId().getName();
-            String s = name.replace("refs/heads/", "");
-
-        }
+        // 4. 关闭Git对象和仓库
         git.close();
 
     }
+
+
+    // public static void createGit() throws IOException {
+    //     // 1. 初始化Git仓库
+    //     Repository repository = Git.init()
+    //             .setDirectory(new File("/path/to/repository"))
+    //             .call()
+    //             .getRepository();
+    //
+    //     // 2. 创建README.md文件
+    //     String readmeContent = "This is a README file.";
+    //     File readmeFile = new File(repository.getDirectory().getParent(), "README.md");
+    //     FileUtils.write(readmeFile, readmeContent);
+    //
+    //     // 3. 创建.gitignore文件
+    //     String gitignoreContent = "*.log\n/target/\n";
+    //     File gitignoreFile = new File(repository.getDirectory().getParent(), ".gitignore");
+    //     FileUtils.write(gitignoreFile, gitignoreContent);
+    //
+    //     // 4. 创建默认分支
+    //     RefUpdate updateRef = repository.updateRef(Constants.HEAD);
+    //     ObjectId emptyTreeId = repository.writeTree(repository.newObjectReader());
+    //     DirCache dirCache = DirCache.newInCore();
+    //     DirCacheEntry readmeEntry = new DirCacheEntry("README.md");
+    //     readmeEntry.setFileMode(FileMode.REGULAR_FILE);
+    //
+    //     readmeEntry.setObjectId(repository.getObjectDatabase().insert(Constants.OBJ_BLOB, readmeContent.getBytes()));
+    //     DirCacheEntry gitignoreEntry = new DirCacheEntry(".gitignore");
+    //     gitignoreEntry.setFileMode(FileMode.REGULAR_FILE);
+    //     gitignoreEntry.setObjectId(repository.getObjectDatabase().insert(Constants.OBJ_BLOB, gitignoreContent.getBytes()));
+    //     dirCache.add(readmeEntry);
+    //     dirCache.add(gitignoreEntry);
+    //     dirCache.write();
+    //     ObjectId treeId = dirCache.writeTree(repository.getObjectDatabase());
+    //     RevCommit initialCommit = new RevCommit(ObjectId.zeroId());
+    //     initialCommit.setTreeId(treeId);
+    //     initialCommit.setAuthor(new PersonIdent("John Doe", "john.doe@example.com"));
+    //     initialCommit.setCommitter(new PersonIdent("John Doe", "john.doe@example.com"));
+    //     initialCommit.setMessage("Initial commit");
+    //     Ref branch = updateRef.update(initialCommit);
+    //
+    //     // 5. 关闭Git仓库
+    //     repository.close();
+    // }
 
 
 

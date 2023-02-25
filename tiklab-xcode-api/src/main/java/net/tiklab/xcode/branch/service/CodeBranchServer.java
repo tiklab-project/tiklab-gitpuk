@@ -1,12 +1,8 @@
 package net.tiklab.xcode.branch.service;
 
-import net.tiklab.join.annotation.FindAll;
-import net.tiklab.join.annotation.FindList;
-import net.tiklab.join.annotation.FindOne;
 import net.tiklab.join.annotation.JoinProvider;
 import net.tiklab.xcode.branch.model.BranchMessage;
 import net.tiklab.xcode.branch.model.CodeBranch;
-import net.tiklab.xcode.code.model.Code;
 
 import java.util.List;
 

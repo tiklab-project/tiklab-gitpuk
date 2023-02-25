@@ -1,13 +1,16 @@
-package net.tiklab.xcode.code.entity;
+package net.tiklab.xcode.repository.entity;
 
 import net.tiklab.dal.jpa.annotation.*;
 
 @Entity
-@Table(name="code_group")
-public class CodeGroupEntity {
+@Table(name="code")
+public class CodeEntity {
 
     @Id
     @GeneratorValue
+    @Column(name = "code_id")
+    private String codeId;
+
     @Column(name = "group_id")
     private String groupId;
 
@@ -29,6 +32,20 @@ public class CodeGroupEntity {
     @Column(name = "remarks")
     private String remarks;
 
+    @Column(name = "language")
+    private String language;
+
+    @Column(name = "state")
+    private int state;
+
+
+    public String getCodeId() {
+        return codeId;
+    }
+
+    public void setCodeId(String codeId) {
+        this.codeId = codeId;
+    }
 
     public String getGroupId() {
         return groupId;
@@ -84,6 +101,22 @@ public class CodeGroupEntity {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 }
 

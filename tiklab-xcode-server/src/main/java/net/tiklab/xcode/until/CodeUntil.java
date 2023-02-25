@@ -1,12 +1,11 @@
 package net.tiklab.xcode.until;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.model.CodeGroup;
+import net.tiklab.xcode.repository.model.Code;
+import net.tiklab.xcode.repository.model.CodeGroup;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,7 +49,6 @@ public class CodeUntil {
         }
     }
 
-
     /**
      * 执行cmd命令
      * @param path 执行文件夹
@@ -92,7 +90,6 @@ public class CodeUntil {
         return file.getAbsolutePath();
     }
 
-
     /**
      * 返回系统时间
      * @param type 时间类型 1.(yyyy-MM-dd HH:mm:ss) 2.(yyyy-MM-dd) 3.(HH:mm:ss) 4.([format]) 5.(HH:mm)
@@ -119,7 +116,6 @@ public class CodeUntil {
         }
     }
 
-
     /**
      * 获取与当前时间的时间差
      * @param date 时间
@@ -134,12 +130,6 @@ public class CodeUntil {
         long minute=((l/(60*1000))-day*24*60-hour*60);
         long second=(l/1000-day*24*60*60-hour*60*60-minute*60);
 
-        // long between=(new Date().getTime()-date.getTime())/1000;//除以1000是为了转换成秒
-        // long day = between / (24*3600) ;
-        // long hour = between % (24*3600) / 3600;
-        // long minute = between % 3600 / 60;
-        // long second = between % 60 ;
-
         if (day != 0){
             return day+"天";
         }
@@ -152,21 +142,30 @@ public class CodeUntil {
         return second+"秒";
     }
 
-
     /**
      * 获取仓库地址
      * @param code 仓库地址
-     * @param b true:裸仓库地址 false:默认分支地址
      * @return 仓库详细地址
      */
-    public static String findRepositoryAddress(Code code ,boolean b){
+    public static String findRepositoryAddress(Code code){
         String address = code.getAddress();
-        String s = defaultPath() + "/" + address;
-        if (b){
-            return s + ".git";
+        //是否存在仓库组
+        CodeGroup codeGroup = code.getCodeGroup();
+        if (codeGroup == null){
+            String s = defaultPath() + "/" + address+ ".git";
+            File file = new File(s);
+            if (!file.exists()){
+                throw new ApplicationException("仓库不存在："+s);
+            }
+            return file.getAbsolutePath();
         }
-
-        return s;
+        String groupAddress = codeGroup.getAddress();
+        String s = defaultPath()+"/"+groupAddress + "/" + address+ ".git";
+        File file = new File(s);
+        if (!file.exists()){
+            throw new ApplicationException("仓库不存在："+s);
+        }
+        return file.getAbsolutePath();
     }
 
 

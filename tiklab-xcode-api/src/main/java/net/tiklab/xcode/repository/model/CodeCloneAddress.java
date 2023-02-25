@@ -1,4 +1,4 @@
-package net.tiklab.xcode.code.model;
+package net.tiklab.xcode.repository.model;
 
 /**
  * 仓库克隆地址

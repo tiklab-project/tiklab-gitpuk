@@ -105,19 +105,6 @@ public class GitCommitUntil {
                 return list;
             }
 
-            // int begin = commit.getBegin();
-            // //判断是否是需要获取的数据
-            // if (i < begin){
-            //     continue;
-            // }
-            // //判断需要获取的数据是否足够
-            // if (i >= commit.getBegin()+ commit.getEnd()){
-            //     revCommit.disposeBody();
-            //     revWalk.close();
-            //     list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
-            //     return list;
-            // }
-
             TreeWalk treeWalk = new TreeWalk(repository);
             treeWalk.reset(revCommit.getTree());
 

@@ -3,11 +3,9 @@ package net.tiklab.xcode.branch.service;
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.branch.model.BranchMessage;
 import net.tiklab.xcode.branch.model.CodeBranch;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.service.CodeServer;
+import net.tiklab.xcode.repository.model.Code;
+import net.tiklab.xcode.repository.service.CodeServer;
 import net.tiklab.xcode.git.GitBranchUntil;
-import net.tiklab.xcode.git.GitUntil;
-import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,7 @@ public class CodeBranchServerImpl implements CodeBranchServer {
     public List<CodeBranch> findAllBranch(String codeId) {
         Code code = codeServer.findOneCode(codeId);
 
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         List<CodeBranch> codeBranches;
         try {
             codeBranches = GitBranchUntil.findAllBranch(repositoryAddress);
@@ -52,7 +50,7 @@ public class CodeBranchServerImpl implements CodeBranchServer {
     public void createBranch(BranchMessage branchMessage) {
         String codeId = branchMessage.getCodeId();
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         try {
             GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
         } catch (IOException | GitAPIException e) {
@@ -68,7 +66,7 @@ public class CodeBranchServerImpl implements CodeBranchServer {
     public void deleteBranch(BranchMessage branchMessage){
         String codeId = branchMessage.getCodeId();
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         try {
             GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());
         } catch (IOException | GitAPIException e) {

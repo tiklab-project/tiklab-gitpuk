@@ -1,10 +1,10 @@
-package net.tiklab.xcode.code.service;
+package net.tiklab.xcode.repository.service;
 
 import net.tiklab.join.annotation.FindAll;
 import net.tiklab.join.annotation.FindList;
 import net.tiklab.join.annotation.FindOne;
 import net.tiklab.join.annotation.JoinProvider;
-import net.tiklab.xcode.code.model.CodeGroup;
+import net.tiklab.xcode.repository.model.CodeGroup;
 
 
 import java.util.List;

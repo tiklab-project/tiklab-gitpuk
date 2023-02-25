@@ -1,13 +1,12 @@
-package net.tiklab.xcode.code.controller;
+package net.tiklab.xcode.repository.controller;
 
 import net.tiklab.core.Result;
 import net.tiklab.postin.annotation.Api;
 import net.tiklab.postin.annotation.ApiMethod;
 import net.tiklab.postin.annotation.ApiParam;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.model.CodeCloneAddress;
-import net.tiklab.xcode.code.model.CodeMessage;
-import net.tiklab.xcode.code.service.CodeServer;
+import net.tiklab.xcode.repository.model.Code;
+import net.tiklab.xcode.repository.model.CodeCloneAddress;
+import net.tiklab.xcode.repository.service.CodeServer;
 import net.tiklab.xcode.file.model.FileTree;
 import net.tiklab.xcode.file.model.FileTreeMessage;
 import org.springframework.beans.factory.annotation.Autowired;

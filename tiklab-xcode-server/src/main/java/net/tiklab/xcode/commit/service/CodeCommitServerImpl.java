@@ -1,8 +1,8 @@
 package net.tiklab.xcode.commit.service;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.service.CodeServer;
+import net.tiklab.xcode.repository.model.Code;
+import net.tiklab.xcode.repository.service.CodeServer;
 import net.tiklab.xcode.commit.model.*;
 import net.tiklab.xcode.file.model.CodeFileMessage;
 import net.tiklab.xcode.git.GitBranchUntil;
@@ -11,10 +11,6 @@ import net.tiklab.xcode.until.CodeFileUntil;
 import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.attributes.Attribute;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -22,7 +18,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -42,7 +37,7 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String codeId = commit.getCodeId();
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         List<CommitMessage> branchCommit;
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -81,18 +76,16 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     public FileDiffEntry findCommitDiffFileList(Commit commit) {
 
         Code code = codeServer.findOneCode(commit.getCodeId());
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             Repository repository = git.getRepository();
 
-            RevWalk walk = new RevWalk(repository);
-            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository,
-                    commit.getBranch(), commit.isFindCommitId());;
-            RevCommit revCommit =  walk.parseCommit(objectId);
+            Map<String, RevCommit> newOldTree = findCommitNewOldTree(
+                    repository, commit.getBranch(), commit.isFindCommitId());
 
-            //获取旧树
-            RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+            RevCommit oldRevCommit =  newOldTree.get("oldTree");
+            RevCommit revCommit = newOldTree.get("newTree");
 
             FileDiffEntry changedList = GitCommitUntil.findFileChangedList(repository, revCommit,
                     oldRevCommit);
@@ -121,18 +114,14 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     @Override
     public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
         Code code = codeServer.findOneCode(commit.getCodeId());
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             Repository repository = git.getRepository();
-
-            RevWalk walk = new RevWalk(repository);
-            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository,
-                    commit.getBranch(), commit.isFindCommitId());;
-            RevCommit revCommit =  walk.parseCommit(objectId);
-
-            //获取旧树
-            RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+            Map<String, RevCommit> newOldTree = findCommitNewOldTree(
+                    repository, commit.getBranch(), commit.isFindCommitId());
+            RevCommit oldRevCommit =  newOldTree.get("oldTree");
+            RevCommit revCommit = newOldTree.get("newTree");
 
             FileDiffEntry changedList = GitCommitUntil.findFileChangedList(repository, revCommit,
                     oldRevCommit);
@@ -163,18 +152,18 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     @Override
     public List<CommitFileDiff> findCommitFileDiff(Commit commit) {
         Code code = codeServer.findOneCode(commit.getCodeId());
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             Repository repository = git.getRepository();
 
-            RevWalk walk = new RevWalk(repository);
-            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository,
-                    commit.getBranch(), commit.isFindCommitId());;
-            RevCommit revCommit =  walk.parseCommit(objectId);
+            Map<String, RevCommit> newOldTree = findCommitNewOldTree(
+                    repository, commit.getBranch(), commit.isFindCommitId());
+
+            RevCommit revCommit = newOldTree.get("newTree");
 
             //获取旧树
-            RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+            RevCommit oldRevCommit =  newOldTree.get("oldTree");
 
             List<CommitFileDiff> fileChanged = GitCommitUntil.findFileChanged(repository,
                     revCommit, oldRevCommit, commit.getFilePath());
@@ -193,7 +182,7 @@ public class CodeCommitServerImpl implements CodeCommitServer {
     @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
         Code code = codeServer.findOneCode(commit.getCodeId());
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             Repository repository = git.getRepository();
@@ -246,6 +235,30 @@ public class CodeCommitServerImpl implements CodeCommitServer {
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
+    }
+
+    /**
+     * 获取指定commitId的新旧树
+     * @param repository 仓库
+     * @param branch 分支
+     * @param b 是否为commitId
+     * @return 新旧树
+     * @throws IOException commitId不存在
+     */
+    private Map<String,RevCommit> findCommitNewOldTree(Repository repository,String branch, boolean b) throws IOException {
+        RevWalk walk = new RevWalk(repository);
+        ObjectId objectId = GitBranchUntil.findBarthCommitId(repository, branch, b);
+        RevCommit revCommit =  walk.parseCommit(objectId);
+
+        //获取旧树
+        RevCommit oldRevCommit = GitCommitUntil.findPrevHash(revCommit, repository);
+
+        Map<String,RevCommit> map = new HashMap<>();
+
+        map.put("newTree",revCommit);
+        map.put("oldTree",oldRevCommit);
+        walk.close();
+        return map;
     }
 
     /**

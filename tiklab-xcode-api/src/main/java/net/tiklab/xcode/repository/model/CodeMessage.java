@@ -1,4 +1,4 @@
-package net.tiklab.xcode.code.model;
+package net.tiklab.xcode.repository.model;
 
 public class CodeMessage {
 

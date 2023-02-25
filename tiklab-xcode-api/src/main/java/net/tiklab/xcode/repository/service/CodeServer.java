@@ -1,12 +1,11 @@
-package net.tiklab.xcode.code.service;
+package net.tiklab.xcode.repository.service;
 
 import net.tiklab.join.annotation.FindAll;
 import net.tiklab.join.annotation.FindList;
 import net.tiklab.join.annotation.FindOne;
 import net.tiklab.join.annotation.JoinProvider;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.model.CodeCloneAddress;
-import net.tiklab.xcode.code.model.CodeMessage;
+import net.tiklab.xcode.repository.model.Code;
+import net.tiklab.xcode.repository.model.CodeCloneAddress;
 import net.tiklab.xcode.file.model.FileTree;
 import net.tiklab.xcode.file.model.FileTreeMessage;
 

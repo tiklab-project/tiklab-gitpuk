@@ -19,14 +19,13 @@ import java.util.List;
 
 public class GitUntil {
 
-
     /**
      * 创建仓库
-     * @param repositoryName 仓库名称
+     * @param repositoryAddress 仓库地址
      * @throws ApplicationException 仓库创建失败
      */
-    public static void createRepository(String repositoryAddress,String repositoryName) throws ApplicationException {
-        File file = new File(repositoryAddress, repositoryName + ".git");
+    public static void createRepository(String repositoryAddress) throws ApplicationException {
+        File file = new File(repositoryAddress);
         Git git;
         try {
             git = Git.init()
@@ -75,7 +74,8 @@ public class GitUntil {
      * @throws IOException 找不到仓库
      * @throws GitAPIException 提交失败
      */
-    public static void repositoryCommit(String repositoryAddress,String branch,String commitMessage,String fileAddress) throws IOException, GitAPIException, URISyntaxException {
+    public static void repositoryCommit(String repositoryAddress,String branch,String commitMessage,String fileAddress)
+            throws IOException, GitAPIException, URISyntaxException {
 
         //判断分支是否存在
         List<CodeBranch> branches = GitBranchUntil.findAllBranch(repositoryAddress);

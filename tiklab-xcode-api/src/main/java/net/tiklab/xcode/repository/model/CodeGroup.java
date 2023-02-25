@@ -1,4 +1,4 @@
-package net.tiklab.xcode.code.model;
+package net.tiklab.xcode.repository.model;
 
 import net.tiklab.beans.annotation.Mapper;
 import net.tiklab.beans.annotation.Mapping;

@@ -1,22 +1,16 @@
 package net.tiklab.xcode.until;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.code.model.CodeMessage;
 import net.tiklab.xcode.file.model.CodeFileMessage;
 import net.tiklab.xcode.file.model.FileTree;
 import net.tiklab.xcode.file.model.FileTreeMessage;
 import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
-import net.tiklab.xcode.git.GitUntil;
-import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.attributes.Attributes;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.junit.Ignore;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -127,7 +121,6 @@ public class CodeFileUntil {
         return file.renameTo(new File(fileAddress + "/" + newName));
     }
 
-
     /**
      * 删除文件及文件夹
      * @param file 文件地址
@@ -164,8 +157,9 @@ public class CodeFileUntil {
 
         List<FileTree> list = new ArrayList<>();
         String commitId = message.getBranch();
+        boolean findCommitId = message.isFindCommitId();
 
-        RevTree tree = GitBranchUntil.findBarthCommitRevTree(repository, commitId, message.isFindCommitId());
+        RevTree tree = GitBranchUntil.findBarthCommitRevTree(repository, commitId, findCommitId);
 
         TreeWalk treeWalk = new TreeWalk(repository);
         treeWalk.addTree(tree);

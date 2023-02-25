@@ -1,13 +1,11 @@
-package net.tiklab.xcode.code.controller;
+package net.tiklab.xcode.repository.controller;
 
 import net.tiklab.core.Result;
 import net.tiklab.postin.annotation.Api;
 import net.tiklab.postin.annotation.ApiMethod;
 import net.tiklab.postin.annotation.ApiParam;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.model.CodeGroup;
-import net.tiklab.xcode.code.service.CodeGroupServer;
-import net.tiklab.xcode.code.service.CodeServer;
+import net.tiklab.xcode.repository.model.CodeGroup;
+import net.tiklab.xcode.repository.service.CodeGroupServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,7 +1,7 @@
-package net.tiklab.xcode.code.dao;
+package net.tiklab.xcode.repository.dao;
 
 import net.tiklab.dal.jpa.JpaTemplate;
-import net.tiklab.xcode.code.entity.CodeGroupEntity;
+import net.tiklab.xcode.repository.entity.CodeGroupEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

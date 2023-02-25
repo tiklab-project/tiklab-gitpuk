@@ -70,7 +70,8 @@ public class XcodeSshServer {
             property= file.getParent();
         }
         Path ssh_key = Paths.get(property+"/"+sshKey);
-        logger.info("私钥地址："+ ssh_key);
+        logger.info("ssh listening address："+ sshPort);
+        logger.info("pryKey address："+ ssh_key);
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
 

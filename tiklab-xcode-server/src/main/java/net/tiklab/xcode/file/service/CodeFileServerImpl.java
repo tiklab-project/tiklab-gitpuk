@@ -1,14 +1,12 @@
 package net.tiklab.xcode.file.service;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.code.model.Code;
-import net.tiklab.xcode.code.service.CodeServer;
+import net.tiklab.xcode.repository.model.Code;
+import net.tiklab.xcode.repository.service.CodeServer;
 import net.tiklab.xcode.file.model.CodeFile;
 import net.tiklab.xcode.file.model.CodeFileMessage;
-import net.tiklab.xcode.git.GitCommitUntil;
 import net.tiklab.xcode.git.GitUntil;
 import net.tiklab.xcode.until.CodeFileUntil;
-import net.tiklab.xcode.until.CodeFinal;
 import net.tiklab.xcode.until.CodeUntil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -57,7 +55,7 @@ public class CodeFileServerImpl implements  CodeFileServer {
         String branch = codeFile.getCommitBranch();
 
         Code code = codeServer.findOneCode(codeId);
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code, CodeFinal.TRUE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
         CodeFileMessage fileMessage ;
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -84,7 +82,7 @@ public class CodeFileServerImpl implements  CodeFileServer {
 
         String fileAddress = codeFile.getFileAddress();
 
-        String repositoryAddress = CodeUntil.findRepositoryAddress(code,CodeFinal.FALSE);
+        String repositoryAddress = CodeUntil.findRepositoryAddress(code);
 
         File file = new File(repositoryAddress + fileAddress);
         String newFileName = codeFile.getNewFileName();
