@@ -1,7 +1,7 @@
 package net.tiklab.xcode.git;
 
+import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.branch.model.Branch;
-import net.tiklab.xcode.until.RepositoryFinal;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
@@ -19,7 +19,6 @@ import java.util.List;
  * jgit操作仓库分支
  */
 public class GitBranchUntil {
-
 
     /**
      * 创建仓库分支
@@ -96,7 +95,7 @@ public class GitBranchUntil {
             }
 
             String Id = ref.getObjectId().getName();
-            String s = name.replace("refs/heads/", "");
+            String s = name.replace(Constants.R_HEADS, "");
             branch.setBranchId(Id);
             //判断是否为默认分支
             if (defaultBranch.equals(name)){
@@ -117,20 +116,19 @@ public class GitBranchUntil {
     }
 
     /**
-     * 返回项目默认分支
+     * 返回仓库默认分支
      * @param repositoryAddress 仓库地址
-     * @return 默认分支 无返回 DEFAULT_MASTER
+     * @return 默认分支 无返回 Constants.MASTER
      * @throws IOException 仓库不存在
      */
     public static String findDefaultBranch(String repositoryAddress) throws IOException {
         List<Branch> branches = findAllBranch(repositoryAddress);
-
         for (Branch branch : branches) {
             if (branch.isDefaultBranch()){
                 return branch.getBranchName();
             }
         }
-        return RepositoryFinal.DEFAULT_MASTER;
+        return Constants.MASTER;
     }
 
     /**
@@ -141,31 +139,33 @@ public class GitBranchUntil {
      * @throws IOException 仓库不存在
      */
     public static RevTree findBarthCommitRevTree(Repository repository,String branch,boolean b) throws IOException {
-        ObjectId commitIdObject = findBarthCommitId(repository,branch,b);
+        ObjectId objectId;
+        if (!b){
+            objectId = repository.resolve(Constants.R_HEADS + branch);
+        }else {
+            objectId = ObjectId.fromString(branch);
+        }
         RevWalk walk = new RevWalk(repository);
-        RevTree tree = walk.parseCommit(commitIdObject).getTree();
+        RevTree tree = walk.parseCommit(objectId).getTree();
         walk.close();
         return tree;
     }
 
     /**
-     * 获取指定分支的commitId
+     * 切换默认分支
      * @param repository 仓库
      * @param branch 分支
-     * @return commitId
-     * @throws IOException 仓库不存在
+     * @throws ApplicationException 切换失败
      */
-    public static ObjectId findBarthCommitId(Repository repository,String branch,boolean b) throws IOException {
-
-        //如果不存在默认分支设置master为默认分支
-        if (repository.getFullBranch() == null){
-            RefUpdate updateRef = repository.updateRef("HEAD");
-            updateRef.link("refs/heads/master");
+    public static void updateFullBranch(Repository repository,String branch) throws ApplicationException {
+        String fullBranch = Constants.R_HEADS + branch;
+        try {
+            RefUpdate  updateRef = repository.updateRef("HEAD");
+            updateRef.link(fullBranch);
+            updateRef.update();
+        } catch (IOException e) {
+            throw new ApplicationException("切换默认分支失败:"+fullBranch);
         }
-        if (!b){
-            branch = repository.resolve("refs/heads/" + branch).getName();
-        }
-        return ObjectId.fromString(branch);
     }
 
 

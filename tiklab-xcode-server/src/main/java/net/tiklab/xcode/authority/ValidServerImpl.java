@@ -4,8 +4,8 @@ import net.tiklab.eam.passport.user.model.UserPassport;
 import net.tiklab.eam.server.author.EamAuthenticator;
 import net.tiklab.xcode.setting.model.Auth;
 import net.tiklab.xcode.setting.service.AuthServer;
-import net.tiklab.xcode.until.RepositoryFinal;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryFinal;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
@@ -82,7 +82,7 @@ public class ValidServerImpl implements ValidServer, PublickeyAuthenticator  {
                 //认证成功
                 if (publicKey.equals(key)){
                     //更新使用时间
-                    auth.setUserTime(RepositoryUntil.date(1,new Date()));
+                    auth.setUserTime(RepositoryUtil.date(1,new Date()));
                     authServer.updateAuth(auth);
                     return true;
                 }

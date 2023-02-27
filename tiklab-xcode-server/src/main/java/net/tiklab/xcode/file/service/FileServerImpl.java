@@ -1,20 +1,16 @@
 package net.tiklab.xcode.file.service;
 
-import net.tiklab.core.exception.ApplicationException;
+import net.tiklab.xcode.file.model.FileMessage;
 import net.tiklab.xcode.file.model.FileQuery;
 import net.tiklab.xcode.repository.model.Repository;
 import net.tiklab.xcode.repository.service.RepositoryServer;
-import net.tiklab.xcode.file.model.FileMessage;
-import net.tiklab.xcode.git.GitUntil;
-import net.tiklab.xcode.until.RepositoryFileUntil;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryFileUtil;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 @Service
 public class FileServerImpl implements FileServer {
@@ -53,14 +49,14 @@ public class FileServerImpl implements FileServer {
         String branch = fileQuery.getCommitBranch();
 
         Repository code = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
         FileMessage fileMessage ;
         try {
             Git git = Git.open(new java.io.File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
             boolean findCommitId = fileQuery.isFindCommitId();
             String substring = fileAddress.substring(1);
-            fileMessage =  RepositoryFileUntil.readBranchFile(repository, branch, substring, findCommitId);
+            fileMessage =  RepositoryFileUtil.readBranchFile(repository, branch, substring, findCommitId);
             git.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -75,42 +71,7 @@ public class FileServerImpl implements FileServer {
      */
     @Override
     public void writeFile(FileQuery repositoryFileQuery) {
-        String rpyId = repositoryFileQuery.getRpyId();
-        Repository repository = repositoryServer.findOneRpy(rpyId);
 
-        String fileAddress = repositoryFileQuery.getFileAddress();
-
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
-
-        java.io.File file = new java.io.File(repositoryAddress + fileAddress);
-        String newFileName = repositoryFileQuery.getNewFileName();
-        String oldFileName = repositoryFileQuery.getOldFileName();
-
-        try {
-            //判断文件名称是否更改
-            if (!oldFileName.equals(newFileName)){
-                boolean b = RepositoryFileUntil.updateFileName(file.getParent(), newFileName, oldFileName);
-                if (!b){
-                    throw new ApplicationException("文件名称更改失败");
-                }
-                //在储存库中删除文件
-                GitUntil.deleteRepositoryFile(repositoryAddress, oldFileName);
-            }
-
-        } catch (IOException | GitAPIException | URISyntaxException e) {
-            throw new ApplicationException("仓库删除文件失败"+e);
-        }
-
-        //写入文件信息
-        String fileContent = repositoryFileQuery.getFileContent();
-        RepositoryFileUntil.writeFile(fileContent,file.getParent()+"/"+newFileName);
-
-        try {
-            GitUntil.repositoryCommit(repositoryAddress, repositoryFileQuery.getCommitBranch(),
-                    repositoryFileQuery.getCommitMessage(), newFileName);
-        } catch (IOException | GitAPIException | URISyntaxException e) {
-            throw new ApplicationException("提交失败："+e);
-        }
 
 
     }

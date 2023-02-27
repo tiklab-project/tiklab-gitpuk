@@ -6,7 +6,7 @@ import net.tiklab.xcode.branch.model.Branch;
 import net.tiklab.xcode.repository.model.Repository;
 import net.tiklab.xcode.repository.service.RepositoryServer;
 import net.tiklab.xcode.git.GitBranchUntil;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class BranchServerImpl implements BranchServer {
     public List<Branch> findAllBranch(String rpyId) {
         Repository repository = repositoryServer.findOneRpy(rpyId);
 
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
         List<Branch> branches;
         try {
             branches = GitBranchUntil.findAllBranch(repositoryAddress);
@@ -50,7 +50,7 @@ public class BranchServerImpl implements BranchServer {
     public void createBranch(BranchMessage branchMessage) {
         String rpyId = branchMessage.getRpyId();
         Repository repository = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
         try {
             GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
         } catch (IOException | GitAPIException e) {
@@ -66,7 +66,7 @@ public class BranchServerImpl implements BranchServer {
     public void deleteBranch(BranchMessage branchMessage){
         String rpyId = branchMessage.getRpyId();
         Repository repository = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(repository);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
         try {
             GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());
         } catch (IOException | GitAPIException e) {

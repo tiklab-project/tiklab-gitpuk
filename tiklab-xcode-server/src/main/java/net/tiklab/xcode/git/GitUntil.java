@@ -1,17 +1,18 @@
 package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.branch.model.Branch;
-import net.tiklab.xcode.until.RepositoryFinal;
-import org.eclipse.jgit.api.*;
+import net.tiklab.user.user.model.User;
+import net.tiklab.xcode.util.RepositoryUtil;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.transport.URIish;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 
 
 /**
@@ -25,36 +26,108 @@ public class GitUntil {
      * @param repositoryAddress 仓库地址
      * @throws ApplicationException 仓库创建失败
      */
-    public static void createRepository(String repositoryAddress) throws ApplicationException {
+    public static void createRepository(String repositoryAddress, String ignoreFilePath, String mdFilePath, User user) throws ApplicationException {
         File file = new File(repositoryAddress);
         Git git;
         try {
             git = Git.init()
                     .setDirectory(file)
                     .setBare(true) //裸仓库
-                    .setInitialBranch(RepositoryFinal.DEFAULT_MASTER)
+                    .setInitialBranch(Constants.MASTER)
                     .call();
-            //提交文件
-            git.add()
-                    .addFilepattern("D:\\桌面\\新建文件夹\\.gitignore")
-                    // .addFilepattern("D:\\桌面\\新建文件夹\\README.md")
-                    // .setUpdate(true)
-                    .call();
-            git.commit()
-                    .setCommitter("zhangcheng", "committer@example.com")
-                    .setMessage("Initial commit")
-                    .setAllowEmpty(true)
-                    .call();
-            // git.pull()
-            //         .setRemoteBranchName(RepositoryFinal.DEFAULT_MASTER)
-            //         .setRemote(repositoryAddress)
-            //         .call();
 
+            Repository repository = git.getRepository();
+
+            if (ignoreFilePath != null || mdFilePath != null){
+                addRepositoryInitFile(repository,ignoreFilePath,mdFilePath,user);
+            }
             git.close();
         } catch (GitAPIException e) {
             throw new ApplicationException("仓库创建失败。" + e);
         }
-       git.close();
+        git.close();
+    }
+
+    /**
+     * 裸仓库添加文件
+     * @param repository 仓库
+     * @param ignoreFilePath .gitignore文件
+     * @param mdFilePath README.md文件
+     * @param user 用户
+     */
+    private static void addRepositoryInitFile(Repository repository, String ignoreFilePath, String mdFilePath, User user)
+            throws ApplicationException {
+
+        try {
+
+            ObjectDatabase objectDatabase = repository.getObjectDatabase();
+            ObjectInserter inserter = objectDatabase.newInserter();
+
+            TreeFormatter treeFormatter = new TreeFormatter();
+            // 写入.gitignore文件到对象数据库
+            if (RepositoryUtil.isNoNull(ignoreFilePath)){
+
+                File ignoreFile = new File(ignoreFilePath);
+                FileInputStream inputStream ;
+                try {
+                    inputStream = new FileInputStream(ignoreFile);
+                } catch (FileNotFoundException e) {
+                    throw new ApplicationException("文件.gitignore写入失败：" + e);
+                }
+
+                ObjectId objectId = inserter.insert(Constants.OBJ_BLOB, ignoreFile.length(), inputStream);
+                inserter.flush();
+                inserter.close();
+                treeFormatter.append(".gitignore", FileMode.REGULAR_FILE, objectId);
+            }
+
+            // 写入README.md文件到对象数据库
+            if (RepositoryUtil.isNoNull(mdFilePath)){
+
+                File mdFile = new File(mdFilePath);
+                FileInputStream mdFileInputStream ;
+                try {
+                    mdFileInputStream = new FileInputStream(mdFile);
+                } catch (FileNotFoundException e) {
+                    throw new ApplicationException("文件README.md写入失败：" + e);
+                }
+
+                ObjectId mdObjectId = inserter.insert(Constants.OBJ_BLOB, mdFile.length(), mdFileInputStream);
+                inserter.flush();
+                inserter.close();
+                treeFormatter.append("README.md", FileMode.REGULAR_FILE, mdObjectId);
+            }
+
+            ObjectId treeId = inserter.insert(treeFormatter);
+            //设置提交信息
+            CommitBuilder commitBuilder = new CommitBuilder();
+            commitBuilder.setTreeId(treeId);
+            String email = user.getEmail();
+            if (!RepositoryUtil.isNoNull(email)){
+                email = user.getName();
+            }
+            PersonIdent ident = new PersonIdent(user.getName(), email);
+            commitBuilder.setCommitter(ident);
+            commitBuilder.setAuthor(ident);
+
+            // 提交更改
+            ObjectInserter objectInserter = repository.newObjectInserter();
+            ObjectId objectId1 = objectInserter.insert(commitBuilder);
+            objectInserter.flush();
+            objectInserter.close();
+
+            //提交写入到master分支
+            RefUpdate refUpdate = repository.updateRef(Constants.R_HEADS + Constants.MASTER);
+            refUpdate.setNewObjectId(objectId1);
+            refUpdate.setExpectedOldObjectId(ObjectId.zeroId());
+            refUpdate.setForceUpdate(true);
+            refUpdate.update();
+
+        }catch (IOException e){
+            throw new ApplicationException("初始化文件到仓库失败：" + e);
+        }
+
+
     }
 
     /**
@@ -65,7 +138,7 @@ public class GitUntil {
      */
     public static void cloneRepository(String repositoryAddress,String branch) throws GitAPIException {
         Git git = Git.cloneRepository()
-                .setURI(repositoryAddress + ".git")
+                .setURI(repositoryAddress)
                 .setDirectory(new File(repositoryAddress+"_"+branch))
                 .setBranch(branch)
                 .call();
@@ -85,54 +158,6 @@ public class GitUntil {
         git.close();
     }
 
-    /**
-     * 仓库提交
-     * @param repositoryAddress 仓库地址
-     * @param commitMessage 提交信息
-     * @param fileAddress 提交文件
-     * @throws IOException 找不到仓库
-     * @throws GitAPIException 提交失败
-     */
-    public static void repositoryCommit(String repositoryAddress,String branch,String commitMessage,String fileAddress)
-            throws IOException, GitAPIException, URISyntaxException {
-
-        //判断分支是否存在
-        List<Branch> branches = GitBranchUntil.findAllBranch(repositoryAddress);
-        boolean isBranch = false;
-        for (Branch codeBranch : branches) {
-            String branchName = codeBranch.getBranchName();
-            if (branch.equals(branchName)) {
-                isBranch = true;
-                break;
-            }
-        }
-
-        if (!isBranch){
-            //默认分支
-            String defaultBranch = GitBranchUntil.findDefaultBranch(repositoryAddress) ;
-            GitBranchUntil.createRepositoryBranch(repositoryAddress+".git",branch,defaultBranch);
-        }
-
-        cloneRepository(repositoryAddress,branch);
-
-        Git git = Git.open(new File(repositoryAddress+"_"+branch));
-
-        git.add() //添加文件
-                .setUpdate(true)
-                .addFilepattern(fileAddress)
-                .call();
-        git.commit() // 提交信息
-                .setMessage(commitMessage)
-                .call();
-        git.push()
-                .setRemote(repositoryAddress)
-                .setRefSpecs(new RefSpec(branch))
-                .call();
-        git.close();
-
-        remoteRepositoryFile(repositoryAddress,branch);
-
-    }
 
     /**
      * 推送到远程

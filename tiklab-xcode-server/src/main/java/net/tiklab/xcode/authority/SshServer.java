@@ -3,8 +3,8 @@ package net.tiklab.xcode.authority;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.setting.service.AuthServer;
-import net.tiklab.xcode.until.RepositoryFinal;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryFinal;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -64,6 +64,7 @@ public class SshServer {
             File file = new File(property);
             property= file.getParent();
         }
+
         Path ssh_key = Paths.get(property+"/"+sshKey);
         logger.info("ssh listening address："+ sshPort);
         logger.info("pryKey address："+ ssh_key);
@@ -101,7 +102,7 @@ public class SshServer {
         public Command createCommand(ChannelSession channelSession, String command) {
             String cmd = command.replace("'", "");
             String s = cmd.split(" ")[1];
-            File file = new File(RepositoryUntil.defaultPath() + s);
+            File file = new File(RepositoryUtil.defaultPath() + s);
             String repositoryPath = file.getAbsolutePath();
 
             logger.info("ssh repository address " + " " + repositoryPath);

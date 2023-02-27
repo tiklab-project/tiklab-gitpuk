@@ -2,8 +2,8 @@ package net.tiklab.xcode.git;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.commit.model.*;
-import net.tiklab.xcode.until.RepositoryFinal;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryFinal;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -28,28 +28,6 @@ import java.util.regex.Pattern;
  */
 public class GitCommitUntil {
 
-    /**
-     * 判断仓库是否为空
-     * @param repositoryAddress 仓库地址
-     * @param branch 分支
-     * @return false 为空 true 不为空
-     * @throws IOException 仓库不存在
-     */
-    public static boolean findRepositoryIsNotNull(String repositoryAddress, String branch) throws IOException {
-
-        Git git = Git.open(new File(repositoryAddress));
-        Repository repository = git.getRepository();
-
-        if (branch == null) {
-            branch = repository.getBranch();
-        }
-        Ref head = repository.findRef("refs/heads/" + branch);
-        if (head == null) {
-            return false;
-        }
-        git.close();
-        return true;
-    }
 
     /**
      * 获取分支的提交记录
@@ -111,7 +89,7 @@ public class GitCommitUntil {
             commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
             commitMessage.setCommitUser(name);
             commitMessage.setDateTime(date);
-            commitMessage.setCommitTime(RepositoryUntil.time(date)+"前");//转换时间
+            commitMessage.setCommitTime(RepositoryUtil.time(date)+"前");//转换时间
             list.add(commitMessage);
             treeWalk.close();
             revCommit.disposeBody();
@@ -151,7 +129,7 @@ public class GitCommitUntil {
             commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
             commitMessage.setCommitUser(name);
             commitMessage.setDateTime(date);
-            commitMessage.setCommitTime(RepositoryUntil.time(date)+"前");//转换时间
+            commitMessage.setCommitTime(RepositoryUtil.time(date)+"前");//转换时间
 
             treeWalk.close();
             revCommit.disposeBody();
@@ -455,7 +433,7 @@ public class GitCommitUntil {
             Date date = revCommit.getAuthorIdent().getWhen();
             String message = revCommit.getShortMessage();
             map.put("message",message);//转换时间
-            map.put("time", RepositoryUntil.time(date)+"前");
+            map.put("time", RepositoryUtil.time(date)+"前");
             list.add(map);
         }
         return list;

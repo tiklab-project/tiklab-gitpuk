@@ -1,26 +1,11 @@
-package net.tiklab.xcode.until;
+package net.tiklab.xcode.util;
 
 public class RepositoryFinal {
-
-    /**
-     * 默认分支
-     */
-    public final static String DEFAULT_MASTER = "master";
 
     /**
      * 项目名称
      */
     public final static String APP_NAME = "xcode";
-
-    /**
-     * 树
-     */
-    public final static String FILE_TYPE_TREE = "tree";
-
-    /**
-     * 文件
-     */
-    public final static String FILE_TYPE_BLOB = "blob";
 
     /**
      * commitId唯一标识
@@ -32,16 +17,6 @@ public class RepositoryFinal {
      * ssh监听地址
      */
     public final static String SSH_HOST = "0.0.0.0";
-
-    /**
-     * 返回true
-     */
-    public final static boolean TRUE = true;
-
-    /**
-     * 返回false
-     */
-    public final static boolean FALSE = false;
 
     /**
      * 文件内容添加

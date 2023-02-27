@@ -1,4 +1,4 @@
-package net.tiklab.xcode.until;
+package net.tiklab.xcode.util;
 
 import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.file.model.FileMessage;
@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class RepositoryFileUntil {
+public class RepositoryFileUtil {
 
     /**
      * 字符串写入文件
@@ -169,15 +169,15 @@ public class RepositoryFileUntil {
             FileTree fileTree = new FileTree();
             String file = message.getPath();
             //获取父级路径
-            if (RepositoryUntil.isNoNull(file)){
+            if (RepositoryUtil.isNoNull(file)){
                 fileTree.setFileParent(file.substring(0,file.lastIndexOf("/")));
             }
             String pathString = treeWalk.getPathString();
             String type = null;
-            if (!RepositoryUntil.isNoNull(file)){
+            if (!RepositoryUtil.isNoNull(file)){
                 int i = pathString.indexOf("/");
                 if (i >= 0){
-                    type = RepositoryFinal.FILE_TYPE_TREE;
+                    type = Constants.TYPE_TREE;
                     String substring = pathString.substring(0, i);
                     String s = map.get(substring);
                     if (s != null){
@@ -186,12 +186,12 @@ public class RepositoryFileUntil {
                     fileTree.setFileName(substring);
                     map.put(substring,substring);
                 }else {
-                    type = RepositoryFinal.FILE_TYPE_BLOB;
+                    type = Constants.TYPE_BLOB;
                     fileTree.setFileName(pathString);
                 }
             }
 
-            if (RepositoryUntil.isNoNull(file) &&
+            if (RepositoryUtil.isNoNull(file) &&
                     pathString.startsWith(file.substring(1))
                     && pathString.contains("/")){
 
@@ -199,7 +199,7 @@ public class RepositoryFileUntil {
                 String replace = pathString.replace(substring,"");
                 int i = replace.indexOf("/");
                 if (i >= 0){
-                    type = RepositoryFinal.FILE_TYPE_TREE;
+                    type = Constants.TYPE_TREE;
                     String substring1 = replace.substring(0, i);
                     fileTree.setFileName(substring1);
                     String s = map.get(substring1);
@@ -208,7 +208,7 @@ public class RepositoryFileUntil {
                     }
                     map.put(substring1,substring1);
                 }else {
-                    type = RepositoryFinal.FILE_TYPE_BLOB;
+                    type = Constants.TYPE_BLOB;
                     fileTree.setFileName(replace);
                 }
             }
@@ -231,7 +231,7 @@ public class RepositoryFileUntil {
                 branch = branch + RepositoryFinal.COMMIT_ONLY_ID;
             }
 
-            if (!RepositoryUntil.isNoNull(file)){
+            if (!RepositoryUtil.isNoNull(file)){
                 path = "/" + type + "/" + branch + "/" + fileName;
             }else {
                 fileAddress = file.substring(1)+"/"+ fileName;
@@ -239,8 +239,16 @@ public class RepositoryFileUntil {
             }
             fileTree.setPath(path);
 
-            //提交信息
-            ObjectId objectId = GitBranchUntil.findBarthCommitId(repository, commitId, message.isFindCommitId());
+            //获取提交id
+            boolean b = message.isFindCommitId();
+            ObjectId objectId;
+            if (!b){
+                objectId = repository.resolve(Constants.R_HEADS + branch);
+            }else {
+                objectId = ObjectId.fromString(branch);
+            }
+
+
             List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),fileAddress);
             if (!commitList.isEmpty()){
                 Map<String, String> fileCommit = commitList.get(0);

@@ -1,6 +1,5 @@
-package net.tiklab.xcode.until;
+package net.tiklab.xcode.util;
 
-import net.tiklab.core.exception.ApplicationException;
 import net.tiklab.xcode.repository.model.Repository;
 import net.tiklab.xcode.repository.model.RepositoryGroup;
 
@@ -9,7 +8,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class RepositoryUntil {
+public class RepositoryUtil {
 
     /**
      * 判断字符串是否为空
@@ -60,14 +59,14 @@ public class RepositoryUntil {
         Runtime runtime=Runtime.getRuntime();
         Process process;
         String[] cmd;
-        if (RepositoryUntil.findSystemType()==1){
-            if (!RepositoryUntil.isNoNull(path)){
+        if (RepositoryUtil.findSystemType()==1){
+            if (!RepositoryUtil.isNoNull(path)){
                 process = runtime.exec(" cmd.exe /c " + " " + order);
             }else {
                 process = runtime.exec(" cmd.exe /c " + " " + order,null,new File(path));
             }
         }else {
-            if (!RepositoryUntil.isNoNull(path)){
+            if (!RepositoryUtil.isNoNull(path)){
                 cmd = new String[] { "/bin/sh", "-c", " source /etc/profile;"+ order };
                 process = runtime.exec(cmd);
             }else {

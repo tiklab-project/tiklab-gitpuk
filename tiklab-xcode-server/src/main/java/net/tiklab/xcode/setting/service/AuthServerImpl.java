@@ -1,6 +1,5 @@
 package net.tiklab.xcode.setting.service;
 
-import com.google.gson.annotations.Until;
 import net.tiklab.beans.BeanMapper;
 import net.tiklab.join.JoinTemplate;
 import net.tiklab.rpc.annotation.Exporter;
@@ -9,7 +8,7 @@ import net.tiklab.utils.context.LoginContext;
 import net.tiklab.xcode.setting.dao.AuthDao;
 import net.tiklab.xcode.setting.entity.AuthEntity;
 import net.tiklab.xcode.setting.model.Auth;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class AuthServerImpl implements AuthServer {
      */
     @Override
     public String createAuth(Auth auth) {
-        auth.setCreateTime(RepositoryUntil.date(1,new Date()));
+        auth.setCreateTime(RepositoryUtil.date(1,new Date()));
         AuthEntity groupEntity = BeanMapper.map(auth, AuthEntity.class);
         return AuthDao.createAuth(groupEntity);
     }

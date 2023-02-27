@@ -15,6 +15,7 @@ xcode:
   ssh:
     port: 8082
     key: tiklab-xcode-starter\src\main\resources\id_rsa
+  file: tiklab-xcode-starter\src\main\resources\file
 
 jdbc:
   driverClassName: com.mysql.cj.jdbc.Driver

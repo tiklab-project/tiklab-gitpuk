@@ -1,16 +1,16 @@
 package net.tiklab.xcode.commit.service;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.repository.model.Repository;
-import net.tiklab.xcode.repository.service.RepositoryServer;
 import net.tiklab.xcode.commit.model.*;
 import net.tiklab.xcode.file.model.FileMessage;
-import net.tiklab.xcode.git.GitBranchUntil;
 import net.tiklab.xcode.git.GitCommitUntil;
-import net.tiklab.xcode.until.RepositoryFileUntil;
-import net.tiklab.xcode.until.RepositoryFinal;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.repository.model.Repository;
+import net.tiklab.xcode.repository.service.RepositoryServer;
+import net.tiklab.xcode.util.RepositoryFileUtil;
+import net.tiklab.xcode.util.RepositoryFinal;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -36,7 +36,7 @@ public class CommitServerImpl implements CommitServer {
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String rpyId = commit.getRpyId();
         Repository code = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
         List<CommitMessage> branchCommit;
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -75,7 +75,7 @@ public class CommitServerImpl implements CommitServer {
     public FileDiffEntry findCommitDiffFileList(Commit commit) {
 
         Repository code = repositoryServer.findOneRpy(commit.getRpyId());
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -113,7 +113,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
         Repository code = repositoryServer.findOneRpy(commit.getRpyId());
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -151,7 +151,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public List<CommitFileDiff> findCommitFileDiff(Commit commit) {
         Repository code = repositoryServer.findOneRpy(commit.getRpyId());
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -181,12 +181,12 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
         Repository code = repositoryServer.findOneRpy(commit.getRpyId());
-        String repositoryAddress = RepositoryUntil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
 
-            FileMessage fileMessage = RepositoryFileUntil.readBranchFile(repository,
+            FileMessage fileMessage = RepositoryFileUtil.readBranchFile(repository,
                     commit.getCommitId(), commit.getPath(), true);
             String message = fileMessage.getFileMessage();
             String[] split = message.split("\n");
@@ -246,7 +246,12 @@ public class CommitServerImpl implements CommitServer {
      */
     private Map<String,RevCommit> findCommitNewOldTree(org.eclipse.jgit.lib.Repository repository, String branch, boolean b) throws IOException {
         RevWalk walk = new RevWalk(repository);
-        ObjectId objectId = GitBranchUntil.findBarthCommitId(repository, branch, b);
+        ObjectId objectId;
+        if (!b){
+            objectId = repository.resolve(Constants.R_HEADS + branch);
+        }else {
+            objectId = ObjectId.fromString(branch);
+        }
         RevCommit revCommit =  walk.parseCommit(objectId);
 
         //获取旧树
@@ -270,11 +275,11 @@ public class CommitServerImpl implements CommitServer {
         List<CommitMessage> removeList = new ArrayList<>();
         CommitMessage commitMessage = new CommitMessage();
         Date date = branchCommit.get(0).getDateTime();
-        String time= RepositoryUntil.date(2, date);
+        String time= RepositoryUtil.date(2, date);
         commitMessage.setCommitTime(time);
         for (CommitMessage message : branchCommit) {
             Date dateTime = message.getDateTime();
-            if (!time.equals(RepositoryUntil.date(2, dateTime))) {
+            if (!time.equals(RepositoryUtil.date(2, dateTime))) {
                 continue;
             }
             removeList.add(message);

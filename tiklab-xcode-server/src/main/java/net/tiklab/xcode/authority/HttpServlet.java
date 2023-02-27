@@ -1,7 +1,7 @@
 package net.tiklab.xcode.authority;
 
 import net.tiklab.core.exception.ApplicationException;
-import net.tiklab.xcode.until.RepositoryUntil;
+import net.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.http.server.GitServlet;
@@ -84,7 +84,7 @@ public class HttpServlet extends GitServlet {
                         throws RepositoryNotFoundException, ServiceNotAuthorizedException,
                         ServiceNotEnabledException, ServiceMayNotContinueException {
 
-                        String s = RepositoryUntil.defaultPath();
+                        String s = RepositoryUtil.defaultPath();
                         File file = new File(s + "/" + name);
 
                         if (!file.exists()){
