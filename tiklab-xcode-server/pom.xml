@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>net.tiklab</groupId>
+		<groupId>io.tiklab</groupId>
 		<artifactId>tiklab-xcode</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
@@ -20,7 +20,7 @@
 			<artifactId>junit</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.tiklab</groupId>
+			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-xcode-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
@@ -42,61 +42,21 @@
 			<version>3.12.0</version>
 		</dependency>
 		<dependency>
-			<groupId>net.tiklab</groupId>
+			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-dal-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>net.tiklab</groupId>
-			<artifactId>tiklab-logging-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>net.tiklab</groupId>
-			<artifactId>tiklab-todotask-api</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.tiklab</groupId>
-			<artifactId>tiklab-message-spring-boot-starter</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.tiklab</groupId>
+			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-message-smssdk</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>net.tiklab</groupId>
+			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-privilege-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.jackrabbit/jackrabbit-webdav -->
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-webdav</artifactId>
-			<version>2.21.14</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>3.1.0</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
-		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>6.4.0.202211300538-r</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.http.server -->
@@ -113,21 +73,12 @@
 			<version>2.9.2</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils -->
 		<dependency>
-			<groupId>io.github.java-diff-utils</groupId>
-			<artifactId>java-diff-utils</artifactId>
-			<version>4.12</version>
-		</dependency>
-
-
-
-
-		<dependency>
-            <groupId>net.tiklab</groupId>
+            <groupId>io.tiklab</groupId>
             <artifactId>tiklab-eam-server</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+
 
 
 	</dependencies>
