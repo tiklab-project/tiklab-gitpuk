@@ -36,11 +36,11 @@ public class GitUntil {
                     .setInitialBranch(Constants.MASTER)
                     .call();
 
-            Repository repository = git.getRepository();
-
-            if (ignoreFilePath != null || mdFilePath != null){
-                addRepositoryInitFile(repository,ignoreFilePath,mdFilePath,user);
-            }
+            // Repository repository = git.getRepository();
+            //
+            // if (ignoreFilePath != null || mdFilePath != null){
+            //     addRepositoryInitFile(repository,ignoreFilePath,mdFilePath,user);
+            // }
             git.close();
         } catch (GitAPIException e) {
             throw new ApplicationException("仓库创建失败。" + e);

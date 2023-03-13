@@ -1,1 +1,1 @@
-alter table code_auth add user_time varchar(256)
+alter table rpy_auth add user_time varchar(256)

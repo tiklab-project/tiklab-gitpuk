@@ -1,16 +1,17 @@
 package io.tiklab.xcode.setting.service;
 
 import io.tiklab.beans.BeanMapper;
+import io.tiklab.core.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.user.model.User;
-import io.tiklab.utils.context.LoginContext;
 import io.tiklab.xcode.setting.dao.AuthDao;
 import io.tiklab.xcode.setting.entity.AuthEntity;
 import io.tiklab.xcode.setting.model.Auth;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;

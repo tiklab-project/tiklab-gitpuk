@@ -16,7 +16,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-tks-spring-boot-starter</artifactId>
+			<artifactId>tiklab-beans-spring-boot-starter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-join-spring-boot-starter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -37,11 +42,6 @@
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-user-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-privilege-spring-boot-starter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
