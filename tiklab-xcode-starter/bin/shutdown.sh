@@ -9,7 +9,7 @@ if [ -e "${DIRS}/${JDK_VERSION}" ]; then
 fi
 
 #APP_MAIN=${application.main.class}
-APP_MAIN="net.tiklab.xcode.XcodeApplication"
+APP_MAIN="io.tiklab.xcode.XcodeApplication"
 
 PID=0
 getPID(){
