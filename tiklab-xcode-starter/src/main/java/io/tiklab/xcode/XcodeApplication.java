@@ -1,7 +1,7 @@
 package io.tiklab.xcode;
 
 
-import io.tiklab.utils.property.PropertyAndYamlSourceFactory;
+import io.tiklab.core.property.PropertyAndYamlSourceFactory;
 import io.tiklab.xcode.util.RepositoryFileUtil;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.springframework.boot.SpringApplication;

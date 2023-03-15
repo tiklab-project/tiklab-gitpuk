@@ -1,7 +1,7 @@
 package io.tiklab.xcode.setting.service;
 
 import io.tiklab.beans.BeanMapper;
-import io.tiklab.core.context.LoginContext;
+import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.user.model.User;

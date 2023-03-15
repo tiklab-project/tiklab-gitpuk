@@ -1,8 +1,8 @@
 package io.tiklab.xcode.repository.service;
 
 import io.tiklab.beans.BeanMapper;
-import io.tiklab.core.context.LoginContext;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.user.model.User;
@@ -22,6 +22,7 @@ import io.tiklab.xcode.util.RepositoryFinal;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -207,7 +209,7 @@ public class RepositoryServerImpl implements RepositoryServer {
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
-            String fullBranch = repository1.getFullBranch();
+            String fullBranch = repository1.getFullBranch().replace(Constants.R_HEADS,"");
             repository.setDefaultBranch(fullBranch);
             repository.setNotNull(fullBranch.isEmpty());
             git.close();
@@ -279,7 +281,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
-        String http = "http://" + ip + ":" + port + "/xrpy/"+ path + ".git";
+        String http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
         String SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
         repositoryCloneAddress.setHttpAddress(http);
         repositoryCloneAddress.setSSHAddress(SSH);
@@ -289,13 +291,6 @@ public class RepositoryServerImpl implements RepositoryServer {
 
 
 
-
-
-
-
-
-
-    
     
 }
 

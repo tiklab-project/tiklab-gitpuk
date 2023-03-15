@@ -13,7 +13,6 @@ import io.tiklab.mysql.starter.EnableMysql;
 import io.tiklab.pluginx.starter.EnablePluginServer;
 import io.tiklab.rpc.starter.annotation.EnableRpc;
 import io.tiklab.security.stater.EnableSecurity;
-import io.tiklab.tks.annotation.EnableTks;
 import io.tiklab.todotask.stater.EnableTodoTask;
 import io.tiklab.user.starter.EnableUser;
 import io.tiklab.web.starter.annotation.EnableWeb;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
-@EnableTks
 @EnableWeb
 @EnableMysql
 @EnableDal

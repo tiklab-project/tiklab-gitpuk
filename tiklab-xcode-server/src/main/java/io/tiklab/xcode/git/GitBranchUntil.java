@@ -142,6 +142,7 @@ public class GitBranchUntil {
         ObjectId objectId;
         if (!b){
             objectId = repository.resolve(Constants.R_HEADS + branch);
+//            objectId = repository.resolve( branch);
         }else {
             objectId = ObjectId.fromString(branch);
         }

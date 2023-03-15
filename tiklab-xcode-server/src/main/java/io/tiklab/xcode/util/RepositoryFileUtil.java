@@ -244,10 +244,13 @@ public class RepositoryFileUtil {
             ObjectId objectId;
             if (!b){
                 objectId = repository.resolve(Constants.R_HEADS + branch);
+                //objectId = repository.resolve(branch);
             }else {
+                if(branch.contains(RepositoryFinal.COMMIT_ONLY_ID)){
+                    branch = branch.replace(RepositoryFinal.COMMIT_ONLY_ID,"");
+                }
                 objectId = ObjectId.fromString(branch);
             }
-
 
             List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),fileAddress);
             if (!commitList.isEmpty()){
