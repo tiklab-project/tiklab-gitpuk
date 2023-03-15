@@ -20,7 +20,7 @@ create table rpy_repository(
     remarks           varchar(255)  comment '描述',
     language             varchar(255)  comment '语言',
     state                int  comment '仓库状态',
-    PRIMARY KEY (code_id) USING BTREE
+    PRIMARY KEY (rpy_id) USING BTREE
 );
 
 
