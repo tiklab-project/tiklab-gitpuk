@@ -10,11 +10,11 @@ create table rpy_group(
 );
 
 create table rpy_repository(
-    code_id                   varchar(255)  comment '仓库id',
+    rpy_id               varchar(255)  comment '仓库id',
     group_id             varchar(256)  comment '仓库组id',
     name                 varchar(255)  comment '仓库名称',
     address              varchar(255)  comment '仓库地址',
-    create_time           varchar(255)  comment '创建时间',
+    create_time          varchar(255)  comment '创建时间',
     type                 int  comment '类型',
     user_id              varchar(255)  comment '创建人',
     remarks           varchar(255)  comment '描述',
