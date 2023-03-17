@@ -13,6 +13,12 @@ spring:
 server:
   port: 8080
 
+xcode:
+  ssh:
+    port: 10000
+    key: tiklab-xcode-starter\src\main\resources\file\id_rsa
+  file: tiklab-xcode-starter\src\main\resources\file
+
 jdbc:
   driverClassName: com.mysql.cj.jdbc.Driver
   url: jdbc:mysql://172.12.1.16:3306/tiklab_xcode?characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
