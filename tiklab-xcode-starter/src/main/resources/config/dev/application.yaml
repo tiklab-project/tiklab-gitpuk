@@ -5,7 +5,7 @@ APP_HOME: ${APP_HOME}
 application: xcode
 
 server:
-  port: 8095
+  port: 8090
 
 spring:
   freemarker:
