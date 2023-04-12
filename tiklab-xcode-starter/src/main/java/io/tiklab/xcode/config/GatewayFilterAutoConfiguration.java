@@ -1,11 +1,11 @@
 package io.tiklab.xcode.config;
 
 import io.tiklab.eam.author.Authenticator;
-import io.tiklab.eam.client.author.AuthorHandler;
-import io.tiklab.eam.client.author.config.IgnoreConfig;
-import io.tiklab.eam.client.author.config.IgnoreConfigBuilder;
-import io.tiklab.gateway.GatewayFilter;
-import io.tiklab.gateway.router.RouterHandler;
+import io.tiklab.eam.client.author.config.AuthorConfig;
+import io.tiklab.eam.client.author.config.AuthorConfigBuilder;
+import io.tiklab.eam.client.author.filter.AuthorFilter;
+import io.tiklab.gateway.router.Router;
+import io.tiklab.gateway.router.RouterBuilder;
 import io.tiklab.gateway.router.config.RouterConfig;
 import io.tiklab.gateway.router.config.RouterConfigBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,25 +15,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayFilterAutoConfiguration {
 
-    //网关filter
+    //路由
     @Bean
-    GatewayFilter gatewayFilter(RouterHandler routerHandler, AuthorHandler authorHandler){
-        return new GatewayFilter()
-                .setRouterHandler(routerHandler)
-                .addHandler(authorHandler);
+    Router router(RouterConfig routerConfig){
+        return RouterBuilder.newRouter(routerConfig);
     }
 
-    //认证handler
+    //认证filter
     @Bean
-    AuthorHandler authorHandler(Authenticator authenticator, IgnoreConfig ignoreConfig){
-        return new AuthorHandler()
+    AuthorFilter authorFilter(Authenticator authenticator, AuthorConfig ignoreConfig){
+        return new AuthorFilter()
                 .setAuthenticator(authenticator)
-                .setIgnoreConfig(ignoreConfig);
+                .setAuthorConfig(ignoreConfig);
     }
 
     @Bean
-    public IgnoreConfig ignoreConfig(){
-        return IgnoreConfigBuilder.instance()
+    public AuthorConfig authorConfig(){
+        return AuthorConfigBuilder.instance()
                 .ignoreTypes(new String[]{
                         ".ico",
                         ".jpg",
@@ -95,12 +93,6 @@ public class GatewayFilterAutoConfiguration {
                 .get();
     }
 
-    //路由handler
-    @Bean
-    RouterHandler routerHandler(RouterConfig routerConfig){
-        return new RouterHandler()
-                .setRouterConfig(routerConfig);
-    }
 
     //路由转发配置
     @Value("${eas.address:null}")

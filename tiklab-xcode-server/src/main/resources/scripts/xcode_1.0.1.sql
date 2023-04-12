@@ -1,1 +1,0 @@
-alter table rpy_auth add user_time varchar(256)

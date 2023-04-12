@@ -11,17 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan({"io.tiklab.xcode"})
 public class XcodeServerAutoConfiguration {
 
-    private static final Logger logger = LoggerFactory.getLogger(XcodeServerAutoConfiguration.class);
-
-    @Bean
-    SQL xcodeInitSql(){
-        logger.info("init xcode project SQL");
-        return new SQL(new String[]{
-                "xcode",
-                "xcode-setting",
-        } ,101);
-    }
-
 }
 
 
