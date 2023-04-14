@@ -194,7 +194,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                 String nickname = rpy.getUser().getName();
                 rpyName = rpyName.replace(nickname + "/", "");
             }
-            if (rpy.getAddress().equals(rpyName)) {
+            if (rpy.getAddress().contains(rpyName)){
                 repository = rpy;
                 break;
             }

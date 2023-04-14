@@ -23,17 +23,13 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
             userPassport.setPassword(password);
             userPassport.setAccount(username);
             userPassport.setDirId(id);
+
             userPassportService.login(userPassport);
             return true;
         }catch (Exception e){
             return false;
         }
     }
-
-
-
-
-
 
 }
 

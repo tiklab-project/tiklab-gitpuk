@@ -41,8 +41,9 @@ public class HttpServlet extends GitServlet {
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-                boolean authorized = isAuthorized((HttpServletRequest) req);
                 HttpServletResponse res1 = (HttpServletResponse) res;
+                boolean authorized = isAuthorized((HttpServletRequest) req);
+
                 if (!authorized){
                         res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
                         res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -62,6 +63,7 @@ public class HttpServlet extends GitServlet {
         private ValidUsrPwdServer validUsrPwdServer;
 
         private boolean isAuthorized(HttpServletRequest req) {
+                String contextPath = req.getContextPath();
                 String authHeader = req.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Basic ")) {
                         byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
