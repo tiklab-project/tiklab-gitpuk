@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Enumeration;
 
 /**
  * 拦截git http请求
@@ -63,7 +64,6 @@ public class HttpServlet extends GitServlet {
         private ValidUsrPwdServer validUsrPwdServer;
 
         private boolean isAuthorized(HttpServletRequest req) {
-                String contextPath = req.getContextPath();
                 String authHeader = req.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Basic ")) {
                         byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
