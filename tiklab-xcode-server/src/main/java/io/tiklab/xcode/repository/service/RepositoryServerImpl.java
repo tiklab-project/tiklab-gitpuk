@@ -52,6 +52,14 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Value("${xcode.file:/file}")
     private String fileAddress;
 
+    @Value("${server.port:8080}")
+    private String port;
+
+    @Value("${xrpy.ssh.port:8082}")
+    private int sshPort;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 创建仓库
@@ -250,14 +258,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         return fileTrees;
     }
 
-    @Value("${server.port:8080}")
-    private String port;
 
-    @Value("${xrpy.ssh.port:8082}")
-    private int sshPort;
-
-    @Autowired
-    private UserService userService;
 
     /**
      * 获取克隆地址
