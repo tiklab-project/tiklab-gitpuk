@@ -2,13 +2,19 @@ package io.tiklab.xcode.util;
 
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Component
 public class RepositoryUtil {
+
+    @Value("${repository.code:null}")
+    private static String repositoryCode;
 
     /**
      * 判断字符串是否为空
@@ -83,7 +89,7 @@ public class RepositoryUtil {
      */
     public static String defaultPath(){
         String property = System.getProperty("user.home");
-        String address = property + "/xcode/repository";
+        String address = property +"/"+repositoryCode+"/repository";
         //根目录
         File file = new File(address);
         return file.getAbsolutePath();

@@ -39,6 +39,10 @@ public class HttpServlet extends GitServlet {
 
         private static final Logger logger = LoggerFactory.getLogger(HttpServlet.class);
 
+
+        @Autowired
+        private ValidUsrPwdServer validUsrPwdServer;
+
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -60,8 +64,7 @@ public class HttpServlet extends GitServlet {
                 super.init(config);
         }
 
-        @Autowired
-        private ValidUsrPwdServer validUsrPwdServer;
+
 
         private boolean isAuthorized(HttpServletRequest req) {
                 String authHeader = req.getHeader("Authorization");
