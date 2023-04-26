@@ -68,6 +68,7 @@ datapath: ${PROJECT_HOME}/caches
 eas:
   embbed:
     enable: true
+  adress: http://bac.eas.tiklab.net
 
 message:
   sms:
@@ -93,7 +94,8 @@ licences:
 file:
   path: http://file.tiklab.net
 
-
+repository:
+  code: xcode
 
 
 
