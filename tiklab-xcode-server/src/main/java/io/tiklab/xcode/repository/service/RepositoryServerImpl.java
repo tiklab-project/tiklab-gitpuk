@@ -61,6 +61,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private UserService userService;
 
+    @Value("${repository.code:null}")
+    private String repositoryCode;
+
     /**
      * 创建仓库
      * @param repository 信息
@@ -282,7 +285,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
-        String http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
+        String http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
         String SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
         repositoryCloneAddress.setHttpAddress(http);
         repositoryCloneAddress.setSSHAddress(SSH);

@@ -1,5 +1,6 @@
 package io.tiklab.xcode.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,11 +11,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@Component
 public class RepositoryUtil {
-
-    @Value("${repository.code:null}")
-    private static String repositoryCode;
 
     /**
      * 判断字符串是否为空
@@ -88,8 +85,10 @@ public class RepositoryUtil {
      * @return 地址
      */
     public static String defaultPath(){
+
         String property = System.getProperty("user.home");
-        String address = property +"/"+repositoryCode+"/repository";
+
+        String address = property +"/code/repository";
         //根目录
         File file = new File(address);
         return file.getAbsolutePath();
