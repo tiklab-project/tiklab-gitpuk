@@ -4,11 +4,7 @@ app:
 APP_HOME: ${APP_HOME}
 application: xcode
 
-spring:
-  config:
-    import: optional:classpath:/config/${env:dev}/application.yaml
-  main:
-    allow-bean-definition-overriding: true
+
 
 server:
   port: 8080
@@ -96,7 +92,7 @@ file:
 
 repository:
   code: xcode
-
+  address: ""
 
 
 

@@ -8,7 +8,7 @@ public class AuthEntity {
 
 
     @Id
-    @GeneratorValue
+    @GeneratorValue(length=12)
     @Column(name = "auth_id")
     private String authId;
 

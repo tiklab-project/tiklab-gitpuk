@@ -4,6 +4,7 @@ import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
+import io.tiklab.privilege.dmRole.service.DmRoleService;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
@@ -20,6 +21,7 @@ import io.tiklab.xcode.repository.model.RepositoryGroup;
 import io.tiklab.xcode.util.RepositoryFileUtil;
 import io.tiklab.xcode.util.RepositoryFinal;
 import io.tiklab.xcode.util.RepositoryUtil;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
@@ -48,6 +50,8 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private RepositoryDao repositoryDao;
 
+    @Autowired
+    private DmRoleService dmRoleService;
 
     @Value("${xcode.file:/file}")
     private String fileAddress;
@@ -63,6 +67,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Value("${repository.code:null}")
     private String repositoryCode;
+
+    @Value("${repository.address:null}")
+    private String repositoryAddress;
 
     /**
      * 创建仓库
@@ -104,7 +111,10 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         repository.setCreateTime(RepositoryUtil.date(1,new Date()));
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
-        return repositoryDao.createRpy(groupEntity);
+
+        String repositoryId = repositoryDao.createRpy(groupEntity);
+        dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+        return repositoryId;
     }
 
     /**
@@ -280,12 +290,19 @@ public class RepositoryServerImpl implements RepositoryServer {
             ip = "172.0.0.1";
         }
         RepositoryCloneAddress repositoryCloneAddress = new RepositoryCloneAddress();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
-        repositoryCloneAddress.setFileAddress(repositoryAddress);
+        String address = RepositoryUtil.findRepositoryAddress(repository);
+        repositoryCloneAddress.setFileAddress(address);
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
-        String http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
+
+        String http=null;
+        if (StringUtils.isNotEmpty(repositoryAddress)){
+             http = repositoryAddress + "/"+repositoryCode+"/"+ path + ".git";
+        }else {
+             http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
+        }
+
         String SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
         repositoryCloneAddress.setHttpAddress(http);
         repositoryCloneAddress.setSSHAddress(SSH);

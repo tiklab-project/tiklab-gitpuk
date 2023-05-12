@@ -98,6 +98,7 @@ file:
 
 repository:
   code: xcode
+  address: "http://192.168.10.19:8090"
 
 
 

@@ -7,7 +7,7 @@ import io.tiklab.dal.jpa.annotation.*;
 public class CodeRelease {
 
     @Id
-    @GeneratorValue
+    @GeneratorValue(length=12)
     @Column(name = "release_id")
     private String releaseId;
 

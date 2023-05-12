@@ -7,7 +7,7 @@ import io.tiklab.dal.jpa.annotation.*;
 public class RepositoryGroupEntity {
 
     @Id
-    @GeneratorValue
+    @GeneratorValue(length=12)
     @Column(name = "group_id")
     private String groupId;
 

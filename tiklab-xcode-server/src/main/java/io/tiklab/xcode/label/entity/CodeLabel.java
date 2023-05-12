@@ -7,7 +7,7 @@ import io.tiklab.dal.jpa.annotation.*;
 public class CodeLabel {
 
     @Id
-    @GeneratorValue
+    @GeneratorValue(length=12)
     @Column(name = "label_id")
     private String labelId;
 

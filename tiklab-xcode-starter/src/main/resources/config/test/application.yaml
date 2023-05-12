@@ -5,7 +5,7 @@ APP_HOME: ${APP_HOME}
 application: xcode
 
 server:
-  port: 8080
+  port: 8083
 
 xcode:
   ssh:
@@ -93,7 +93,7 @@ file:
 
 repository:
   code: xcode
-
+  address: "http://xcode-ce.test.tiklab.net"
 
 
 
