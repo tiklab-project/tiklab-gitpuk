@@ -40,6 +40,11 @@ public class XcodeSqlLoad {
                 "xdprivilege_1.0.0_dml",
 
         });
+
+        dsmConfig.newVersion("1.0.1", new String[]{
+                "user_1.0.1_dml",
+                "oplog_1.0.1_dml"
+        });
         return dsmConfig;
     }
 }

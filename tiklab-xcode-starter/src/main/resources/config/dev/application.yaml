@@ -18,9 +18,9 @@ xcode:
   file: tiklab-xcode-starter\src\main\resources\file
 
 jdbc:
-  driverClassName: com.mysql.cj.jdbc.Driver
-  url: jdbc:mysql://172.10.1.10:3306/tiklab_xcode?characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-  username: root
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://172.10.1.10:5432/tiklab_xcode?stringtype=unspecified
+  username: postgres
   password: darth2020
 
 #plugin config
