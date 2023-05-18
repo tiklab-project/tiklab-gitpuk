@@ -8,6 +8,7 @@ import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
 import io.tiklab.xcode.repository.model.Repository;
+import io.tiklab.xcode.repository.model.RepositoryQuery;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,6 +70,17 @@ public class RepositoryController {
 
         return Result.ok(repositoryList);
     }
+
+    @RequestMapping(path="/findRepositoryList",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryList",desc = "条件查询仓库")
+    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    public Result<List<Repository>> findRepositoryList(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
+
+        List<Repository> repositoryList = repositoryServer.findRepositoryList(repositoryQuery);
+
+        return Result.ok(repositoryList);
+    }
+
 
 
     @RequestMapping(path="/findFileTree",method = RequestMethod.POST)

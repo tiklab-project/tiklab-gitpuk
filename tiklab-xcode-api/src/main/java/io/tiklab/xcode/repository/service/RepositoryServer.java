@@ -8,6 +8,7 @@ import io.tiklab.join.annotation.FindList;
 import io.tiklab.join.annotation.FindOne;
 import io.tiklab.join.annotation.JoinProvider;
 import io.tiklab.xcode.repository.model.Repository;
+import io.tiklab.xcode.repository.model.RepositoryQuery;
 
 import java.util.List;
 
@@ -82,22 +83,11 @@ public interface RepositoryServer {
      */
     RepositoryCloneAddress findCloneAddress(String rpyId);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * 条件查询仓库
+     * @param repositoryQuery repositoryQuery
+     */
+    List<Repository> findRepositoryList(RepositoryQuery repositoryQuery);
 }
 
 

@@ -6,6 +6,9 @@ import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.privilege.dmRole.service.DmRoleService;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.user.dmUser.model.DmUser;
+import io.tiklab.user.dmUser.model.DmUserQuery;
+import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.branch.model.Branch;
@@ -15,12 +18,11 @@ import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RepositoryDao;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
-import io.tiklab.xcode.repository.model.Repository;
-import io.tiklab.xcode.repository.model.RepositoryCloneAddress;
-import io.tiklab.xcode.repository.model.RepositoryGroup;
+import io.tiklab.xcode.repository.model.*;
 import io.tiklab.xcode.util.RepositoryFileUtil;
 import io.tiklab.xcode.util.RepositoryFinal;
 import io.tiklab.xcode.util.RepositoryUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -28,17 +30,17 @@ import org.eclipse.jgit.lib.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
+import javax.validation.constraints.Null;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Exporter
@@ -52,6 +54,12 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Autowired
     private DmRoleService dmRoleService;
+
+    @Autowired
+    private DmUserService dmUserService;
+
+    @Autowired
+    private OpenRecordService openRecordService;
 
     @Value("${xcode.file:/file}")
     private String fileAddress;
@@ -110,6 +118,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
 
         repository.setCreateTime(RepositoryUtil.date(1,new Date()));
+        repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
 
         String repositoryId = repositoryDao.createRpy(groupEntity);
@@ -125,6 +134,8 @@ public class RepositoryServerImpl implements RepositoryServer {
     public void deleteRpy(String rpyId) {
         Repository repository = findOneRpy(rpyId);
         repositoryDao.deleteRpy(rpyId);
+
+        openRecordService.deleteOpenRecordByRecord(rpyId);
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
         File file = new File(repositoryAddress);
         if (!file.exists()){
@@ -179,9 +190,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         List<RepositoryEntity> groupEntityList = repositoryDao.findAllRpy();
         List<Repository> list = BeanMapper.mapList(groupEntityList, Repository.class);
         joinTemplate.joinQuery(list);
-        if (list == null){
-            return Collections.emptyList();
-        }
         return list;
     }
 
@@ -310,9 +318,41 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     }
 
+    @Override
+    public List<Repository> findRepositoryList(RepositoryQuery repositoryQuery) {
+        DmUserQuery dmUserQuery = new DmUserQuery();
+        dmUserQuery.setUserId(repositoryQuery.getUserId());
+        List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+        List<Repository> repositoryList=null;
+        if (CollectionUtils.isNotEmpty(dmUserList)){
+            List<String> ids = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
+            //通过最近打开的仓库排序
+            if (("openTime").equals(repositoryQuery.getSort())){
+                List<OpenRecord> recordList = openRecordService.findOpenRecordList(new OpenRecordQuery().setUserId(repositoryQuery.getUserId()));
+                //获取当前用户最近打开的仓库id
+                List<String> openRepositoryIds = recordList.stream().sorted(Comparator.comparing(OpenRecord::getNewOpenTime).reversed()).map(OpenRecord::getRepositoryId).collect(Collectors.toList());
+
+                List<String> stringList = openRepositoryIds.stream().filter(ids::contains).collect(Collectors.toList());
+                if (stringList.size()>0){
+                    List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(stringList);
+                    repositoryList = BeanMapper.mapList(repositoryEntityList, Repository.class);
+                }
+            }else {
+                List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(ids);
+                repositoryList = BeanMapper.mapList(repositoryEntityList, Repository.class);
+                repositoryList = repositoryList.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
+                //通过仓库名称查询
+                if(StringUtils.isNotEmpty(repositoryQuery.getName())){
+                   repositoryList = repositoryList.stream().filter(a -> (repositoryQuery.getName()).equals(a.getName())).collect(Collectors.toList());
+
+                }
+            }
+            joinTemplate.joinQuery(repositoryList);
+        }
+        return repositoryList;
+    }
 
 
-    
 }
 
 

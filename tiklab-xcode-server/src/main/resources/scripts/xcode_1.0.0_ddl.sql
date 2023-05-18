@@ -5,8 +5,8 @@
 create table rpy_group(
     group_id             varchar(12) ,
     name                 varchar(256)  ,
-    type                 int ,
-    create_time          varchar(256) ,
+    type                 int,
+    create_time          varchar(256),
     user_id              varchar(12)  ,
     address              varchar(256) ,
     remarks           varchar(256)

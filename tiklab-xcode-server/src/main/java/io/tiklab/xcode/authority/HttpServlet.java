@@ -1,5 +1,7 @@
 package io.tiklab.xcode.authority;
 
+import io.tiklab.xcode.repository.model.RepositoryQuery;
+import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.util.RepositoryUtil;
 import io.tiklab.core.exception.ApplicationException;
 import org.eclipse.jgit.api.Git;
@@ -22,7 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 
 /**
  * 拦截git http请求
@@ -43,6 +47,9 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private ValidUsrPwdServer validUsrPwdServer;
 
+
+        @Autowired
+        private RepositoryServer repositoryServer;
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -52,6 +59,15 @@ public class HttpServlet extends GitServlet {
                 if (!authorized){
                         res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
                         res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+                String requestURI = ((HttpServletRequest) req).getRequestURI();
+                if (requestURI.endsWith("git-receive-pack")){
+                        String[] split = requestURI.split("/");
+                        String repositoryName=split[2];
+                        String name = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
+                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(name));
+                        repositoryList.get(0).setUpdateTime(RepositoryUtil.date(1,new Date()));
+                        repositoryServer.updateRpy(repositoryList.get(0));
                 }
                 super.service(req, res);
         }

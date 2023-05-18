@@ -61,7 +61,14 @@ public class RepositoryDao {
         return jpaTemplate.findList(RepositoryEntity.class,idList);
     }
 
-
+    /**
+     * 通过ids查询
+     * @param idList
+     * @return
+     */
+    public List<RepositoryEntity> findRepositoryList(List<String> idList) {
+        return jpaTemplate.findList(RepositoryEntity.class,idList);
+    }
 
 }
 

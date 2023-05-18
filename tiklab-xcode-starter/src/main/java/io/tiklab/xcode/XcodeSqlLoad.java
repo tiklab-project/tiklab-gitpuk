@@ -37,13 +37,15 @@ public class XcodeSqlLoad {
                 "todotask_1.0.0_dml",
                 //xcode
                 "xcode_1.0.0_ddl",
+                "xcode_1.0.0_dml",
                 "xdprivilege_1.0.0_dml",
 
         });
 
         dsmConfig.newVersion("1.0.1", new String[]{
                 "user_1.0.1_dml",
-                "oplog_1.0.1_dml"
+                "oplog_1.0.1_dml",
+                "xcode_1.0.1_ddl"
         });
         dsmConfig.newVersion("1.0.2", new String[]{
                 "oplog_1.0.2_dml"
