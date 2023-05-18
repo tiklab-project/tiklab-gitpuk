@@ -7,8 +7,7 @@ create table rpy_open_record(
     repository_id    varchar(12)  ,
     user_id          varchar(12)
     new_open_time    timestamp,
-    create_time      timestamp,
-
+    create_time      timestamp
 );
 
 

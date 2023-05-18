@@ -60,15 +60,7 @@ public class HttpServlet extends GitServlet {
                         res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
                         res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
-                String requestURI = ((HttpServletRequest) req).getRequestURI();
-                if (requestURI.endsWith("git-receive-pack")){
-                        String[] split = requestURI.split("/");
-                        String repositoryName=split[2];
-                        String name = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
-                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(name));
-                        repositoryList.get(0).setUpdateTime(RepositoryUtil.date(1,new Date()));
-                        repositoryServer.updateRpy(repositoryList.get(0));
-                }
+
                 super.service(req, res);
         }
 
@@ -91,9 +83,22 @@ public class HttpServlet extends GitServlet {
                                 String username = authTokens[0];
                                 String password = authTokens[1];
                                 return validUsrPwdServer.validUserNamePassword(username,password,"1");
+
                         }
                 }
                 return false;
+        }
+
+
+        private void updateRepository(String requestURI,String userName){
+                if (requestURI.endsWith("git-receive-pack")){
+                        String[] split = requestURI.split("/");
+                        String repositoryName=split[2];
+                        String name = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
+                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(name));
+                        repositoryList.get(0).setUpdateTime(RepositoryUtil.date(1,new Date()));
+                        repositoryServer.updateRpy(repositoryList.get(0));
+                }
         }
 
         /**
