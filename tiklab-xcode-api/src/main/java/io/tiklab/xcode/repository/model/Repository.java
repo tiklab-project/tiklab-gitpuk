@@ -9,10 +9,12 @@ import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 import io.tiklab.user.user.model.User;
 
+import java.io.Serializable;
+
 @ApiModel
 @Join
 @Mapper(targetAlias = "RepositoryEntity")
-public class Repository {
+public class Repository implements Serializable {
 
     @ApiProperty(name="rpyId",desc="仓库id")
     private String rpyId;
@@ -55,6 +57,8 @@ public class Repository {
     @ApiProperty(name="state",desc="仓库状态")
     private int state;
 
+    /*--------其他字段---------*/
+
     /**
      * 默认分支
      */
@@ -65,6 +69,10 @@ public class Repository {
      */
     private boolean notNull;
 
+    /**
+     * 仓库全路径
+     */
+    private String fullPath;
 
     public String getRpyId() {
         return rpyId;
@@ -169,6 +177,14 @@ public class Repository {
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    public void setFullPath(String fullPath) {
+        this.fullPath = fullPath;
     }
 }
 

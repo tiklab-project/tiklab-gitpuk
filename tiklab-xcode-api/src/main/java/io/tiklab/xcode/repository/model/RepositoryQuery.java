@@ -22,8 +22,9 @@ public class RepositoryQuery implements Serializable {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public RepositoryQuery setUserId(String userId) {
         this.userId = userId;
+        return this;
     }
 
     public String getSort() {

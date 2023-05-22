@@ -1,28 +1,33 @@
-package io.tiklab.xcode.repository.entity;
+package io.tiklab.xcode.repository.model;
 
-import io.tiklab.dal.jpa.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.tiklab.beans.annotation.Mapper;
+import io.tiklab.join.annotation.Join;
+import io.tiklab.postin.annotation.ApiModel;
+import io.tiklab.postin.annotation.ApiProperty;
 
 import java.sql.Timestamp;
 
-@Entity
-@Table(name="rpy_open_record")
-public class OpenRecordEntity {
+@ApiModel
+@Join
+@Mapper(targetAlias = "RecordOpenEntity")
+public class RecordOpen {
 
-    @Id
-    @GeneratorValue(length=12)
-    @Column(name = "id")
+    @ApiProperty(name="id",desc="id")
     private String id;
 
-    @Column(name = "repository_id")
+    @ApiProperty(name="repositoryId",desc="仓库id")
     private String repositoryId;
 
-    @Column(name = "user_id")
+    @ApiProperty(name="userId",desc="用户id")
     private String userId;
 
-    @Column(name = "new_open_time")
+    @ApiProperty(name="newOpenTime",desc="最新打开的时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Timestamp newOpenTime;
 
-    @Column(name = "create_time")
+    @ApiProperty(name="createTime",desc="创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Timestamp createTime;
 
     public String getId() {
@@ -38,7 +43,10 @@ public class OpenRecordEntity {
     }
 
     public void setRepositoryId(String repositoryId) {
+
         this.repositoryId = repositoryId;
+
+
     }
 
     public String getUserId() {
@@ -65,11 +73,6 @@ public class OpenRecordEntity {
         this.createTime = createTime;
     }
 }
-
-
-
-
-
 
 
 

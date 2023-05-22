@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import javax.validation.constraints.Null;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -59,7 +58,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     private DmUserService dmUserService;
 
     @Autowired
-    private OpenRecordService openRecordService;
+    private RecordOpenService recordOpenService;
 
     @Value("${xcode.file:/file}")
     private String fileAddress;
@@ -135,7 +134,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         Repository repository = findOneRpy(rpyId);
         repositoryDao.deleteRpy(rpyId);
 
-        openRecordService.deleteOpenRecordByRecord(rpyId);
+        recordOpenService.deleteRecordOpenByRecord(rpyId);
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
         File file = new File(repositoryAddress);
         if (!file.exists()){
@@ -189,6 +188,10 @@ public class RepositoryServerImpl implements RepositoryServer {
     public List<Repository> findAllRpy() {
         List<RepositoryEntity> groupEntityList = repositoryDao.findAllRpy();
         List<Repository> list = BeanMapper.mapList(groupEntityList, Repository.class);
+        for (Repository repository:list){
+            RepositoryCloneAddress cloneAddress = findCloneAddress(repository.getRpyId());
+            repository.setFullPath(cloneAddress.getHttpAddress());
+        }
         joinTemplate.joinQuery(list);
         return list;
     }
@@ -197,7 +200,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public List<Repository> findAllRpyList(List<String> idList) {
         List<RepositoryEntity> groupEntities = repositoryDao.findAllRpyList(idList);
-        List<Repository> list = BeanMapper.mapList(groupEntities, Repository.class);
+        List<RepositoryEntity> entities = groupEntities.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
+        List<Repository> list = BeanMapper.mapList(entities, Repository.class);
+
         joinTemplate.joinQuery(list);
         return list;
     }
@@ -310,8 +315,11 @@ public class RepositoryServerImpl implements RepositoryServer {
         }else {
              http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
         }
+        String SSH=null;
+        if (!ObjectUtils.isEmpty(user)){
+             SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
+        }
 
-        String SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
         repositoryCloneAddress.setHttpAddress(http);
         repositoryCloneAddress.setSSHAddress(SSH);
         return repositoryCloneAddress;
@@ -328,9 +336,9 @@ public class RepositoryServerImpl implements RepositoryServer {
             List<String> ids = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
             //通过最近打开的仓库排序
             if (("openTime").equals(repositoryQuery.getSort())){
-                List<OpenRecord> recordList = openRecordService.findOpenRecordList(new OpenRecordQuery().setUserId(repositoryQuery.getUserId()));
+                List<RecordOpen> recordList = recordOpenService.findRecordOpenList(new RecordOpenQuery().setUserId(repositoryQuery.getUserId()));
                 //获取当前用户最近打开的仓库id
-                List<String> openRepositoryIds = recordList.stream().sorted(Comparator.comparing(OpenRecord::getNewOpenTime).reversed()).map(OpenRecord::getRepositoryId).collect(Collectors.toList());
+                List<String> openRepositoryIds = recordList.stream().sorted(Comparator.comparing(RecordOpen::getNewOpenTime).reversed()).map(RecordOpen::getRepositoryId).collect(Collectors.toList());
 
                 List<String> stringList = openRepositoryIds.stream().filter(ids::contains).collect(Collectors.toList());
                 if (stringList.size()>0){

@@ -1,6 +1,7 @@
 package io.tiklab.xcode.branch.service;
 
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.xcode.branch.model.BranchMessage;
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.xcode.repository.model.Repository;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
+@Exporter
 public class BranchServerImpl implements BranchServer {
 
 

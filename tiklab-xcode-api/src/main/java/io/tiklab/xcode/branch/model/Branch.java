@@ -1,6 +1,8 @@
 package io.tiklab.xcode.branch.model;
 
-public class Branch {
+import java.io.Serializable;
+
+public class Branch implements Serializable {
 
     //分支id
     private String branchId;

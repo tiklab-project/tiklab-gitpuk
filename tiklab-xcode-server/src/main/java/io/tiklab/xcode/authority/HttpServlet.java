@@ -1,6 +1,10 @@
 package io.tiklab.xcode.authority;
 
+import io.tiklab.user.user.model.User;
+import io.tiklab.user.user.service.UserService;
+import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.RepositoryQuery;
+import io.tiklab.xcode.repository.service.RecordCommitService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.util.RepositoryUtil;
 import io.tiklab.core.exception.ApplicationException;
@@ -23,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
@@ -47,9 +52,16 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private ValidUsrPwdServer validUsrPwdServer;
 
+        @Autowired
+        private RecordCommitService  commitService;
 
         @Autowired
         private RepositoryServer repositoryServer;
+
+        @Autowired
+        private UserService userService;
+
+
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -82,22 +94,34 @@ public class HttpServlet extends GitServlet {
                         if (authTokens.length == 2) {
                                 String username = authTokens[0];
                                 String password = authTokens[1];
-                                return validUsrPwdServer.validUserNamePassword(username,password,"1");
+                                boolean result = validUsrPwdServer.validUserNamePassword(username, password, "1");
+                                if (result){
+                                        updateRepository(req.getRequestURI(),username);
+                                }
+                                return result;
 
                         }
                 }
                 return false;
         }
 
-
+        /**
+         * 修改提交记录
+         */
         private void updateRepository(String requestURI,String userName){
                 if (requestURI.endsWith("git-receive-pack")){
+                        User user = userService.findUserByUsername(userName);
+
                         String[] split = requestURI.split("/");
                         String repositoryName=split[2];
                         String name = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
-                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(name));
-                        repositoryList.get(0).setUpdateTime(RepositoryUtil.date(1,new Date()));
-                        repositoryServer.updateRpy(repositoryList.get(0));
+                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(name).setUserId(user.getId()));
+
+                        RecordCommit recordCommit = new RecordCommit();
+                        recordCommit.setRepository(repositoryList.get(0));
+                        recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
+                        recordCommit.setUserId(user.getId());
+                        commitService.createRecordCommit(recordCommit);
                 }
         }
 

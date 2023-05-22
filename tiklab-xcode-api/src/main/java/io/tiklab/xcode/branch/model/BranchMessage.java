@@ -1,6 +1,8 @@
 package io.tiklab.xcode.branch.model;
 
-public class BranchMessage {
+import java.io.Serializable;
+
+public class BranchMessage implements Serializable {
 
     /**
      * 新建分支名称

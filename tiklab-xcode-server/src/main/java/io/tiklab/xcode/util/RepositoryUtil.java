@@ -1,6 +1,7 @@
 package io.tiklab.xcode.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class RepositoryUtil {
 
@@ -166,7 +168,83 @@ public class RepositoryUtil {
         return file.getAbsolutePath();
     }
 
+    /**
+     * 效验地址是否存在配置文件
+     * @param fileAddress 文件地址
+     * @param type 文件类型
+    // * @return 匹配状态  1.不是个目录或不存在这个文件夹  2. 空目录找不到可执行文件 0. 匹配成功
+     */
+    public static void validFile(String fileAddress, int type) throws ApplicationException {
+        File file = new File(fileAddress);
 
+        //不存在这个目录
+        if (!file.exists()){
+            throw new ApplicationException("git可执行程序地址错误，找不到 "+fileAddress+" 这个目录。");
+        }
+        //不是个目录
+        if (!file.isDirectory()){
+            throw new ApplicationException(fileAddress+"不是个目录。");
+        }
+        //不存在可执行文件
+        File[] files = file.listFiles();
+        if (files == null || files.length == 0){
+            throw new ApplicationException("在"+fileAddress+"找不到可执行文件。");
+        }
+
+        for (File listFile : Objects.requireNonNull(file.listFiles())) {
+            if (listFile.isDirectory()){
+                continue;
+            }
+            String name = listFile.getName();
+            switch (type) {
+                case 1,2,3,4 -> {
+                    if (name.equals("git") || name.equals("git.exe")) {
+                        return ;
+                    }
+                }
+                case 5 -> {
+                    if (name.equals("svn") || name.equals("svn.exe")) {
+                        return ;
+                    }
+                }
+                case 21 -> {
+                    if (name.equals("mvn")) {
+                        return ;
+                    }
+                }
+                case 22 -> {
+                    if (name.equals("npm")) {
+                        return ;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 系统默认存储位置
+     * @return 位置
+     */
+    public static String findFileAddress(String id){
+        //根目录
+        String userHome = System.getProperty("user.home");
+       String path= userHome+"/Desktop/tiklab-xpack";
+
+        int systemType = findSystemType();
+        if (systemType == 1){
+            if (!RepositoryUtil.isNoNull(id)){
+                return path + "\\";
+            }else {
+                return path + "\\" + id + "\\";
+            }
+        }else {
+            if (!RepositoryUtil.isNoNull(id)){
+                return path + "/";
+            }else {
+                return path + "/" + id + "/" ;
+            }
+        }
+    }
 }
 
 
