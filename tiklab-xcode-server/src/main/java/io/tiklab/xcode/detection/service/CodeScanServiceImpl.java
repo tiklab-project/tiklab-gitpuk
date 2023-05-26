@@ -237,7 +237,8 @@ public class CodeScanServiceImpl implements CodeScanService {
             CodeScanEntity codeScanEntity = BeanMapper.map(codeScan, CodeScanEntity.class);
             codeScanDao.createCodeScan(codeScanEntity);
         }else {
-            CodeScanEntity codeScanEntity = BeanMapper.map(scanByRpy, CodeScanEntity.class);
+            codeScan.setId(scanByRpy.getId());
+            CodeScanEntity codeScanEntity = BeanMapper.map(codeScan, CodeScanEntity.class);
              codeScanDao.updateCodeScan(codeScanEntity);
         }
         return null;
