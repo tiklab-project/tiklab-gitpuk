@@ -134,15 +134,25 @@ public class GitUntil {
      * 克隆仓库
      * @param repositoryAddress 仓库地址
      * @param branch 分支
+     * @parm cloneAddress  克隆地址
      * @throws GitAPIException 克隆失败
      */
-    public static void cloneRepository(String repositoryAddress,String branch) throws GitAPIException {
-        Git git = Git.cloneRepository()
-                .setURI(repositoryAddress)
-                .setDirectory(new File(repositoryAddress+"_"+branch))
-                .setBranch(branch)
-                .call();
-        git.close();
+    public static void cloneRepository(String repositoryAddress,String branch,String cloneAddress)   {
+        try {
+            File folder = new File(cloneAddress);
+            if (!folder.exists() && !folder.isDirectory()) {
+                folder.mkdirs();
+            }
+            Git git = Git.cloneRepository()
+                    .setURI(repositoryAddress)
+                    .setDirectory(folder)
+                    .setBranch(branch)
+                    .call();
+            git.close();
+        }catch (Exception e){
+            throw  new ApplicationException(e.getMessage());
+        }
+
     }
 
     /**

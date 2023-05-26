@@ -7,8 +7,7 @@ import io.tiklab.xcode.repository.model.RepositoryGroup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -46,11 +45,14 @@ public class RepositoryUtil {
     public static int findSystemType(){
         String property = System.getProperty("os.name");
         String[] s1 = property.split(" ");
-        if (s1[0].equals("Windows")){
-            return 1;
-        }else {
-            return 2;
-        }
+       switch (s1[0]){
+           case "Windows":
+               return 1;
+           case "Mac":
+               return 2;
+           default:
+               return 3;
+       }
     }
 
     /**
@@ -63,7 +65,6 @@ public class RepositoryUtil {
     public static Process process(String path,String order) throws IOException {
         Runtime runtime=Runtime.getRuntime();
         Process process;
-        String[] cmd;
         if (RepositoryUtil.findSystemType()==1){
             if (!RepositoryUtil.isNoNull(path)){
                 process = runtime.exec(" cmd.exe /c " + " " + order);
@@ -72,10 +73,10 @@ public class RepositoryUtil {
             }
         }else {
             if (!RepositoryUtil.isNoNull(path)){
-                cmd = new String[] { "/bin/sh", "-c", " source /etc/profile;"+ order };
+                String[]  cmd = new String[] { "/bin/sh", "-c", " source /etc/profile;"+ order };
                 process = runtime.exec(cmd);
             }else {
-                cmd = new String[] { "/bin/sh", "-c", "cd " + path + ";"+" source /etc/profile;"+ order };
+                String[]  cmd = new String[] { "/bin/sh", "-c", "cd " + path + ";"+" source /etc/profile;"+ order };
                 process = runtime.exec(cmd,null,new File(path));
             }
         }
@@ -222,28 +223,41 @@ public class RepositoryUtil {
     }
 
     /**
-     * 系统默认存储位置
+     * 不同系统返回的地址
+     * @param address
      * @return 位置
      */
-    public static String findFileAddress(String id){
-        //根目录
-        String userHome = System.getProperty("user.home");
-       String path= userHome+"/Desktop/tiklab-xpack";
+    public static String SystemTypeAddress(String address) {
+
 
         int systemType = findSystemType();
-        if (systemType == 1){
-            if (!RepositoryUtil.isNoNull(id)){
-                return path + "\\";
-            }else {
-                return path + "\\" + id + "\\";
-            }
-        }else {
-            if (!RepositoryUtil.isNoNull(id)){
-                return path + "/";
-            }else {
-                return path + "/" + id + "/" ;
-            }
+        if (systemType == 1) {
+            return address.replace("/", "\\");
         }
+        return address;
+    }
+
+    /**
+     * 删除文件和文件夹
+     * @param address
+     * @param  dire 文件夹
+     * @return 位置
+     */
+    public static Process deleteDireAndFile(String address,String dire) {
+        try {
+            Runtime runtime=Runtime.getRuntime();
+            Process process;
+            if (RepositoryUtil.findSystemType()==1){
+                process = runtime.exec(" cmd.exe /c " + " " + "rm -rf "+ dire);
+            }else {
+                String[]  cmd = new String[] { "/bin/sh", "-c", "cd " + address + ";"+" source /etc/profile;"+ "rm -rf "+ dire };
+                process=runtime.exec(cmd);
+            }
+            return process;
+        }catch (Exception e){
+            throw  new ApplicationException(e.getMessage());
+        }
+
     }
 }
 

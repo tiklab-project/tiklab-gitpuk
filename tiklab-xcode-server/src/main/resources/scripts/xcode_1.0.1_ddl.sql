@@ -21,36 +21,33 @@ create table rpy_record_commit(
     commit_time    timestamp
 );
 -- ---------------------------
--- 供应管理地址
+-- 环境配置
 -- @dsm.cmd.id="1003"
 -- ----------------------------
-create table rpy_scm_address(
+create table rpy_deploy_env(
       id             varchar(12) PRIMARY KEY ,
-      scm_type       varchar (12) NOT NULL,
-      scm_name       varchar(32) NOT NULL,
-      scm_address    varchar (32) NOT NULL,
+      env_type       varchar (32) NOT NULL,
+      env_name       varchar(128) NOT NULL,
+      env_address    varchar (255) NOT NULL,
       create_time    timestamp
 );
 
 -- ---------------------------
--- 第三方认证管理
--- @dsm.cmd.id="1003"
+-- 服务配置
+-- @dsm.cmd.id="1004"
 -- ----------------------------
-create table rpy_auth_third(
+create table rpy_deploy_server(
     id             varchar(12) PRIMARY KEY ,
-    auth_name      varchar (32)  NOT NULL,
-    auth_type       varchar (12) NOT NULL,
-    auth_server     varchar (12)  NOT NULL,
-    server_address     varchar(64) NOT NULL,
-    maven_address    varchar (64)  NOT NULL,
+    task_name     varchar (64) NOT NULL,
+    server_name      varchar (32)  NOT NULL,
+    server_type       varchar (12) NOT NULL,
+    auth_type    varchar (12)  NOT NULL,
+    server_address     varchar(255) NOT NULL,
     user_name    varchar (32),
     pass_word    varchar (32),
     private_key  varchar (328),
     create_time    timestamp
 );
-
-
-
 
 
 

@@ -48,7 +48,8 @@ public class XcodeSqlLoad {
                 "xcode_1.0.1_ddl"
         });
         dsmConfig.newVersion("1.0.2", new String[]{
-                "oplog_1.0.2_dml"
+                "oplog_1.0.2_dml",
+                "xcode_1.0.2_ddl"
         });
         return dsmConfig;
     }

@@ -117,7 +117,6 @@ public class RepositoryServerImpl implements RepositoryServer {
 
 
         repository.setCreateTime(RepositoryUtil.date(1,new Date()));
-        repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
 
         String repositoryId = repositoryDao.createRpy(groupEntity);
@@ -160,6 +159,17 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     @Override
     public Repository findOneRpy(String rpyId) {
+        RepositoryEntity groupEntity = repositoryDao.findOneRpy(rpyId);
+        Repository repository = BeanMapper.map(groupEntity, Repository.class);
+        joinTemplate.joinQuery(repository);
+        if (!ObjectUtils.isEmpty(repository)){
+            RepositoryCloneAddress cloneAddress = findCloneAddress(rpyId);
+            repository.setFullPath(cloneAddress.getHttpAddress());
+        }
+        return repository;
+    }
+
+    public Repository findOne(String rpyId){
         RepositoryEntity groupEntity = repositoryDao.findOneRpy(rpyId);
         Repository repository = BeanMapper.map(groupEntity, Repository.class);
         joinTemplate.joinQuery(repository);
@@ -293,7 +303,7 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     @Override
     public RepositoryCloneAddress findCloneAddress(String rpyId){
-        Repository repository = findOneRpy(rpyId);
+        Repository repository = findOne(rpyId);
         String path = repository.getAddress();
         String  ip ;
         //获取本机地址
@@ -325,6 +335,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         return repositoryCloneAddress;
 
     }
+
 
     @Override
     public List<Repository> findRepositoryList(RepositoryQuery repositoryQuery) {

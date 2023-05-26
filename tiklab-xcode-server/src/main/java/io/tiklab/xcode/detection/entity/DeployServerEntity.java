@@ -5,28 +5,28 @@ import io.tiklab.dal.jpa.annotation.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name="rpy_auth_third")
-public class AuthThirdEntity {
+@Table(name="rpy_deploy_server")
+public class DeployServerEntity {
 
     @Id
     @GeneratorValue(length=12)
     @Column(name = "id")
     private String id;
 
-    @Column(name = "auth_name" ,notNull = true)
-    private String authName;
+    @Column(name = "task_name" ,notNull = true)
+    private String taskName;
 
-    @Column(name = "auth_server",notNull = true)
-    private String authServer;
+    @Column(name = "server_name" ,notNull = true)
+    private String serverName;
 
     @Column(name = "auth_type",notNull = true)
     private String authType;
 
+    @Column(name = "server_auth",notNull = true)
+    private String serverAuth;
+
     @Column(name = "server_address",notNull = true)
     private String serverAddress;
-
-    @Column(name = "maven_address",notNull = true)
-    private String  mavenAddress;
 
     @Column(name = "user_name")
     private String userName;
@@ -48,20 +48,20 @@ public class AuthThirdEntity {
         this.id = id;
     }
 
-    public String getAuthName() {
-        return authName;
+    public String getTaskName() {
+        return taskName;
     }
 
-    public void setAuthName(String authName) {
-        this.authName = authName;
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
-    public String getAuthServer() {
-        return authServer;
+    public String getServerName() {
+        return serverName;
     }
 
-    public void setAuthServer(String authServer) {
-        this.authServer = authServer;
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
     }
 
     public String getAuthType() {
@@ -70,6 +70,14 @@ public class AuthThirdEntity {
 
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    public String getServerAuth() {
+        return serverAuth;
+    }
+
+    public void setServerAuth(String serverAuth) {
+        this.serverAuth = serverAuth;
     }
 
     public String getServerAddress() {
@@ -111,15 +119,6 @@ public class AuthThirdEntity {
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
-
-    public String getMavenAddress() {
-        return mavenAddress;
-    }
-
-    public void setMavenAddress(String mavenAddress) {
-        this.mavenAddress = mavenAddress;
-    }
-
 }
 
 

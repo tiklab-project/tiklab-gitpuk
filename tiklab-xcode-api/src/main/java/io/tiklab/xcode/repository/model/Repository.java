@@ -35,8 +35,6 @@ public class Repository implements Serializable {
     @ApiProperty(name="createTime",desc="创建时间")
     private String createTime;
 
-    @ApiProperty(name="updateTime",desc="更新时间")
-    private String updateTime;
 
     @ApiProperty(name="type",desc="类型")
     private int type;
@@ -171,13 +169,6 @@ public class Repository implements Serializable {
         this.notNull = notNull;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
-    }
 
     public String getFullPath() {
         return fullPath;

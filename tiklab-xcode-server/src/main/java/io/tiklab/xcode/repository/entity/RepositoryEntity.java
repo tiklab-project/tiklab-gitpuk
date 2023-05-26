@@ -23,8 +23,6 @@ public class RepositoryEntity {
     @Column(name = "create_time")
     private String createTime;
 
-    @Column(name = "update_time")
-    private String updateTime;
 
     @Column(name = "type")
     private int type;
@@ -122,13 +120,6 @@ public class RepositoryEntity {
         this.state = state;
     }
 
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
-    }
 }
 
 

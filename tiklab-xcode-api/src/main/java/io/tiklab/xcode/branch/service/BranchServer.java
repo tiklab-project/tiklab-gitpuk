@@ -9,6 +9,12 @@ import java.util.List;
 @JoinProvider(model = Branch.class)
 public interface BranchServer {
 
+    /**
+     * 查询单个分支
+     * @param rpyId 仓库id
+     * @return 分支信息列表
+     */
+     Branch findBranch(String rpyId,String commitId);
 
 
     /**

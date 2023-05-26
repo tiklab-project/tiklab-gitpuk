@@ -11,22 +11,22 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "ScmAddressEntity")
-public class ScmAddress implements Serializable {
+@Mapper(targetAlias = "DeployEnvEntity")
+public class DeployEnv implements Serializable {
 
 
     @ApiProperty(name="id",desc="id")
     private String id;
 
 
-    @ApiProperty(name="scmType",desc="供应应用类型")
-    private String scmType;
+    @ApiProperty(name="envType",desc="环境类型")
+    private String envType;
 
-    @ApiProperty(name="scmName",desc="供应应用名称")
-    private String scmName;
+    @ApiProperty(name="envName",desc="环境名称")
+    private String envName;
 
-    @ApiProperty(name="scmAddress",desc="供应应用地址")
-    private String scmAddress;
+    @ApiProperty(name="envAddress",desc="环境应用地址")
+    private String envAddress;
 
     @ApiProperty(name="createTime",desc="创建时间")
     private Timestamp createTime;
@@ -40,28 +40,28 @@ public class ScmAddress implements Serializable {
         this.id = id;
     }
 
-    public String getScmType() {
-        return scmType;
+    public String getEnvType() {
+        return envType;
     }
 
-    public void setScmType(String scmType) {
-        this.scmType = scmType;
+    public void setEnvType(String envType) {
+        this.envType = envType;
     }
 
-    public String getScmName() {
-        return scmName;
+    public String getEnvName() {
+        return envName;
     }
 
-    public void setScmName(String scmName) {
-        this.scmName = scmName;
+    public void setEnvName(String envName) {
+        this.envName = envName;
     }
 
-    public String getScmAddress() {
-        return scmAddress;
+    public String getEnvAddress() {
+        return envAddress;
     }
 
-    public void setScmAddress(String scmAddress) {
-        this.scmAddress = scmAddress;
+    public void setEnvAddress(String envAddress) {
+        this.envAddress = envAddress;
     }
 
     public Timestamp getCreateTime() {

@@ -10,18 +10,20 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "AuthThirdEntity")
-public class AuthThird implements Serializable {
+@Mapper(targetAlias = "DeployServerEntity")
+public class DeployServer implements Serializable {
 
     @ApiProperty(name="id",desc="id")
     private String id;
 
+    @ApiProperty(name="taskName",desc="任务名称")
+    private String taskName;
 
-    @ApiProperty(name="authName",desc="认证名称")
-    private String authName;
+    @ApiProperty(name="serverName",desc="服务名称")
+    private String serverName;
 
-    @ApiProperty(name="authServer",desc="服务权限 public、private")
-    private String authServer;
+    @ApiProperty(name="serverAuth",desc="服务权限 public、private")
+    private String serverAuth;
 
 
     @ApiProperty(name="authType",desc="认证类型 account、privateKey")
@@ -29,9 +31,6 @@ public class AuthThird implements Serializable {
 
     @ApiProperty(name="serverAddress",desc="应用地址")
     private String serverAddress;
-
-    @ApiProperty(name="mavenAddress",desc="maven 地址")
-    private String mavenAddress;
 
     @ApiProperty(name="userName",desc="账号")
     private String userName;
@@ -53,20 +52,28 @@ public class AuthThird implements Serializable {
         this.id = id;
     }
 
-    public String getAuthName() {
-        return authName;
+    public String getTaskName() {
+        return taskName;
     }
 
-    public void setAuthName(String authName) {
-        this.authName = authName;
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 
-    public String getAuthServer() {
-        return authServer;
+    public String getServerName() {
+        return serverName;
     }
 
-    public void setAuthServer(String authServer) {
-        this.authServer = authServer;
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getServerAuth() {
+        return serverAuth;
+    }
+
+    public void setServerAuth(String serverAuth) {
+        this.serverAuth = serverAuth;
     }
 
     public String getAuthType() {
@@ -115,13 +122,5 @@ public class AuthThird implements Serializable {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
-    }
-
-    public String getMavenAddress() {
-        return mavenAddress;
-    }
-
-    public void setMavenAddress(String mavenAddress) {
-        this.mavenAddress = mavenAddress;
     }
 }
