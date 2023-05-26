@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableUser
 //消息中心
 @EnableMessage
+
 //权限中心
 @EnableLicenceServer
 @EnableIntegration
