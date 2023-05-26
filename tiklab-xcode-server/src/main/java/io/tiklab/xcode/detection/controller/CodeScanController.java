@@ -45,8 +45,8 @@ public class CodeScanController {
     @RequestMapping(path="/findScanResult",method = RequestMethod.POST)
     @ApiMethod(name = "findScanResult",desc = "查询扫描后项目结果")
     @ApiParam(name = "repositoryId",desc = "repositoryId",required = true)
-    public Result<CodeScan> findScanResult( @NotNull String  repositoryId,String deployServerId){
-        CodeScan scanResult = codeScanService.findScanResult(repositoryId, deployServerId);
+    public Result<CodeScan> findScanResult( @NotNull String  repositoryId){
+        CodeScan scanResult = codeScanService.findScanResult(repositoryId);
 
         return Result.ok(scanResult);
     }

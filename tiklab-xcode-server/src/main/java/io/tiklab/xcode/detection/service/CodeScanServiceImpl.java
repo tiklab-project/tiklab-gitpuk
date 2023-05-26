@@ -120,12 +120,12 @@ public class CodeScanServiceImpl implements CodeScanService {
     }
 
     @Override
-    public CodeScan findScanResult(String repositoryId, String deployServerId) {
-        CodeScan codeScan = new CodeScan();
+    public CodeScan findScanResult(String repositoryId) {
+        CodeScan codeScan = this.findCodeScanByRpyId(repositoryId);
         try {
-            Repository repository = repositoryServer.findOneRpy(repositoryId);
-            DeployServer deployServer = deployServerService.findDeployServer(deployServerId);
+            Repository repository = codeScan.getRepository();
 
+            DeployServer deployServer = deployServerService.findDeployServer(codeScan.getDeployServerId());
 
             //查询项目
             String findRepositoryUrl=deployServer.getServerAddress()+"/api/projects/search?projects="+repository.getName();

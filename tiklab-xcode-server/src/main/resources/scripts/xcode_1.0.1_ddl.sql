@@ -40,7 +40,6 @@ create table rpy_deploy_server(
     id             varchar(12) PRIMARY KEY ,
     task_name     varchar (64) NOT NULL,
     server_name      varchar (32)  NOT NULL,
-    server_type       varchar (12) NOT NULL,
     auth_type    varchar (12)  NOT NULL,
     server_address     varchar(255) NOT NULL,
     user_name    varchar (32),
