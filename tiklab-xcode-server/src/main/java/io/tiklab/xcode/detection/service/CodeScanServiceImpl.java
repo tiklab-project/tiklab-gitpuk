@@ -72,7 +72,7 @@ public class CodeScanServiceImpl implements CodeScanService {
             codeScanState.put(repositoryId,"false");
             throw new ApplicationException(6006,"不存在sonar配置");
         }
-        DeployServer deployServer = deployServerService.findDeployServer(codeScan.getDeployServerId());
+        DeployServer deployServer = codeScan.getDeployServer();
 
         String mavenAddress = deployEnv.getEnvAddress();
         RepositoryUtil.validFile(mavenAddress,21);
@@ -125,7 +125,7 @@ public class CodeScanServiceImpl implements CodeScanService {
         try {
             Repository repository = codeScan.getRepository();
 
-            DeployServer deployServer = deployServerService.findDeployServer(codeScan.getDeployServerId());
+            DeployServer deployServer = codeScan.getDeployServer();
 
             //查询项目
             String findRepositoryUrl=deployServer.getServerAddress()+"/api/projects/search?projects="+repository.getName();

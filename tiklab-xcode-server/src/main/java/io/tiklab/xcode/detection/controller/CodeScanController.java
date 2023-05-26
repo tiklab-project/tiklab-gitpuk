@@ -60,4 +60,13 @@ public class CodeScanController {
         return Result.ok(id);
     }
 
+    @RequestMapping(path="/findCodeScanByRpyId",method = RequestMethod.POST)
+    @ApiMethod(name = "findCodeScanByRpyId",desc = "查询扫描方案")
+    @ApiParam(name = "CodeScan",desc = "CodeScan",required = true)
+    public Result<String> findCodeScanByRpyId( @NotNull String repositoryId){
+        CodeScan codeScan = codeScanService.findCodeScanByRpyId(repositoryId);
+
+        return Result.ok(codeScan);
+    }
+
 }

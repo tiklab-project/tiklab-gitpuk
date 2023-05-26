@@ -7,6 +7,7 @@ import io.tiklab.join.annotation.Join;
 import io.tiklab.join.annotation.JoinQuery;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
+import io.tiklab.xcode.detection.service.DeployServerService;
 import io.tiklab.xcode.repository.model.Repository;
 
 import java.io.Serializable;
@@ -35,8 +36,13 @@ public class CodeScan implements Serializable {
     @ApiProperty(name="deployEnvId",desc="环境id")
     private String deployEnvId;
 
-    @ApiProperty(name="deployServerId",desc="服务id")
-    private String deployServerId;
+
+    @ApiProperty(name="deployServer",desc="服务")
+    @Mappings({
+            @Mapping(source = "deployServer.id",target = "deployServerId")
+    })
+    @JoinQuery(key = "id")
+    private DeployServer deployServer;
 
     @ApiProperty(name="scanStatus",desc="scanStatus 扫描通过 OK  ERROR")
     private String scanStatus;
@@ -114,12 +120,12 @@ public class CodeScan implements Serializable {
         this.deployEnvId = deployEnvId;
     }
 
-    public String getDeployServerId() {
-        return deployServerId;
+    public DeployServer getDeployServer() {
+        return deployServer;
     }
 
-    public void setDeployServerId(String deployServerId) {
-        this.deployServerId = deployServerId;
+    public void setDeployServer(DeployServer deployServer) {
+        this.deployServer = deployServer;
     }
 
     public Timestamp getUpdateTime() {
