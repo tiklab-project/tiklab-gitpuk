@@ -22,9 +22,6 @@ public class DeployServerEntity {
     @Column(name = "auth_type",notNull = true)
     private String authType;
 
-    @Column(name = "server_auth",notNull = true)
-    private String serverAuth;
-
     @Column(name = "server_address",notNull = true)
     private String serverAddress;
 
@@ -72,13 +69,6 @@ public class DeployServerEntity {
         this.authType = authType;
     }
 
-    public String getServerAuth() {
-        return serverAuth;
-    }
-
-    public void setServerAuth(String serverAuth) {
-        this.serverAuth = serverAuth;
-    }
 
     public String getServerAddress() {
         return serverAddress;

@@ -22,10 +22,6 @@ public class DeployServer implements Serializable {
     @ApiProperty(name="serverName",desc="服务名称")
     private String serverName;
 
-    @ApiProperty(name="serverAuth",desc="服务权限 public、private")
-    private String serverAuth;
-
-
     @ApiProperty(name="authType",desc="认证类型 account、privateKey")
     private String authType;
 
@@ -68,13 +64,6 @@ public class DeployServer implements Serializable {
         this.serverName = serverName;
     }
 
-    public String getServerAuth() {
-        return serverAuth;
-    }
-
-    public void setServerAuth(String serverAuth) {
-        this.serverAuth = serverAuth;
-    }
 
     public String getAuthType() {
         return authType;

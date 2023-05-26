@@ -37,7 +37,6 @@ public class XcodeSqlLoad {
                 "todotask_1.0.0_dml",
                 //xcode
                 "xcode_1.0.0_ddl",
-                "xcode_1.0.0_dml",
                 "xdprivilege_1.0.0_dml",
 
         });
