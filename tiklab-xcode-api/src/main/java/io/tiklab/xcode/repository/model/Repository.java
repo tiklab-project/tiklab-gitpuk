@@ -3,6 +3,7 @@ package io.tiklab.xcode.repository.model;
 import io.tiklab.beans.annotation.Mapper;
 import io.tiklab.beans.annotation.Mapping;
 import io.tiklab.beans.annotation.Mappings;
+import io.tiklab.dal.jpa.annotation.Column;
 import io.tiklab.join.annotation.Join;
 import io.tiklab.join.annotation.JoinQuery;
 import io.tiklab.postin.annotation.ApiModel;
@@ -38,6 +39,9 @@ public class Repository implements Serializable {
 
     @ApiProperty(name="type",desc="类型")
     private int type;
+
+    @ApiProperty(name = "rules" ,desc =" 仓库权限 public、private")
+    private String rules;
 
     //创建人
     @Mappings({
@@ -176,6 +180,14 @@ public class Repository implements Serializable {
 
     public void setFullPath(String fullPath) {
         this.fullPath = fullPath;
+    }
+
+    public String getRules() {
+        return rules;
+    }
+
+    public void setRules(String rules) {
+        this.rules = rules;
     }
 }
 

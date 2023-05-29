@@ -39,6 +39,9 @@ public class RepositoryEntity {
     @Column(name = "state")
     private int state;
 
+    @Column(name = "rules")
+    private String rules;
+
 
     public String getRpyId() {
         return rpyId;
@@ -120,6 +123,13 @@ public class RepositoryEntity {
         this.state = state;
     }
 
+    public String getRules() {
+        return rules;
+    }
+
+    public void setRules(String rules) {
+        this.rules = rules;
+    }
 }
 
 

@@ -44,7 +44,8 @@ public class XcodeSqlLoad {
         dsmConfig.newVersion("1.0.1", new String[]{
                 "user_1.0.1_dml",
                 "oplog_1.0.1_dml",
-                "xcode_1.0.1_ddl"
+                "xcode_1.0.1_ddl",
+                "xcode_1.0.1_dml"
         });
         dsmConfig.newVersion("1.0.2", new String[]{
                 "oplog_1.0.2_dml",
