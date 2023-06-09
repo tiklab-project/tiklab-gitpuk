@@ -90,6 +90,7 @@ public class GatewayFilterAutoConfiguration {
                         "/start",
                         "/eas",
                         "/xcode",
+                        "/backups",
                 })
                 .get();
     }

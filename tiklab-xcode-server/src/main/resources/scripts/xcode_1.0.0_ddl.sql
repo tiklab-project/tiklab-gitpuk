@@ -23,7 +23,7 @@ create table rpy_repository(
     create_time          varchar(255) ,
     type                 int ,
     user_id              varchar(12),
-    remarks           varchar(255),
+    remarks              varchar(255),
     language             varchar(255),
     state                int
   

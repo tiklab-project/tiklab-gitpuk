@@ -26,6 +26,9 @@ public class RepositoryGroupEntity {
     @Column(name = "user_id")
     private String userId;
 
+    @Column(name = "rules")
+    private String rules;
+
     @Column(name = "remarks")
     private String remarks;
 
@@ -84,6 +87,14 @@ public class RepositoryGroupEntity {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public String getRules() {
+        return rules;
+    }
+
+    public void setRules(String rules) {
+        this.rules = rules;
     }
 }
 

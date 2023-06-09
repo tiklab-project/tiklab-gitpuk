@@ -7,10 +7,15 @@ import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.user.dmUser.model.DmUser;
+import io.tiklab.user.dmUser.model.DmUserQuery;
+import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.repository.dao.RecordCommitDao;
 import io.tiklab.xcode.repository.entity.RecordCommitEntity;
+import io.tiklab.xcode.repository.entity.RecordOpenEntity;
 import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.RecordCommitQuery;
+import io.tiklab.xcode.repository.model.RecordOpen;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +42,9 @@ public class RecordCommitServiceImpl implements RecordCommitService {
     @Autowired
     JoinTemplate joinTemplate;
 
+    @Autowired
+    private DmUserService dmUserService;
+
 
     @Override
     public String createRecordCommit(@NotNull @Valid RecordCommit openRecord) {
@@ -57,6 +65,14 @@ public class RecordCommitServiceImpl implements RecordCommitService {
     @Override
     public void deleteRecordCommit(@NotNull String id) {
         recordCommitDao.deleteRecordCommit(id);
+    }
+
+    @Override
+    public void deleteRecordCommitByRepository(String repositoryId) {
+        DeleteCondition deleteCondition = DeleteBuilders.createDelete(RecordCommitEntity.class)
+                .eq("repositoryId", repositoryId)
+                .get();
+        recordCommitDao.deleteRecordCommit(deleteCondition);
     }
 
     @Override
@@ -100,6 +116,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
 
         joinTemplate.joinQuery(openRecordList);
 
+
         return openRecordList;
     }
 
@@ -112,8 +129,29 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         //排序后根据仓库去重
         List<RecordCommit> recordCommits = openRecordList.stream().sorted(Comparator.comparing(RecordCommit::getCommitTime).reversed()).
                 collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(a -> a.getRepository().getRpyId()))), ArrayList::new));
+        joinTemplate.joinQuery(recordCommits);
+        List<RecordCommit> publicRep = recordCommits.stream().filter(a -> ("public").equals(a.getRepository().getRules())).collect(Collectors.toList());
 
-        List<RecordCommit> RecordCommitList = recordCommits.stream().limit(5).collect(Collectors.toList());
+        //查询私有库
+        List<RecordCommit> privateRep = recordCommits.stream().filter(a -> ("private").equals(a.getRepository().getRules())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(privateRep)){
+            //查询用户id 查询关联的项目
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setUserId(RecordCommitQuery.getUserId());
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+            List<RecordCommit> arrayList = new ArrayList<>();
+            for (DmUser dmUser:dmUserList){
+                List<RecordCommit> repositories = privateRep.stream().filter(a -> dmUser.getDomainId().equals(a.getRepository().getRpyId())).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(repositories)){
+                    arrayList.add(repositories.get(0));
+                }
+            }
+            publicRep.addAll(arrayList);
+        }
+
+
+        List<RecordCommit> RecordCommitList = publicRep.stream().limit(5).collect(Collectors.toList());
+
         for (RecordCommit recordCommit:RecordCommitList){
             long longTime = System.currentTimeMillis() - recordCommit.getCommitTime().getTime();
             long days = longTime / (24 * 60 * 60 * 1000); // 计算天数
@@ -132,7 +170,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
             }
             recordCommit.setCommitTimeBad(badTime);
         }
-        joinTemplate.joinQuery(RecordCommitList);
+
         return RecordCommitList;
     }
 

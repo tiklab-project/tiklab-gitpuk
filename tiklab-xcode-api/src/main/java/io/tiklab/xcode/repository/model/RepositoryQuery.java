@@ -1,5 +1,6 @@
 package io.tiklab.xcode.repository.model;
 
+import io.tiklab.core.page.Page;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
@@ -7,6 +8,9 @@ import java.io.Serializable;
 
 @ApiModel
 public class RepositoryQuery implements Serializable {
+
+    @ApiProperty(name ="pageParam",desc = "分页参数")
+    private Page pageParam = new Page();
 
     @ApiProperty(name ="userId",desc = "登录用户")
     private String  userId;
@@ -42,6 +46,14 @@ public class RepositoryQuery implements Serializable {
     public RepositoryQuery setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public Page getPageParam() {
+        return pageParam;
+    }
+
+    public void setPageParam(Page pageParam) {
+        this.pageParam = pageParam;
     }
 }
 

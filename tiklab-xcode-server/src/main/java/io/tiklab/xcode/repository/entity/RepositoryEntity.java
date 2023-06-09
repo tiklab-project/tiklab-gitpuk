@@ -1,10 +1,13 @@
 package io.tiklab.xcode.repository.entity;
 
+import io.tiklab.core.BaseModel;
 import io.tiklab.dal.jpa.annotation.*;
+
+import java.io.Serializable;
 
 @Entity
 @Table(name="rpy_repository")
-public class RepositoryEntity {
+public class RepositoryEntity extends BaseModel {
 
     @Id
     @GeneratorValue(length=12)
@@ -22,6 +25,9 @@ public class RepositoryEntity {
 
     @Column(name = "create_time")
     private String createTime;
+
+    @Column(name = "update_time")
+    private String updateTime;
 
 
     @Column(name = "type")
@@ -41,6 +47,9 @@ public class RepositoryEntity {
 
     @Column(name = "rules")
     private String rules;
+
+    @Column(name = "classify_state")
+    private String classifyState;
 
 
     public String getRpyId() {
@@ -129,6 +138,22 @@ public class RepositoryEntity {
 
     public void setRules(String rules) {
         this.rules = rules;
+    }
+
+    public String getClassifyState() {
+        return classifyState;
+    }
+
+    public void setClassifyState(String classifyState) {
+        this.classifyState = classifyState;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
     }
 }
 

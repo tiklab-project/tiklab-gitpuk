@@ -6,6 +6,7 @@ import io.tiklab.xcode.setting.service.AuthServer;
 import io.tiklab.xcode.util.RepositoryFinal;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
+import org.apache.sshd.common.util.logging.LoggingUtils;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SshServer;
@@ -52,10 +53,11 @@ public class SshService {
     @Value("${xcode.ssh.key:/conf/id_rsa}")
     private String sshKey;
 
-    private static final Logger logger = LoggerFactory.getLogger(SshService.class);
+
 
     @Bean
     public  void sshAuthority()  {
+        Class<LoggingUtils> loggingUtilsClass = LoggingUtils.class;
         SshServer sshServer = SshServer.setUpDefaultServer();
         sshServer.setPort(sshPort);
         sshServer.setHost (RepositoryFinal.SSH_HOST);
@@ -65,8 +67,8 @@ public class SshService {
             property= file.getParent();
         }
         Path ssh_key = Paths.get(property+"/"+sshKey);
-        logger.info("ssh listening address："+ sshPort);
-        logger.info("pryKey address："+ ssh_key);
+       // logger.info("ssh listening address："+ sshPort);
+        //logger.info("pryKey address："+ ssh_key);
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
 
@@ -104,7 +106,7 @@ public class SshService {
             File file = new File(RepositoryUtil.defaultPath() + s);
             String repositoryPath = file.getAbsolutePath();
 
-            logger.info("ssh repository address " + " " + repositoryPath);
+           // logger.info("ssh repository address " + " " + repositoryPath);
 
             try {
                 File file1 = new File(repositoryPath);

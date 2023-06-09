@@ -7,10 +7,14 @@ import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.user.dmUser.model.DmUser;
+import io.tiklab.user.dmUser.model.DmUserQuery;
+import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.repository.dao.RecordOpenDao;
 import io.tiklab.xcode.repository.entity.RecordOpenEntity;
 import io.tiklab.xcode.repository.model.RecordOpen;
 import io.tiklab.xcode.repository.model.RecordOpenQuery;
+import io.tiklab.xcode.repository.model.Repository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +22,10 @@ import org.springframework.stereotype.Service;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * RecordOpenServiceImpl-打开仓库的记录接口实现
@@ -30,6 +37,8 @@ public class RecordOpenServiceImpl implements RecordOpenService {
     @Autowired
     RecordOpenDao recordOpenDao;
 
+    @Autowired
+    private DmUserService dmUserService;
 
     @Autowired
     JoinTemplate joinTemplate;
@@ -42,7 +51,7 @@ public class RecordOpenServiceImpl implements RecordOpenService {
         RecordOpenEntity openRecordEntity = BeanMapper.map(openRecord, RecordOpenEntity.class);
 
         List<RecordOpenEntity> recordList = recordOpenDao.findRecordOpenList(new RecordOpenQuery().setUserId(openRecord.getUserId())
-                .setRepositoryId(openRecord.getRepositoryId()));
+                .setRepositoryId(openRecord.getRepository().getRpyId()));
         if (CollectionUtils.isNotEmpty(recordList)){
             RecordOpenEntity record = recordList.get(0);
             record.setNewOpenTime(new Timestamp(System.currentTimeMillis()));
@@ -118,12 +127,30 @@ public class RecordOpenServiceImpl implements RecordOpenService {
         List<RecordOpenEntity> openRecordEntityList = recordOpenDao.findRecordOpenList(RecordOpenQuery);
 
         List<RecordOpen> openRecordList = BeanMapper.mapList(openRecordEntityList, RecordOpen.class);
-
-
-
         joinTemplate.joinQuery(openRecordList);
 
-        return openRecordList;
+        List<RecordOpen> publicRep = openRecordList.stream().filter(a -> ("public").equals(a.getRepository().getRules())).collect(Collectors.toList());
+
+        //查询私有库
+        List<RecordOpen> privateRep = openRecordList.stream().filter(a -> ("private").equals(a.getRepository().getRules())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(privateRep)){
+            //查询用户id 查询关联的项目
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setUserId(RecordOpenQuery.getUserId());
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+            List<RecordOpen> arrayList = new ArrayList<>();
+            for (DmUser dmUser:dmUserList){
+                List<RecordOpen> repositories = privateRep.stream().filter(a -> dmUser.getDomainId().equals(a.getRepository().getRpyId())).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(repositories)){
+                    arrayList.add(repositories.get(0));
+                }
+            }
+            publicRep.addAll(arrayList);
+        }
+
+        List<RecordOpen> recordOpenList = publicRep.stream().sorted(Comparator.comparing(RecordOpen::getNewOpenTime).reversed()).collect(Collectors.toList());
+
+        return recordOpenList;
     }
 
     @Override

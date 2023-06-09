@@ -8,6 +8,8 @@ import io.tiklab.xcode.repository.service.RecordCommitService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.util.RepositoryUtil;
 import io.tiklab.core.exception.ApplicationException;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.http.server.GitServlet;
@@ -19,6 +21,7 @@ import org.eclipse.jgit.transport.resolver.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebInitParam;
@@ -67,13 +70,27 @@ public class HttpServlet extends GitServlet {
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
                 HttpServletResponse res1 = (HttpServletResponse) res;
                 boolean authorized = isAuthorized((HttpServletRequest) req);
+                String requestURI = ((HttpServletRequest) req).getRequestURI();
 
                 if (!authorized){
                         res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
                         res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 }
 
+                if (requestURI.endsWith("git-receive-pack")){
+                        String repositoryUrl = requestURI.substring(7);
+                        String repositoryName = repositoryUrl.substring(0, repositoryUrl.indexOf("/", 1)).substring(0,repositoryUrl.indexOf(".git"));
+                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(repositoryName));
+                        io.tiklab.xcode.repository.model.Repository repository = repositoryList.get(0);
+                        if(repository.getState()==2){
+                                res1.setHeader("Content-Type", "text/plain");
+                                res1.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                res1.getWriter().write("You are not allowed to push code to this project");
+                                return;
+                        }
+                }
                 super.service(req, res);
+
         }
 
         @Override
@@ -165,11 +182,12 @@ public class HttpServlet extends GitServlet {
         /**
          * 实现git-receive-pack钩子
          */
-        private static class HttpReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
+        private  class HttpReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
                 @Override
                 public ReceivePack create(HttpServletRequest req, Repository db)
                         throws ServiceNotEnabledException, ServiceNotAuthorizedException {
-                        return new ReceivePack(db);
+
+                        return   new ReceivePack(db);
                 }
         }
 

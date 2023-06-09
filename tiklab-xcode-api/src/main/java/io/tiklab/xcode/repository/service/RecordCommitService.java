@@ -38,6 +38,12 @@ public interface RecordCommitService {
     void deleteRecordCommit(@NotNull String id);
 
     /**
+     * 通过仓库删除
+     * @param repositoryId 仓库id
+     */
+    void deleteRecordCommitByRepository(@NotNull String repositoryId);
+
+    /**
      * 条件删除
      * @param
      */

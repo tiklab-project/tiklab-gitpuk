@@ -1,7 +1,11 @@
 package io.tiklab.xcode.repository.dao;
 
+import io.tiklab.core.page.Pagination;
 import io.tiklab.dal.jpa.JpaTemplate;
+import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
+import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
+import io.tiklab.xcode.repository.model.RepositoryQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -66,10 +70,36 @@ public class RepositoryDao {
      * @param idList
      * @return
      */
-    public List<RepositoryEntity> findRepositoryList(List<String> idList) {
+    public List<RepositoryEntity> findRepositoryListByIds(List<String> idList) {
         return jpaTemplate.findList(RepositoryEntity.class,idList);
     }
 
+    /**
+     * 条件查询仓库库
+     * @param repositoryQuery
+     * @return List <RepositoryEntity>
+     */
+    public List<RepositoryEntity> findRepositoryList(RepositoryQuery repositoryQuery) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
+                .eq("name", repositoryQuery.getName())
+                .eq("userId", repositoryQuery.getUserId())
+                .get();
+        return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
+    }
+
+    /**
+     * 通过ids查询
+     * @param repositoryQuery
+     * @return
+     */
+    public Pagination<RepositoryEntity> findRepositoryPage(RepositoryQuery repositoryQuery, String[] ids) {
+
+        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
+                .in("rpyId",ids)
+                .pagination(repositoryQuery.getPageParam())
+                .get();
+        return jpaTemplate.findPage(queryCondition,RepositoryEntity.class);
+    }
 }
 
 

@@ -2,15 +2,22 @@ package io.tiklab.xcode.repository.service;
 
 
 import io.tiklab.beans.BeanMapper;
+import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
+import io.tiklab.privilege.dmRole.service.DmRoleService;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.repository.dao.RepositoryGroupDao;
 import io.tiklab.xcode.repository.entity.RepositoryGroupEntity;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
+import io.tiklab.xcode.util.RepositoryUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Exporter
@@ -22,7 +29,11 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Autowired
     private RepositoryGroupDao repositoryGroupDao;
 
+    @Autowired
+    private DmUserService dmUserService;
 
+    @Autowired
+    private DmRoleService dmRoleService;
     /**
      * 创建仓库组
      * @param repositoryGroup 信息
@@ -31,7 +42,11 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Override
     public String createCodeGroup(RepositoryGroup repositoryGroup) {
         RepositoryGroupEntity groupEntity = BeanMapper.map(repositoryGroup, RepositoryGroupEntity.class);
-        return repositoryGroupDao.createCodeGroup(groupEntity);
+
+        groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
+        String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
+        dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), "xcode");
+        return codeGroupId;
     }
 
     /**
@@ -94,7 +109,19 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
      */
     @Override
     public List<RepositoryGroup> findUserGroup(String userId) {
-        return findAllCodeGroup();
+        List<RepositoryGroup> repositoryGroups = findAllCodeGroup();
+        if (CollectionUtils.isNotEmpty(repositoryGroups)){
+
+            List<RepositoryGroup> publicGroup = repositoryGroups.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
+
+            List<RepositoryGroup> privateGroup = repositoryGroups.stream().filter(a -> ("private").equals(a.getRules())).collect(Collectors.toList());
+
+            if (CollectionUtils.isNotEmpty(privateGroup)){
+
+            }
+
+        }
+        return repositoryGroups;
     }
 }
 

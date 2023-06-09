@@ -36,8 +36,17 @@ public class RepositoryGroup {
     @JoinQuery(key = "id")
     private User user;
 
+    @ApiProperty(name = "rules" ,desc =" 仓库权限 public、private")
+    private String rules;
+
     @ApiProperty(name="remarks",desc="描述")
     private String remarks;
+
+
+    /*-----------其他字段----------*/
+
+    @ApiProperty(name="repositoryNum",desc="仓库数")
+    private String repositoryNum;
 
 
     public String getGroupId() {
@@ -96,7 +105,21 @@ public class RepositoryGroup {
         this.remarks = remarks;
     }
 
+    public String getRules() {
+        return rules;
+    }
 
+    public void setRules(String rules) {
+        this.rules = rules;
+    }
+
+    public String getRepositoryNum() {
+        return repositoryNum;
+    }
+
+    public void setRepositoryNum(String repositoryNum) {
+        this.repositoryNum = repositoryNum;
+    }
 }
 
 

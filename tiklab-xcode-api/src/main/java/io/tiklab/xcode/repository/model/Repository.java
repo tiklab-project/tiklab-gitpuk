@@ -36,6 +36,9 @@ public class Repository implements Serializable {
     @ApiProperty(name="createTime",desc="创建时间")
     private String createTime;
 
+    @ApiProperty(name="updateTime",desc="更新时间")
+    private String updateTime;
+
 
     @ApiProperty(name="type",desc="类型")
     private int type;
@@ -56,8 +59,11 @@ public class Repository implements Serializable {
     @ApiProperty(name="language",desc="语言")
     private String language;
 
-    @ApiProperty(name="state",desc="仓库状态")
-    private int state;
+    @ApiProperty(name="state",desc="仓库状态 1.所有 2.只读 ")
+    private int state=1;
+
+    @ApiProperty(name="classifyState",desc="代码归档状态 ture false")
+    private String classifyState="false";
 
     /*--------其他字段---------*/
 
@@ -188,6 +194,22 @@ public class Repository implements Serializable {
 
     public void setRules(String rules) {
         this.rules = rules;
+    }
+
+    public String getClassifyState() {
+        return classifyState;
+    }
+
+    public void setClassifyState(String classifyState) {
+        this.classifyState = classifyState;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
     }
 }
 

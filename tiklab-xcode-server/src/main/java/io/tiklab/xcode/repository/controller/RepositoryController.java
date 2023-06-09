@@ -1,5 +1,6 @@
 package io.tiklab.xcode.repository.controller;
 
+import io.tiklab.core.page.Pagination;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.repository.model.RepositoryCloneAddress;
@@ -81,6 +82,16 @@ public class RepositoryController {
         return Result.ok(repositoryList);
     }
 
+    @RequestMapping(path="/findRepositoryPage",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryPage",desc = "条件分页查询仓库")
+    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    public Result<Pagination<Repository>> findRepositoryPage(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
+
+        Pagination<Repository> repositoryPage = repositoryServer.findRepositoryPage(repositoryQuery);
+
+        return Result.ok(repositoryPage);
+    }
+
 
 
     @RequestMapping(path="/findFileTree",method = RequestMethod.POST)
@@ -114,10 +125,19 @@ public class RepositoryController {
 
         return Result.ok(nameRepository);
     }
-    
-    
-    
-    
+
+
+    @RequestMapping(path="/findRepository",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepository",desc = "通过仓库id 查询")
+    @ApiParam(name = "id",desc = "仓库ID",required = true)
+    public Result<Repository> findRepository(@NotNull String id){
+
+        Repository nameRepository = repositoryServer.findRepository(id);
+
+        return Result.ok(nameRepository);
+    }
+
+
 }
 
 

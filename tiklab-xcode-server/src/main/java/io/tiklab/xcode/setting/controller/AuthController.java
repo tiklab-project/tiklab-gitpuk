@@ -26,7 +26,7 @@ public class AuthController {
 
     @RequestMapping(path="/createAuth",method = RequestMethod.POST)
     @ApiMethod(name = "createAuth",desc = "创建认证")
-    @ApiParam(name = "",desc = "",required = true)
+    @ApiParam(name = "auth",desc = "auth",required = true)
     public Result<String> createAuth(@RequestBody @NotNull @Valid Auth auth){
 
         String Id = authServer.createAuth(auth);

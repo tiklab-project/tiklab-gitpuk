@@ -1,5 +1,6 @@
 package io.tiklab.xcode.repository.service;
 
+import io.tiklab.core.page.Pagination;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.repository.model.RepositoryCloneAddress;
@@ -88,6 +89,19 @@ public interface RepositoryServer {
      * @param repositoryQuery repositoryQuery
      */
     List<Repository> findRepositoryList(RepositoryQuery repositoryQuery);
+
+
+    /**
+     * 分页条件查询仓库
+     * @param repositoryQuery repositoryQuery
+     */
+     Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery);
+
+    /**
+     * 通过仓库id 查询仓库
+     * @param id
+     */
+    Repository findRepository(String id);
 }
 
 

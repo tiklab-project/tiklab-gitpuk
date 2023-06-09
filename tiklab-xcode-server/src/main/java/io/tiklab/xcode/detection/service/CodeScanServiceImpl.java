@@ -48,28 +48,38 @@ public class CodeScanServiceImpl implements CodeScanService {
     @Autowired
     JoinTemplate joinTemplate;
 
+    @Autowired
+    CodeScanInstanceService instanceService;
+
 
     public static Map<String , String> codeScanState = new HashMap<>();
 
+    public static Map<String , CodeScanInstance> codeScanLog = new HashMap<>();
+
     @Override
     public boolean codeScanExec(String repositoryId) {
-
-        codeScanState.remove(repositoryId);
+        codeScanLog.remove(repositoryId);
+        CodeScanInstance scanInstance = new CodeScanInstance();
+        scanInstance.setRepositoryId(repositoryId);
+        scanInstance.setTaskName("123");
 
         CodeScan codeScan = findCodeScanByRpyId(repositoryId);
         if (ObjectUtils.isEmpty(codeScan)){
-            codeScanState.put(repositoryId,"false");
+            scanInstance.setRunState("false");
+            codeScanLog.put(repositoryId,scanInstance);
             throw new ApplicationException(6006,"请先设置里面选择配置");
         }
         if (ObjectUtils.isEmpty(codeScan.getDeployEnvId())){
-            codeScanState.put(repositoryId,"false");
+            scanInstance.setRunState("false");
+            codeScanLog.put(repositoryId,scanInstance);
             throw new ApplicationException(6006,"不存在maven配置");
         }
         DeployEnv deployEnv = deployEnvService.findDeployEnv(codeScan.getDeployEnvId());
         String execOrder =  "mvn clean verify sonar:sonar ";
 
         if (ObjectUtils.isEmpty(codeScan.getDeployEnvId())){
-            codeScanState.put(repositoryId,"false");
+            scanInstance.setRunState("false");
+            codeScanLog.put(repositoryId,scanInstance);
             throw new ApplicationException(6006,"不存在sonar配置");
         }
         DeployServer deployServer = codeScan.getDeployServer();
@@ -104,16 +114,21 @@ public class CodeScanServiceImpl implements CodeScanService {
             GitUntil.cloneRepository(repositoryUrl, "master", cloneUrl);
 
             process = RepositoryUtil.process(mavenAddress, order);
-            readFile(process);
-            codeScanState.put(repositoryId,"true");
+            readFile(process,repositoryId,scanInstance);
+
+            scanInstance.setRunState("true");
+            codeScanLog.put(repositoryId,scanInstance);
+            instanceService.createCodeScanInstance(scanInstance);
             return true;
         }catch (Exception e){
             //这个异常是已经有存在的项目
             if (e.getMessage().contains("already exists and is not an empty directory")){
-                codeScanState.put(repositoryId,"false");
+                scanInstance.setRunState("false");
+                codeScanLog.put(repositoryId,scanInstance);
                 throw  new ApplicationException(6005,"该项目正在扫描中");
             }
-            codeScanState.put(repositoryId,"false");
+            scanInstance.setRunState("false");
+            codeScanLog.put(repositoryId,scanInstance);
             throw new ApplicationException(e.getMessage());
         }
 
@@ -164,7 +179,6 @@ public class CodeScanServiceImpl implements CodeScanService {
                     codeScan.setVulnerabilities(jsonObject.get("value").toString());
                 }
             }
-
         } catch (Exception e) {
             if (e.getMessage().contains("Connection refused")){
                 logger.info(e.getMessage());
@@ -177,13 +191,13 @@ public class CodeScanServiceImpl implements CodeScanService {
     }
 
     @Override
-    public String findScanState(String repositoryId) {
-        String result = codeScanState.get(repositoryId);
-        if (StringUtils.isNotEmpty(result)){
+    public CodeScanInstance findScanState(String repositoryId) {
+        CodeScanInstance scanInstance = codeScanLog.get(repositoryId);
+        if (!ObjectUtils.isEmpty(scanInstance)){
             Repository repository = repositoryServer.findOneRpy(repositoryId);
             RepositoryUtil.deleteDireAndFile(RepositoryUtil.defaultPath()+"/clone/",repository.getName());
         }
-        return   result;
+        return   scanInstance;
     }
 
     /**
@@ -207,7 +221,14 @@ public class CodeScanServiceImpl implements CodeScanService {
         return resultBody;
     }
 
-    public void  readFile( Process process){
+    /**
+     *  restTemplate 调用
+     *  @param process:process
+     * @param repositoryId: repositoryId
+     * @return
+     */
+    public void  readFile( Process process,String repositoryId,CodeScanInstance scanInstance){
+        CodeScanInstance instance = codeScanLog.get(repositoryId);
         try {
             InputStream inputStream = process.getInputStream();
             ByteArrayOutputStream bos = new ByteArrayOutputStream(inputStream.available());
@@ -215,9 +236,18 @@ public class CodeScanServiceImpl implements CodeScanService {
             int buf_size = 1024;
             byte[] buffer = new byte[buf_size];
             int len = 0;
+
             while (-1 != (len = in.read(buffer, 0, buf_size))) {
+                Date data = new Date();
+                if (ObjectUtils.isEmpty(instance)){
+                    scanInstance.setRunLog( "["+data+"]"+bos);
+                }else {
+                    scanInstance.setRunLog( "["+data+"]"+instance.getRunLog()+"\n"+bos);
+                }
+                codeScanLog.put(repositoryId,scanInstance);
                 logger.info(bos.toString());
                 bos.write(buffer, 0, len);
+               codeScanState.put(repositoryId,bos.toString());
             }
         }catch (Exception e){
             throw new ApplicationException(e.getMessage());

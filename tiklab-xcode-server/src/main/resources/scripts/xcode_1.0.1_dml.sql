@@ -1,5 +1,5 @@
 ALTER TABLE rpy_repository ADD rules VARCHAR(12);
-
+ALTER TABLE rpy_repository ADD classify_state VARCHAR(12);
 
 
 

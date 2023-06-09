@@ -5,6 +5,7 @@ import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
 import io.tiklab.xcode.detection.model.CodeScan;
+import io.tiklab.xcode.detection.model.CodeScanInstance;
 import io.tiklab.xcode.detection.model.DeployEnv;
 import io.tiklab.xcode.detection.service.CodeScanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,8 @@ public class CodeScanController {
     @RequestMapping(path="/findScanState",method = RequestMethod.POST)
     @ApiMethod(name = "findScanState",desc = "获取扫描状态")
     @ApiParam(name = "repositoryId",desc = "repositoryId",required = true)
-    public Result<String> findScanState( @NotNull String  repositoryId){
-        String scanResult = codeScanService.findScanState(repositoryId);
+    public Result<CodeScanInstance> findScanState( @NotNull String  repositoryId){
+        CodeScanInstance scanResult = codeScanService.findScanState(repositoryId);
 
         return Result.ok(scanResult);
     }

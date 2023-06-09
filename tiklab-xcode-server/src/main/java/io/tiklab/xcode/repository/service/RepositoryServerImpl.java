@@ -1,7 +1,10 @@
 package io.tiklab.xcode.repository.service;
 
+import ch.qos.logback.core.joran.conditional.IfAction;
 import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.core.page.Pagination;
+import io.tiklab.core.page.PaginationBuilder;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.privilege.dmRole.service.DmRoleService;
@@ -12,6 +15,7 @@ import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.branch.model.Branch;
+import io.tiklab.xcode.branch.service.BranchServer;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.git.GitBranchUntil;
@@ -40,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Exporter
@@ -60,13 +65,22 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private RecordOpenService recordOpenService;
 
+    @Autowired
+    private RecordCommitService recordCommitService;
+
+    @Autowired
+    private BranchServer branchServer;
+
+    @Autowired
+    private MemoryManService memoryManService;
+
     @Value("${xcode.file:/file}")
     private String fileAddress;
 
     @Value("${server.port:8080}")
     private String port;
 
-    @Value("${xrpy.ssh.port:8082}")
+    @Value("${xcode.ssh.port:8082}")
     private int sshPort;
 
     @Autowired
@@ -85,43 +99,50 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     @Override
     public String createRpy(Repository repository) {
-
-        joinTemplate.joinQuery(repository);
-        //获取用户名
-        RepositoryGroup repositoryGroup = repository.getGroup();
-        //存在仓库组
-        if (repositoryGroup != null && repositoryGroup.getGroupId() != null){
-            String groupAddress = repositoryGroup.getAddress();
-            String s = RepositoryUtil.defaultPath() + "/" + groupAddress;
-            //创建工作目录
-            File file = new File(s);
-            if (!file.exists()){
-                RepositoryFileUtil.createDirectory(file.getAbsolutePath());
+        //判断是否有剩余内存
+        boolean resMemory = memoryManService.findResMemory();
+        if (resMemory){
+            joinTemplate.joinQuery(repository);
+            //获取用户名
+            RepositoryGroup repositoryGroup = repository.getGroup();
+            //存在仓库组
+            if (repositoryGroup != null && repositoryGroup.getGroupId() != null){
+                String groupAddress = repositoryGroup.getName();
+                String s = RepositoryUtil.defaultPath() + "/" + groupAddress;
+                //创建工作目录
+                File file = new File(s);
+                if (!file.exists()){
+                    RepositoryFileUtil.createDirectory(file.getAbsolutePath());
+                }
             }
+
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
+
+            String property = System.getProperty("user.dir");
+            if (!property.endsWith(RepositoryFinal.APP_NAME)){
+                File file = new File(property);
+                property= file.getParent();
+            }
+
+            Path filePath = Paths.get(property+"/"+fileAddress);
+
+            String ignoreFilePath = filePath+"/"+".gitignore";
+            String mdFilePath = filePath+"/"+"README.md";
+
+            GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
+
+
+            repository.setCreateTime(RepositoryUtil.date(1,new Date()));
+            repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
+            RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+
+            String repositoryId = repositoryDao.createRpy(groupEntity);
+            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+            return repositoryId;
+        }else {
+            throw  new ApplicationException(4006,"内存不足");
         }
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
-
-        String property = System.getProperty("user.dir");
-        if (!property.endsWith(RepositoryFinal.APP_NAME)){
-            File file = new File(property);
-            property= file.getParent();
-        }
-
-        Path filePath = Paths.get(property+"/"+fileAddress);
-
-        String ignoreFilePath = filePath+"/"+".gitignore";
-        String mdFilePath = filePath+"/"+"README.md";
-
-        GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
-
-
-        repository.setCreateTime(RepositoryUtil.date(1,new Date()));
-        RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
-
-        String repositoryId = repositoryDao.createRpy(groupEntity);
-        dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
-        return repositoryId;
     }
 
     /**
@@ -134,6 +155,9 @@ public class RepositoryServerImpl implements RepositoryServer {
         repositoryDao.deleteRpy(rpyId);
 
         recordOpenService.deleteRecordOpenByRecord(rpyId);
+        recordCommitService.deleteRecordCommitByRepository(rpyId);
+
+        dmUserService.deleteDmUserByDomainId(rpyId);
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
         File file = new File(repositoryAddress);
         if (!file.exists()){
@@ -149,6 +173,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public void updateRpy(Repository repository) {
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+        groupEntity.setUpdateTime(RepositoryUtil.date(1,new Date()));
         repositoryDao.updateRpy(groupEntity);
     }
 
@@ -217,12 +242,12 @@ public class RepositoryServerImpl implements RepositoryServer {
         return list;
     }
 
+
     /**
      * 根据仓库名称查询仓库信息
      * @param rpyName 仓库名称
      * @return 仓库信息
      */
-    @Override
     public Repository findNameRpy(String rpyName) {
         String loginId = LoginContext.getLoginId();
         List<Repository> userRepositories = findUserRpy(loginId);
@@ -237,8 +262,9 @@ public class RepositoryServerImpl implements RepositoryServer {
             if (repositoryGroup == null || repositoryGroup.getName() == null) {
                 String nickname = rpy.getUser().getName();
                 rpyName = rpyName.replace(nickname + "/", "");
+                System.out.println("");
             }
-            if (rpy.getAddress().contains(rpyName)){
+            if (rpy.getAddress().equals(rpyName)){
                 repository = rpy;
                 break;
             }
@@ -263,6 +289,8 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
 
     }
+
+
 
     /**
      * 获取文件信息
@@ -326,6 +354,7 @@ public class RepositoryServerImpl implements RepositoryServer {
              http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
         }
         String SSH=null;
+
         if (!ObjectUtils.isEmpty(user)){
              SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
         }
@@ -337,40 +366,69 @@ public class RepositoryServerImpl implements RepositoryServer {
     }
 
 
-    @Override
-    public List<Repository> findRepositoryList(RepositoryQuery repositoryQuery) {
-        DmUserQuery dmUserQuery = new DmUserQuery();
-        dmUserQuery.setUserId(repositoryQuery.getUserId());
-        List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
-        List<Repository> repositoryList=null;
-        if (CollectionUtils.isNotEmpty(dmUserList)){
-            List<String> ids = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
-            //通过最近打开的仓库排序
-            if (("openTime").equals(repositoryQuery.getSort())){
-                List<RecordOpen> recordList = recordOpenService.findRecordOpenList(new RecordOpenQuery().setUserId(repositoryQuery.getUserId()));
-                //获取当前用户最近打开的仓库id
-                List<String> openRepositoryIds = recordList.stream().sorted(Comparator.comparing(RecordOpen::getNewOpenTime).reversed()).map(RecordOpen::getRepositoryId).collect(Collectors.toList());
+    public List<Repository> findRepositoryList(RepositoryQuery repositoryQuery){
+        List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(repositoryQuery);
 
-                List<String> stringList = openRepositoryIds.stream().filter(ids::contains).collect(Collectors.toList());
-                if (stringList.size()>0){
-                    List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(stringList);
-                    repositoryList = BeanMapper.mapList(repositoryEntityList, Repository.class);
-                }
-            }else {
-                List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(ids);
-                repositoryList = BeanMapper.mapList(repositoryEntityList, Repository.class);
-                repositoryList = repositoryList.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
-                //通过仓库名称查询
-                if(StringUtils.isNotEmpty(repositoryQuery.getName())){
-                   repositoryList = repositoryList.stream().filter(a -> (repositoryQuery.getName()).equals(a.getName())).collect(Collectors.toList());
+        List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
 
-                }
-            }
-            joinTemplate.joinQuery(repositoryList);
-        }
+
+        joinTemplate.joinQuery(repositoryList);
         return repositoryList;
     }
 
+
+    @Override
+    public Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery) {
+        List<Repository> allRpy = this.findAllRpy();
+        if (CollectionUtils.isNotEmpty(allRpy)) {
+            //公共的仓库
+            List<Repository> publicRpy = allRpy.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
+
+            List<String> canViewRpyId = publicRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
+
+            List<Repository> privateRpy = allRpy.stream().filter(a -> ("private").equals(a.getRules())).collect(Collectors.toList());
+
+            //查询用户id 查询关联的项目
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setUserId(repositoryQuery.getUserId());
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+
+            //存在私有的和权限成员
+            if (CollectionUtils.isNotEmpty(privateRpy) && CollectionUtils.isNotEmpty(dmUserList)) {
+                List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
+                List<String> dmRpyId = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
+
+                //查询私有相同的仓库id
+                privateRpyId = privateRpyId.stream().filter(dmRpyId::contains).collect(Collectors.toList());
+                canViewRpyId = Stream.concat(privateRpyId.stream(), canViewRpyId.stream()).collect(Collectors.toList());
+            }
+            String[] canViewRpyIdList = canViewRpyId.toArray(new String[canViewRpyId.size()]);
+            Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
+            List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
+            joinTemplate.joinQuery(repositoryList);
+            return PaginationBuilder.build(pagination,repositoryList);
+        }
+        return null;
+    }
+
+    @Override
+    public Repository findRepository(String id) {
+        Repository repository = this.findOneRpy(id);
+
+        try {
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
+            File file = new File(repositoryAddress);
+            Git git = Git.open(file);
+            org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
+            String fullBranch = repository1.getFullBranch().replace(Constants.R_HEADS,"");
+            repository.setDefaultBranch(fullBranch);
+            repository.setNotNull(fullBranch.isEmpty());
+            git.close();
+            return repository;
+        } catch (IOException e) {
+            throw new ApplicationException("仓库不存在"+e);
+        }
+    }
 
 }
 

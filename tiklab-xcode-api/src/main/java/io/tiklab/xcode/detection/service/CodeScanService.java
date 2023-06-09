@@ -2,6 +2,7 @@ package io.tiklab.xcode.detection.service;
 
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.detection.model.CodeScan;
+import io.tiklab.xcode.detection.model.CodeScanInstance;
 
 public interface CodeScanService {
 
@@ -29,7 +30,7 @@ public interface CodeScanService {
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败
      */
-    String findScanState(String repositoryId);
+    CodeScanInstance findScanState(String repositoryId);
 
     /**
      * 创建扫描方案

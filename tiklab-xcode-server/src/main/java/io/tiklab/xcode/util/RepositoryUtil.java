@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -158,12 +160,12 @@ public class RepositoryUtil {
         String address = repository.getAddress();
         //是否存在仓库组
         RepositoryGroup repositoryGroup = repository.getGroup();
-        if (repositoryGroup == null){
+        if (ObjectUtils.isEmpty(repositoryGroup)||StringUtils.isEmpty(repositoryGroup.getGroupId())){
             String s = defaultPath() + "/" + address+ ".git";
             File file = new File(s);
             return file.getAbsolutePath();
         }
-        String groupAddress = repositoryGroup.getAddress();
+        String groupAddress = repositoryGroup.getName();
         String s = defaultPath()+"/"+groupAddress + "/" + address+ ".git";
         File file = new File(s);
         return file.getAbsolutePath();

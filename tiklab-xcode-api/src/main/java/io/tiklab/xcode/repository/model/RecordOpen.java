@@ -2,7 +2,11 @@ package io.tiklab.xcode.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.tiklab.beans.annotation.Mapper;
+import io.tiklab.beans.annotation.Mapping;
+import io.tiklab.beans.annotation.Mappings;
+import io.tiklab.core.BaseModel;
 import io.tiklab.join.annotation.Join;
+import io.tiklab.join.annotation.JoinQuery;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
@@ -11,13 +15,18 @@ import java.sql.Timestamp;
 @ApiModel
 @Join
 @Mapper(targetAlias = "RecordOpenEntity")
-public class RecordOpen {
+public class RecordOpen  extends BaseModel {
 
     @ApiProperty(name="id",desc="id")
     private String id;
 
-    @ApiProperty(name="repositoryId",desc="仓库id")
-    private String repositoryId;
+
+    @ApiProperty(name="repository",desc="仓库")
+    @Mappings({
+            @Mapping(source = "repository.rpyId",target = "repositoryId")
+    })
+    @JoinQuery(key = "rpyId")
+    private Repository repository;
 
     @ApiProperty(name="userId",desc="用户id")
     private String userId;
@@ -38,15 +47,12 @@ public class RecordOpen {
         this.id = id;
     }
 
-    public String getRepositoryId() {
-        return repositoryId;
+    public Repository getRepository() {
+        return repository;
     }
 
-    public void setRepositoryId(String repositoryId) {
-
-        this.repositoryId = repositoryId;
-
-
+    public void setRepository(Repository repository) {
+        this.repository = repository;
     }
 
     public String getUserId() {
