@@ -9,7 +9,7 @@ public interface BackupsServer {
     /**
      * 执行备份
      */
-    void backupsExec();
+    String backupsExec();
 
     /**
      * 获取备份结果

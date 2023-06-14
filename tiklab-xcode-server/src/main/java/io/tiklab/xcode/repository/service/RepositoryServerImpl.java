@@ -33,12 +33,14 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -98,39 +100,19 @@ public class RepositoryServerImpl implements RepositoryServer {
      * @return 仓库id
      */
     @Override
-    public String createRpy(Repository repository) {
+    public String createRpy(Repository repository){
         //判断是否有剩余内存
         boolean resMemory = memoryManService.findResMemory();
         if (resMemory){
-            joinTemplate.joinQuery(repository);
-            //获取用户名
-            RepositoryGroup repositoryGroup = repository.getGroup();
-            //存在仓库组
-            if (repositoryGroup != null && repositoryGroup.getGroupId() != null){
-                String groupAddress = repositoryGroup.getName();
-                String s = RepositoryUtil.defaultPath() + "/" + groupAddress;
-                //创建工作目录
-                File file = new File(s);
-                if (!file.exists()){
-                    RepositoryFileUtil.createDirectory(file.getAbsolutePath());
-                }
-            }
-
+            //git文件存放位置
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
 
-            String property = System.getProperty("user.dir");
-            if (!property.endsWith(RepositoryFinal.APP_NAME)){
-                File file = new File(property);
-                property= file.getParent();
-            }
-
-            Path filePath = Paths.get(property+"/"+fileAddress);
-
-            String ignoreFilePath = filePath+"/"+".gitignore";
-            String mdFilePath = filePath+"/"+"README.md";
+            URL gitFileURL = ResourceLoader.class.getClassLoader().getResource("file/.gitignore");
+            String ignoreFilePath = gitFileURL.getPath();
+            URL mdDileURL = ResourceLoader.class.getClassLoader().getResource("file/README.md");
+            String mdFilePath = mdDileURL.getPath();
 
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
-
 
             repository.setCreateTime(RepositoryUtil.date(1,new Date()));
             repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
@@ -139,11 +121,12 @@ public class RepositoryServerImpl implements RepositoryServer {
             String repositoryId = repositoryDao.createRpy(groupEntity);
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
             return repositoryId;
-        }else {
+        }
+        else {
             throw  new ApplicationException(4006,"内存不足");
         }
-
     }
+
 
     /**
      * 删除仓库
@@ -428,6 +411,24 @@ public class RepositoryServerImpl implements RepositoryServer {
         } catch (IOException e) {
             throw new ApplicationException("仓库不存在"+e);
         }
+    }
+
+    @Override
+    public  List<Repository> findRepositoryByName(RepositoryQuery repositoryQuery) {
+        List<Repository> repositoryList = this.findRepositoryList(repositoryQuery);
+
+        List<Repository> repositorys=null;
+        if (CollectionUtils.isNotEmpty(repositoryList)){
+            if (StringUtils.isEmpty(repositoryQuery.getGroupId())){
+                List<Repository> repositories = repositoryList.stream().filter(a -> ObjectUtils.isEmpty(a.getGroup())).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(repositories)){
+                    repositorys= repositories;
+                }
+            }else {
+                repositorys=repositoryList;
+            }
+        }
+        return repositorys;
     }
 
 }

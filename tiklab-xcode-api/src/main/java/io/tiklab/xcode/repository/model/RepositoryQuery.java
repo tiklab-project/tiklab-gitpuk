@@ -21,6 +21,10 @@ public class RepositoryQuery implements Serializable {
     @ApiProperty(name ="userId",desc = "仓库名称")
     private String  name;
 
+    @ApiProperty(name ="groupId",desc = "仓库组id")
+    private String  groupId;
+
+
 
     public String getUserId() {
         return userId;
@@ -54,6 +58,14 @@ public class RepositoryQuery implements Serializable {
 
     public void setPageParam(Page pageParam) {
         this.pageParam = pageParam;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }
 

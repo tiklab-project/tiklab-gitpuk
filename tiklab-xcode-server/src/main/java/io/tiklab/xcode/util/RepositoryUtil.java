@@ -86,14 +86,14 @@ public class RepositoryUtil {
     }
 
     /**
-     * 默认路径
+     * 默认路径 xcode
      * @return 地址
      */
     public static String defaultPath(){
 
         String property = System.getProperty("user.home");
-
-        String address = property +"/code/repository";
+        //String property="/var/opt/xcode";
+        String address = property +"/xcode/repository";
         //根目录
         File file = new File(address);
         return file.getAbsolutePath();
@@ -158,15 +158,7 @@ public class RepositoryUtil {
      */
     public static String findRepositoryAddress(Repository repository){
         String address = repository.getAddress();
-        //是否存在仓库组
-        RepositoryGroup repositoryGroup = repository.getGroup();
-        if (ObjectUtils.isEmpty(repositoryGroup)||StringUtils.isEmpty(repositoryGroup.getGroupId())){
-            String s = defaultPath() + "/" + address+ ".git";
-            File file = new File(s);
-            return file.getAbsolutePath();
-        }
-        String groupAddress = repositoryGroup.getName();
-        String s = defaultPath()+"/"+groupAddress + "/" + address+ ".git";
+        String s = defaultPath() + "/" + address+ ".git";
         File file = new File(s);
         return file.getAbsolutePath();
     }

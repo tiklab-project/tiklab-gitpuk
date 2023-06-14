@@ -1,13 +1,14 @@
 package io.tiklab.xcode.setting.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mysql.cj.result.Field;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.setting.model.Backups;
 import io.tiklab.xcode.util.RepositoryUtil;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +18,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 @Service
@@ -39,54 +42,55 @@ public class BackupsServerImpl implements BackupsServer{
     //数据恢复状态
     public static Map<String , String> recoveryState = new HashMap<>();
 
-    //上传备份压缩文件路径
-    public static Map<String , String> uploadFileUrlMap = new HashMap<>();
+    //执行的文件绝对路径名称
+    public static Map<String , String> fileAbUrlMap = new HashMap<>();
 
     @Override
-    public void backupsExec() {
+    public String backupsExec() {
         List<Repository> allRpy = repositoryServer.findAllRpy();
+        String loginId = LoginContext.getLoginId();
+        backupsExecState.remove(loginId);
+        fileAbUrlMap.remove(loginId);
 
-        backupsExecState.clear();
-        File file = new File(appHome+"/file/backups");
-        String fileData = gainFileData(file);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(new Runnable(){
+            @Override
+            public void run() {
+                //执行备份脚本
+                File file = new File(appHome+"/file/backups");
+                String fileData = gainFileData(file);
 
 
-        JSONObject jsonObject = JSONObject.parseObject(fileData);
-        String backUpsUrl = jsonObject.get("backups-url").toString();
-        String backupsTime = jsonObject.get("backups-time").toString();
+                JSONObject jsonObject = JSONObject.parseObject(fileData);
+                String backUpsUrl = jsonObject.get("backups-url").toString();
+                String backupsTime = jsonObject.get("backups-time").toString();
 
-        //code 下面存放代码数据
-        File backUpsUrlFile = new File(backUpsUrl+"/code");
+                //code 下面存放代码数据
+                File backUpsUrlFile = new File(backUpsUrl+"/code");
 
-        try {
-            if (!backUpsUrlFile.exists() && !backUpsUrlFile.isDirectory()) {
-                backUpsUrlFile.mkdirs();
+                try {
+                    if (!backUpsUrlFile.exists() && !backUpsUrlFile.isDirectory()) {
+                        backUpsUrlFile.mkdirs();
+                    }
+                    executeScript(backUpsUrl,allRpy);
+
+                    backupsExecState.put(loginId,"ok");
+
+                    if (StringUtils.isNotEmpty(backupsTime)){
+                        fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
+                    }
+                    writeFile(file,fileData);
+                }catch (Exception e){
+                    backupsExecState.put(loginId,"error");
+                    new ApplicationException(e.getMessage());
+                }
             }
+        });
 
-            //执行备份脚本
-            executeScript(backUpsUrl,allRpy);
-
-            backupsExecState.put("result","ok");
-
-            if (StringUtils.isNotEmpty(backupsTime)){
-                fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
-            }
-            writeFile(file,fileData);
-        }catch (Exception e){
-            backupsExecState.put("result","error");
-            new ApplicationException(e.getMessage());
-        }
+        return "ok";
     }
 
 
-
-    @Override
-    public String gainBackupsRes(String type) {
-        if (("backups").equals(type)){
-            return   backupsExecState.get("result");
-        }
-        return recoveryState.get("result");
-    }
 
     @Override
     public void updateBackups(Backups backups)  {
@@ -119,7 +123,8 @@ public class BackupsServerImpl implements BackupsServer{
         String taskState = jsonObject.get("task-state").toString();
         String backupsTime = jsonObject.get("backups-time").toString();
 
-        backups.setBackupsAddress(backUpsUrl);
+        String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
+        backups.setBackupsAddress(substring);
         backups.setTaskState(taskState);
         backups.setNewBackupsTime(backupsTime);
         return backups;
@@ -128,6 +133,7 @@ public class BackupsServerImpl implements BackupsServer{
     @Override
     public void recoveryData(String userId,String fileName) {
         recoveryState.clear();
+
         File file = new File(appHome + "/file/backups");
         try {
             String fileData = gainFileData(file);
@@ -138,16 +144,74 @@ public class BackupsServerImpl implements BackupsServer{
             executeRecoveryScript(backUpsUrl, substring, fileName);
             recoveryState.put("result","ok");
 
-            uploadFileUrlMap.remove(userId);
         }catch (Exception e){
             recoveryState.put("result","error");
             throw  new ApplicationException(e.getMessage());
         }
     }
 
+
+    @Override
+    public String gainBackupsRes(String type) {
+
+        String loginId = LoginContext.getLoginId();
+        if (("backups").equals(type)){
+
+            String backupsAbsoluteUrl = fileAbUrlMap.get(loginId);
+            //缓存中还未存入文件的绝对路径,执行恢复进度为0
+            if (StringUtils.isEmpty(backupsAbsoluteUrl)){
+                return  "0";
+            }
+
+            File file = new File(backupsAbsoluteUrl);
+            long backupsFileSize = file.length();
+            String defaultPath = RepositoryUtil.defaultPath();
+            long fileSize = FileUtils.sizeOfDirectory(new File(defaultPath));
+
+            return   backupsExecState.get("result");
+        }
+        File file = new File(appHome + "/file/backups");
+        String fileData = gainFileData(file);
+        JSONObject jsonObject = JSONObject.parseObject(fileData);
+        String backUpsUrl = jsonObject.get("backups-url").toString();
+
+        //备份文件git文件大小
+        File backupsFile = new File(backUpsUrl + "/code");
+        long backupsFileSize = backupsFile.length();
+
+        //恢复数据的大小
+        String defaultPath = RepositoryUtil.defaultPath();
+        long recoveryFileSize = FileUtils.sizeOfDirectory(new File(defaultPath));
+        if (recoveryFileSize==0){
+            //在执恢复git 文件之前回先执行恢复数据库数据 默认20%进度
+            return  "20";
+        }
+        //恢复失败
+        if(("error").equals(recoveryState.get("result"))){
+            return "error";
+        }
+
+        if (backupsFileSize!=0){
+            Long progress = recoveryFileSize / backupsFileSize;
+            long result = progress * 100;
+            logger.info("执行进度"+result);
+            return String.valueOf(result);
+        }else {
+            //在恢复成功后回删除掉解压的恢复文件，就取缓存中的恢复数据
+            if(("ok").equals(recoveryState.get("result"))){
+                logger.info("执行进度"+100);
+                return "100";
+            }
+            return String.valueOf(0);
+        }
+
+       // return recoveryState.get("result");
+    }
+
     @Override
     public void uploadBackups(InputStream inputStream, String fileName,String userId) {
         try {
+            //获取text文件信息
             File file = new File(appHome + "/file/backups");
             String fileData = gainFileData(file);
 
@@ -155,14 +219,20 @@ public class BackupsServerImpl implements BackupsServer{
             String backUpsUrl = jsonObject.get("backups-url").toString();
             String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
 
+            //如果文件夹不存在就创建文件夹
+            File reduceDir = new File(substring);
+            if (!reduceDir.exists() && !reduceDir.isDirectory()) {
+                reduceDir.mkdirs();
+            }
+
             //上传备份压缩文件的绝对路径
             String reduceUrl = substring + "/" + fileName;
-
             File reduceFile = new File(reduceUrl);
             //文件已经存在
             if (!reduceFile.exists()) {
+
                 //创建文件
-                File backUpsUrlFile = new File(backUpsUrl);
+                File backUpsUrlFile = new File(reduceUrl);
                 backUpsUrlFile.createNewFile();
                 //写入文件
                 FileOutputStream outputStream = new FileOutputStream(reduceUrl);
@@ -173,7 +243,7 @@ public class BackupsServerImpl implements BackupsServer{
                 }
                 outputStream.flush();
             }
-            uploadFileUrlMap.put(userId,fileName);
+
         }catch (Exception e){
             throw  new ApplicationException(e.getMessage());
         }
@@ -186,7 +256,17 @@ public class BackupsServerImpl implements BackupsServer{
      */
     public void executeScript(String backUpsUrl, List<Repository> allRpy) throws IOException, InterruptedException {
         String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
-        String reduceName = substring + "/"+System.currentTimeMillis();
+
+        // 获取当前时间
+        LocalDateTime now = LocalDateTime.now();
+        //备份文件名称
+        String backupsName="xcode_backups_"+now.getYear()+"_"+now.getMonthValue()+"_"
+                +now.getDayOfMonth()+"_"+now.getHour()+"_"+now.getMinute()+"_"+String.valueOf(System.currentTimeMillis()).substring(0,9);
+        
+        String backupsAbsoluteUrl = substring + "/"+backupsName;
+
+        fileAbUrlMap.put(LoginContext.getLoginId(),backupsAbsoluteUrl);
+        
         int length = substring.split("/").length;
 
         String defaultPath = RepositoryUtil.defaultPath();
@@ -206,7 +286,7 @@ public class BackupsServerImpl implements BackupsServer{
         args[6] = "backupsUrl="+backUpsUrl;
         args[7] = "backupsCodeUrl="+backUpsUrl+"/code";
         args[8] = "sourceFilePath="+allUrl;
-        args[9] = "reduceName="+reduceName;
+        args[9] = "reduceName="+backupsAbsoluteUrl;
         args[10]="length="+length;
         Process ps = Runtime.getRuntime().exec(appHome+"/file/backups.sh",args);
         ps.waitFor();

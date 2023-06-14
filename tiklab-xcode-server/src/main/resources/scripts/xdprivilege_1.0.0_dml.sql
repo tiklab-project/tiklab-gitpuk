@@ -29,7 +29,12 @@ INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('28b4ec49b6
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('3572dd063f4f', '1', 'projectdele');
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('39f06b018e83', '1', 'projectup');
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('732aa5077352', '2', 'version');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('732aa5077352', '2', 'version');
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('74217ab2e9eb', '2', 'loginexce');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('74217ab2e9eb', '2', 'loginexce');
+
+
+
 INSERT INTO "public"."pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('81da97f94fa7', '1', '9633d9475886');
 INSERT INTO "public"."pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('2f8bdda13cdc', '1', '428be660dea3');
 INSERT INTO "public"."pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('ea9f15425a50', '1', '5fb7863b09a8');

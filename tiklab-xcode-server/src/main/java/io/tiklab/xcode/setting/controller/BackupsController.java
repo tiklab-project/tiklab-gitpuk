@@ -29,9 +29,9 @@ public class BackupsController {
     @ApiParam(name = "auth",desc = "auth",required = true)
     public Result<String> backupsExec(){
 
-        backupsServer.backupsExec();
+        String exec = backupsServer.backupsExec();
 
-        return Result.ok();
+        return Result.ok(exec);
     }
 
     @RequestMapping(path="/findBackups",method = RequestMethod.POST)

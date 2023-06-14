@@ -14,7 +14,7 @@ length=${length}
 mysql_bin="/Users/limingliang/postgreSQL/bin"
 psql="${mysql_bin}/psql"
 pg_dump="${mysql_bin}/pg_dump"
-current_time=$(date +%s)
+current_time="xcode-backups-"$(date +%s)
 
 PGPASSWORD=${password} ${pg_dump} -U ${userName} -h ${host} -p ${port} -d ${dbName} -n ${schemaName}>${backupsUrl}/${dbName}.sql
 

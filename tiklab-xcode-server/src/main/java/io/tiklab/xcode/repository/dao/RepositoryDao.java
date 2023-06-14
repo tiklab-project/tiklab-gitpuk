@@ -83,6 +83,7 @@ public class RepositoryDao {
         QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
                 .eq("name", repositoryQuery.getName())
                 .eq("userId", repositoryQuery.getUserId())
+                .eq("groupId",repositoryQuery.getGroupId())
                 .get();
         return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }

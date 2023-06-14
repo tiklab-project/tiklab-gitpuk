@@ -138,6 +138,16 @@ public class RepositoryController {
     }
 
 
+    @RequestMapping(path="/findRepositoryByName",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryByName",desc = "通过仓库名字或仓库组查询仓库是否存在")
+    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    public Result<List<Repository>> findRepositoryByName(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
+
+        List<Repository> repositoryByName = repositoryServer.findRepositoryByName(repositoryQuery);
+
+        return Result.ok(repositoryByName);
+    }
+
 }
 
 

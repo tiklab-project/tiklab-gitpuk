@@ -25,10 +25,11 @@ tar -zxvf ${reduceUrl} -C ${prePath}
 PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -d ${dbName}  -n ${schemaName}<${backupsSqlUrl}/${dbName}.sql;
 
 
+
 cp -r ${backupsCodeUrl}/* ${sourceFilePath}
 
 rm -rf ${backupsSqlUrl}
-rm -rf ${reduceUrl}
+
 #create db
 
 

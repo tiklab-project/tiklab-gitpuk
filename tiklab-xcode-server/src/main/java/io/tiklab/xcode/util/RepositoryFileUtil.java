@@ -1,5 +1,6 @@
 package io.tiklab.xcode.util;
 
+import io.tiklab.core.exception.SystemException;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.git.GitCommitUntil;
@@ -12,9 +13,7 @@ import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,11 +42,12 @@ public class RepositoryFileUtil {
      * @param address 文件地址
      * @throws ApplicationException 文件创建失败
      */
-    public static void createDirectory(String address) throws ApplicationException {
+    public static void createDirectory(String address)    {
         File file = new File(address);
         if (file.exists()) {
             return;
         }
+
         int i = 0;
         boolean b = false;
         if (!file.exists()) {
@@ -57,7 +57,7 @@ public class RepositoryFileUtil {
             }
         }
         if (i >= 10) {
-            throw new ApplicationException("项目工作目录创建失败。");
+            throw new ApplicationException("项目工作目录创建失败。"+address);
         }
     }
 

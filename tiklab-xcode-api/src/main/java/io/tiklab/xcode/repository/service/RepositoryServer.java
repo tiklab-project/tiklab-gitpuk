@@ -102,6 +102,13 @@ public interface RepositoryServer {
      * @param id
      */
     Repository findRepository(String id);
+
+    /**
+     * 通过仓库名字或 仓库组查询仓库是否存在
+     * @param repositoryQuery
+     * @return 仓库
+     */
+    List<Repository> findRepositoryByName(RepositoryQuery repositoryQuery);
 }
 
 
