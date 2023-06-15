@@ -1,6 +1,5 @@
 package io.tiklab.xcode.repository.service;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
 import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.page.Pagination;
@@ -23,14 +22,16 @@ import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RepositoryDao;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.*;
+import io.tiklab.xcode.setting.service.BackupsServerImpl;
 import io.tiklab.xcode.util.RepositoryFileUtil;
-import io.tiklab.xcode.util.RepositoryFinal;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -51,6 +52,8 @@ import java.util.stream.Stream;
 @Service
 @Exporter
 public class RepositoryServerImpl implements RepositoryServer {
+
+    private static Logger logger = LoggerFactory.getLogger(RepositoryServerImpl.class);
 
     @Autowired
     private JoinTemplate joinTemplate;
@@ -79,9 +82,6 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Value("${xcode.file:/file}")
     private String fileAddress;
 
-    @Value("${APP_HOME:null}")
-    String appHome;
-
     @Value("${server.port:8080}")
     private String port;
 
@@ -109,13 +109,18 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (resMemory){
             //git文件存放位置
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
+            String property = System.getProperty("user.dir");
 
-            String ignoreFilePath = appHome+"/file/.gitignore";
-            String mdFilePath =appHome+"file/README.md";
-      /*      URL gitFileURL = ResourceLoader.class.getClassLoader().getResource("file/.gitignore");
-            String ignoreFilePath = gitFileURL.getPath();
-            URL mdDileURL = ResourceLoader.class.getClassLoader().getResource("file/README.md");
-            String mdFilePath = mdDileURL.getPath();*/
+            Path filePath = Paths.get(property+"/"+fileAddress);
+
+            String ignoreFilePath = filePath+"/"+".gitignore";
+            String mdFilePath = filePath+"/"+"README.md";
+            URL gitFileURL = ResourceLoader.class.getClassLoader().getResource("file/.gitignore");
+            logger.info("创建仓库gitFileURL:"+gitFileURL);
+            logger.info("创建仓库filePath:"+filePath);
+           /* String ignoreFilePath = property+"/file/.gitignore";
+            String mdFilePath =property+"file/README.md";*/
+
 
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
 
@@ -125,7 +130,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
             String repositoryId = repositoryDao.createRpy(groupEntity);
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
-            return repositoryId;
+            return "repositoryId";
         }
         else {
             throw  new ApplicationException(4006,"内存不足");

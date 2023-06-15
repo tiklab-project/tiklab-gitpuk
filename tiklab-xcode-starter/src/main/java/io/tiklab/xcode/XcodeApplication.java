@@ -22,6 +22,7 @@ public class XcodeApplication {
 		SpringApplication.run(XcodeApplication.class, args);
 
 		RepositoryFileUtil.createDirectory(RepositoryUtil.defaultPath());
+		RepositoryFileUtil.initializeBackupsUrl();
 	}
 
 

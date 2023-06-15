@@ -1,5 +1,6 @@
 package io.tiklab.xcode.util;
 
+import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.git.GitBranchUntil;
@@ -27,6 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class RepositoryFileUtil {
+
 
     /**
      * 字符串写入文件
@@ -387,6 +389,36 @@ public class RepositoryFileUtil {
         tarArchiveInputStream.close();
         gzipInputStream.close();
         fileInputStream.close();
+    }
+
+    /**
+     * 启动项目 创建备份路径
+     */
+    public static void initializeBackupsUrl(){
+        String property = System.getProperty("user.dir");
+        /*String backupsPath=property+"/file/backups";
+        File file = new File(backupsPath);
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            StringBuilder result = new StringBuilder();
+            BufferedReader bfr = new BufferedReader(new InputStreamReader(inputStream));
+            String lineTxt = null;
+            while ((lineTxt = bfr.readLine()) != null) {
+                String a=lineTxt;
+                result.append(lineTxt).append(System.lineSeparator());
+            }
+            String fileData = result.toString();
+            JSONObject jsonObject = JSONObject.parseObject(fileData);
+            String backUpsUrl = jsonObject.get("backups-url").toString();
+            fileData =fileData.replace(backUpsUrl,RepositoryUtil.defaultPath()+"/backups/backups");
+
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(fileData);
+            fileWriter.close();
+            inputStream.close();
+        }catch (IOException e){
+            throw new ApplicationException(e.getMessage());
+        }*/
     }
 }
 
