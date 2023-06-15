@@ -88,6 +88,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Value("${xcode.ssh.port:8082}")
     private int sshPort;
 
+    @Value("${APP_HOME:null}")
+    String appHome;
+
     @Autowired
     private UserService userService;
 
@@ -109,18 +112,10 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (resMemory){
             //git文件存放位置
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
-            String property = System.getProperty("user.dir");
 
-            Path filePath = Paths.get(property+"/"+fileAddress);
-
-            String ignoreFilePath = filePath+"/"+".gitignore";
-            String mdFilePath = filePath+"/"+"README.md";
-            URL gitFileURL = ResourceLoader.class.getClassLoader().getResource("file/.gitignore");
-            logger.info("创建仓库gitFileURL:"+gitFileURL);
-            logger.info("创建仓库filePath:"+filePath);
-           /* String ignoreFilePath = property+"/file/.gitignore";
-            String mdFilePath =property+"file/README.md";*/
-
+            String ignoreFilePath = appHome+"/file/.gitignore";
+            String mdFilePath =appHome+"file/README.md";
+            logger.info("创建仓库ignoreFilePath:"+ignoreFilePath);
 
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
 

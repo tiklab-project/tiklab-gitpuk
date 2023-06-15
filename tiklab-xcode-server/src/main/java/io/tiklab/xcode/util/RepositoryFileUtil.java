@@ -16,6 +16,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -391,35 +393,7 @@ public class RepositoryFileUtil {
         fileInputStream.close();
     }
 
-    /**
-     * 启动项目 创建备份路径
-     */
-    public static void initializeBackupsUrl(){
-        String property = System.getProperty("user.dir");
-        /*String backupsPath=property+"/file/backups";
-        File file = new File(backupsPath);
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
-            StringBuilder result = new StringBuilder();
-            BufferedReader bfr = new BufferedReader(new InputStreamReader(inputStream));
-            String lineTxt = null;
-            while ((lineTxt = bfr.readLine()) != null) {
-                String a=lineTxt;
-                result.append(lineTxt).append(System.lineSeparator());
-            }
-            String fileData = result.toString();
-            JSONObject jsonObject = JSONObject.parseObject(fileData);
-            String backUpsUrl = jsonObject.get("backups-url").toString();
-            fileData =fileData.replace(backUpsUrl,RepositoryUtil.defaultPath()+"/backups/backups");
 
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(fileData);
-            fileWriter.close();
-            inputStream.close();
-        }catch (IOException e){
-            throw new ApplicationException(e.getMessage());
-        }*/
-    }
 }
 
 
