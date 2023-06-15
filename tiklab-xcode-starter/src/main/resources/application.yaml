@@ -79,10 +79,6 @@ message:
 base:
   url: http://xcode-ce.tiklab.net
 
-mysql:
-  embbed:
-    enable: true
-  database: tiklab_xcode
 
 #homes
 homes:

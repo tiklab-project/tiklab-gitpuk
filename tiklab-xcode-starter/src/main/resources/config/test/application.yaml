@@ -75,11 +75,6 @@ message:
   sms:
     enabled: true
 
-mysql:
-  embbed:
-    enable: false
-  database: tiklab_xcode
-
 #homes
 homes:
   address: http://192.168.10.19:8080
