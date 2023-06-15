@@ -79,6 +79,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Value("${xcode.file:/file}")
     private String fileAddress;
 
+    @Value("${APP_HOME:null}")
+    String appHome;
+
     @Value("${server.port:8080}")
     private String port;
 
@@ -107,10 +110,12 @@ public class RepositoryServerImpl implements RepositoryServer {
             //git文件存放位置
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
 
-            URL gitFileURL = ResourceLoader.class.getClassLoader().getResource("file/.gitignore");
+            String ignoreFilePath = appHome+"/file/.gitignore";
+            String mdFilePath =appHome+"file/README.md";
+      /*      URL gitFileURL = ResourceLoader.class.getClassLoader().getResource("file/.gitignore");
             String ignoreFilePath = gitFileURL.getPath();
             URL mdDileURL = ResourceLoader.class.getClassLoader().getResource("file/README.md");
-            String mdFilePath = mdDileURL.getPath();
+            String mdFilePath = mdDileURL.getPath();*/
 
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
 
