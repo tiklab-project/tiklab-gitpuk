@@ -20,15 +20,13 @@ PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -c  "DROP DA
 PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -c "CREATE DATABASE ${dbName};"
 
 
-tar -zxvf ${reduceUrl} -C ${prePath}
-
-PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -d ${dbName}  -n ${schemaName}<${backupsSqlUrl}/${dbName}.sql;
+PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -d ${dbName}  -n ${schemaName}<${backupsSqlUrl}${dbName}.sql;
 
 
+#tar -zxvf ${reduceUrl} -C ${prePath}
+#cp -r ${backupsCodeUrl}/* ${sourceFilePath}
 
-cp -r ${backupsCodeUrl}/* ${sourceFilePath}
-
-rm -rf ${backupsSqlUrl}
+#rm -rf ${backupsSqlUrl}
 
 #create db
 

@@ -9,7 +9,7 @@ backupsUrl=$backupsUrl
 backupsCodeUrl=$backupsCodeUrl
 sourceFilePath=$sourceFilePath
 reduceName=$reduceName
-length=${length}
+length=$length
 
 mysql_bin="/Users/limingliang/postgreSQL/bin"
 psql="${mysql_bin}/psql"
@@ -19,13 +19,13 @@ current_time="xcode-backups-"$(date +%s)
 PGPASSWORD=${password} ${pg_dump} -U ${userName} -h ${host} -p ${port} -d ${dbName} -n ${schemaName}>${backupsUrl}/${dbName}.sql
 
 
-while read line ;  do
-cp -r ${line} ${backupsCodeUrl}
-done <<< ${sourceFilePath}
+#while read line ;  do
+#cp -r ${line} ${backupsCodeUrl}
+#done <<< ${sourceFilePath}
 
-tar -zcvf ${reduceName}.tar.gz  --strip-components=${length} ${backupsUrl}
+#tar -zcvf ${reduceName}.tar.gz  --strip-components=${length} ${backupsUrl}
 
-rm -rf ${backupsUrl}
+#rm -rf ${backupsUrl}
 
 
 #create db

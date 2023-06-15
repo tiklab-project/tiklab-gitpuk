@@ -7,6 +7,9 @@ import io.tiklab.xcode.git.GitCommitUntil;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.file.model.FileTreeMessage;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
@@ -19,6 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class RepositoryFileUtil {
 
@@ -301,6 +307,87 @@ public class RepositoryFileUtil {
         return fileMessage;
     }
 
+    /**
+     * 递归压缩当前文件夹 tar.gz
+     * @param sourceFolder 当前文件夹路径
+     * @param tos 压缩文件ZipOutputStream
+     */
+    public static void compressFolder(String sourceFolder, String parentEntryPath, TarArchiveOutputStream tos) throws IOException {
+        File folder = new File(sourceFolder);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // 如果是子文件夹，创建对应的tar条目，然后递归压缩子文件夹中的内容
+                    String entryName = parentEntryPath + file.getName() + "/";
+                    TarArchiveEntry entry = new TarArchiveEntry(entryName);
+                    tos.putArchiveEntry(entry);
+                    tos.closeArchiveEntry();
+                    compressFolder(file.getAbsolutePath(), entryName, tos);
+                } else {
+                    // 如果是文件，创建对应的tar条目，并将文件内容写入tar输出流中
+                    String entryName = parentEntryPath + file.getName();
+                    TarArchiveEntry entry = new TarArchiveEntry(entryName);
+                    entry.setSize(file.length());
+                    tos.putArchiveEntry(entry);
+
+                    try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = bis.read(buffer)) != -1) {
+                            tos.write(buffer, 0, bytesRead);
+                        }
+                    }
+
+                    // 关闭当前条目
+                    tos.closeArchiveEntry();
+                }
+            }
+        }
+    }
+
+    /**
+     * 解压tar.gz文件夹
+     * @param outputFolderPath 解压路径
+     * @param inputFilePath 压缩包文件路径
+     */
+
+    public static void decompression(String inputFilePath,String outputFolderPath) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(inputFilePath);
+        GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream);
+
+        TarArchiveEntry entry;
+        while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
+            String entryName = entry.getName();
+            File outputFile = new File(outputFolderPath + entryName);
+
+            if (entry.isDirectory()) {
+                outputFile.mkdirs();
+                continue;
+            }
+
+            File parentDir = outputFile.getParentFile();
+            if (!parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = tarArchiveInputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, bytesRead);
+            }
+
+            fileOutputStream.close();
+        }
+
+        tarArchiveInputStream.close();
+        gzipInputStream.close();
+        fileInputStream.close();
+    }
 }
 
 

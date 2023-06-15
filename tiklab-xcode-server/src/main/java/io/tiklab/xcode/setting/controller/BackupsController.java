@@ -57,11 +57,11 @@ public class BackupsController {
     @RequestMapping(path="/recoveryData",method = RequestMethod.POST)
     @ApiMethod(name = "recoveryData",desc = "数据恢复")
     @ApiParam(name = "fileName",desc = "恢复的文件名称",required = true)
-    public Result<String> recoveryData(@NotNull String userId,String fileName){
+    public Result<String> recoveryData(@NotNull String fileName){
 
-        backupsServer.recoveryData(userId,fileName);
+        String exec = backupsServer.recoveryData(fileName);
 
-        return Result.ok();
+        return Result.ok(exec);
     }
 
     @RequestMapping(path="/gainBackupsRes",method = RequestMethod.POST)

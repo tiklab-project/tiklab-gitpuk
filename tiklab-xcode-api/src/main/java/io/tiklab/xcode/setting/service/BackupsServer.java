@@ -29,10 +29,9 @@ public interface BackupsServer {
 
     /**
      * 数据恢复
-     * @param  userId yonhuid
      * @param fileName 文件名称
      */
-    void recoveryData(String userId,String fileName);
+    String recoveryData(String fileName);
 
     /**
      * 备份数据上传
