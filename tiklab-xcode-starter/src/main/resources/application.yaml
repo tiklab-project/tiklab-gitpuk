@@ -1,0 +1,106 @@
+app:
+  name: tiklab-xcode
+
+APP_HOME: ${APP_HOME}
+application: xcode
+
+spring:
+  config:
+    import: optional:classpath:/config/${env:dev}/application.yaml
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8080
+
+xcode:
+  ssh:
+    port: 10000
+    key: tiklab-xcode-starter\src\main\resources\file\id_rsa
+  file: tiklab-xcode-starter\src\main\resources\file
+
+
+jdbc:
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://172.13.1.13:5432/tiklab_xcode?stringtype=unspecified
+  username: postgres
+  password: darth2020
+
+
+#plugin config
+PROJECT_HOME: ${user.home}/pipeline/${app.name}
+plugin:
+  path: ${PROJECT_HOME}/plugin
+
+#dfs config
+dfs:
+  server:
+    enabled: false
+    mode: server
+    port: 4000
+    datapath: ${PROJECT_HOME}/files
+  client:
+    url: 127.0.0.1:4000
+    bucket: ${app.name}
+
+#dcs config
+dcs:
+  server:
+    enabled: false
+    mode: server
+    port: 5000
+    datapath: ${PROJECT_HOME}/caches
+  client:
+    url: 127.0.0.1:5000
+    bucket: ${app.name}
+
+#dcs config
+dss:
+  server:
+    enabled: false
+    mode: server
+    port: 6000
+    datapath: ${PROJECT_HOME}/index
+  client:
+    url: 127.0.0.1:6000
+    bucket: ${app.name}
+
+datapath: ${PROJECT_HOME}/caches
+
+eas:
+  embbed:
+    enable: false
+  address: http://bac.eas.tiklab.net
+
+message:
+  sms:
+    enabled: true
+
+base:
+  url: http://xcode-ce.tiklab.net
+
+
+#homes
+homes:
+  address: http://192.168.10.19:8080
+
+#license
+licences:
+  path: ${APP_HOME}/licences
+
+#file
+file:
+  path: http://file.tiklab.net
+
+repository:
+  code: xcode
+  address: ""
+
+
+
+
+
+
+
+
+
