@@ -297,6 +297,12 @@
 				<yaml-type>/config/test</yaml-type>
 			</properties>
 		</profile>
+		<profile>
+			<id>env-demo</id>
+			<properties>
+				<yaml-type>/config/demo</yaml-type>
+			</properties>
+		</profile>
 
 		<!--release-->
 		<profile>

@@ -16,7 +16,7 @@ xcode:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://172.11.1.10:5432/tiklab_xcode?stringtype=unspecified
+  url: jdbc:postgresql://172.12.1.10:5432/tiklab_xcode?stringtype=unspecified
   username: postgres
   password: darth2020
 
@@ -65,8 +65,9 @@ eas:
   embbed:
     enable: true
 
+
 base:
-  url: http://bac.eas.test.tiklab.net
+  url: http://bac.eas.demo.tiklab.net
 
 message:
   sms:
@@ -87,7 +88,7 @@ file:
 
 repository:
   code: xcode
-  address: "http://bac.xcode.test.tiklab.net"
+  address: "http://bac.xcode.demo.tiklab.net"
 
 
 
