@@ -2,6 +2,7 @@ package io.tiklab.xcode.setting.service;
 
 import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.core.exception.SystemException;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.RepositoryServer;
@@ -239,13 +240,13 @@ public class BackupsServerImpl implements BackupsServer{
         String fileData = gainFileData(file);
 
         JSONObject jsonObject = JSONObject.parseObject(fileData);
-        String backUpsUrl = jsonObject.get("backups-url").toString();
-        String taskState = jsonObject.get("task-state").toString();
 
         if (StringUtils.isNotEmpty(backups.getBackupsAddress())){
+            String backUpsUrl = jsonObject.get("backups-url").toString();
             fileData =fileData.replace(backUpsUrl,backups.getBackupsAddress());
         }
         if (StringUtils.isNotEmpty(backups.getTaskState())){
+            String taskState = jsonObject.get("task-state").toString();
              fileData = fileData.replace(taskState, backups.getTaskState());
         }
         writeFile(file,fileData);
@@ -268,6 +269,16 @@ public class BackupsServerImpl implements BackupsServer{
         backups.setBackupsAddress(substring);
         backups.setTaskState(taskState);
         backups.setNewBackupsTime(backupsTime);
+        backups.setNewResult("non");
+        String result = backupsExecLog.get(LoginContext.getLoginId());
+        if (StringUtils.isNotEmpty(result)){
+            backups.setNewResult("fail");
+           if (result.contains("Backups file success end")){
+               backups.setNewResult("success");
+           }
+        }
+
+
         return backups;
     }
 
@@ -276,10 +287,16 @@ public class BackupsServerImpl implements BackupsServer{
     public String gainBackupsRes(String type) {
 
         String loginId = LoginContext.getLoginId();
-        String backups = backupsExecLog.get(loginId);
-        String recovery = recoveryLog.get(loginId);
         if (("backups").equals(type)){
+            String backups = backupsExecLog.get(loginId);
+            if (StringUtils.isEmpty(backups)){
+                return null;
+            }
            return backups;
+        }
+        String recovery = recoveryLog.get(loginId);
+        if (StringUtils.isEmpty(recovery)){
+            return null;
         }
         return recovery;
     }

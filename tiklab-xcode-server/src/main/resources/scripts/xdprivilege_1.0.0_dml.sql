@@ -14,6 +14,7 @@ INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES 
 INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectuser','项目成员', 'xcode_user',null ,6, 2);
 INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectdele','删除项目', 'xcode_delete','projectall' ,2, 2);
 INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectup','修改项目', 'xcode_update','projectall' ,3, 2);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('backups','备份与恢复项目', 'backups',null ,1, 1);
 
 
 
@@ -28,10 +29,8 @@ INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('256bca68cd
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('28b4ec49b63c', '1', 'projectuser');
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('3572dd063f4f', '1', 'projectdele');
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('39f06b018e83', '1', 'projectup');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('732aa5077352', '2', 'version');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('7464415279eb', '1', 'backups');
 INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('74217ab2e9eb', '2', 'loginexce');
-
-
 
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('81da97f94fa7', '1', '9633d9475886');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('2f8bdda13cdc', '1', '428be660dea3');

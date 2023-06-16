@@ -15,6 +15,9 @@ public class Backups {
     @ApiProperty(name="newBackupsTime",desc="最近备份时间")
     private String newBackupsTime;
 
+    @ApiProperty(name="newResult",desc="最近备份结果")
+    private String newResult;
+
     public String getBackupsAddress() {
         return backupsAddress;
     }
@@ -37,5 +40,14 @@ public class Backups {
 
     public void setNewBackupsTime(String newBackupsTime) {
         this.newBackupsTime = newBackupsTime;
+    }
+
+    public String getNewResult() {
+        return newResult;
+    }
+
+    public Backups setNewResult(String newResult) {
+        this.newResult = newResult;
+        return this;
     }
 }
