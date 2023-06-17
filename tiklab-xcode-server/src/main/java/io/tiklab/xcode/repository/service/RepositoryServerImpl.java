@@ -123,9 +123,17 @@ public class RepositoryServerImpl implements RepositoryServer {
             repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
             RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
 
+            if (repository.getAddress().contains("/")){
+                String address = repository.getAddress().substring(0, repository.getAddress().indexOf("/"));
+                String allAddress = RepositoryUtil.defaultPath() + "/" + address;
+                File file = new File(allAddress);
+                if (!file.exists() && !file.isDirectory()) {
+                    file.mkdirs();
+                }
+            }
             String repositoryId = repositoryDao.createRpy(groupEntity);
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
-            return "repositoryId";
+            return repositoryId;
         }
         else {
             throw  new ApplicationException(4006,"内存不足");
