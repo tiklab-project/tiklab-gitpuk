@@ -16,7 +16,7 @@ xcode:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432//tiklab_xcode?stringtype=unspecified
+  url: jdbc:postgresql://localhost:5432/tiklab_xcode?stringtype=unspecified
   username: postgres
   password: darth2020
 
