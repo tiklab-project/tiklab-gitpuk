@@ -32,6 +32,11 @@ PROJECT_HOME: ${user.home}/pipeline/${app.name}
 plugin:
   path: ${PROJECT_HOME}/plugin
 
+postgresql:
+  embbed:
+    enable: true
+  database: tiklab_xcode
+
 #dfs config
 dfs:
   server:

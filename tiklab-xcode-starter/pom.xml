@@ -16,6 +16,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-postgresql-starter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-toolkit-spring-boot-starter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -99,12 +104,6 @@
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-mysql-starter</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
 
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
 		<!--<dependency>
@@ -112,6 +111,7 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.5</version>
 		</dependency>-->
+
 
 	</dependencies>
 
@@ -151,6 +151,13 @@
 								</goals>
 								<configuration>
 									<artifactItems>
+										<artifactItem>
+											<groupId>io.tiklab</groupId>
+											<artifactId>tiklab-postgresql-linux</artifactId>
+											<version>${project.version}</version>
+											<type>zip</type>
+											<outputDirectory>embbed</outputDirectory>
+										</artifactItem>
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
 											<artifactId>tiklab-jdk-linux</artifactId>

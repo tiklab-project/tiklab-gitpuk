@@ -375,7 +375,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Override
     public Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery) {
-        List<Repository> allRpy = this.findAllRpy();
+        List<Repository> allRpy = this.findRepositoryList(repositoryQuery);
         if (CollectionUtils.isNotEmpty(allRpy)) {
             //公共的仓库
             List<Repository> publicRpy = allRpy.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());

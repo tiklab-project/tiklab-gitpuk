@@ -20,6 +20,11 @@ jdbc:
   username: postgres
   password: darth2020
 
+postgresql:
+  embbed:
+    enable: true
+  database: tiklab_xcode
+
 
 #plugin config
 PROJECT_HOME: ${user.home}/pipeline/${app.name}
