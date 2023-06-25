@@ -71,7 +71,7 @@ eas:
     enable: true
 
 base:
-  url: http://bac.eas.test.tiklab.net
+  url: http://eas-ce.test.tiklab.net
 
 message:
   sms:

@@ -68,11 +68,11 @@ datapath: ${PROJECT_HOME}/caches
 eas:
   embbed:
     enable: false
-  address:  http://bac.eas.demo.tiklab.net
+  address:  http://eas-ce.demo.tiklab.net
 
 
 base:
-  url: http://bac.eas.demo.tiklab.net
+  url: http://eas-ce.demo.tiklab.net
 
 message:
   sms:
@@ -93,7 +93,7 @@ file:
 
 repository:
   code: xcode
-  address: "http://bac.xcode.demo.tiklab.net"
+  address: "http://xcode-ce.demo.tiklab.net"
 
 
 
