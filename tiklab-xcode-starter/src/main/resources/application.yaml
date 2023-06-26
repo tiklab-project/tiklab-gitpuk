@@ -34,7 +34,7 @@ plugin:
 
 postgresql:
   embbed:
-    enable: true
+    enable: false
   database: tiklab_xcode
 
 #dfs config
