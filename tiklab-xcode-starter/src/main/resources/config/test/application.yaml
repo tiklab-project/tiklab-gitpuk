@@ -24,6 +24,8 @@ postgresql:
   embbed:
     enable: true
   database: tiklab_xcode
+  server:
+      port: 5010
 
 
 #plugin config
