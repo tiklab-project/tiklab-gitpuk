@@ -75,14 +75,14 @@ datapath: ${PROJECT_HOME}/caches
 eas:
   embbed:
     enable: false
-  address: http://bac.eas.tiklab.net
+  address: http://e.eas.tiklab.net
 
 message:
   sms:
     enabled: true
 
 base:
-  url: http://xcode-ce.tiklab.net
+  url: http://e.eas.tiklab.net
 
 
 #homes

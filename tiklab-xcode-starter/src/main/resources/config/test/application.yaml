@@ -92,7 +92,7 @@ file:
 
 repository:
   code: xcode
-  address: "http://bac.xcode.test.tiklab.net"
+  address: "http://xcode-ce.test.tiklab.net"
 
 
 
