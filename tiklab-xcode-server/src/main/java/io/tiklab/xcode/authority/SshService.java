@@ -65,8 +65,6 @@ public class SshService {
             property= file.getParent();
         }
         Path ssh_key = Paths.get(property+"/"+sshKey);
-       // logger.info("ssh listening address："+ sshPort);
-        //logger.info("pryKey address："+ ssh_key);
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
 
@@ -104,7 +102,6 @@ public class SshService {
             File file = new File(RepositoryUtil.defaultPath() + s);
             String repositoryPath = file.getAbsolutePath();
 
-           // logger.info("ssh repository address " + " " + repositoryPath);
 
             try {
                 File file1 = new File(repositoryPath);
