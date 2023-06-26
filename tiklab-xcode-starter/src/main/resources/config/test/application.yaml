@@ -1,5 +1,5 @@
 app:
-  name: tiklab-xcode
+  name: xcode
 
 APP_HOME: ${APP_HOME}
 application: xcode
@@ -25,7 +25,7 @@ postgresql:
     enable: true
   database: tiklab_xcode
   server:
-      port: 5010
+    port: 5010
 
 
 #plugin config

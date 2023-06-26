@@ -6,7 +6,6 @@ import io.tiklab.xcode.setting.service.AuthServer;
 import io.tiklab.xcode.util.RepositoryFinal;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
-import org.apache.sshd.common.util.logging.LoggingUtils;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SshServer;
@@ -55,7 +54,6 @@ public class SshService {
 
     @Bean
     public  void sshAuthority()  {
-        Class<LoggingUtils> loggingUtilsClass = LoggingUtils.class;
         SshServer sshServer = SshServer.setUpDefaultServer();
         sshServer.setPort(sshPort);
         sshServer.setHost (RepositoryFinal.SSH_HOST);
