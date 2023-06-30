@@ -1,6 +1,8 @@
 package io.tiklab.xcode.config;
 
 import com.alibaba.fastjson.JSONObject;
+import io.tiklab.context.AppHomeConfiguration;
+import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,13 +14,12 @@ import java.io.*;
 @Configuration
 public class InitializeBackups {
 
-    @Value("${APP_HOME:null}")
-     String property;
+
 
     @Bean
     public void InitializeBackupsUrl(){
-
-      String backupsPath=property+"/file/backups";
+        String appHome = AppHomeContext.getAppHome();
+        String backupsPath=appHome+"/file/backups";
         File file = new File(backupsPath);
         try {
             FileInputStream inputStream = new FileInputStream(file);

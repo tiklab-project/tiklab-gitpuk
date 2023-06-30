@@ -90,8 +90,7 @@ homes:
   address: http://192.168.10.7:8080
 
 #license
-licences:
-  path: ${APP_HOME}/licences
+
 
 #file
 file:
