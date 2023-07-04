@@ -1,11 +1,9 @@
 package io.tiklab.xcode.config;
 
 import com.alibaba.fastjson.JSONObject;
-import io.tiklab.context.AppHomeConfiguration;
 import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.util.RepositoryUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,7 +29,8 @@ public class InitializeBackups {
                 result.append(lineTxt).append(System.lineSeparator());
             }
             String fileData = result.toString();
-            JSONObject jsonObject = JSONObject.parseObject(fileData);
+            String replace = fileData.replace("\\", "\\\\");
+            JSONObject jsonObject = JSONObject.parseObject(replace);
             String backUpsUrl = jsonObject.get("backups-url").toString();
 
             String defaultPath = RepositoryUtil.defaultPath();

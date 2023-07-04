@@ -12,11 +12,7 @@
 	<name>${project.artifactId}</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-toolkit-annotation</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-user-api</artifactId>
@@ -27,16 +23,8 @@
 			<artifactId>tiklab-postin-annotation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-rpc-annotation</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-dsm-annotation</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
+
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-security-api</artifactId>
@@ -52,11 +40,7 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
 
-		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit</artifactId>
-			<version>6.4.0.202211300538-r</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>io.tiklab</groupId>
