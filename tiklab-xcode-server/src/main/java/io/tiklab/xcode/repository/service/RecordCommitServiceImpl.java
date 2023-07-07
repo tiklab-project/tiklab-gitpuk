@@ -169,6 +169,16 @@ public class RecordCommitServiceImpl implements RecordCommitService {
                 badTime= minutes + "分前";
             }
             recordCommit.setCommitTimeBad(badTime);
+
+            String address = recordCommit.getRepository().getAddress();
+            String[] split = address.split("/");
+            String groupName;
+            if (split.length>2){
+                 groupName = split[1];
+            }else {
+                groupName = split[0];
+            }
+            recordCommit.setGroupName(groupName);
         }
 
         return RecordCommitList;

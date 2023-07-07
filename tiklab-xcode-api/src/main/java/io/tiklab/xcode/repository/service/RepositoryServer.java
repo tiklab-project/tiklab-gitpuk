@@ -61,13 +61,6 @@ public interface RepositoryServer {
     @FindList
     List<Repository> findAllRpyList(List<String> idList);
 
-    /**
-     * 根据仓库名称查询仓库信息
-     * @param Name 仓库名称
-     * @return 仓库信息
-     */
-    Repository findNameRpy(String Name);
-
 
     /**
      * 获取文件信息
@@ -109,6 +102,29 @@ public interface RepositoryServer {
      * @return 仓库
      */
     List<Repository> findRepositoryByName(RepositoryQuery repositoryQuery);
+
+
+
+    /**
+     * 通过仓库地址查询
+     * @param address
+     * @return 仓库
+     */
+    Repository findRepositoryByAddress(String address);
+
+    /**
+     * 通过仓库组名字查询仓库列表
+     * @param groupName
+     * @return 仓库
+     */
+    List<Repository> findRepositoryByGroupName(String groupName);
+
+    /**
+     * 根据路径删除仓库
+     * @param address
+     * @return 仓库
+     */
+    void deleteRpyByAddress(String address);
 }
 
 

@@ -55,8 +55,6 @@ public class BackupsServerImpl implements BackupsServer{
     //数据恢复日志
     public static Map<String , String> recoveryLog = new HashMap<>();
 
-    //数据恢复状态
-    public static Map<String , String> recoveryState = new HashMap<>();
 
     //执行的文件绝对路径名称
     public static Map<String , String> fileAbUrlMap = new HashMap<>();
@@ -81,6 +79,9 @@ public class BackupsServerImpl implements BackupsServer{
                 String backUpsUrl = jsonObject.get("backups-url").toString();
                 String backupsTime = jsonObject.get("backups-time").toString();
 
+                //添加最后一层目录压缩
+                String lastName = backUpsUrl.substring(backUpsUrl.lastIndexOf("/"));
+                backUpsUrl=backUpsUrl+"/"+lastName;
                 //code 下面存放代码数据
                 File backUpsUrlFile = new File(backUpsUrl+"/code");
 
@@ -97,23 +98,19 @@ public class BackupsServerImpl implements BackupsServer{
                     for (Repository repository:allRpy){
                         //源文件 地址
                         String defaultPath = RepositoryUtil.defaultPath();
-                        String repositoryUrl = defaultPath +"/"+ repository.getAddress() + ".git";
+                        String repositoryUrl = defaultPath +"/"+ repository.getRpyId() + ".git";
                         File codeFileUrl = new File(repositoryUrl);
-                        if (!codeFileUrl.exists() && !codeFileUrl.isDirectory()) {
-                            codeFileUrl.mkdirs();
-                        }
+
 
                         /**
                          *  复制代码源文件到备份文件夹
                          */
-                        String backupsCodePath = backUpsUrl + "/code/" + repository.getAddress()+".git";
+                        String backupsCodePath = backUpsUrl + "/code/" + repository.getRpyId()+".git";
                         File backupsCodeFilePath = new File(backupsCodePath);
 
                         String name = repository.getName();
 
-                        if(!ObjectUtils.isEmpty(repository.getGroup())){
-                            name = repository.getGroup().getName() + "/" + name;
-                        }
+
                         //复制代码文件
                         joinBackupsLog(name+"  start backups...");
                         FileUtils.copyDirectory(codeFileUrl,backupsCodeFilePath);
@@ -124,6 +121,7 @@ public class BackupsServerImpl implements BackupsServer{
                     /**
                      *  压缩备份代码文件夹
                      */
+                    joinBackupsLog(" start compress tar.gz...");
                     String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
                     LocalDateTime now = LocalDateTime.now();
                     //备份压缩文件名称
@@ -137,7 +135,6 @@ public class BackupsServerImpl implements BackupsServer{
                     GzipCompressorOutputStream gzos = new GzipCompressorOutputStream(bos);
                     TarArchiveOutputStream tos = new TarArchiveOutputStream(gzos);
 
-                    joinBackupsLog(" start compress tar.gz...");
                     RepositoryFileUtil.compressFolder(backUpsUrl,"",tos);
                     joinBackupsLog(" compress tar.gz success...[DONE]");
                     logger.info("压缩成功");
@@ -212,10 +209,10 @@ public class BackupsServerImpl implements BackupsServer{
                      */
                     List<Repository> allRpy = repositoryServer.findAllRpy();
                     for (Repository repository:allRpy){
-                        joinRecoveryLog(repository.getAddress()+ "  start Recovery ...");
-                        String codePath = RepositoryUtil.defaultPath() + "/" + repository.getAddress() + ".git";
-                        FileUtils.copyDirectory(new File(afterDecFileUrl+"code/"+repository.getAddress()+".git"),new File(codePath));
-                        joinRecoveryLog(repository.getAddress()+ " Recovery  success [DONE]");
+                        joinRecoveryLog(repository.getName()+ "  start Recovery ...");
+                        String codePath = RepositoryUtil.defaultPath() + "/" + repository.getRpyId() + ".git";
+                        FileUtils.copyDirectory(new File(afterDecFileUrl+"code/"+repository.getRpyId()+".git"),new File(codePath));
+                        joinRecoveryLog(repository.getName()+ " Recovery  success [DONE]");
                     }
 
                     /**
@@ -236,6 +233,12 @@ public class BackupsServerImpl implements BackupsServer{
 
     @Override
     public void updateBackups(Backups backups)  {
+        String backupsAddress = backups.getBackupsAddress();
+        if (StringUtils.isNotEmpty(backupsAddress)&&backupsAddress.endsWith("/")){
+            backupsAddress= backupsAddress.substring(0,backupsAddress.lastIndexOf("/")+1);
+        }
+
+
         File file = new File(appHome+"/file/backups");
         String fileData = gainFileData(file);
 
@@ -243,7 +246,7 @@ public class BackupsServerImpl implements BackupsServer{
 
         if (StringUtils.isNotEmpty(backups.getBackupsAddress())){
             String backUpsUrl = jsonObject.get("backups-url").toString();
-            fileData =fileData.replace(backUpsUrl,backups.getBackupsAddress());
+            fileData =fileData.replace(backUpsUrl,backupsAddress);
         }
         if (StringUtils.isNotEmpty(backups.getTaskState())){
             String taskState = jsonObject.get("task-state").toString();
@@ -265,8 +268,7 @@ public class BackupsServerImpl implements BackupsServer{
         String taskState = jsonObject.get("task-state").toString();
         String backupsTime = jsonObject.get("backups-time").toString();
 
-        String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
-        backups.setBackupsAddress(substring);
+        backups.setBackupsAddress(backUpsUrl);
         backups.setTaskState(taskState);
         backups.setNewBackupsTime(backupsTime);
         backups.setNewResult("non");

@@ -164,6 +164,17 @@ public class RepositoryUtil {
     }
 
     /**
+     * 仓库在内存里面的存储路径
+     * @param repositoryId 仓库Id
+     * @return 仓库详细地址
+     */
+    public static String findRepositoryAddress(String repositoryId){
+        String s = defaultPath() + "/" + repositoryId+ ".git";
+        File file = new File(s);
+        return file.getAbsolutePath();
+    }
+
+    /**
      * 效验地址是否存在配置文件
      * @param fileAddress 文件地址
      * @param type 文件类型

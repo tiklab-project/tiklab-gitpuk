@@ -1,12 +1,14 @@
 package io.tiklab.xcode.repository.dao;
 
 import io.tiklab.core.page.Pagination;
+import io.tiklab.dal.jdbc.JdbcTemplate;
 import io.tiklab.dal.jpa.JpaTemplate;
 import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.RepositoryQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -100,6 +102,45 @@ public class RepositoryDao {
                 .pagination(repositoryQuery.getPageParam())
                 .get();
         return jpaTemplate.findPage(queryCondition,RepositoryEntity.class);
+    }
+
+    /**
+     * 通过地址模糊查询
+     * @param address
+     * @return
+     */
+    public List<RepositoryEntity> findRepositoryByAddress(String  address) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
+                .like("address", address)
+                .get();
+        return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
+    }
+
+    /**
+     * 通过仓库组名字查询仓库列表
+     * @param groupName
+     * @return
+     */
+    public  List<RepositoryEntity> findRepositoryByGroupName(String groupName) {
+        String sql="SELECT re.* FROM rpy_repository re LEFT JOIN rpy_group gr ON re.group_id=gr.group_id WHERE gr.name ='"+groupName+"'";
+        JdbcTemplate jdbcTemplate = jpaTemplate.getJdbcTemplate();
+        List<RepositoryEntity> repositoryEntities = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(RepositoryEntity.class));
+        return repositoryEntities;
+    }
+
+    /**
+     * 通过仓库名字模糊查询仓库列表
+     * @param repositoryQuery
+     * @return
+     */
+    public List<RepositoryEntity> findRepositoryListLike(RepositoryQuery repositoryQuery) {
+        QueryBuilders queryBuilders = QueryBuilders.createQuery(RepositoryEntity.class)
+                .like("name", repositoryQuery.getName());
+        if (("oneself").equals(repositoryQuery.getFindType())){
+            queryBuilders.eq("userId", repositoryQuery.getUserId());
+        }
+        QueryCondition queryCondition = queryBuilders.get();
+        return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }
 }
 

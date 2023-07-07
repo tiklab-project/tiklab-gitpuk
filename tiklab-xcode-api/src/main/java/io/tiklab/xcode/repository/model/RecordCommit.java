@@ -38,6 +38,8 @@ public class RecordCommit {
     @ApiProperty(name="commitTimeBad",desc="提交信息到现在差")
     private String commitTimeBad;
 
+    @ApiProperty(name="groupName",desc="组名")
+    private String groupName;
 
     public String getId() {
         return id;
@@ -78,6 +80,14 @@ public class RecordCommit {
 
     public void setRepository(Repository repository) {
         this.repository = repository;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 }
 

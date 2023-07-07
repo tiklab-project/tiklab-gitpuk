@@ -48,8 +48,7 @@ public class FileServerImpl implements FileServer {
         String fileAddress = fileQuery.getFileAddress();
         String branch = fileQuery.getCommitBranch();
 
-        Repository code = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(code);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
         FileMessage fileMessage ;
         try {
             Git git = Git.open(new java.io.File(repositoryAddress));

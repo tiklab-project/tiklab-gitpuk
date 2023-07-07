@@ -32,15 +32,20 @@ public class InitializeBackups {
             String replace = fileData.replace("\\", "\\\\");
             JSONObject jsonObject = JSONObject.parseObject(replace);
             String backUpsUrl = jsonObject.get("backups-url").toString();
+            String isInitialize = jsonObject.get("is-initialize").toString();
 
-            String defaultPath = RepositoryUtil.defaultPath();
-            String substring = defaultPath.substring(0, defaultPath.lastIndexOf("/"));
+            if (("true").equals(isInitialize)){
+                String defaultPath = RepositoryUtil.defaultPath();
+                String substring = defaultPath.substring(0, defaultPath.lastIndexOf("/"));
 
-            fileData =fileData.replace(backUpsUrl, substring+"/backups/backups");
+                //初始化地址
+                fileData =fileData.replace(backUpsUrl, substring+"/backups");
+                fileData =fileData.replace(isInitialize, "false");
 
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(fileData);
-            fileWriter.close();
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(fileData);
+                fileWriter.close();
+            }
             inputStream.close();
         }catch (IOException e){
             throw new ApplicationException(e.getMessage());

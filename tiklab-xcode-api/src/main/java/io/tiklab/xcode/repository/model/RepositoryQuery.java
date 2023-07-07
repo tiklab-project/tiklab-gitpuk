@@ -24,6 +24,11 @@ public class RepositoryQuery implements Serializable {
     @ApiProperty(name ="groupId",desc = "仓库组id")
     private String  groupId;
 
+    @ApiProperty(name ="address",desc = "仓库地址")
+    private String  address;
+
+    @ApiProperty(name ="findType",desc = "查询类型 自己创建的：oneself、有权限看的：viewable")
+    private String  findType;
 
 
     public String getUserId() {
@@ -64,8 +69,25 @@ public class RepositoryQuery implements Serializable {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public RepositoryQuery setGroupId(String groupId) {
         this.groupId = groupId;
+        return this;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getFindType() {
+        return findType;
+    }
+
+    public void setFindType(String findType) {
+        this.findType = findType;
     }
 }
 

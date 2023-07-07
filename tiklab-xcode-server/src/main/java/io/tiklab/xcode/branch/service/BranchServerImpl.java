@@ -49,9 +49,8 @@ public class BranchServerImpl implements BranchServer {
      */
     @Override
     public List<Branch> findAllBranch(String rpyId) {
-        Repository repository = repositoryServer.findOneRpy(rpyId);
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
         List<Branch> branches;
         try {
             branches = GitBranchUntil.findAllBranch(repositoryAddress);
@@ -69,8 +68,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public void createBranch(BranchMessage branchMessage) {
         String rpyId = branchMessage.getRpyId();
-        Repository repository = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
         try {
             GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
         } catch (IOException | GitAPIException e) {
@@ -88,8 +86,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public void deleteBranch(BranchMessage branchMessage){
         String rpyId = branchMessage.getRpyId();
-        Repository repository = repositoryServer.findOneRpy(rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repository);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
         try {
             GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());
         } catch (IOException | GitAPIException e) {

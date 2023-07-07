@@ -115,18 +115,6 @@ public class RepositoryController {
         return Result.ok(cloneAddress);
     }
 
-
-    @RequestMapping(path="/findNameRpy",method = RequestMethod.POST)
-    @ApiMethod(name = "findName",desc = "查询仓库名称")
-    @ApiParam(name = "Name",desc = "仓库名称",required = true)
-    public Result<Repository> findName(@NotNull String rpyName){
-
-        Repository nameRepository = repositoryServer.findNameRpy(rpyName);
-
-        return Result.ok(nameRepository);
-    }
-
-
     @RequestMapping(path="/findRepository",method = RequestMethod.POST)
     @ApiMethod(name = "findRepository",desc = "通过仓库id 查询")
     @ApiParam(name = "id",desc = "仓库ID",required = true)
@@ -148,6 +136,35 @@ public class RepositoryController {
         return Result.ok(repositoryByName);
     }
 
+    @RequestMapping(path="/findRepositoryByAddress",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryByAddress",desc = "通过仓库地址匹配")
+    @ApiParam(name = "address",desc = "address",required = true)
+    public Result<Repository> findRepositoryByAddress( @NotNull String address){
+
+        Repository repository= repositoryServer.findRepositoryByAddress(address);
+
+        return Result.ok(repository);
+    }
+
+    @RequestMapping(path="/findRepositoryByGroupName",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryByGroupName",desc = "通过仓库组名字查询仓库列表")
+    @ApiParam(name = "address",desc = "address",required = true)
+    public Result<List<Repository>> findRepositoryByGroupName( @NotNull String groupName){
+
+        List<Repository> repository= repositoryServer.findRepositoryByGroupName(groupName);
+
+        return Result.ok(repository);
+    }
+
+    @RequestMapping(path="/deleteRpyByAddress",method = RequestMethod.POST)
+    @ApiMethod(name = "deleteRpyByAddress",desc = "根据路径删除")
+    @ApiParam(name = "address",desc = "仓库id",required = true)
+    public Result<Void> deleteRpyByAddress(@NotNull String address){
+
+        repositoryServer.deleteRpyByAddress(address);
+
+        return Result.ok();
+    }
 }
 
 

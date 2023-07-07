@@ -1,27 +1,16 @@
-package io.tiklab.xcode.authority;
+package io.tiklab.xcode.authority.http;
 
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
+import io.tiklab.xcode.authority.ValidUsrPwdServer;
 import io.tiklab.xcode.repository.model.RecordCommit;
-import io.tiklab.xcode.repository.model.RepositoryQuery;
+import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.RecordCommitService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
-import io.tiklab.xcode.util.RepositoryUtil;
-import io.tiklab.core.exception.ApplicationException;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.http.server.GitServlet;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.ReceivePack;
-import org.eclipse.jgit.transport.ServiceMayNotContinueException;
-import org.eclipse.jgit.transport.UploadPack;
-import org.eclipse.jgit.transport.resolver.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebInitParam;
@@ -32,9 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Base64;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * 拦截git http请求
@@ -78,10 +64,12 @@ public class HttpServlet extends GitServlet {
                 }
 
                 if (requestURI.endsWith("git-receive-pack")){
-                        String repositoryUrl = requestURI.substring(7);
-                        String repositoryName = repositoryUrl.substring(0, repositoryUrl.indexOf("/", 1)).substring(0,repositoryUrl.indexOf(".git"));
-                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(repositoryName));
-                        io.tiklab.xcode.repository.model.Repository repository = repositoryList.get(0);
+                        String[] split = requestURI.split("/");
+                        String groupName = split[2];
+                        String name = split[3].substring(0,split[3].indexOf(".git"));
+
+                        Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+
                         if(repository.getState()==2){
                                 res1.setHeader("Content-Type", "text/plain");
                                 res1.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -95,7 +83,7 @@ public class HttpServlet extends GitServlet {
 
         @Override
         public void init(ServletConfig config) throws ServletException {
-                setRepositoryResolver(new HttpRepositoryResolver());
+                setRepositoryResolver(new HttpRepositoryResolver(repositoryServer));
                 setUploadPackFactory(new HttpUploadPackFactory());
                 setReceivePackFactory(new HttpReceivePackFactory());
                 super.init(config);
@@ -130,66 +118,18 @@ public class HttpServlet extends GitServlet {
                         User user = userService.findUserByUsername(userName);
 
                         String[] split = requestURI.split("/");
-                        String repositoryName=split[2];
-                        String name = repositoryName.substring(0, repositoryName.lastIndexOf(".git"));
-                        List<io.tiklab.xcode.repository.model.Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setName(name).setUserId(user.getId()));
+                        String groupName=split[2];
+                        String name=split[3].substring(0,split[3].indexOf(".git"));
+                        Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
 
                         RecordCommit recordCommit = new RecordCommit();
-                        recordCommit.setRepository(repositoryList.get(0));
+                        recordCommit.setRepository(repository);
                         recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
                         recordCommit.setUserId(user.getId());
                         commitService.createRecordCommit(recordCommit);
                 }
         }
 
-        /**
-         * 处理仓库地址
-         */
-        private static class HttpRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
-                @Override
-                public Repository open(HttpServletRequest req, String name)
-                        throws RepositoryNotFoundException, ServiceNotAuthorizedException,
-                        ServiceNotEnabledException, ServiceMayNotContinueException {
-
-                        String s = RepositoryUtil.defaultPath();
-                        File file = new File(s + "/" + name);
-
-                        if (!file.exists()){
-                                throw new ApplicationException("仓库不存在！");
-                        }
-
-                        Repository repository;
-                        try {
-                                repository = Git.open(file).getRepository();
-                        } catch (IOException e) {
-                                throw new RuntimeException(e);
-                        }
-                        return repository;
-                }
-        }
-
-        /**
-         * 实现git-upload-pack钩子
-         */
-        private static class HttpUploadPackFactory implements UploadPackFactory<HttpServletRequest> {
-                @Override
-                public UploadPack create(HttpServletRequest req, Repository db)
-                        throws ServiceNotEnabledException, ServiceNotAuthorizedException {
-                        return new UploadPack(db);
-                }
-        }
-
-        /**
-         * 实现git-receive-pack钩子
-         */
-        private  class HttpReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
-                @Override
-                public ReceivePack create(HttpServletRequest req, Repository db)
-                        throws ServiceNotEnabledException, ServiceNotAuthorizedException {
-
-                        return   new ReceivePack(db);
-                }
-        }
 
 }
 
