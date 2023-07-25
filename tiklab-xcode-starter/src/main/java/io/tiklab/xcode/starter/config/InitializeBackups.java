@@ -1,4 +1,4 @@
-package io.tiklab.xcode.config;
+package io.tiklab.xcode.starter.config;
 
 import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.context.AppHomeContext;

@@ -34,7 +34,7 @@ public interface CodeScanInstanceService {
 
     /**
      * 条件删除
-     * @param
+     * @param repositoryId
      */
     void deleteCodeScanInstanceByRecord(@NotNull String repositoryId);
 

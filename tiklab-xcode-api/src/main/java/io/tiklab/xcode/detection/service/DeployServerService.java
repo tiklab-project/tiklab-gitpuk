@@ -39,7 +39,7 @@ public interface DeployServerService {
 
     /**
      * 条件删除
-     * @param
+     * @param repositoryId
      */
     void deleteDeployServerByRecord(@NotNull String repositoryId);
 

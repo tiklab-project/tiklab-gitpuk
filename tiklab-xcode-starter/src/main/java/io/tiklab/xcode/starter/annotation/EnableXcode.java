@@ -1,5 +1,6 @@
-package io.tiklab.xcode;
+package io.tiklab.xcode.starter.annotation;
 
+import io.tiklab.xcode.starter.config.XcodeAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;

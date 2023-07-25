@@ -45,7 +45,7 @@ public interface RecordCommitService {
 
     /**
      * 条件删除
-     * @param
+     * @param repositoryId
      */
     void deleteRecordCommitByRecord(@NotNull String repositoryId);
 

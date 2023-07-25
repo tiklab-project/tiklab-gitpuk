@@ -131,8 +131,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
             return repositoryId;
-        }
-        else {
+        } else {
             throw  new ApplicationException(4006,"内存不足");
         }
     }
@@ -260,7 +259,6 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public List<FileTree> findFileTree(FileTreeMessage message){
 
-        Repository repository = findOneRpy(message.getRpyId());
 
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(message.getRpyId()) ;
 
@@ -348,7 +346,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (CollectionUtils.isNotEmpty(allRpy)) {
             //公共的仓库
             List<Repository> publicRpy = allRpy.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
-
             List<String> canViewRpyId = publicRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
 
             //私有仓库
@@ -374,15 +371,14 @@ public class RepositoryServerImpl implements RepositoryServer {
             }
 
             String[] canViewRpyIdList = canViewRpyId.toArray(new String[canViewRpyId.size()]);
-            Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
-            List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
-            joinTemplate.joinQuery(repositoryList);
-            System.out.println("结束时间："+new Date());
-            return PaginationBuilder.build(pagination,repositoryList);
+           if (canViewRpyIdList.length>0){
+               Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
+               List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
+               joinTemplate.joinQuery(repositoryList);
+               System.out.println("结束时间："+new Date());
+               return PaginationBuilder.build(pagination,repositoryList);
+           }
         }
-
-
-
         return null;
     }
 

@@ -1,12 +1,18 @@
 package io.tiklab.xcode.git;
 
+
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.user.user.model.User;
+import io.tiklab.xcode.repository.model.RemoteInfo;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.TransportException;
+import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.lib.*;
-import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.util.FS;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +39,7 @@ public class GitUntil {
             git = Git.init()
                     .setDirectory(file)
                     .setBare(true) //裸仓库
-                    .setInitialBranch(Constants.MASTER)
+                    //.setInitialBranch(Constants.MASTER)
                     .call();
 
             // Repository repository = git.getRepository();
@@ -134,7 +140,7 @@ public class GitUntil {
      * 克隆仓库
      * @param repositoryAddress 仓库地址
      * @param branch 分支
-     * @parm cloneAddress  克隆地址
+     * @param cloneAddress  克隆地址
      * @throws GitAPIException 克隆失败
      */
     public static void cloneRepository(String repositoryAddress,String branch,String cloneAddress)   {
@@ -179,6 +185,7 @@ public class GitUntil {
      */
     public static void remoteRepositoryFile(String repositoryAddress,String branch) throws IOException, URISyntaxException, GitAPIException {
         Git git = Git.open(new File(repositoryAddress));
+
         git.remoteAdd() //远程仓库
                 .setName("origin")
                 .setUri(new URIish(repositoryAddress+".git"))
@@ -211,8 +218,55 @@ public class GitUntil {
     }
 
 
+    /**
+     * 推送到第三方仓库
+     * @param repositoryAddress 仓库地址
+     * @param remoteInfo 分支
+     * @throws IOException 仓库不存在
+     * @throws URISyntaxException 远程地址错误
+     * @throws GitAPIException 推送失败
+     */
+    public static void remoteRepository(String repositoryAddress, RemoteInfo remoteInfo) throws IOException, URISyntaxException, GitAPIException {
 
+        Git git = Git.open(new File(repositoryAddress));
+        git.remoteSetUrl()
+                .setRemoteName("origin")
+                .setRemoteUri(new URIish(remoteInfo.getAddress()))
+                .call();
 
+        if (("password").equals(remoteInfo.getAuthWay())) {
+
+            //账号密码认证
+            UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(remoteInfo.getAccount(), remoteInfo.getPassword());
+            git.push().setCredentialsProvider(credentialsProvider)
+                    .setPushAll()
+                    .call();
+        } else {
+
+           /* //ssh 认证
+            SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
+                @Override
+                protected void configure(OpenSshConfig.Host host, Session session) {
+                    // Set any SSH session configurations if needed
+                }
+
+                @Override
+                protected JSch createDefaultJSch(FS fs) throws JSchException {
+                    JSch jSch = super.createDefaultJSch(fs);
+                    jSch.addIdentity(remoteInfo.getSecretKey());
+                    return jSch;
+                }
+            };
+            git.push().setTransportConfigCallback(transport -> {
+                if (transport instanceof SshTransport) {
+                    SshTransport sshTransport = (SshTransport) transport;
+                    sshTransport.setSshSessionFactory(sshSessionFactory);
+                }
+            }).setPushAll().call();
+        }*/
+            git.close();
+        }
+    }
 
 
 }

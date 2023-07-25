@@ -13,7 +13,7 @@ import io.tiklab.user.user.model.User;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "AuthEntity")
+@Mapper
 public class Auth {
 
 

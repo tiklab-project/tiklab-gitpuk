@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "CodeScanInstanceEntity")
+@Mapper
 public class CodeScanInstance  {
 
     @ApiProperty(name="id",desc="id")

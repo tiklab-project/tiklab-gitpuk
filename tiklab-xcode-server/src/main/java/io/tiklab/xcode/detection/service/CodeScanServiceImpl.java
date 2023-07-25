@@ -225,7 +225,6 @@ public class CodeScanServiceImpl implements CodeScanService {
      *  restTemplate 调用
      *  @param process:process
      * @param repositoryId: repositoryId
-     * @return
      */
     public void  readFile( Process process,String repositoryId,CodeScanInstance scanInstance){
         CodeScanInstance instance = codeScanLog.get(repositoryId);

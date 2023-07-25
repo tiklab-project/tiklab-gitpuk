@@ -1,4 +1,4 @@
-package io.tiklab.xcode.config;
+package io.tiklab.xcode.starter.config;
 
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;

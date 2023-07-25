@@ -11,7 +11,7 @@ import io.tiklab.user.user.model.User;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "RepositoryGroupEntity")
+@Mapper
 public class RepositoryGroup {
 
     @ApiProperty(name="groupId",desc="仓库组id")

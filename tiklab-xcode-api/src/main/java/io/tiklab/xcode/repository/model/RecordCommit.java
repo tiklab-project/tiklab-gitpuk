@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "RecordCommitEntity")
+@Mapper
 public class RecordCommit {
 
     @ApiProperty(name="id",desc="id")

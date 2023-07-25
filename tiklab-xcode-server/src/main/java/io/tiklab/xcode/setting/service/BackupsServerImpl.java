@@ -164,7 +164,7 @@ public class BackupsServerImpl implements BackupsServer{
             }
         });
 
-        return "ok";
+        return "OK";
     }
 
     @Override
@@ -347,7 +347,6 @@ public class BackupsServerImpl implements BackupsServer{
 
     /**
      *  dump database 备份脚本
-     * @return
      */
     public void executeScript(String backUpsUrl) throws IOException, InterruptedException {
 
@@ -368,7 +367,6 @@ public class BackupsServerImpl implements BackupsServer{
         /**
          *  执行恢复PostgreSQL 数据脚本
          * @param backUpsSqlUrl 备份sql地址
-         * @return
          */
     public void executeRecoveryScript(String backUpsSqlUrl) throws IOException, InterruptedException {
 
@@ -413,7 +411,6 @@ public class BackupsServerImpl implements BackupsServer{
     /**
      *  写入文件
      *  @param file     文件
-     * @return
      */
     public void writeFile(File file,String fileData){
         try {
@@ -442,7 +439,6 @@ public class BackupsServerImpl implements BackupsServer{
     /**
      *  拼接备份日志
      *  @param log 日志
-     * @return
      */
     public void joinBackupsLog(String log){
         LocalDateTime now = LocalDateTime.now();
@@ -463,7 +459,6 @@ public class BackupsServerImpl implements BackupsServer{
     /**
      *  拼接恢复日志
      *  @param log 日志
-     * @return
      */
     public void joinRecoveryLog(String log){
         LocalDateTime now = LocalDateTime.now();

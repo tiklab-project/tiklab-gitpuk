@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "CodeScanEntity")
+@Mapper
 public class CodeScan implements Serializable {
 
     @ApiProperty(name="id",desc="id")

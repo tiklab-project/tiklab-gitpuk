@@ -83,7 +83,6 @@ public class CodeScanDao {
     /**
      * 条件查询插件
      * @param codeScanQuery
-     * @return
      */
     public List<CodeScanEntity> findCodeScanList(CodeScanQuery codeScanQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(CodeScanEntity.class)
@@ -95,7 +94,6 @@ public class CodeScanDao {
     /**
      * 条件分页查询插件
      * @param codeScanQuery
-     * @return
      */
     public Pagination<CodeScanEntity> findCodeScanPage(CodeScanQuery codeScanQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(CodeScanEntity.class)

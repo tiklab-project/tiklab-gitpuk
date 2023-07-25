@@ -39,7 +39,7 @@ public interface DeployEnvService {
 
     /**
      * 条件删除
-     * @param
+     * @param repositoryId
      */
     void deleteDeployEnvByRecord(@NotNull String repositoryId);
 

@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "DeployEnvEntity")
+@Mapper
 public class DeployEnv implements Serializable {
 
 

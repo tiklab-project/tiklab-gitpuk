@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "RecordOpenEntity")
+@Mapper
 public class RecordOpen  extends BaseModel {
 
     @ApiProperty(name="id",desc="id")

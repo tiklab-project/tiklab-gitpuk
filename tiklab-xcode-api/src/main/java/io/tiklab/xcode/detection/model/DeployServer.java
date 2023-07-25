@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 @ApiModel
 @Join
-@Mapper(targetAlias = "DeployServerEntity")
+@Mapper
 public class DeployServer implements Serializable {
 
     @ApiProperty(name="id",desc="id")

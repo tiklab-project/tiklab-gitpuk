@@ -40,14 +40,6 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
 
-
-
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-dsm-core</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
     </dependencies>
 
 	<build>

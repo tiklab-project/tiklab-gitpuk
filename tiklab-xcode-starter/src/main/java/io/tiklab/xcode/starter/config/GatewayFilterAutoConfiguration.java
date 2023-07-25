@@ -1,4 +1,4 @@
-package io.tiklab.xcode.config;
+package io.tiklab.xcode.starter.config;
 
 import io.tiklab.eam.author.Authenticator;
 import io.tiklab.eam.client.author.config.AuthorConfig;
@@ -76,6 +76,7 @@ public class GatewayFilterAutoConfiguration {
                         "/licence/import",
                         "/wechatCallback/instruct",
                         "/alterSql/updateId",
+
                         "/gui"
                 })
                 .ignorePreUrls(new String[]{
@@ -91,6 +92,7 @@ public class GatewayFilterAutoConfiguration {
                         "/eas",
                         "/xcode",
                         "/backups",
+                        "/remoteInfo",
                 })
                 .get();
     }

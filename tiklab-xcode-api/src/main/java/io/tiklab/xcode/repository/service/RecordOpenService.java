@@ -39,7 +39,7 @@ public interface RecordOpenService {
 
     /**
      * 条件删除
-     * @param
+     * @param repositoryId
      */
     void deleteRecordOpenByRecord(@NotNull String repositoryId);
 

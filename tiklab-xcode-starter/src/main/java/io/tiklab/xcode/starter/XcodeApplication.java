@@ -1,7 +1,8 @@
-package io.tiklab.xcode;
+package io.tiklab.xcode.starter;
 
 
 import io.tiklab.core.property.PropertyAndYamlSourceFactory;
+import io.tiklab.xcode.starter.annotation.EnableXcode;
 import io.tiklab.xcode.util.RepositoryFileUtil;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.springframework.boot.SpringApplication;

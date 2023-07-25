@@ -79,7 +79,6 @@ public class RepositoryDao {
     /**
      * 条件查询仓库库
      * @param repositoryQuery
-     * @return List <RepositoryEntity>
      */
     public List<RepositoryEntity> findRepositoryList(RepositoryQuery repositoryQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)

@@ -122,7 +122,6 @@ public interface RepositoryServer {
     /**
      * 根据路径删除仓库
      * @param address
-     * @return 仓库
      */
     void deleteRpyByAddress(String address);
 }

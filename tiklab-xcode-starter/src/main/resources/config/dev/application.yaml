@@ -28,6 +28,11 @@ postgresql:
     enable: false
   database: tiklab_xcode
 
+
+eas:
+  embbed:
+    enable: true
+
 #plugin config
 PROJECT_HOME: ${user.home}/xcode/${app.name}
 plugin:
@@ -47,13 +52,14 @@ dfs:
 #dcs config
 dcs:
   server:
-    enabled: false
-    mode: server
-    port: 5000
-    datapath: ${PROJECT_HOME}/caches
+    enabled: true
+    port: 5001
+    datapath: ${PROJECT_HOME}/data
   client:
-    url: 127.0.0.1:5000
-    bucket: ${app.name}
+    url: 127.0.0.1:5001
+    group: g1
+    database: dcs1
+    expire: 600
 
 #dcs config
 dss:
@@ -72,9 +78,7 @@ message:
   sms:
     enabled: true
 
-eas:
-  embbed:
-    enable: true
+
 #    enable: false
 #  address: http://192.168.10.14:8080
 #  web:
