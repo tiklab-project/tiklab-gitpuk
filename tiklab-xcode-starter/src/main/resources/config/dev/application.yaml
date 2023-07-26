@@ -28,15 +28,10 @@ postgresql:
     enable: false
   database: tiklab_xcode
 
-
-eas:
-  embbed:
-    enable: true
-
 #plugin config
-PROJECT_HOME: ${user.home}/xcode/${app.name}
+DATA_HOME: ${user.home}/tiklab/${app.name}
 plugin:
-  path: ${PROJECT_HOME}/plugin
+  path: ${DATA_HOME}/plugin
 
 #dfs config
 dfs:
@@ -44,7 +39,7 @@ dfs:
     enabled: false
     mode: server
     port: 4000
-    datapath: ${PROJECT_HOME}/files
+    datapath: ${DATA_HOME}/files
   client:
     url: 127.0.0.1:4000
     bucket: ${app.name}
@@ -54,7 +49,7 @@ dcs:
   server:
     enabled: true
     port: 5001
-    datapath: ${PROJECT_HOME}/data
+    datapath: ${DATA_HOME}/data
   client:
     url: 127.0.0.1:5001
     group: g1
@@ -67,18 +62,20 @@ dss:
     enabled: false
     mode: server
     port: 6000
-    datapath: ${PROJECT_HOME}/index
+    datapath: ${DATA_HOME}/index
   client:
     url: 127.0.0.1:6000
     bucket: ${app.name}
 
-datapath: ${PROJECT_HOME}/caches
+datapath: ${DATA_HOME}/caches
 
 message:
   sms:
     enabled: true
 
-
+eas:
+  embbed:
+    enable: true
 #    enable: false
 #  address: http://192.168.10.14:8080
 #  web:

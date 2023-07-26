@@ -57,7 +57,13 @@ public interface RepositoryGroupServer {
      * @return 仓库组集合
      */
     List<RepositoryGroup> findUserGroup(String userId);
-    
+
+    /**
+     * 通过名字查询仓库组
+     * @param groupName groupName
+     * @return
+     */
+    RepositoryGroup findGroupByName(String groupName);
 }
 
 

@@ -66,6 +66,14 @@ public class RepositoryGroupController {
 
         return Result.ok(codeList);
     }
-    
-    
+
+    @RequestMapping(path="/findGroupByName",method = RequestMethod.POST)
+    @ApiMethod(name = "findGroupByName",desc = "通过名字查询仓库组")
+    @ApiParam(name = "groupName",desc = "仓库名字",required = true)
+    public Result<List<RepositoryGroup>> findGroupByName(@NotNull String groupName){
+
+        RepositoryGroup repositoryGroup = groupServer.findGroupByName(groupName);
+
+        return Result.ok(repositoryGroup);
+    }
 }

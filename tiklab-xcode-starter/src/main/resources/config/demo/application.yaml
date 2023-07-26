@@ -26,9 +26,9 @@ postgresql:
   database: tiklab_xcode
 
 #plugin config
-PROJECT_HOME: ${user.home}/pipeline/${app.name}
+DATA_HOME: ${user.home}/tiklab/${app.name}
 plugin:
-  path: ${PROJECT_HOME}/plugin
+  path: ${DATA_HOME}/plugin
 
 #dfs config
 dfs:
@@ -36,7 +36,7 @@ dfs:
     enabled: false
     mode: server
     port: 4000
-    datapath: ${PROJECT_HOME}/files
+    datapath: ${DATA_HOME}/files
   client:
     url: 127.0.0.1:4000
     bucket: ${app.name}
@@ -47,7 +47,7 @@ dcs:
     enabled: false
     mode: server
     port: 5000
-    datapath: ${PROJECT_HOME}/caches
+    datapath: ${DATA_HOME}/caches
   client:
     url: 127.0.0.1:5000
     bucket: ${app.name}
@@ -58,12 +58,12 @@ dss:
     enabled: false
     mode: server
     port: 6000
-    datapath: ${PROJECT_HOME}/index
+    datapath: ${DATA_HOME}/index
   client:
     url: 127.0.0.1:6000
     bucket: ${app.name}
 
-datapath: ${PROJECT_HOME}/caches
+datapath: ${DATA_HOME}/caches
 
 eas:
   embbed:

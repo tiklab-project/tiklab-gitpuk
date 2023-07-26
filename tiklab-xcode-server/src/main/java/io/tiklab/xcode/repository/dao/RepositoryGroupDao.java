@@ -1,7 +1,12 @@
 package io.tiklab.xcode.repository.dao;
 
 import io.tiklab.dal.jpa.JpaTemplate;
+import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
+import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
+import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.entity.RepositoryGroupEntity;
+import io.tiklab.xcode.repository.model.RepositoryGroup;
+import io.tiklab.xcode.repository.model.RepositoryQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -59,5 +64,16 @@ public class RepositoryGroupDao {
 
     public List<RepositoryGroupEntity> findAllCodeGroupList(List<String> idList){
         return jpaTemplate.findList(RepositoryGroupEntity.class,idList);
+    }
+
+    /**
+     * 条件查询仓库库
+     * @param name
+     */
+    public List<RepositoryGroupEntity> findRepositoryByName(String name) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryGroupEntity.class)
+                .eq("name", name)
+                .get();
+        return jpaTemplate.findList(queryCondition, RepositoryGroupEntity.class);
     }
 }

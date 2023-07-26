@@ -123,6 +123,18 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         }
         return repositoryGroups;
     }
+
+    @Override
+    public RepositoryGroup findGroupByName(String groupName) {
+        RepositoryGroup repositoryGroup=null;
+
+        List<RepositoryGroupEntity> repositoryByName = repositoryGroupDao.findRepositoryByName(groupName);
+        List<RepositoryGroup>  list = BeanMapper.mapList(repositoryByName, RepositoryGroup.class);
+        if (CollectionUtils.isNotEmpty(list)){
+             repositoryGroup = list.get(0);
+        }
+        return repositoryGroup;
+    }
 }
 
 

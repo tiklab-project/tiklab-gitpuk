@@ -18,7 +18,6 @@ import io.tiklab.toolkit.boot.starter.annotation.EnableToolkit;
 import io.tiklab.user.boot.starter.annotation.EnableUserClient;
 import io.tiklab.user.boot.starter.annotation.EnableUserServer;
 import io.tiklab.xcode.EnableXcodeServer;
-import io.tiklab.xcode.starter.annotation.EnableXcode;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,7 +46,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableGateway
 @EnableTodoTaskServer
 @EnablePrivilegeServer
-
 @EnableXcodeServer
+@ComponentScan(value = "io.tiklab.xcode")
 public class XcodeAutoConfiguration {
 }

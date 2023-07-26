@@ -76,7 +76,6 @@ public class GatewayFilterAutoConfiguration {
                         "/licence/import",
                         "/wechatCallback/instruct",
                         "/alterSql/updateId",
-
                         "/gui"
                 })
                 .ignorePreUrls(new String[]{
@@ -92,7 +91,6 @@ public class GatewayFilterAutoConfiguration {
                         "/eas",
                         "/xcode",
                         "/backups",
-                        "/remoteInfo",
                 })
                 .get();
     }
