@@ -12,6 +12,7 @@ import io.tiklab.xcode.repository.model.RemoteInfoQuery;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -38,6 +39,9 @@ public class RemoteInfoServiceImpl implements RemoteInfoService {
 
     @Autowired
     JoinTemplate joinTemplate;
+
+    @Value("${repository.address}")
+    private String memoryAddress;
 
     //推送镜像结果
     public static Map<String , String> remoteResultMap = new HashMap<>();
@@ -130,14 +134,13 @@ public class RemoteInfoServiceImpl implements RemoteInfoService {
     public String sendOneRepository(RemoteInfo remoteInfo) {
         String key = remoteInfo.getId() + remoteInfo.getRpyId();
         remoteResultMap.remove(key);
-        String defaultPath = RepositoryUtil.defaultPath();
 
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.submit(new Runnable(){
             @Override
             public void run() {
                 try {
-                    GitUntil.remoteRepository(defaultPath+"/"+remoteInfo.getRpyId()+".git",remoteInfo);
+                    GitUntil.remoteRepository(memoryAddress+"/"+remoteInfo.getRpyId()+".git",remoteInfo);
                 } catch (Exception  e) {
                     if (e.getMessage().contains("Nothing to push.")){
                         remoteResultMap.put(key,"已经是最新的代码，无需推送");

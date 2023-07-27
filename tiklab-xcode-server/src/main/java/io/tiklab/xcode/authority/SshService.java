@@ -90,6 +90,8 @@ public class SshService {
      */
     private static class XcodeSshCommandFactory implements CommandFactory {
 
+        @Value("${repository.address}")
+        private String memoryAddress;
         public XcodeSshCommandFactory() {
         }
 
@@ -97,7 +99,7 @@ public class SshService {
         public Command createCommand(ChannelSession channelSession, String command) {
             String cmd = command.replace("'", "");
             String s = cmd.split(" ")[1];
-            File file = new File(RepositoryUtil.defaultPath() + s);
+            File file = new File(memoryAddress + s);
             String repositoryPath = file.getAbsolutePath();
 
 

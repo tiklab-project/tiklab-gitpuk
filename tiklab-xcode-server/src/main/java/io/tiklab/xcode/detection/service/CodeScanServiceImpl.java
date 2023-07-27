@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -51,7 +52,9 @@ public class CodeScanServiceImpl implements CodeScanService {
     @Autowired
     CodeScanInstanceService instanceService;
 
-
+    @Value("${repository.address}")
+    private String memoryAddress;
+    
     public static Map<String , String> codeScanState = new HashMap<>();
 
     public static Map<String , CodeScanInstance> codeScanLog = new HashMap<>();
@@ -99,7 +102,7 @@ public class CodeScanServiceImpl implements CodeScanService {
                     " -Dsonar.login="+deployServer.getPrivateKey();
         }
 
-        String cloneRepositoryUrl = RepositoryUtil.SystemTypeAddress(RepositoryUtil.defaultPath()+"/clone/" + codeScan.getRepository().getName());
+        String cloneRepositoryUrl = RepositoryUtil.SystemTypeAddress(memoryAddress+"/clone/" + codeScan.getRepository().getName());
         String order = " ./" + execOrder + " " + "-f" +" " +cloneRepositoryUrl ;
         if (RepositoryUtil.findSystemType() == 1){
             order = " .\\" + execOrder + " " + "-f"+" "  +cloneRepositoryUrl;
@@ -109,8 +112,8 @@ public class CodeScanServiceImpl implements CodeScanService {
 
         try {
             //克隆项目
-            String repositoryUrl = RepositoryUtil.SystemTypeAddress(RepositoryUtil.defaultPath() +"/"+ codeScan.getRepository().getName() + ".git");
-            String cloneUrl =  RepositoryUtil.SystemTypeAddress(RepositoryUtil.defaultPath()+"/clone/"+codeScan.getRepository().getName());
+            String repositoryUrl = RepositoryUtil.SystemTypeAddress(memoryAddress +"/"+ codeScan.getRepository().getName() + ".git");
+            String cloneUrl =  RepositoryUtil.SystemTypeAddress(memoryAddress+"/clone/"+codeScan.getRepository().getName());
             GitUntil.cloneRepository(repositoryUrl, "master", cloneUrl);
 
             process = RepositoryUtil.process(mavenAddress, order);
@@ -195,7 +198,7 @@ public class CodeScanServiceImpl implements CodeScanService {
         CodeScanInstance scanInstance = codeScanLog.get(repositoryId);
         if (!ObjectUtils.isEmpty(scanInstance)){
             Repository repository = repositoryServer.findOneRpy(repositoryId);
-            RepositoryUtil.deleteDireAndFile(RepositoryUtil.defaultPath()+"/clone/",repository.getName());
+            RepositoryUtil.deleteDireAndFile(memoryAddress+"/clone/",repository.getName());
         }
         return   scanInstance;
     }
