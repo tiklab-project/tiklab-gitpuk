@@ -15,9 +15,6 @@ create table rpy_remote_info(
 );
 
 
-ALTER TABLE rpy_repository RENAME COLUMN "type" TO code;
-ALTER TABLE rpy_repository ALTER COLUMN code TYPE varchar;
-
 
 
 
