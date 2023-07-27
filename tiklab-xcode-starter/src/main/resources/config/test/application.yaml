@@ -93,10 +93,13 @@ file:
 
 
 repository:
+  address: ${DATA_HOME}/repository
   code: xcode
-  address: "http://xcode-ce.test.tiklab.net"
+backup:
+  address: ${DATA_HOME}/backup
 
-
+visit:
+  address: http://xcode-ce.test.tiklab.net
 
 
 

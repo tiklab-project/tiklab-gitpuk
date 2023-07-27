@@ -1,6 +1,7 @@
 package io.tiklab.xcode.setting.service;
 
 import com.alibaba.fastjson.JSONObject;
+import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.eam.common.context.LoginContext;
@@ -41,13 +42,26 @@ public class BackupsServerImpl implements BackupsServer{
 
     private static Logger logger = LoggerFactory.getLogger(BackupsServerImpl.class);
 
-    @Value("${APP_HOME:null}")
-    String appHome;
-
-
-
     @Autowired
     RepositoryServer repositoryServer;
+
+
+    @Value("${backup.address}")
+    String backupAddress;
+
+    @Value("${repository.address}")
+    String memoryAddress;
+
+    @Value("${jdbc.url}")
+    String jdbcUrl;
+
+    @Value("${jdbc.username}")
+    String jdbcUserName;
+
+    @Value("${jdbc.password}")
+    String jdbcPassword;
+
+
 
     //数据备份日志
     public static Map<String , String> backupsExecLog = new HashMap<>();
@@ -61,6 +75,11 @@ public class BackupsServerImpl implements BackupsServer{
 
     @Override
     public String backupsExec() {
+        File file = new File(backupAddress);
+        if (!file.exists()){
+            file.mkdir();
+        }
+
         List<Repository> allRpy = repositoryServer.findAllRpy();
         String loginId = LoginContext.getLoginId();
         recoveryLog.remove(loginId);
@@ -72,18 +91,20 @@ public class BackupsServerImpl implements BackupsServer{
         executorService.submit(new Runnable(){
             @Override
             public void run() {
-                File file = new File(appHome+"/file/backups");
+
+                File file = new File(AppHomeContext.getAppHome()+"/file/backups");
                 String fileData = gainFileData(file);
 
                 JSONObject jsonObject = JSONObject.parseObject(fileData);
-                String backUpsUrl = jsonObject.get("backups-url").toString();
+
                 String backupsTime = jsonObject.get("backups-time").toString();
 
                 //添加最后一层目录压缩
-                String lastName = backUpsUrl.substring(backUpsUrl.lastIndexOf("/"));
-                backUpsUrl=backUpsUrl+"/"+lastName;
+                String lastName = backupAddress.substring(backupAddress.lastIndexOf("/"));
+
+                String backupPath=backupAddress+lastName;
                 //code 下面存放代码数据
-                File backUpsUrlFile = new File(backUpsUrl+"/code");
+                File backUpsUrlFile = new File(backupPath+"/code");
 
                 try {
                     if (!backUpsUrlFile.exists() && !backUpsUrlFile.isDirectory()) {
@@ -91,21 +112,19 @@ public class BackupsServerImpl implements BackupsServer{
                     }
 
                     //开始dump database备份脚本
-                    executeScript(backUpsUrl);
+                    executeScript(backupPath);
                     //完成dump database备份脚本
                     joinBackupsLog("Dumping PostgreSQL database tiklab_xcode...[DONE]");
 
                     for (Repository repository:allRpy){
-                        //源文件 地址
-                        String defaultPath = RepositoryUtil.defaultPath();
-                        String repositoryUrl = defaultPath +"/"+ repository.getRpyId() + ".git";
+
+                        String repositoryUrl = memoryAddress +"/"+ repository.getRpyId() + ".git";
                         File codeFileUrl = new File(repositoryUrl);
 
-
-                        /**
-                         *  复制代码源文件到备份文件夹
-                         */
-                        String backupsCodePath = backUpsUrl + "/code/" + repository.getRpyId()+".git";
+                        /*
+                        * 复制代码源文件到备份文件夹
+                        * */
+                        String backupsCodePath = backupPath + "/code/" + repository.getRpyId()+".git";
                         File backupsCodeFilePath = new File(backupsCodePath);
 
                         String name = repository.getName();
@@ -117,12 +136,11 @@ public class BackupsServerImpl implements BackupsServer{
                         joinBackupsLog(name+"  backups success...[DONE]");
                     }
 
-
-                    /**
-                     *  压缩备份代码文件夹
-                     */
+                    /*
+                    * 压缩备份代码文件夹
+                    * */
                     joinBackupsLog(" start compress tar.gz...");
-                    String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
+                    String substring = backupPath.substring(0, backupPath.lastIndexOf("/"));
                     LocalDateTime now = LocalDateTime.now();
                     //备份压缩文件名称
                     String backupsName="xcode_backups_"+now.getYear()+"_"+now.getMonthValue()+"_" +now.getDayOfMonth()+"_"
@@ -135,7 +153,7 @@ public class BackupsServerImpl implements BackupsServer{
                     GzipCompressorOutputStream gzos = new GzipCompressorOutputStream(bos);
                     TarArchiveOutputStream tos = new TarArchiveOutputStream(gzos);
 
-                    RepositoryFileUtil.compressFolder(backUpsUrl,"",tos);
+                    RepositoryFileUtil.compressFolder(backupPath,"",tos);
                     joinBackupsLog(" compress tar.gz success...[DONE]");
                     logger.info("压缩成功");
                     // 关闭流
@@ -144,17 +162,16 @@ public class BackupsServerImpl implements BackupsServer{
                     bos.close();
                     fos.close();
 
-                    /**
+                     /*
                      *  删除备份文件夹
-                     */
-                    FileUtils.deleteDirectory(new File(backUpsUrl));
+                     * */
+                    FileUtils.deleteDirectory(new File(backupPath));
 
                     if (StringUtils.isNotEmpty(backupsTime)){
                         fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
                     }
                     //修该备份text信息
                     writeFile(file,fileData);
-
                     joinBackupsLog(" Backups file success end [DONE]");
                 }catch (Exception e){
                     joinBackupsLog(" Backups file fail end,errorMsg:"+e.getMessage());
@@ -163,7 +180,6 @@ public class BackupsServerImpl implements BackupsServer{
                 }
             }
         });
-
         return "OK";
     }
 
@@ -178,21 +194,15 @@ public class BackupsServerImpl implements BackupsServer{
         executorService.submit(new Runnable(){
             @Override
             public void run() {
-                File file = new File(appHome + "/file/backups");
                 try {
-                    String fileData = gainFileData(file);
-                    JSONObject jsonObject = JSONObject.parseObject(fileData);
-                    String backUpsUrl = jsonObject.get("backups-url").toString();
-                    String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
-
                     /**
                      *  解压tar.gz包
                      */
                     //压缩包的绝对路径
-                    String DecFileUrl = substring + "/" + fileName;
+                    String DecFileUrl = backupAddress + "/" + fileName;
                     //压缩后的文件绝对路径
                     String name = fileName.substring(0, fileName.indexOf(".tar.gz"));
-                    String afterDecFileUrl = substring + "/" + name + "/";
+                    String afterDecFileUrl = backupAddress + "/" + name + "/";
                     //解压tar.gz
                     RepositoryFileUtil.decompression(DecFileUrl,afterDecFileUrl);
                     joinRecoveryLog(" decompression "+fileName+" success [DONE]");
@@ -210,7 +220,7 @@ public class BackupsServerImpl implements BackupsServer{
                     List<Repository> allRpy = repositoryServer.findAllRpy();
                     for (Repository repository:allRpy){
                         joinRecoveryLog(repository.getName()+ "  start Recovery ...");
-                        String codePath = RepositoryUtil.defaultPath() + "/" + repository.getRpyId() + ".git";
+                        String codePath = memoryAddress + "/" + repository.getRpyId() + ".git";
                         FileUtils.copyDirectory(new File(afterDecFileUrl+"code/"+repository.getRpyId()+".git"),new File(codePath));
                         joinRecoveryLog(repository.getName()+ " Recovery  success [DONE]");
                     }
@@ -218,7 +228,7 @@ public class BackupsServerImpl implements BackupsServer{
                     /**
                      *  删除解压后的文件
                      */
-                    FileUtils.deleteDirectory(new File(substring + "/" + name ));
+                    FileUtils.deleteDirectory(new File(backupAddress + "/" + name ));
 
                     joinRecoveryLog("Recovery success end [DONE]");
 
@@ -233,21 +243,12 @@ public class BackupsServerImpl implements BackupsServer{
 
     @Override
     public void updateBackups(Backups backups)  {
-        String backupsAddress = backups.getBackupsAddress();
-        if (StringUtils.isNotEmpty(backupsAddress)&&backupsAddress.endsWith("/")){
-            backupsAddress= backupsAddress.substring(0,backupsAddress.lastIndexOf("/")+1);
-        }
 
-
-        File file = new File(appHome+"/file/backups");
+        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
         String fileData = gainFileData(file);
 
         JSONObject jsonObject = JSONObject.parseObject(fileData);
 
-        if (StringUtils.isNotEmpty(backups.getBackupsAddress())){
-            String backUpsUrl = jsonObject.get("backups-url").toString();
-            fileData =fileData.replace(backUpsUrl,backupsAddress);
-        }
         if (StringUtils.isNotEmpty(backups.getTaskState())){
             String taskState = jsonObject.get("task-state").toString();
              fileData = fileData.replace(taskState, backups.getTaskState());
@@ -258,17 +259,16 @@ public class BackupsServerImpl implements BackupsServer{
     @Override
     public Backups findBackups() {
         Backups backups = new Backups();
-        File file = new File(appHome+"/file/backups");
+        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
         String fileData = gainFileData(file);
         if (StringUtils.isEmpty(fileData)){
             throw  new ApplicationException(5000,"数据不存在");
         }
         JSONObject jsonObject = JSONObject.parseObject(fileData);
-        String backUpsUrl = jsonObject.get("backups-url").toString();
         String taskState = jsonObject.get("task-state").toString();
         String backupsTime = jsonObject.get("backups-time").toString();
 
-        backups.setBackupsAddress(backUpsUrl);
+        backups.setBackupsAddress(backupAddress);
         backups.setTaskState(taskState);
         backups.setNewBackupsTime(backupsTime);
         backups.setNewResult("non");
@@ -307,7 +307,7 @@ public class BackupsServerImpl implements BackupsServer{
     public void uploadBackups(InputStream inputStream, String fileName,String userId) {
         try {
             //获取text文件信息
-            File file = new File(appHome + "/file/backups");
+            File file = new File(AppHomeContext.getAppHome() + "/file/backups");
             String fileData = gainFileData(file);
 
             JSONObject jsonObject = JSONObject.parseObject(fileData);
@@ -350,16 +350,22 @@ public class BackupsServerImpl implements BackupsServer{
      */
     public void executeScript(String backUpsUrl) throws IOException, InterruptedException {
 
+        String substring = jdbcUrl.substring(jdbcUrl.indexOf("//", 1)+2, jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2));
+        String[] split = substring.split(":");
+
+        String dbName = jdbcUrl.substring(jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2)+1, jdbcUrl.indexOf("?", 1));
+
         String[] args = new String[7];
-        args[0] = "host=172.10.1.10";
+        args[0] = "host="+split[0];
         args[1] = "port=5432";
-        args[2] = "userName=postgres";
-        args[3] = "password=darth2020";
-        args[4] = "dbName=tiklab_xcode";
+        args[2] = "userName="+jdbcUserName;
+        args[3] = "password="+jdbcPassword;
+        args[4] = "dbName="+dbName;
         args[5] = "schemaName=public";
         args[6] = "backupsUrl="+backUpsUrl;
 
-        Process ps = Runtime.getRuntime().exec(appHome+"/file/backups.sh",args);
+        String scriptFile = AppHomeContext.getAppHome() + "/file/backups.sh";
+        Process ps = Runtime.getRuntime().exec(scriptFile,args);
         ps.waitFor();
     }
 
@@ -370,16 +376,21 @@ public class BackupsServerImpl implements BackupsServer{
          */
     public void executeRecoveryScript(String backUpsSqlUrl) throws IOException, InterruptedException {
 
+        String substring = jdbcUrl.substring(jdbcUrl.indexOf("//", 1)+2, jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2));
+        String[] split = substring.split(":");
+
+        String dbName = jdbcUrl.substring(jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2)+1, jdbcUrl.indexOf("?", 1));
+
         String[] args = new String[7];
-        args[0] = "host=172.10.1.10";
+        args[0] = "host="+split[0];
         args[1] = "port=5432";
-        args[2] = "userName=postgres";
-        args[3] = "password=darth2020";
-        args[4] = "dbName=tiklab_xcode";
+        args[2] = "userName="+jdbcUserName;
+        args[3] = "password="+jdbcPassword;
+        args[4] = "dbName="+dbName;
         args[5] = "schemaName=public";
         args[6] = "backupsSqlUrl="+backUpsSqlUrl;
 
-        Process ps = Runtime.getRuntime().exec(appHome+"/file/recovery.sh",args);
+        Process ps = Runtime.getRuntime().exec(AppHomeContext.getAppHome()+"/file/recovery.sh",args);
         ps.waitFor();
     }
 
@@ -425,7 +436,7 @@ public class BackupsServerImpl implements BackupsServer{
 
     @Scheduled(cron = "0 0 2 * * ?")
     public void createTemplate(){
-        File file = new File(appHome + "/file/backups");
+        File file = new File(AppHomeContext.getAppHome() + "/file/backups");
         String fileData = gainFileData(file);
 
         JSONObject jsonObject = JSONObject.parseObject(fileData);

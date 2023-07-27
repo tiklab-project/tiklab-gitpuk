@@ -91,12 +91,15 @@ file:
   path: http://file.dev.tiklab.net
 
 
+
 repository:
-  code: xcode
-  address: "http://xcode-ce.demo.tiklab.net"
+  address: ${DATA_HOME}/repository
 
+backup:
+  address: ${DATA_HOME}/backup
 
-
+visit:
+  address: http://xcode-ce.demo.tiklab.net
 
 
 

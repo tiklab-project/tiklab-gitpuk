@@ -165,11 +165,24 @@ public class RepositoryUtil {
 
     /**
      * 仓库在内存里面的存储路径
-     * @param repositoryId 仓库Id
+     * @param repositoryId 服务内存以仓库ID 存储仓库
      * @return 仓库详细地址
      */
     public static String findRepositoryAddress(String repositoryId){
         String s = defaultPath() + "/" + repositoryId+ ".git";
+        File file = new File(s);
+        return file.getAbsolutePath();
+    }
+
+
+    /**
+     * 仓库在内存里面的存储路径
+     * @param InitialPath 仓库存储初始路径
+     * @param repositoryId 服务内存以仓库ID 存储仓库
+     * @return 仓库详细地址
+     */
+    public static String findRepositoryAddress(String InitialPath, String repositoryId){
+        String s = InitialPath + "/" + repositoryId+ ".git";
         File file = new File(s);
         return file.getAbsolutePath();
     }

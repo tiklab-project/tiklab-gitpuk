@@ -80,10 +80,8 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private MemoryManService memoryManService;
 
-    @Value("${xcode.file:/file}")
-    private String fileAddress;
 
-    @Value("${server.port:8080}")
+    @Value("${server.port}")
     private String port;
 
     @Value("${xcode.ssh.port:8082}")
@@ -96,8 +94,12 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Value("${repository.code:null}")
     private String repositoryCode;
 
-    @Value("${repository.address:null}")
-    private String repositoryAddress;
+    @Value("${visit.address:null}")
+    private String visitAddress;
+
+
+    @Value("${repository.address}")
+    private String repositoryMemoryAddress;
 
     /**
      * 创建仓库
@@ -116,11 +118,13 @@ public class RepositoryServerImpl implements RepositoryServer {
 
 
             String repositoryId = repositoryDao.createRpy(groupEntity);
-            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
 
-
+            //创建私有仓库 给创建人设置管理员权限
+            if(("private").equals(repository.getRules())){
+                dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+            }
             //git文件存放位置
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryId);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,repositoryId);
 
             String appHome = AppHomeContext.getAppHome();
             String ignoreFilePath = appHome+"/file/.gitignore";
@@ -129,7 +133,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
 
-            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+
             return repositoryId;
         } else {
             throw  new ApplicationException(4006,"内存不足");
@@ -149,7 +153,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         recordCommitService.deleteRecordCommitByRepository(rpyId);
 
         dmUserService.deleteDmUserByDomainId(rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         File file = new File(repositoryAddress);
         if (!file.exists()){
             return;
@@ -260,7 +264,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     public List<FileTree> findFileTree(FileTreeMessage message){
 
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(message.getRpyId()) ;
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,message.getRpyId()) ;
 
         List<FileTree> fileTrees ;
         try {
@@ -299,15 +303,15 @@ public class RepositoryServerImpl implements RepositoryServer {
             ip = "172.0.0.1";
         }
         RepositoryCloneAddress repositoryCloneAddress = new RepositoryCloneAddress();
-        String address = RepositoryUtil.findRepositoryAddress(repository);
+        String address = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         repositoryCloneAddress.setFileAddress(address);
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
 
         String http=null;
-        if (StringUtils.isNotEmpty(repositoryAddress)){
-             http = repositoryAddress + "/"+repositoryCode+"/"+ path + ".git";
+        if (StringUtils.isNotEmpty(visitAddress)){
+             http = visitAddress + "/"+repositoryCode+"/"+ path + ".git";
         }else {
              http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
         }
@@ -338,8 +342,6 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery) {
 
-        System.out.println("开始时间："+new Date());
-
         List<RepositoryEntity> groupEntityList = repositoryDao.findRepositoryListLike(repositoryQuery);
         List<Repository> allRpy = BeanMapper.mapList(groupEntityList, Repository.class);
 
@@ -356,11 +358,9 @@ public class RepositoryServerImpl implements RepositoryServer {
                 //查询用户id 查询关联的项目
                 DmUserQuery dmUserQuery = new DmUserQuery();
                 dmUserQuery.setUserId(repositoryQuery.getUserId());
-                System.out.println("开始查询dmUserList："+new Date());
                 List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
-                System.out.println("查询dmUserList："+new Date());
-                //存在私有的和权限成员
-                if (CollectionUtils.isNotEmpty(privateRpy) && CollectionUtils.isNotEmpty(dmUserList)) {
+                //存在项目成员
+                if ( CollectionUtils.isNotEmpty(dmUserList)) {
                     List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
                     List<String> dmRpyId = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
 
@@ -375,7 +375,6 @@ public class RepositoryServerImpl implements RepositoryServer {
                Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
                List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
                joinTemplate.joinQuery(repositoryList);
-               System.out.println("结束时间："+new Date());
                return PaginationBuilder.build(pagination,repositoryList);
            }
         }
@@ -387,7 +386,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         Repository repository = this.findOneRpy(id);
 
         try {
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(id);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,id);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
@@ -465,9 +464,16 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     }
 
+    @Override
+    public String findRepositoryAp(String address) {
+        Repository repository = this.findRepositoryByAddress(address);
+        String absolutePath = repositoryMemoryAddress + "/" + repository.getRpyId()+ ".git";
+        return absolutePath;
+    }
+
     public String findDefaultBranch(String repositoryId){
         try {
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryId);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,repositoryId);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();

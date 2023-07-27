@@ -12,12 +12,11 @@ create table rpy_remote_info(
     secret_key          varchar (64),
     timed_state         INT,
     create_time          timestamp
-
 );
 
 
-
-
+ALTER TABLE rpy_repository RENAME COLUMN "type" TO code;
+ALTER TABLE rpy_repository ALTER COLUMN code TYPE varchar;
 
 
 

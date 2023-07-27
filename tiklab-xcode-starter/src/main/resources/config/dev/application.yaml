@@ -13,9 +13,9 @@ spring:
 
 xcode:
   ssh:
-    port: 10000
-    key: tiklab-xcode-starter\src\main\resources\file\id_rsa
-  file: tiklab-xcode-starter\src\main\resources\file
+    port: 10001
+    key: tiklab-xcode-starter\file\id_rsa
+  file: tiklab-xcode-starter\file
 
 jdbc:
   driverClassName: org.postgresql.Driver
@@ -97,10 +97,14 @@ homes:
 file:
   path: http://file.dev.tiklab.net
 
-repository:
-  code: xcode
-  address: "http://192.168.10.7:8090"
 
+repository:
+  address: ${DATA_HOME}/repository
+backup:
+  address: ${DATA_HOME}/backup
+
+visit:
+  address: http://192.168.10.7:8090
 
 
 

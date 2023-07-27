@@ -2,14 +2,21 @@ package io.tiklab.xcode.repository.service;
 
 
 import io.tiklab.beans.BeanMapper;
+import io.tiklab.core.page.Pagination;
+import io.tiklab.core.page.PaginationBuilder;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.privilege.dmRole.service.DmRoleService;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.user.dmUser.model.DmUser;
+import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.repository.dao.RepositoryGroupDao;
+import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.entity.RepositoryGroupEntity;
+import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
+import io.tiklab.xcode.repository.model.RepositoryGroupQuery;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Exporter
@@ -104,24 +112,47 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
 
     /**
      * 查询用户仓库组
-     * @param userId 用户id
+     * @param repositoryGroupQuery
      * @return 仓库组集合
      */
     @Override
-    public List<RepositoryGroup> findUserGroup(String userId) {
-        List<RepositoryGroup> repositoryGroups = findAllCodeGroup();
-        if (CollectionUtils.isNotEmpty(repositoryGroups)){
+    public Pagination<RepositoryGroup> findRepositoryGroupPage(RepositoryGroupQuery repositoryGroupQuery) {
+        List<RepositoryGroupEntity> groupEntityList = repositoryGroupDao.findRepositoryListLike(repositoryGroupQuery);
+        List<RepositoryGroup> allGroupList = BeanMapper.mapList(groupEntityList, RepositoryGroup.class);
 
-            List<RepositoryGroup> publicGroup = repositoryGroups.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(allGroupList)){
 
-            List<RepositoryGroup> privateGroup = repositoryGroups.stream().filter(a -> ("private").equals(a.getRules())).collect(Collectors.toList());
+            List<RepositoryGroup> publicGroup = allGroupList.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
+            List<String> canViewId = publicGroup.stream().map(RepositoryGroup::getGroupId).collect(Collectors.toList());
+
+            List<RepositoryGroup> privateGroup = allGroupList.stream().filter(a -> ("private").equals(a.getRules())).collect(Collectors.toList());
 
             if (CollectionUtils.isNotEmpty(privateGroup)){
 
-            }
+                //查询用户id 查询关联的项目
+                DmUserQuery dmUserQuery = new DmUserQuery();
+                dmUserQuery.setUserId(repositoryGroupQuery.getUserId());
+                List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+                //存在项目成员
+                if (CollectionUtils.isNotEmpty(dmUserList)) {
+                    List<String> privateGroupId = privateGroup.stream().map(RepositoryGroup::getGroupId).collect(Collectors.toList());
+                    List<String> dmGroupId = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
 
+                    //查询项目私有
+                    privateGroupId = privateGroupId.stream().filter(dmGroupId::contains).collect(Collectors.toList());
+                    //最终能查看的项目组id
+                    canViewId = Stream.concat(privateGroupId.stream(), canViewId.stream()).collect(Collectors.toList());
+                }
+                String[] canViewGroupIdList = canViewId.toArray(new String[canViewId.size()]);
+                if (canViewGroupIdList.length>0){
+                    Pagination<RepositoryGroupEntity> repositoryGroupPage = repositoryGroupDao.findRepositoryGroupPage(repositoryGroupQuery, canViewGroupIdList);
+                    List<RepositoryGroup> repositoryGroupList = BeanMapper.mapList(repositoryGroupPage.getDataList(),RepositoryGroup.class);
+                    joinTemplate.joinQuery(repositoryGroupList);
+                    return PaginationBuilder.build(repositoryGroupPage,repositoryGroupList);
+                }
+            }
         }
-        return repositoryGroups;
+        return null;
     }
 
     @Override
@@ -134,6 +165,20 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
              repositoryGroup = list.get(0);
         }
         return repositoryGroup;
+    }
+
+    @Override
+    public List<RepositoryGroup> findAllGroup() {
+        List<RepositoryGroupEntity> allGroupEntity = repositoryGroupDao.findAllGroup();
+        List<RepositoryGroup>  repositoryGroups = BeanMapper.mapList(allGroupEntity, RepositoryGroup.class);
+        return repositoryGroups;
+    }
+
+    @Override
+    public List<RepositoryGroup> findCanCreateRpyGroup(String userId) {
+        List<RepositoryGroupEntity> allGroupEntity = repositoryGroupDao.findCanCreateRpyGroup(userId);
+        List<RepositoryGroup>  repositoryGroups = BeanMapper.mapList(allGroupEntity, RepositoryGroup.class);
+        return repositoryGroups;
     }
 }
 

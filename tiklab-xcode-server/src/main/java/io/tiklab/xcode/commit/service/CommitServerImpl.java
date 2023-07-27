@@ -16,6 +16,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -25,9 +26,9 @@ import java.util.*;
 @Service
 public class CommitServerImpl implements CommitServer {
 
-    @Autowired
-    private RepositoryServer repositoryServer;
 
+    @Value("${repository.address}")
+    private String repositoryMemoryAddress;
     /**
      * 获取分支提交记录
      * @param commit 信息
@@ -36,7 +37,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String rpyId = commit.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         List<CommitMessage> branchCommit;
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -74,7 +75,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public FileDiffEntry findCommitDiffFileList(Commit commit) {
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -111,7 +112,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -148,7 +149,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitFileDiff> findCommitFileDiff(Commit commit) {
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -177,7 +178,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();

@@ -1,10 +1,12 @@
 package io.tiklab.xcode.repository.service;
 
+import io.tiklab.core.page.Pagination;
 import io.tiklab.join.annotation.FindAll;
 import io.tiklab.join.annotation.FindList;
 import io.tiklab.join.annotation.FindOne;
 import io.tiklab.join.annotation.JoinProvider;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
+import io.tiklab.xcode.repository.model.RepositoryGroupQuery;
 
 
 import java.util.List;
@@ -53,10 +55,10 @@ public interface RepositoryGroupServer {
 
     /**
      * 查询用户仓库组
-     * @param userId 用户id
+     * @param repositoryGroupQuery repositoryGroupQuery
      * @return 仓库组集合
      */
-    List<RepositoryGroup> findUserGroup(String userId);
+    Pagination<RepositoryGroup> findRepositoryGroupPage(RepositoryGroupQuery repositoryGroupQuery);
 
     /**
      * 通过名字查询仓库组
@@ -64,6 +66,20 @@ public interface RepositoryGroupServer {
      * @return
      */
     RepositoryGroup findGroupByName(String groupName);
+
+    /**
+     * 查询所有仓库组
+     * @return
+     */
+    List<RepositoryGroup> findAllGroup();
+
+
+    /**
+     * 查询自己创建的和有创建仓库权限的仓库组
+     * @param userId 创建人id
+     * @return 仓库组list
+     */
+    List<RepositoryGroup> findCanCreateRpyGroup(String userId);
 }
 
 

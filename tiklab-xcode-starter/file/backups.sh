@@ -6,6 +6,8 @@ password=$password
 dbName=$dbName
 schemaName=$schemaName
 backupsUrl=$backupsUrl
+
+
 backupsCodeUrl=$backupsCodeUrl
 sourceFilePath=$sourceFilePath
 reduceName=$reduceName
@@ -19,6 +21,7 @@ current_time="xcode-backups-"$(date +%s)
 PGPASSWORD=${password} ${pg_dump} -U ${userName} -h ${host} -p ${port} -d ${dbName} -n ${schemaName}>${backupsUrl}/${dbName}.sql
 
 
+echo "执行dump完成"
 #while read line ;  do
 #cp -r ${line} ${backupsCodeUrl}
 #done <<< ${sourceFilePath}

@@ -10,6 +10,7 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
+import org.springframework.beans.factory.annotation.Value;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +22,8 @@ import java.io.IOException;
  */
 public  class HttpRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
-  private RepositoryServer repositoryServer;
+   private RepositoryServer repositoryServer;
+
 
 
     public HttpRepositoryResolver(RepositoryServer repositoryServer){
@@ -34,12 +36,10 @@ public  class HttpRepositoryResolver implements RepositoryResolver<HttpServletRe
             ServiceNotEnabledException, ServiceMayNotContinueException {
 
         String address = name.substring(0, name.indexOf(".git"));
-        io.tiklab.xcode.repository.model.Repository repositoryByAddress = repositoryServer.findRepositoryByAddress(address);
-        String fileName = repositoryByAddress.getRpyId() + ".git";
 
-        String s = RepositoryUtil.defaultPath();
-        File file = new File(s + "/" + fileName);
+        String absolutePath = repositoryServer.findRepositoryAp(address);
 
+        File file = new File(absolutePath);
         if (!file.exists()){
             throw new ApplicationException("仓库不存在！");
         }

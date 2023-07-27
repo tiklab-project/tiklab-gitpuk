@@ -124,6 +124,15 @@ public interface RepositoryServer {
      * @param address
      */
     void deleteRpyByAddress(String address);
+
+    /**
+     * 通过仓库address 查询绝对路径
+     * @param address
+     * @return 绝对路径
+     */
+    String findRepositoryAp(String address);
+
+
 }
 
 

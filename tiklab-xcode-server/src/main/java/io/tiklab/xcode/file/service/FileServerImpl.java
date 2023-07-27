@@ -8,6 +8,7 @@ import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,6 +19,8 @@ public class FileServerImpl implements FileServer {
     @Autowired
     RepositoryServer repositoryServer;
 
+    @Value("${repository.address}")
+    private String repositoryMemoryAddress;
 
     /**
      * 创建文件
@@ -48,7 +51,7 @@ public class FileServerImpl implements FileServer {
         String fileAddress = fileQuery.getFileAddress();
         String branch = fileQuery.getCommitBranch();
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         FileMessage fileMessage ;
         try {
             Git git = Git.open(new java.io.File(repositoryAddress));

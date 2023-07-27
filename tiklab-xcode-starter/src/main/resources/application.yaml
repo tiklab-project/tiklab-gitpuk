@@ -99,8 +99,12 @@ file:
   path: http://file.tiklab.net
 
 repository:
-  code: xcode
-  address: ""
+    address: ${DATA_HOME}/repository
+backup:
+    address: ${DATA_HOME}/backup
+
+visit:
+    address: ""
 
 
 

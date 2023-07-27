@@ -1,10 +1,13 @@
 package io.tiklab.xcode.repository.controller;
 
 import io.tiklab.core.Result;
+import io.tiklab.core.page.Pagination;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
+import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
+import io.tiklab.xcode.repository.model.RepositoryGroupQuery;
 import io.tiklab.xcode.repository.service.RepositoryGroupServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,12 +60,12 @@ public class RepositoryGroupController {
         return Result.ok();
     }
 
-    @RequestMapping(path="/findUserGroup",method = RequestMethod.POST)
-    @ApiMethod(name = "findUserGroup",desc = "查询仓库组")
+    @RequestMapping(path="/findRepositoryGroupPage",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryGroupPage",desc = "查询仓库组")
     @ApiParam(name = "userId",desc = "用户id",required = true)
-    public Result<List<RepositoryGroup>> findUserGroup(@NotNull String userId){
+    public Result<Pagination<RepositoryGroup>> findRepositoryGroupPage(@RequestBody @NotNull @Valid RepositoryGroupQuery repositoryGroupQuery){
 
-        List<RepositoryGroup> codeList = groupServer.findUserGroup(userId);
+        Pagination<RepositoryGroup> codeList = groupServer.findRepositoryGroupPage(repositoryGroupQuery);
 
         return Result.ok(codeList);
     }
@@ -76,4 +79,22 @@ public class RepositoryGroupController {
 
         return Result.ok(repositoryGroup);
     }
+
+    @RequestMapping(path="/findAllGroup",method = RequestMethod.POST)
+    @ApiMethod(name = "findAllGroup",desc = "查询所有")
+    public Result<List<RepositoryGroup>> findAllGroup(){
+        List<RepositoryGroup> repositoryGroupList = groupServer.findAllGroup();
+
+        return Result.ok(repositoryGroupList);
+    }
+
+
+    @RequestMapping(path="/findCanCreateRpyGroup",method = RequestMethod.POST)
+    @ApiMethod(name = "findCanCreateRpyGroup",desc = "查询自己创建的和有创建仓库权限的仓库组")
+    public Result<List<RepositoryGroup>> findCanCreateRpyGroup(@NotNull  String userId){
+        List<RepositoryGroup> repositoryGroupList = groupServer.findCanCreateRpyGroup(userId);
+
+        return Result.ok(repositoryGroupList);
+    }
+
 }

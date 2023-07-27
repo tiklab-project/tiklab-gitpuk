@@ -60,11 +60,11 @@ public class Auth {
         this.authId = authId;
     }
 
-    public Repository getCode() {
+    public Repository getRepository() {
         return repository;
     }
 
-    public void setCode(Repository repository) {
+    public void setRepository(Repository repository) {
         this.repository = repository;
     }
 

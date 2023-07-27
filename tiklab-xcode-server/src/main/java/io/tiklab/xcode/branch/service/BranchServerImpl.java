@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -29,6 +30,8 @@ public class BranchServerImpl implements BranchServer {
     @Autowired
     RepositoryServer repositoryServer;
 
+    @Value("${repository.address}")
+    private String repositoryMemoryAddress;
 
     @Override
     public Branch findBranch(String rpyId,String commitId) {
@@ -50,7 +53,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public List<Branch> findAllBranch(String rpyId) {
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         List<Branch> branches;
         try {
             branches = GitBranchUntil.findAllBranch(repositoryAddress);
@@ -68,7 +71,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public void createBranch(BranchMessage branchMessage) {
         String rpyId = branchMessage.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         try {
             GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
         } catch (IOException | GitAPIException e) {
@@ -86,7 +89,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public void deleteBranch(BranchMessage branchMessage){
         String rpyId = branchMessage.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
         try {
             GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());
         } catch (IOException | GitAPIException e) {
