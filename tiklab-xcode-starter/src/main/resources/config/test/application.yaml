@@ -50,14 +50,14 @@ dfs:
 #dcs config
 dcs:
   server:
-    enabled: false
-    mode: server
-    port: 5000
+    enabled: true
+    port: 5020
     datapath: ${DATA_HOME}/caches
   client:
-    url: 127.0.0.1:5000
-    bucket: ${app.name}
-
+    url: 127.0.0.1:5020
+    group: g1
+    database: dcs1
+    expire: 7200
 #dcs config
 dss:
   server:
