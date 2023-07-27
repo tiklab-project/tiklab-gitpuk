@@ -311,7 +311,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         String http=null;
         if (StringUtils.isNotEmpty(visitAddress)){
-             http = visitAddress + "/xcode"+ path + ".git";
+             http = visitAddress + "/xcode/"+ path + ".git";
         }else {
              http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
         }
