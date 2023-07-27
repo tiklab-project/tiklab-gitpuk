@@ -24,12 +24,15 @@ postgresql:
   embbed:
     enable: true
   database: tiklab_xcode
-  server:
-    port: 5010
+  db:
+    port: 5000
+    username: postgres
+    password: darth2020
+    address: ${DATA_HOME}/postgresql
 
 
 #plugin config
-DATA_HOME: ${user.home}/tiklab/${app.name}
+DATA_HOME: /opt/tiklab/${app.name}
 plugin:
   path: ${DATA_HOME}/plugin
 

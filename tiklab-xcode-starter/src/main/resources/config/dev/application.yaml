@@ -29,7 +29,7 @@ postgresql:
   database: tiklab_xcode
 
 #plugin config
-DATA_HOME: ${user.home}/tiklab/${app.name}
+DATA_HOME: /opt/tiklab/${app.name}
 plugin:
   path: ${DATA_HOME}/plugin
 

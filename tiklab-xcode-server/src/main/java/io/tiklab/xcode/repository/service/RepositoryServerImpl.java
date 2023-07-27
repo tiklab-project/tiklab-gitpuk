@@ -91,8 +91,6 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private UserService userService;
 
-    @Value("${repository.code:null}")
-    private String repositoryCode;
 
     @Value("${visit.address:null}")
     private String visitAddress;
@@ -224,6 +222,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (allRepositories == null || allRepositories.size() == 0){
             return Collections.emptyList();
         }
+
         return allRepositories;
     }
 
@@ -240,6 +239,7 @@ public class RepositoryServerImpl implements RepositoryServer {
             repository.setFullPath(cloneAddress.getHttpAddress());
         }
         joinTemplate.joinQuery(list);
+
         return list;
     }
 
@@ -311,9 +311,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         String http=null;
         if (StringUtils.isNotEmpty(visitAddress)){
-             http = visitAddress + "/"+repositoryCode+"/"+ path + ".git";
+             http = visitAddress + "/xcode"+ path + ".git";
         }else {
-             http = "http://" + ip + ":" + port + "/"+repositoryCode+"/"+ path + ".git";
+             http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
         }
         String SSH=null;
 
@@ -324,7 +324,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         repositoryCloneAddress.setHttpAddress(http);
         repositoryCloneAddress.setSSHAddress(SSH);
         return repositoryCloneAddress;
-
     }
 
 
@@ -470,6 +469,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         String absolutePath = repositoryMemoryAddress + "/" + repository.getRpyId()+ ".git";
         return absolutePath;
     }
+
 
     public String findDefaultBranch(String repositoryId){
         try {
