@@ -25,7 +25,7 @@ postgresql:
     enable: true
   database: tiklab_xcode
   db:
-    port: 50432
+    port: 5432
     username: postgres
     password: darth2020
     address: ${DATA_HOME}/postgresql
