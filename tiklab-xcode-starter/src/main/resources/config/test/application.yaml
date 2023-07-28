@@ -54,10 +54,10 @@ dfs:
 dcs:
   server:
     enabled: true
-    port: 5020
+    port: 5000
     datapath: ${DATA_HOME}/caches
   client:
-    url: 127.0.0.1:5020
+    url: 127.0.0.1:5000
     group: g1
     database: dcs1
     expire: 7200
