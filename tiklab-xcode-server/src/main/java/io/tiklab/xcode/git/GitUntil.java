@@ -4,15 +4,11 @@ package io.tiklab.xcode.git;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.user.user.model.User;
 import io.tiklab.xcode.repository.model.RemoteInfo;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.TransportException;
-import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.transport.*;
-import org.eclipse.jgit.util.FS;
 
 import java.io.File;
 import java.io.FileInputStream;

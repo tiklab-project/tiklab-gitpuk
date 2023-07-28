@@ -4,12 +4,8 @@ import io.tiklab.core.page.Pagination;
 import io.tiklab.dal.jpa.JpaTemplate;
 import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
-import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.entity.RepositoryGroupEntity;
-import io.tiklab.xcode.repository.model.RepositoryGroup;
 import io.tiklab.xcode.repository.model.RepositoryGroupQuery;
-import io.tiklab.xcode.repository.model.RepositoryQuery;
-import io.tiklab.xcode.util.RepositoryFinal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

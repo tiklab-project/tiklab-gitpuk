@@ -1,5 +1,5 @@
 app:
-  name: xcode
+  name: tiklab-xcode
 
 APP_HOME: ${APP_HOME}
 application: xcode
@@ -16,20 +16,23 @@ xcode:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/tiklab_xcode?stringtype=unspecified
+  url: jdbc:postgresql://localhost:5432/xcode?stringtype=unspecified
   username: postgres
   password: darth2020
 
 postgresql:
   embbed:
     enable: true
-  database: tiklab_xcode
+  database: xcode
   db:
     port: 5432
     username: postgres
     password: darth2020
     address: ${DATA_HOME}/postgresql
 
+eas:
+  embbed:
+    enable: true
 
 #plugin config
 DATA_HOME: /opt/tiklab/${app.name}
@@ -71,9 +74,7 @@ dss:
 
 datapath: ${DATA_HOME}/caches
 
-eas:
-  embbed:
-    enable: true
+
 
 base:
   url: http://eas-ce.test.tiklab.net

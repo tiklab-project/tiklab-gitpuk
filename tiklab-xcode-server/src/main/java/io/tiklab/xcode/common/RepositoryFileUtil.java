@@ -1,7 +1,5 @@
-package io.tiklab.xcode.util;
+package io.tiklab.xcode.common;
 
-import com.alibaba.fastjson.JSONObject;
-import io.tiklab.core.exception.SystemException;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.git.GitCommitUntil;
@@ -16,8 +14,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -26,8 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class RepositoryFileUtil {
 

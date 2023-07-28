@@ -38,6 +38,12 @@ postgresql:
     enable: false
   database: tiklab_xcode
 
+
+eas:
+  embbed:
+    enable: false
+  address: http://e.eas.tiklab.net
+
 #dfs config
 dfs:
   server:
@@ -73,10 +79,7 @@ dss:
 
 datapath: ${DATA_HOME}/caches
 
-eas:
-  embbed:
-    enable: false
-  address: http://e.eas.tiklab.net
+
 
 message:
   sms:

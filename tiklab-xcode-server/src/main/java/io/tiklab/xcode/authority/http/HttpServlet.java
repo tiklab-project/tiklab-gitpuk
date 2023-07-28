@@ -5,6 +5,7 @@ import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.authority.ValidUsrPwdServer;
 import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.Repository;
+import io.tiklab.xcode.repository.service.MemoryManService;
 import io.tiklab.xcode.repository.service.RecordCommitService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import org.eclipse.jgit.http.server.GitServlet;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
@@ -50,6 +52,8 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private UserService userService;
 
+        @Resource
+        MemoryManService memoryManService;
 
         //拦截请求效验数据
         @Override
@@ -61,6 +65,16 @@ public class HttpServlet extends GitServlet {
                 if (!authorized){
                         res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
                         res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                }
+
+                //查询是否还有剩余内存
+                boolean resMemory = memoryManService.findResMemory();
+                if (!resMemory){
+                        logger.warn("存储空间不足");
+                        res1.setHeader("Content-Type", "text/plain");
+                        res1.setStatus(201);
+                        res1.getWriter().write("pack exceeds maximum allowed size");
+                        return;
                 }
 
                 if (requestURI.endsWith("git-receive-pack")){

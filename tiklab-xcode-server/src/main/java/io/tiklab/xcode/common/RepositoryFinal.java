@@ -1,4 +1,4 @@
-package io.tiklab.xcode.util;
+package io.tiklab.xcode.common;
 
 public class RepositoryFinal {
 

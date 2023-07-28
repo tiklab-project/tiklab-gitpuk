@@ -8,7 +8,7 @@ import io.tiklab.user.user.model.User;
 import io.tiklab.xcode.setting.dao.AuthDao;
 import io.tiklab.xcode.setting.entity.AuthEntity;
 import io.tiklab.xcode.setting.model.Auth;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

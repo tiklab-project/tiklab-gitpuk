@@ -3,17 +3,16 @@ package io.tiklab.xcode.setting.service;
 import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
-import io.tiklab.core.exception.SystemException;
 import io.tiklab.eam.common.context.LoginContext;
+import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.setting.model.Backups;
-import io.tiklab.xcode.util.RepositoryFileUtil;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryFileUtil;
+import io.tiklab.xcode.common.RepositoryUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipOutputStream;
 
 
 @Service
@@ -45,12 +40,9 @@ public class BackupsServerImpl implements BackupsServer{
     @Autowired
     RepositoryServer repositoryServer;
 
+    @Autowired
+    RepositoryPubDataService pubDataService;
 
-    @Value("${backup.address}")
-    String backupAddress;
-
-    @Value("${repository.address}")
-    String memoryAddress;
 
     @Value("${jdbc.url}")
     String jdbcUrl;
@@ -75,7 +67,7 @@ public class BackupsServerImpl implements BackupsServer{
 
     @Override
     public String backupsExec() {
-        File file = new File(backupAddress);
+        File file = new File(pubDataService.backupAddress());
         if (!file.exists()){
             file.mkdir();
         }
@@ -100,6 +92,7 @@ public class BackupsServerImpl implements BackupsServer{
                 String backupsTime = jsonObject.get("backups-time").toString();
 
                 //添加最后一层目录压缩
+                String backupAddress = pubDataService.backupAddress();
                 String lastName = backupAddress.substring(backupAddress.lastIndexOf("/"));
 
                 String backupPath=backupAddress+lastName;
@@ -118,7 +111,7 @@ public class BackupsServerImpl implements BackupsServer{
 
                     for (Repository repository:allRpy){
 
-                        String repositoryUrl = memoryAddress +"/"+ repository.getRpyId() + ".git";
+                        String repositoryUrl = pubDataService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
                         File codeFileUrl = new File(repositoryUrl);
 
                         /*
@@ -199,10 +192,10 @@ public class BackupsServerImpl implements BackupsServer{
                      *  解压tar.gz包
                      */
                     //压缩包的绝对路径
-                    String DecFileUrl = backupAddress + "/" + fileName;
+                    String DecFileUrl = pubDataService.backupAddress() + "/" + fileName;
                     //压缩后的文件绝对路径
                     String name = fileName.substring(0, fileName.indexOf(".tar.gz"));
-                    String afterDecFileUrl = backupAddress + "/" + name + "/";
+                    String afterDecFileUrl = pubDataService.backupAddress() + "/" + name + "/";
                     //解压tar.gz
                     RepositoryFileUtil.decompression(DecFileUrl,afterDecFileUrl);
                     joinRecoveryLog(" decompression "+fileName+" success [DONE]");
@@ -220,7 +213,7 @@ public class BackupsServerImpl implements BackupsServer{
                     List<Repository> allRpy = repositoryServer.findAllRpy();
                     for (Repository repository:allRpy){
                         joinRecoveryLog(repository.getName()+ "  start Recovery ...");
-                        String codePath = memoryAddress + "/" + repository.getRpyId() + ".git";
+                        String codePath = pubDataService.repositoryAddress() + "/" + repository.getRpyId() + ".git";
                         FileUtils.copyDirectory(new File(afterDecFileUrl+"code/"+repository.getRpyId()+".git"),new File(codePath));
                         joinRecoveryLog(repository.getName()+ " Recovery  success [DONE]");
                     }
@@ -228,7 +221,7 @@ public class BackupsServerImpl implements BackupsServer{
                     /**
                      *  删除解压后的文件
                      */
-                    FileUtils.deleteDirectory(new File(backupAddress + "/" + name ));
+                    FileUtils.deleteDirectory(new File(pubDataService.backupAddress() + "/" + name ));
 
                     joinRecoveryLog("Recovery success end [DONE]");
 
@@ -268,7 +261,7 @@ public class BackupsServerImpl implements BackupsServer{
         String taskState = jsonObject.get("task-state").toString();
         String backupsTime = jsonObject.get("backups-time").toString();
 
-        backups.setBackupsAddress(backupAddress);
+        backups.setBackupsAddress(pubDataService.backupAddress());
         backups.setTaskState(taskState);
         backups.setNewBackupsTime(backupsTime);
         backups.setNewResult("non");

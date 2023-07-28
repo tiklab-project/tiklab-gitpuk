@@ -4,21 +4,18 @@ import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RemoteInfoDao;
 import io.tiklab.xcode.repository.entity.RemoteInfoEntity;
 import io.tiklab.xcode.repository.model.RemoteInfo;
 import io.tiklab.xcode.repository.model.RemoteInfoQuery;
-import io.tiklab.xcode.util.RepositoryUtil;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +37,8 @@ public class RemoteInfoServiceImpl implements RemoteInfoService {
     @Autowired
     JoinTemplate joinTemplate;
 
-    @Value("${repository.address}")
-    private String memoryAddress;
+    @Autowired
+    private RepositoryPubDataService pubDataService;
 
     //推送镜像结果
     public static Map<String , String> remoteResultMap = new HashMap<>();
@@ -140,28 +137,34 @@ public class RemoteInfoServiceImpl implements RemoteInfoService {
             @Override
             public void run() {
                 try {
-                    GitUntil.remoteRepository(memoryAddress+"/"+remoteInfo.getRpyId()+".git",remoteInfo);
+                    GitUntil.remoteRepository(pubDataService.repositoryAddress()+"/"+remoteInfo.getRpyId()+".git",remoteInfo);
                 } catch (Exception  e) {
                     if (e.getMessage().contains("Nothing to push.")){
                         remoteResultMap.put(key,"已经是最新的代码，无需推送");
+                        return;
                     }
                     if (e.getMessage().contains("not authorized")){
                         remoteResultMap.put(key,"认证未通过，请检查认证信息和权限");
+                        return;
                     }
                     if (e.getMessage().contains("501 Not Implemented")){
                         remoteResultMap.put(key,"连接失败，请检查镜像地址是否正确");
+                        return;
                     }
                     if (e.getMessage().contains("Not Found")){
                         remoteResultMap.put(key,"仓库或者地址不正确");
+                        return;
                     }
                     if (e.getMessage().contains("repository not found")){
                         remoteResultMap.put(key,"本地仓库不存在");
+                        return;
                     }
                     if (e.getMessage().contains("Read timed out after")){
                         remoteResultMap.put(key,"连接超时，请检查镜像地址或者镜像仓库");
+                        return;
                     }
                     remoteResultMap.put(key,e.getMessage());
-                    throw new RuntimeException(e.getMessage());
+                    throw new SystemException(e.getMessage());
                 }
                 remoteResultMap.put(key,"succeed");
             }

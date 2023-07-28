@@ -1,13 +1,6 @@
-package io.tiklab.xcode.util;
+package io.tiklab.xcode.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.tiklab.core.exception.ApplicationException;
-import io.tiklab.xcode.repository.model.Repository;
-import io.tiklab.xcode.repository.model.RepositoryGroup;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -150,30 +143,6 @@ public class RepositoryUtil {
         }
         return second+"秒";
     }
-
-    /**
-     * 获取仓库地址
-     * @param repository 仓库地址
-     * @return 仓库详细地址
-     */
-    public static String findRepositoryAddress(Repository repository){
-        String address = repository.getAddress();
-        String s = defaultPath() + "/" + address+ ".git";
-        File file = new File(s);
-        return file.getAbsolutePath();
-    }
-
-    /**
-     * 仓库在内存里面的存储路径
-     * @param repositoryId 服务内存以仓库ID 存储仓库
-     * @return 仓库详细地址
-     */
-    public static String findRepositoryAddress(String repositoryId){
-        String s = defaultPath() + "/" + repositoryId+ ".git";
-        File file = new File(s);
-        return file.getAbsolutePath();
-    }
-
 
     /**
      * 仓库在内存里面的存储路径

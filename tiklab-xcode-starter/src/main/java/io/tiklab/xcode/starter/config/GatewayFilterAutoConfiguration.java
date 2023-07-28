@@ -92,6 +92,7 @@ public class GatewayFilterAutoConfiguration {
                         "/eas",
                         "/xcode",
                         "/backups",
+                        "/remoteInfo",
                 })
                 .get();
     }

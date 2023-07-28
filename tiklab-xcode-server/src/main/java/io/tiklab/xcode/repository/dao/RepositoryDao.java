@@ -110,7 +110,7 @@ public class RepositoryDao {
      */
     public List<RepositoryEntity> findRepositoryByAddress(String  address) {
         QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
-                .like("address", address)
+                .eq("address", address)
                 .get();
         return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }

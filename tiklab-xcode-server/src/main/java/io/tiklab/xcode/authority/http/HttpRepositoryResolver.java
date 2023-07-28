@@ -2,7 +2,6 @@ package io.tiklab.xcode.authority.http;
 
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.repository.service.RepositoryServer;
-import io.tiklab.xcode.util.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
@@ -10,7 +9,6 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import org.springframework.beans.factory.annotation.Value;
 
 
 import javax.servlet.http.HttpServletRequest;

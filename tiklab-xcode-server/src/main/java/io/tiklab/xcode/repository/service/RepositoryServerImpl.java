@@ -16,7 +16,7 @@ import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.branch.model.Branch;
-import io.tiklab.xcode.branch.service.BranchServer;
+import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.git.GitBranchUntil;
@@ -24,9 +24,8 @@ import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RepositoryDao;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.*;
-import io.tiklab.xcode.setting.service.BackupsServerImpl;
-import io.tiklab.xcode.util.RepositoryFileUtil;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryFileUtil;
+import io.tiklab.xcode.common.RepositoryUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -36,17 +35,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,29 +70,16 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private RecordCommitService recordCommitService;
 
-
-
     @Autowired
     private MemoryManService memoryManService;
 
-
-    @Value("${server.port}")
-    private String port;
-
-    @Value("${xcode.ssh.port:8082}")
-    private int sshPort;
-
+    @Autowired
+    RepositoryPubDataService pubDataService;
 
     @Autowired
     private UserService userService;
 
 
-    @Value("${visit.address:null}")
-    private String visitAddress;
-
-
-    @Value("${repository.address}")
-    private String repositoryMemoryAddress;
 
     /**
      * 创建仓库
@@ -122,7 +104,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                 dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
             }
             //git文件存放位置
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,repositoryId);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),repositoryId);
 
             String appHome = AppHomeContext.getAppHome();
             String ignoreFilePath = appHome+"/file/.gitignore";
@@ -151,7 +133,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         recordCommitService.deleteRecordCommitByRepository(rpyId);
 
         dmUserService.deleteDmUserByDomainId(rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
         File file = new File(repositoryAddress);
         if (!file.exists()){
             return;
@@ -264,7 +246,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     public List<FileTree> findFileTree(FileTreeMessage message){
 
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,message.getRpyId()) ;
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),message.getRpyId()) ;
 
         List<FileTree> fileTrees ;
         try {
@@ -303,22 +285,22 @@ public class RepositoryServerImpl implements RepositoryServer {
             ip = "172.0.0.1";
         }
         RepositoryCloneAddress repositoryCloneAddress = new RepositoryCloneAddress();
-        String address = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,rpyId);
+        String address = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
         repositoryCloneAddress.setFileAddress(address);
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
 
         String http=null;
-        if (StringUtils.isNotEmpty(visitAddress)){
-             http = visitAddress + "/xcode/"+ path + ".git";
+        if (StringUtils.isNotEmpty(pubDataService.visitAddress())){
+             http = pubDataService.visitAddress() + "/xcode/"+ path + ".git";
         }else {
-             http = "http://" + ip + ":" + port + "/xcode/"+ path + ".git";
+             http = "http://" + ip + ":" + pubDataService.serverPort() + "/xcode/"+ path + ".git";
         }
         String SSH=null;
 
         if (!ObjectUtils.isEmpty(user)){
-             SSH = "ssh://"+ user.getName() +"@"+ip + ":" + sshPort +"/" + path + ".git";
+             SSH = "ssh://"+ user.getName() +"@"+ip + ":" + pubDataService.sshPort() +"/" + path + ".git";
         }
 
         repositoryCloneAddress.setHttpAddress(http);
@@ -385,7 +367,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         Repository repository = this.findOneRpy(id);
 
         try {
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,id);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),id);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
@@ -429,7 +411,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         joinTemplate.joinQuery(repositoryList);
 
         if (CollectionUtils.isNotEmpty(repositoryList)){
-             repository = repositoryList.get(0);
+            repository = repositoryList.get(0);
             RepositoryCloneAddress cloneAddress = findCloneAddress(repository.getRpyId());
             repository.setFullPath(cloneAddress.getHttpAddress());
 
@@ -466,14 +448,14 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public String findRepositoryAp(String address) {
         Repository repository = this.findRepositoryByAddress(address);
-        String absolutePath = repositoryMemoryAddress + "/" + repository.getRpyId()+ ".git";
+        String absolutePath = pubDataService.repositoryAddress() + "/" + repository.getRpyId()+ ".git";
         return absolutePath;
     }
 
 
     public String findDefaultBranch(String repositoryId){
         try {
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(repositoryMemoryAddress,repositoryId);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),repositoryId);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();

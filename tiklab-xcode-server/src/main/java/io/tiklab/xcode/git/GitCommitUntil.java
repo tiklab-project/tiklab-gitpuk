@@ -2,9 +2,8 @@ package io.tiklab.xcode.git;
 
 import io.tiklab.xcode.commit.model.*;
 import io.tiklab.core.exception.ApplicationException;
-import io.tiklab.xcode.commit.model.*;
-import io.tiklab.xcode.util.RepositoryFinal;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryFinal;
+import io.tiklab.xcode.common.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;

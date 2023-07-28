@@ -1,5 +1,5 @@
 app:
-  name: xcode
+  name: tiklab-xcode
 
 APP_HOME: ${APP_HOME}
 application: xcode
@@ -25,6 +25,11 @@ postgresql:
     enable: false
   database: tiklab_xcode
 
+eas:
+  embbed:
+    enable: false
+  address:  http://eas-ce.demo.tiklab.net
+
 #plugin config
 DATA_HOME: /opt/tiklab/${app.name}
 plugin:
@@ -44,7 +49,7 @@ dfs:
 #dcs config
 dcs:
   server:
-    enabled: true
+    enabled: false
     port: 5020
     datapath: ${DATA_HOME}/caches
   client:
@@ -66,10 +71,7 @@ dss:
 
 datapath: ${DATA_HOME}/caches
 
-eas:
-  embbed:
-    enable: false
-  address:  http://eas-ce.demo.tiklab.net
+
 
 
 base:

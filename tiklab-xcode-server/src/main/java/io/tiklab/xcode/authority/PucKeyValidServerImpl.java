@@ -2,8 +2,8 @@ package io.tiklab.xcode.authority;
 
 import io.tiklab.xcode.setting.model.Auth;
 import io.tiklab.xcode.setting.service.AuthServer;
-import io.tiklab.xcode.util.RepositoryFinal;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryFinal;
+import io.tiklab.xcode.common.RepositoryUtil;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;

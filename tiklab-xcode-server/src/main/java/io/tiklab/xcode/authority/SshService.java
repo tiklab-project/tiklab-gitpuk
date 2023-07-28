@@ -2,9 +2,9 @@ package io.tiklab.xcode.authority;
 
 
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.setting.service.AuthServer;
-import io.tiklab.xcode.util.RepositoryFinal;
-import io.tiklab.xcode.util.RepositoryUtil;
+import io.tiklab.xcode.common.RepositoryFinal;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -90,8 +90,10 @@ public class SshService {
      */
     private static class XcodeSshCommandFactory implements CommandFactory {
 
-        @Value("${repository.address}")
-        private String memoryAddress;
+        @Autowired
+        RepositoryPubDataService pubDataService;
+
+
         public XcodeSshCommandFactory() {
         }
 
@@ -99,7 +101,7 @@ public class SshService {
         public Command createCommand(ChannelSession channelSession, String command) {
             String cmd = command.replace("'", "");
             String s = cmd.split(" ")[1];
-            File file = new File(memoryAddress + s);
+            File file = new File(pubDataService.repositoryAddress() + s);
             String repositoryPath = file.getAbsolutePath();
 
 
