@@ -1,4 +1,4 @@
-package io.tiklab.xcode;
+package io.tiklab.xcode.starter;
 
 
 import io.tiklab.core.property.PropertyAndYamlSourceFactory;
