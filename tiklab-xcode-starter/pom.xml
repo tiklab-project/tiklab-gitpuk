@@ -231,7 +231,7 @@
 		<!--mac-->
 		<profile>
 			<id>system-mac</id>
-			<dependencies>
+		<!--	<dependencies>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-mac</artifactId>
@@ -246,7 +246,7 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-			</dependencies>
+			</dependencies>-->
 			<properties>
 				<assembly>mac</assembly>
 				<systemType>mac</systemType>
