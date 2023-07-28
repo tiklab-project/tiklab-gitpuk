@@ -49,9 +49,6 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private RepositoryServer repositoryServer;
 
-        @Autowired
-        private UserService userService;
-
         @Resource
         MemoryManService memoryManService;
 
@@ -77,6 +74,7 @@ public class HttpServlet extends GitServlet {
                         return;
                 }
 
+                /*//仓库上传权限
                 if (requestURI.endsWith("git-receive-pack")){
                         String[] split = requestURI.split("/");
                         String groupName = split[2];
@@ -90,7 +88,7 @@ public class HttpServlet extends GitServlet {
                                 res1.getWriter().write("You are not allowed to push code to this project");
                                 return;
                         }
-                }
+                }*/
                 super.service(req, res);
 
         }
@@ -115,7 +113,7 @@ public class HttpServlet extends GitServlet {
                                 String password = authTokens[1];
                                 boolean result = validUsrPwdServer.validUserNamePassword(username, password, "1");
                                 if (result){
-                                        updateRepository(req.getRequestURI(),username);
+                                        commitService.updateCommitRecord(req.getRequestURI(),username);
                                 }
                                 return result;
 
@@ -123,27 +121,6 @@ public class HttpServlet extends GitServlet {
                 }
                 return false;
         }
-
-        /**
-         * 修改提交记录
-         */
-        private void updateRepository(String requestURI,String userName){
-                if (requestURI.endsWith("git-receive-pack")){
-                        User user = userService.findUserByUsername(userName);
-
-                        String[] split = requestURI.split("/");
-                        String groupName=split[2];
-                        String name=split[3].substring(0,split[3].indexOf(".git"));
-                        Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
-
-                        RecordCommit recordCommit = new RecordCommit();
-                        recordCommit.setRepository(repository);
-                        recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
-                        recordCommit.setUserId(user.getId());
-                        commitService.createRecordCommit(recordCommit);
-                }
-        }
-
 
 }
 

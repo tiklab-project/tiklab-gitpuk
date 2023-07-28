@@ -83,4 +83,11 @@ public interface RecordCommitService {
     Pagination<RecordCommit> findRecordCommitPage(RecordCommitQuery recordCommitQuery);
 
 
+    /**
+     * 修改提交记录
+     * @param requestURI 提交地址
+     * @param userName 提交永华
+     * @return
+     */
+    void updateCommitRecord(String requestURI,String userName);
 }

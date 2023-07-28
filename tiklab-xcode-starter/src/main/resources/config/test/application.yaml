@@ -35,7 +35,7 @@ eas:
     enable: true
 
 #plugin config
-DATA_HOME: /opt/tiklab/${app.name}
+DATA_HOME: /opt/tiklab/xcode
 plugin:
   path: ${DATA_HOME}/plugin
 

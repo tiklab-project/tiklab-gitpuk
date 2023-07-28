@@ -10,12 +10,15 @@ import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
+import io.tiklab.user.user.model.User;
+import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.repository.dao.RecordCommitDao;
 import io.tiklab.xcode.repository.entity.RecordCommitEntity;
 import io.tiklab.xcode.repository.entity.RecordOpenEntity;
 import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.RecordCommitQuery;
 import io.tiklab.xcode.repository.model.RecordOpen;
+import io.tiklab.xcode.repository.model.Repository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,12 @@ public class RecordCommitServiceImpl implements RecordCommitService {
 
     @Autowired
     private DmUserService dmUserService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private RepositoryServer repositoryServer;
 
 
     @Override
@@ -193,4 +202,24 @@ public class RecordCommitServiceImpl implements RecordCommitService {
 
         return PaginationBuilder.build(pagination,openRecordList);
     }
+
+    @Override
+    public void updateCommitRecord(String requestURI,String userName) {
+        if (requestURI.endsWith("git-receive-pack")){
+            User user = userService.findUserByUsername(userName);
+
+            String[] split = requestURI.split("/");
+            String groupName=split[2];
+            String name=split[3].substring(0,split[3].indexOf(".git"));
+            Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+
+            RecordCommit recordCommit = new RecordCommit();
+            recordCommit.setRepository(repository);
+            recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
+            recordCommit.setUserId(user.getId());
+            this.createRecordCommit(recordCommit);
+        }
+    }
+
+
 }

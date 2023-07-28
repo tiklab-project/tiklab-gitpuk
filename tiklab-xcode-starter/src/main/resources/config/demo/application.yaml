@@ -31,7 +31,7 @@ eas:
   address:  http://eas-ce.demo.tiklab.net
 
 #plugin config
-DATA_HOME: /opt/tiklab/${app.name}
+DATA_HOME: /opt/tiklab/xcode
 plugin:
   path: ${DATA_HOME}/plugin
 
