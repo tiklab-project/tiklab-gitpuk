@@ -103,7 +103,7 @@ backup:
   address: ${DATA_HOME}/backup
 
 visit:
-  address: http://xcode-ce.test.tiklab.net
+  address: http://172.11.1.19:8080
 
 
 
