@@ -129,15 +129,6 @@ public class HttpServlet extends GitServlet {
                 }
                 return false;
         }
-
-
-        @RequestMapping(path="/test",method = RequestMethod.POST)
-        @ApiMethod(name = "deleteRpyByAddress",desc = "根据路径删除")
-        @ApiParam(name = "address",desc = "仓库id",required = true)
-        public Result<Void> deleteRpyByAddress(@NotNull String address){
-
-                return Result.ok();
-        }
 }
 
 
