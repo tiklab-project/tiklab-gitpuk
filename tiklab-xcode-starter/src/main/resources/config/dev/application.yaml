@@ -13,7 +13,7 @@ spring:
 
 xcode:
   ssh:
-    port: 10001
+    port: 10000
     key: tiklab-xcode-starter\file\id_rsa
   file: tiklab-xcode-starter\file
 
@@ -106,7 +106,7 @@ backup:
   address: ${DATA_HOME}/backup
 
 visit:
-  address: http://192.168.10.7:8090
+  address: ""
 
 
 

@@ -41,6 +41,7 @@ import org.springframework.util.ObjectUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -277,13 +278,31 @@ public class RepositoryServerImpl implements RepositoryServer {
     public RepositoryCloneAddress findCloneAddress(String rpyId){
         Repository repository = findOne(rpyId);
         String path = repository.getAddress();
-        String  ip ;
+        String  ip=null ;
         //获取本机地址
         try {
-            ip = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (networkInterface.isLoopback() || networkInterface.isVirtual()) {
+                    continue;  // 跳过回环和虚拟网络接口
+                }
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if (address.isLoopbackAddress()) {
+                        continue;  // 跳过回环地址
+                    }
+                    if (address.getHostAddress().contains(":")) {
+                        continue;  // 跳过IPv6地址
+                    }
+                     ip = address.getHostAddress();
+                }
+            }
+        } catch (Exception e) {
             ip = "172.0.0.1";
         }
+       logger.info("最后ip: " + ip);
         RepositoryCloneAddress repositoryCloneAddress = new RepositoryCloneAddress();
         String address = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
         repositoryCloneAddress.setFileAddress(address);
@@ -291,7 +310,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
 
-        String http=null;
+        String http;
         if (StringUtils.isNotEmpty(pubDataService.visitAddress())){
              http = pubDataService.visitAddress() + "/xcode/"+ path + ".git";
         }else {

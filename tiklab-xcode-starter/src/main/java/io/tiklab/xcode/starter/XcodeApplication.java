@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @PropertySource(value = {"classpath:application.yaml"}, factory = PropertyAndYamlSourceFactory.class)
 @EnableXcode
-@ServletComponentScan
+@ServletComponentScan("io.tiklab.xcode")
 public class XcodeApplication {
 
 	public static void main(String[] args) {

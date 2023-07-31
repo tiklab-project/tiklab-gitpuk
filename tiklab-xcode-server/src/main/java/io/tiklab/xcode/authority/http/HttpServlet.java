@@ -1,5 +1,9 @@
 package io.tiklab.xcode.authority.http;
 
+import io.tiklab.core.Result;
+import io.tiklab.postin.annotation.Api;
+import io.tiklab.postin.annotation.ApiMethod;
+import io.tiklab.postin.annotation.ApiParam;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.authority.ValidUsrPwdServer;
@@ -12,6 +16,9 @@ import org.eclipse.jgit.http.server.GitServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.*;
@@ -19,6 +26,7 @@ import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -122,6 +130,14 @@ public class HttpServlet extends GitServlet {
                 return false;
         }
 
+
+        @RequestMapping(path="/test",method = RequestMethod.POST)
+        @ApiMethod(name = "deleteRpyByAddress",desc = "根据路径删除")
+        @ApiParam(name = "address",desc = "仓库id",required = true)
+        public Result<Void> deleteRpyByAddress(@NotNull String address){
+
+                return Result.ok();
+        }
 }
 
 
