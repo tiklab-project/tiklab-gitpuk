@@ -17,6 +17,13 @@ import java.util.List;
 public interface RepositoryServer {
 
     /**
+     * 创建代码库以及相关数据
+     * @param repository 信息
+     * @return 代码库id
+     */
+    String createRpyData(Repository repository);
+
+    /**
      * 创建代码库
      * @param repository 信息
      * @return 代码库id

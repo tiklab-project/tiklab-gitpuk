@@ -310,6 +310,12 @@
 				<yaml-type>/config/demo</yaml-type>
 			</properties>
 		</profile>
+		<profile>
+			<id>env-prd</id>
+			<properties>
+				<yaml-type>/config/prd</yaml-type>
+			</properties>
+		</profile>
 
 		<!--release-->
 		<profile>
@@ -360,7 +366,7 @@
 							<descriptors>
 								<descriptor>assembly/distribution-${assembly}.xml</descriptor>
 							</descriptors>
-							<finalName>tiklab-xcode</finalName>
+							<finalName>tiklab-xcode-${version}-${timestamp}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 						<phase>package</phase>

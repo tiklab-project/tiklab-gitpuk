@@ -4,14 +4,13 @@ import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.xcode.branch.model.BranchMessage;
 import io.tiklab.xcode.branch.model.Branch;
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.common.RepositoryUtil;
+import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
 import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class BranchServerImpl implements BranchServer {
     RepositoryServer repositoryServer;
 
     @Autowired
-    RepositoryPubDataService pubDataService;
+    XcodeYamlDataMaService yamlDataMaService;
 
 
     @Override
@@ -50,7 +49,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public List<Branch> findAllBranch(String rpyId) {
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         List<Branch> branches;
         try {
             branches = GitBranchUntil.findAllBranch(repositoryAddress);
@@ -68,7 +67,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public void createBranch(BranchMessage branchMessage) {
         String rpyId = branchMessage.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         try {
             GitBranchUntil.createRepositoryBranch(repositoryAddress , branchMessage.getBranchName(), branchMessage.getPoint());
         } catch (IOException | GitAPIException e) {
@@ -86,7 +85,7 @@ public class BranchServerImpl implements BranchServer {
     @Override
     public void deleteBranch(BranchMessage branchMessage){
         String rpyId = branchMessage.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         try {
             GitBranchUntil.deleteRepositoryBranch(repositoryAddress, branchMessage.getBranchName());
         } catch (IOException | GitAPIException e) {

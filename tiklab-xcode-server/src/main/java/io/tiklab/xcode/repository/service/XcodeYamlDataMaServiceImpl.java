@@ -1,11 +1,10 @@
 package io.tiklab.xcode.repository.service;
 
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RepositoryPubDataServiceImpl implements RepositoryPubDataService {
+public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
 
     @Value("${repository.address}")
     private String repositoryAddress;

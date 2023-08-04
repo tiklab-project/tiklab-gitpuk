@@ -35,7 +35,7 @@ public class RepositoryController {
     @ApiParam(name = "repository",desc = "repository",required = true)
     public Result<String> create(@RequestBody @NotNull @Valid Repository repository){
 
-        String rpyId = repositoryServer.createRpy(repository);
+        String rpyId = repositoryServer.createRpyData(repository);
 
         return Result.ok(rpyId);
     }

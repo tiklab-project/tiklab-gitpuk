@@ -1,6 +1,6 @@
-package io.tiklab.xcode.common;
+package io.tiklab.xcode.repository.service;
 
-public interface RepositoryPubDataService {
+public interface XcodeYamlDataMaService {
 
 
     /**

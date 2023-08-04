@@ -1,20 +1,19 @@
 package io.tiklab.xcode.commit.service;
 
 import io.tiklab.xcode.commit.model.*;
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.git.GitCommitUntil;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.common.RepositoryFileUtil;
 import io.tiklab.xcode.common.RepositoryFinal;
 import io.tiklab.xcode.common.RepositoryUtil;
+import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -25,7 +24,7 @@ import java.util.*;
 public class CommitServerImpl implements CommitServer {
 
     @Autowired
-    private RepositoryPubDataService pubDataService;
+    private XcodeYamlDataMaService yamlDataMaService;
 
     /**
      * 获取分支提交记录
@@ -35,7 +34,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String rpyId = commit.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         List<CommitMessage> branchCommit;
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -73,7 +72,7 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public FileDiffEntry findCommitDiffFileList(Commit commit) {
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -110,7 +109,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -147,7 +146,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitFileDiff> findCommitFileDiff(Commit commit) {
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
@@ -176,7 +175,7 @@ public class CommitServerImpl implements CommitServer {
      */
     @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),commit.getRpyId());
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();

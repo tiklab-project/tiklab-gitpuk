@@ -1,14 +1,13 @@
 package io.tiklab.xcode.file.service;
 
 import io.tiklab.xcode.common.RepositoryFileUtil;
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.file.model.FileQuery;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.common.RepositoryUtil;
+import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class FileServerImpl implements FileServer {
     RepositoryServer repositoryServer;
 
     @Autowired
-    RepositoryPubDataService pubDataService;
+    XcodeYamlDataMaService yamlDataMaService;
 
     /**
      * 创建文件
@@ -51,7 +50,7 @@ public class FileServerImpl implements FileServer {
         String fileAddress = fileQuery.getFileAddress();
         String branch = fileQuery.getCommitBranch();
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         FileMessage fileMessage ;
         try {
             Git git = Git.open(new java.io.File(repositoryAddress));

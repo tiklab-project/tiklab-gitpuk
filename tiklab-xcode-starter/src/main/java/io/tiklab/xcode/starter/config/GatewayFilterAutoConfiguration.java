@@ -93,6 +93,7 @@ public class GatewayFilterAutoConfiguration {
                         "/xcode",
                         "/backups",
                         "/remoteInfo",
+                        "/toLead",
                 })
                 .get();
     }

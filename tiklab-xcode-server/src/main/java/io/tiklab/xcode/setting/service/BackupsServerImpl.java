@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.eam.common.context.LoginContext;
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.RepositoryServer;
+import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
 import io.tiklab.xcode.setting.model.Backups;
 import io.tiklab.xcode.common.RepositoryFileUtil;
 import io.tiklab.xcode.common.RepositoryUtil;
@@ -41,7 +41,7 @@ public class BackupsServerImpl implements BackupsServer{
     RepositoryServer repositoryServer;
 
     @Autowired
-    RepositoryPubDataService pubDataService;
+    XcodeYamlDataMaService yamlDataMaService;
 
 
     @Value("${jdbc.url}")
@@ -67,7 +67,7 @@ public class BackupsServerImpl implements BackupsServer{
 
     @Override
     public String backupsExec() {
-        File file = new File(pubDataService.backupAddress());
+        File file = new File(yamlDataMaService.backupAddress());
         if (!file.exists()){
             file.mkdir();
         }
@@ -92,7 +92,7 @@ public class BackupsServerImpl implements BackupsServer{
                 String backupsTime = jsonObject.get("backups-time").toString();
 
                 //添加最后一层目录压缩
-                String backupAddress = pubDataService.backupAddress();
+                String backupAddress = yamlDataMaService.backupAddress();
                 String lastName = backupAddress.substring(backupAddress.lastIndexOf("/"));
 
                 String backupPath=backupAddress+lastName;
@@ -111,7 +111,7 @@ public class BackupsServerImpl implements BackupsServer{
 
                     for (Repository repository:allRpy){
 
-                        String repositoryUrl = pubDataService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
+                        String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
                         File codeFileUrl = new File(repositoryUrl);
 
                         /*
@@ -192,10 +192,10 @@ public class BackupsServerImpl implements BackupsServer{
                      *  解压tar.gz包
                      */
                     //压缩包的绝对路径
-                    String DecFileUrl = pubDataService.backupAddress() + "/" + fileName;
+                    String DecFileUrl = yamlDataMaService.backupAddress() + "/" + fileName;
                     //压缩后的文件绝对路径
                     String name = fileName.substring(0, fileName.indexOf(".tar.gz"));
-                    String afterDecFileUrl = pubDataService.backupAddress() + "/" + name + "/";
+                    String afterDecFileUrl = yamlDataMaService.backupAddress() + "/" + name + "/";
                     //解压tar.gz
                     RepositoryFileUtil.decompression(DecFileUrl,afterDecFileUrl);
                     joinRecoveryLog(" decompression "+fileName+" success [DONE]");
@@ -213,7 +213,7 @@ public class BackupsServerImpl implements BackupsServer{
                     List<Repository> allRpy = repositoryServer.findAllRpy();
                     for (Repository repository:allRpy){
                         joinRecoveryLog(repository.getName()+ "  start Recovery ...");
-                        String codePath = pubDataService.repositoryAddress() + "/" + repository.getRpyId() + ".git";
+                        String codePath = yamlDataMaService.repositoryAddress() + "/" + repository.getRpyId() + ".git";
                         FileUtils.copyDirectory(new File(afterDecFileUrl+"code/"+repository.getRpyId()+".git"),new File(codePath));
                         joinRecoveryLog(repository.getName()+ " Recovery  success [DONE]");
                     }
@@ -221,7 +221,7 @@ public class BackupsServerImpl implements BackupsServer{
                     /**
                      *  删除解压后的文件
                      */
-                    FileUtils.deleteDirectory(new File(pubDataService.backupAddress() + "/" + name ));
+                    FileUtils.deleteDirectory(new File(yamlDataMaService.backupAddress() + "/" + name ));
 
                     joinRecoveryLog("Recovery success end [DONE]");
 
@@ -261,7 +261,7 @@ public class BackupsServerImpl implements BackupsServer{
         String taskState = jsonObject.get("task-state").toString();
         String backupsTime = jsonObject.get("backups-time").toString();
 
-        backups.setBackupsAddress(pubDataService.backupAddress());
+        backups.setBackupsAddress(yamlDataMaService.backupAddress());
         backups.setTaskState(taskState);
         backups.setNewBackupsTime(backupsTime);
         backups.setNewResult("non");

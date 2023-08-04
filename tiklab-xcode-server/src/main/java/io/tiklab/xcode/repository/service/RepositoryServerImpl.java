@@ -16,7 +16,6 @@ import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.branch.model.Branch;
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.git.GitBranchUntil;
@@ -34,7 +33,6 @@ import org.eclipse.jgit.lib.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -42,7 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,7 +72,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     private MemoryManService memoryManService;
 
     @Autowired
-    RepositoryPubDataService pubDataService;
+    XcodeYamlDataMaService yamlDataMaService;
 
     @Autowired
     private UserService userService;
@@ -88,24 +85,15 @@ public class RepositoryServerImpl implements RepositoryServer {
      * @return 仓库id
      */
     @Override
-    public String createRpy(Repository repository){
+    public String createRpyData(Repository repository){
         //判断是否有剩余内存
         boolean resMemory = memoryManService.findResMemory();
         if (resMemory){
 
-            repository.setCreateTime(RepositoryUtil.date(1,new Date()));
-            repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
-            RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+            String repositoryId = createRpy(repository);
 
-
-            String repositoryId = repositoryDao.createRpy(groupEntity);
-
-            //创建私有仓库 给创建人设置管理员权限
-            if(("private").equals(repository.getRules())){
-                dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
-            }
             //git文件存放位置
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),repositoryId);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
 
             String appHome = AppHomeContext.getAppHome();
             String ignoreFilePath = appHome+"/file/.gitignore";
@@ -121,6 +109,23 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
     }
 
+    @Override
+    public String createRpy(Repository repository) {
+        repository.setCreateTime(RepositoryUtil.date(1,new Date()));
+        repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
+        RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+
+
+        String repositoryId = repositoryDao.createRpy(groupEntity);
+        //创建私有仓库 给创建人设置管理员权限
+        if(ObjectUtils.isEmpty(repository.getUser())){
+            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+        }else {
+            dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), "xcode");
+        }
+        return repositoryId;
+    }
+
 
     /**
      * 删除仓库
@@ -134,7 +139,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         recordCommitService.deleteRecordCommitByRepository(rpyId);
 
         dmUserService.deleteDmUserByDomainId(rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         File file = new File(repositoryAddress);
         if (!file.exists()){
             return;
@@ -247,7 +252,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     public List<FileTree> findFileTree(FileTreeMessage message){
 
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),message.getRpyId()) ;
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),message.getRpyId()) ;
 
         List<FileTree> fileTrees ;
         try {
@@ -304,22 +309,22 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
        logger.info("最后ip: " + ip);
         RepositoryCloneAddress repositoryCloneAddress = new RepositoryCloneAddress();
-        String address = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),rpyId);
+        String address = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         repositoryCloneAddress.setFileAddress(address);
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
         User user = userService.findOne(loginId);
 
         String http;
-        if (StringUtils.isNotEmpty(pubDataService.visitAddress())){
-             http = pubDataService.visitAddress() + "/xcode/"+ path + ".git";
+        if (StringUtils.isNotEmpty(yamlDataMaService.visitAddress())){
+             http = yamlDataMaService.visitAddress() + "/xcode/"+ path + ".git";
         }else {
-             http = "http://" + ip + ":" + pubDataService.serverPort() + "/xcode/"+ path + ".git";
+             http = "http://" + ip + ":" + yamlDataMaService.serverPort() + "/xcode/"+ path + ".git";
         }
         String SSH=null;
 
         if (!ObjectUtils.isEmpty(user)){
-             SSH = "ssh://"+ user.getName() +"@"+ip + ":" + pubDataService.sshPort() +"/" + path + ".git";
+             SSH = "ssh://"+ user.getName() +"@"+ip + ":" + yamlDataMaService.sshPort() +"/" + path + ".git";
         }
 
         repositoryCloneAddress.setHttpAddress(http);
@@ -386,7 +391,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         Repository repository = this.findOneRpy(id);
 
         try {
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),id);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),id);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
@@ -467,14 +472,14 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public String findRepositoryAp(String address) {
         Repository repository = this.findRepositoryByAddress(address);
-        String absolutePath = pubDataService.repositoryAddress() + "/" + repository.getRpyId()+ ".git";
+        String absolutePath = yamlDataMaService.repositoryAddress() + "/" + repository.getRpyId()+ ".git";
         return absolutePath;
     }
 
 
     public String findDefaultBranch(String repositoryId){
         try {
-            String repositoryAddress = RepositoryUtil.findRepositoryAddress(pubDataService.repositoryAddress(),repositoryId);
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();

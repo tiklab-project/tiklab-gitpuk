@@ -141,13 +141,13 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
                     //最终能查看的项目组id
                     canViewId = Stream.concat(privateGroupId.stream(), canViewId.stream()).collect(Collectors.toList());
                 }
-                String[] canViewGroupIdList = canViewId.toArray(new String[canViewId.size()]);
-                if (canViewGroupIdList.length>0){
-                    Pagination<RepositoryGroupEntity> repositoryGroupPage = repositoryGroupDao.findRepositoryGroupPage(repositoryGroupQuery, canViewGroupIdList);
-                    List<RepositoryGroup> repositoryGroupList = BeanMapper.mapList(repositoryGroupPage.getDataList(),RepositoryGroup.class);
-                    joinTemplate.joinQuery(repositoryGroupList);
-                    return PaginationBuilder.build(repositoryGroupPage,repositoryGroupList);
-                }
+            }
+            String[] canViewGroupIdList = canViewId.toArray(new String[canViewId.size()]);
+            if (canViewGroupIdList.length>0){
+                Pagination<RepositoryGroupEntity> repositoryGroupPage = repositoryGroupDao.findRepositoryGroupPage(repositoryGroupQuery, canViewGroupIdList);
+                List<RepositoryGroup> repositoryGroupList = BeanMapper.mapList(repositoryGroupPage.getDataList(),RepositoryGroup.class);
+                joinTemplate.joinQuery(repositoryGroupList);
+                return PaginationBuilder.build(repositoryGroupPage,repositoryGroupList);
             }
         }
         return null;

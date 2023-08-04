@@ -121,8 +121,8 @@
                     <url>http://192.168.10.7:8080/xpack/maven/maven-snapshot</url>
                 </snapshotRepository>
                 <repository>
-                    <id>xpack</id>
-                    <url>http://192.168.10.7:8080/xpack/maven/maven-release</url>
+                    <id>xpack-cloud</id>
+                    <url>http://xpack.tiklab.net/xpack/maven/p7mei027/maven-release</url>
                 </repository>
             </distributionManagement>
             <build>

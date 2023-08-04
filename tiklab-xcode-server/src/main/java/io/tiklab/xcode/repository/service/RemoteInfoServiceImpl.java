@@ -4,14 +4,12 @@ import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
-import io.tiklab.xcode.common.RepositoryPubDataService;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RemoteInfoDao;
 import io.tiklab.xcode.repository.entity.RemoteInfoEntity;
 import io.tiklab.xcode.repository.model.RemoteInfo;
 import io.tiklab.xcode.repository.model.RemoteInfoQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -38,7 +36,7 @@ public class RemoteInfoServiceImpl implements RemoteInfoService {
     JoinTemplate joinTemplate;
 
     @Autowired
-    private RepositoryPubDataService pubDataService;
+    private XcodeYamlDataMaService yamlDataMaService;
 
     //推送镜像结果
     public static Map<String , String> remoteResultMap = new HashMap<>();
@@ -137,7 +135,7 @@ public class RemoteInfoServiceImpl implements RemoteInfoService {
             @Override
             public void run() {
                 try {
-                    GitUntil.remoteRepository(pubDataService.repositoryAddress()+"/"+remoteInfo.getRpyId()+".git",remoteInfo);
+                    GitUntil.remoteRepository(yamlDataMaService.repositoryAddress()+"/"+remoteInfo.getRpyId()+".git",remoteInfo);
                 } catch (Exception  e) {
                     if (e.getMessage().contains("Nothing to push.")){
                         remoteResultMap.put(key,"已经是最新的代码，无需推送");

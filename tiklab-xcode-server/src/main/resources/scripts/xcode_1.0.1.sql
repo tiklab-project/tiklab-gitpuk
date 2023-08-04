@@ -1,17 +1,15 @@
 -- ---------------------------
 -- 远程仓库信息
 -- ----------------------------
-create table rpy_remote_info(
-    id                  varchar(12) PRIMARY KEY,
-    rpy_id              varchar (12) NOT NULL,
-    name                varchar (64),
-    address             varchar(256)  NOT NULL,
-    auth_way            varchar (12) NOT NULL,
-    account             varchar (32),
-    password            varchar (32),
-    secret_key          varchar (64),
-    timed_state         INT,
-    create_time          timestamp
+create table rpy_import_auth(
+    id  varchar(12) PRIMARY KEY,
+    address varchar(128),
+    access_token varchar(128),
+    type varchar(32) NOT NULL,
+    account varchar(64),
+    password varchar(64),
+    user_id varchar (12),
+    create_time timestamp
 );
 
 
