@@ -36,10 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.sql.Time;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -346,7 +348,7 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Override
     public Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery) {
-
+        System.out.println("执行开始时间01:"+new Time(System.currentTimeMillis()));
         List<RepositoryEntity> groupEntityList = repositoryDao.findRepositoryListLike(repositoryQuery);
         List<Repository> allRpy = BeanMapper.mapList(groupEntityList, Repository.class);
 
@@ -363,7 +365,9 @@ public class RepositoryServerImpl implements RepositoryServer {
                 //查询用户id 查询关联的项目
                 DmUserQuery dmUserQuery = new DmUserQuery();
                 dmUserQuery.setUserId(repositoryQuery.getUserId());
+                System.out.println("执行开始时间02:"+new Time(System.currentTimeMillis()));
                 List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+                System.out.println("执行开始时间03:"+new Time(System.currentTimeMillis()));
                 //存在项目成员
                 if ( CollectionUtils.isNotEmpty(dmUserList)) {
                     List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
@@ -380,6 +384,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
                List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
                joinTemplate.joinQuery(repositoryList);
+               System.out.println("执行开始时间04:"+new Time(System.currentTimeMillis()));
                return PaginationBuilder.build(pagination,repositoryList);
            }
         }

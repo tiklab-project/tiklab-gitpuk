@@ -9,10 +9,12 @@ import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 import io.tiklab.user.user.model.User;
 
+import java.io.Serializable;
+
 @ApiModel
 @Join
 @Mapper
-public class RepositoryGroup {
+public class RepositoryGroup implements Serializable {
 
     @ApiProperty(name="groupId",desc="仓库组id")
     private String groupId;

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.tiklab</groupId>
 		<artifactId>tiklab-xcode</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0.3</version>
 	</parent>
 
 
@@ -17,91 +17,87 @@
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-postgresql-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-postgresql.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-toolkit-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-toolkit.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-eam-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-eam.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-user-spring-boot-starter</artifactId>
+			<version>${tiklab-user.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-message-spring-boot-starter</artifactId>
+			<version>${tiklab-message.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-xcode-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-message-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-user-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
+
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-licence-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-licence.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-plugin-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-plugin.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-gateway-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-gateway.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-rpc-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-rpc.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-dss-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-dfs-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-dfs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-dcs-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-dcs.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-upgrade-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-upgrade.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-integration-spring-boot-starter</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-todotask-spring-boot-starter</artifactId>
-			<version>${project.version}</version>
+			<version>${tiklab-todotask.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-security-spring-boot-starter</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${tiklab-security.version}</version>
 		</dependency>
 
 
@@ -123,7 +119,7 @@
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
-			<dependencies>
+			<!--<dependencies>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-linux</artifactId>
@@ -131,12 +127,12 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-			</dependencies>
+			</dependencies>-->
 			<properties>
 				<assembly>linux</assembly>
 				<systemType>linux</systemType>
 			</properties>
-			<build>
+		<!--	<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -171,13 +167,13 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>
+			</build>-->
 		</profile>
 
 		<!--windows-->
 		<profile>
 			<id>system-windows</id>
-			<dependencies>
+		<!--	<dependencies>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-windows</artifactId>
@@ -185,12 +181,12 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-			</dependencies>
+			</dependencies>-->
 			<properties>
 				<assembly>windows</assembly>
 				<systemType>windows</systemType>
 			</properties>
-			<build>
+			<!--<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -225,7 +221,7 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>
+			</build>-->
 		</profile>
 
 		<!--mac-->
@@ -251,7 +247,7 @@
 				<assembly>mac</assembly>
 				<systemType>mac</systemType>
 			</properties>
-			<build>
+			<!--<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -264,7 +260,7 @@
 								<goals>
 									<goal>unpack</goal>
 								</goals>
-								<configuration>
+							&lt;!&ndash;	<configuration>
 									<artifactItems>
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
@@ -281,12 +277,12 @@
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
 									</artifactItems>
-								</configuration>
+								</configuration>&ndash;&gt;
 							</execution>
 						</executions>
 					</plugin>
 				</plugins>
-			</build>
+			</build>-->
 		</profile>
 
 		<!--dev-->
@@ -377,24 +373,6 @@
 				</executions>
 			</plugin>
 
-			<!--docker打包插件-->
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.4.13</version>
-				<configuration>
-					<imageName>matflow:1.0.0</imageName>
-					<!--Dockerfile文件位置-->
-					<dockerDirectory>./</dockerDirectory>
-					<resources>
-						<resource>
-							<targetPath>./</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}-distribution.tar.gz</include>
-						</resource>
-					</resources>
-				</configuration>
-			</plugin>
 
 			<!--清理之前的目录-->
 			<plugin>

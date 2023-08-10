@@ -1,6 +1,7 @@
 package io.tiklab.xcode.setting.controller;
 
 import io.tiklab.core.Result;
+import io.tiklab.core.exception.SystemException;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
@@ -83,7 +84,7 @@ public class BackupsController {
             InputStream inputStream = uploadFile.getInputStream();
             backupsServer.uploadBackups(inputStream,fileName,userId);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new SystemException(e);
         }
         return Result.ok();
     }

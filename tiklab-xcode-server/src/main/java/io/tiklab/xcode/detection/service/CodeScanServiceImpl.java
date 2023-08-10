@@ -3,6 +3,7 @@ package io.tiklab.xcode.detection.service;
 import com.alibaba.fastjson.JSONObject;
 import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.core.exception.SystemException;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.xcode.detection.dao.CodeScanDao;
 import io.tiklab.xcode.detection.entity.CodeScanEntity;
@@ -186,7 +187,7 @@ public class CodeScanServiceImpl implements CodeScanService {
                 codeScan.setScanStatus("not");
                 return codeScan;
             }
-            throw new RuntimeException(e);
+            throw new SystemException(e);
         }
         return codeScan;
     }

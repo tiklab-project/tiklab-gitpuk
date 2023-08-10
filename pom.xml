@@ -7,13 +7,47 @@
     <parent>
         <groupId>io.tiklab</groupId>
         <artifactId>tiklab-dependencies</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0.3</version>
     </parent>
 
     <artifactId>tiklab-xcode</artifactId>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.3</version>
+
+    <properties>
+        <tiklab-privilege.version>1.0.0.3</tiklab-privilege.version>
+        <tiklab-toolkit.version>1.0.0.3</tiklab-toolkit.version>
+        <tiklab-privilege.version>1.0.0.3</tiklab-privilege.version>
+        <tiklab-licence.version>1.0.0.3</tiklab-licence.version>
+        <tiklab-plugin.version>1.0.0.3</tiklab-plugin.version>
+        <tiklab-gateway.version>1.0.0.3</tiklab-gateway.version>
+        <tiklab-rpc.version>1.0.0.3</tiklab-rpc.version>
+        <tiklab-dss.version>1.0.0.3</tiklab-dss.version>
+        <tiklab-dfs.version>1.0.0.3</tiklab-dfs.version>
+        <tiklab-dcs.version>1.0.0.3</tiklab-dcs.version>
+        <tiklab-integration.version>1.0.0.3</tiklab-integration.version>
+        <tiklab-todotask.version>1.0.0.3</tiklab-todotask.version>
+
+        <!--tiklab-->
+        <tiklab-join.version>1.0.0.3</tiklab-join.version>
+        <tiklab-user.version>1.0.0.3</tiklab-user.version>
+        <tiklab-security.version>1.0.0.3</tiklab-security.version>
+        <tiklab-message.version>1.0.0.3</tiklab-message.version>
+        <tiklab-postin.version>1.0.0.3</tiklab-postin.version>
+        <tiklab-dal.version>1.0.0.3</tiklab-dal.version>
+        <tiklab-eam.version>1.0.0.3</tiklab-eam.version>
+        <tiklab-postin.version>1.0.0.3</tiklab-postin.version>
+        <tiklab-upgrade.version>1.0.0.3</tiklab-upgrade.version>
+        <tiklab-postgresql.version>1.0.0.3</tiklab-postgresql.version>
+
+        <!--other-->
+        <commons-compress.version>1.19</commons-compress.version>
+        <commons-io.version>2.11.0</commons-io.version>
+        <sshd-core.version>2.9.2</sshd-core.version>
+        <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+    </properties>
 
     <modules>
         <module>tiklab-xcode-api</module>
@@ -118,11 +152,11 @@
             <distributionManagement>
                 <snapshotRepository>
                     <id>xpack</id>
-                    <url>http://192.168.10.7:8080/xpack/maven/maven-snapshot</url>
+                    <url>http://172.13.1.24:8080/repository/maven-snapshots</url>
                 </snapshotRepository>
                 <repository>
-                    <id>xpack-cloud</id>
-                    <url>http://xpack.tiklab.net/xpack/maven/p7mei027/maven-release</url>
+                    <id>xpack</id>
+                    <url>http://172.13.1.24:8080/repository/maven-releases</url>
                 </repository>
             </distributionManagement>
             <build>
