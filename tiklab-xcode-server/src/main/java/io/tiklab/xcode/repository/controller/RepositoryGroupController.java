@@ -90,7 +90,7 @@ public class RepositoryGroupController {
 
 
     @RequestMapping(path="/findCanCreateRpyGroup",method = RequestMethod.POST)
-    @ApiMethod(name = "findCanCreateRpyGroup",desc = "查询自己创建的和有创建仓库权限的仓库组")
+    @ApiMethod(name = "findCanCreateRpyGroup",desc = "查询自己创建的和有权限查看的仓库组")
     public Result<List<RepositoryGroup>> findCanCreateRpyGroup(@NotNull  String userId){
         List<RepositoryGroup> repositoryGroupList = groupServer.findCanCreateRpyGroup(userId);
 

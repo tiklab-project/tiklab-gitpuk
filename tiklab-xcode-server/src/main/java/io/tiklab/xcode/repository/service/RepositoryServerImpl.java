@@ -309,7 +309,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         } catch (Exception e) {
             ip = "172.0.0.1";
         }
-       logger.info("最后ip: " + ip);
         RepositoryCloneAddress repositoryCloneAddress = new RepositoryCloneAddress();
         String address = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         repositoryCloneAddress.setFileAddress(address);
@@ -328,7 +327,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (!ObjectUtils.isEmpty(user)){
              SSH = "ssh://"+ user.getName() +"@"+ip + ":" + yamlDataMaService.sshPort() +"/" + path + ".git";
         }
-
         repositoryCloneAddress.setHttpAddress(http);
         repositoryCloneAddress.setSSHAddress(SSH);
         return repositoryCloneAddress;

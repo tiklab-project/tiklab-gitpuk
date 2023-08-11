@@ -159,7 +159,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         }
 
 
-        List<RecordCommit> RecordCommitList = publicRep.stream().limit(5).collect(Collectors.toList());
+        List<RecordCommit> RecordCommitList = publicRep.stream().limit(4).collect(Collectors.toList());
 
         for (RecordCommit recordCommit:RecordCommitList){
             long longTime = System.currentTimeMillis() - recordCommit.getCommitTime().getTime();
