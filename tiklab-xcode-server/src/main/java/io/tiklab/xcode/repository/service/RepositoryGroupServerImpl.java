@@ -178,6 +178,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         List<RepositoryGroup>  repositoryGroups = BeanMapper.mapList(allGroupEntity, RepositoryGroup.class);
         return repositoryGroups;
     }
+
 }
 
 

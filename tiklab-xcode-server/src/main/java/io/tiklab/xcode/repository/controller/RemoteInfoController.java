@@ -37,6 +37,7 @@ public class RemoteInfoController {
     @ApiMethod(name = "createRemoteInfo",desc = "创建镜像信息")
     @ApiParam(name = "remoteInfo",desc = "remoteInfo",required = true)
     public Result<String> createRemoteInfo(@RequestBody @NotNull @Valid RemoteInfo remoteInfo){
+
         String id = remoteInfoService.createRemoteInfo(remoteInfo);
 
         return Result.ok(id);
@@ -65,7 +66,7 @@ public class RemoteInfoController {
     @ApiParam(name = "id",desc = "id",required = true)
     public Result<RemoteInfo> findRemoteInfo(@NotNull String id){
         RemoteInfo remoteInfo = remoteInfoService.findRemoteInfo(id);
-
+        System.out.println("dasd");
         return Result.ok(remoteInfo);
     }
 
