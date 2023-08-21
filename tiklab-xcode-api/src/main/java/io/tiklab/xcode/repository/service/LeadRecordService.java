@@ -1,67 +1,68 @@
 package io.tiklab.xcode.repository.service;
 
-import io.tiklab.core.page.Pagination;
 import io.tiklab.join.annotation.FindAll;
 import io.tiklab.join.annotation.FindList;
 import io.tiklab.join.annotation.FindOne;
 import io.tiklab.join.annotation.JoinProvider;
-import io.tiklab.xcode.repository.model.ImportAuth;
-import io.tiklab.xcode.repository.model.ImportAuthQuery;
+import io.tiklab.xcode.repository.model.LeadRecord;
+import io.tiklab.xcode.repository.model.LeadRecordQuery;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
-* ImportAuthService-导入第三方应用的仓库
+* LeadRecordService-导入第三方应用的仓库
 */
-@JoinProvider(model = ImportAuth.class)
-public interface ImportAuthService {
+public interface LeadRecordService {
 
     /**
     * 创建
-    * @param importAuth
+    * @param leadRecord
     * @return
     */
-    String createImportAuth(@NotNull @Valid ImportAuth importAuth);
+    String createLeadRecord(@NotNull @Valid LeadRecord leadRecord);
 
-    /**
-    * 更新
-    * @param importAuth
-    */
-    void updateImportAuth(@NotNull @Valid ImportAuth importAuth);
 
     /**
     * 删除
     * @param id
     */
-    void deleteImportAuth(@NotNull String id);
+    void deleteLeadRecord(@NotNull String id);
+
+    /**
+     * 根据表中的其他条件字段删除
+     * @param field 删除的条件字段
+     * @param value 参数
+     */
+    void deleteLeadRecord(@NotNull String field,String value);
+
 
     @FindOne
-    ImportAuth findOne(@NotNull String id);
+    LeadRecord findOne(@NotNull String id);
     @FindList
-    List<ImportAuth> findList(List<String> idList);
+    List<LeadRecord> findList(List<String> idList);
 
     /**
     * 查找
     * @param id
     * @return
     */
-    ImportAuth findImportAuth(@NotNull String id);
+    LeadRecord findLeadRecord(@NotNull String id);
 
     /**
     * 查找所有
     * @return
     */
     @FindAll
-    List<ImportAuth> findAllImportAuth();
+    List<LeadRecord> findAllLeadRecord();
 
     /**
     * 查询列表
-    * @param importAuthQuery
+    * @param leadRecordQuery
     * @return
     */
-    List<ImportAuth> findImportAuthList(ImportAuthQuery importAuthQuery);
+    List<LeadRecord> findLeadRecordList(LeadRecordQuery leadRecordQuery);
 
 
 }

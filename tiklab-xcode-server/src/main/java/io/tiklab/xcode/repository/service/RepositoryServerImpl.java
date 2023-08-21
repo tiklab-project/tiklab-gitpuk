@@ -21,6 +21,7 @@ import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RepositoryDao;
+import io.tiklab.xcode.repository.entity.LeadRecordEntity;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.*;
 import io.tiklab.xcode.common.RepositoryFileUtil;
@@ -79,6 +80,8 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    LeadRecordService leadRecordService;
 
 
     /**
@@ -136,11 +139,14 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public void deleteRpy(String rpyId) {
         repositoryDao.deleteRpy(rpyId);
-
+        //删除打卡记录
         recordOpenService.deleteRecordOpenByRecord(rpyId);
+        //删除提交记录
         recordCommitService.deleteRecordCommitByRepository(rpyId);
-
+        //删除项目成员
         dmUserService.deleteDmUserByDomainId(rpyId);
+        //删除导入(如果存在)
+        leadRecordService.deleteLeadRecord("rpyId",rpyId);
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         File file = new File(repositoryAddress);
         if (!file.exists()){
@@ -158,19 +164,23 @@ public class RepositoryServerImpl implements RepositoryServer {
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
         groupEntity.setUpdateTime(RepositoryUtil.date(1,new Date()));
 
-        if (!ObjectUtils.isEmpty(repository.getGroup())){
-            //存在仓库组
-            List<RepositoryEntity>  repositoryList = repositoryDao.findRepositoryList(new RepositoryQuery().setName(repository.getName()).setGroupId(repository.getGroup().getGroupId()));
-            //校验修改的仓库名字是否重复
-            if (CollectionUtils.isNotEmpty(repositoryList)&&!repositoryList.get(0).getRpyId().equals(repository.getRpyId())){
+
+        //校验修改的仓库名字是否重复
+        String namespace = repository.getAddress().substring(0, repository.getAddress().indexOf("/", 1));
+        //存在仓库组
+        List<RepositoryEntity>  repositoryEntityList = repositoryDao.findRepositoryByNamespace(namespace);
+
+        if (CollectionUtils.isNotEmpty(repositoryEntityList)){
+            List<RepositoryEntity> entities = repositoryEntityList.stream().filter(a -> a.getName().equals(repository.getName())&&
+                    !a.getRpyId().equals(repository.getRpyId())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(entities)){
                 throw  new SystemException(9000,"仓库名字重复");
             }
-        }else {
-            List<RepositoryEntity> repositoryList = repositoryDao.findRepositoryList(new RepositoryQuery().setName(repository.getName()).setUserId(repository.getUser().getId()));
-            //校验修改的仓库名字是否重复
-            if (CollectionUtils.isNotEmpty(repositoryList)&&!repositoryList.get(0).getRpyId().equals(repository.getRpyId())
-            &&StringUtils.isEmpty(repositoryList.get(0).getGroupId())){
-                throw  new SystemException(9000,"仓库名字重复");
+
+            List<RepositoryEntity> path = repositoryEntityList.stream().filter(a -> a.getAddress().equals(repository.getAddress())&&
+                    !a.getRpyId().equals(repository.getRpyId())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(path)){
+                throw  new SystemException(9001,"仓库地址重复");
             }
         }
 
@@ -363,9 +373,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                 //查询用户id 查询关联的项目
                 DmUserQuery dmUserQuery = new DmUserQuery();
                 dmUserQuery.setUserId(repositoryQuery.getUserId());
-                System.out.println("执行开始时间02:"+new Time(System.currentTimeMillis()));
                 List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
-                System.out.println("执行开始时间03:"+new Time(System.currentTimeMillis()));
                 //存在项目成员
                 if ( CollectionUtils.isNotEmpty(dmUserList)) {
                     List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
@@ -382,7 +390,6 @@ public class RepositoryServerImpl implements RepositoryServer {
                Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
                List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
                joinTemplate.joinQuery(repositoryList);
-               System.out.println("执行开始时间04:"+new Time(System.currentTimeMillis()));
                return PaginationBuilder.build(pagination,repositoryList);
            }
         }

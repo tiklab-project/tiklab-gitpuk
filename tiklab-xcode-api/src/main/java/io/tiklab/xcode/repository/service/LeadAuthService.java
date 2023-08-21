@@ -1,67 +1,66 @@
 package io.tiklab.xcode.repository.service;
 
-import io.tiklab.core.page.Pagination;
 import io.tiklab.join.annotation.FindAll;
 import io.tiklab.join.annotation.FindList;
 import io.tiklab.join.annotation.FindOne;
 import io.tiklab.join.annotation.JoinProvider;
-import io.tiklab.xcode.repository.model.ImportAuth;
-import io.tiklab.xcode.repository.model.ImportAuthQuery;
+import io.tiklab.xcode.repository.model.LeadAuth;
+import io.tiklab.xcode.repository.model.LeadAuthQuery;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
-* ImportAuthService-导入第三方应用的仓库
+* LeadAuthService-导入第三方应用的仓库
 */
-@JoinProvider(model = ImportAuth.class)
-public interface ImportAuthService {
+@JoinProvider(model = LeadAuth.class)
+public interface LeadAuthService {
 
     /**
     * 创建
-    * @param importAuth
+    * @param leadAuth
     * @return
     */
-    String createImportAuth(@NotNull @Valid ImportAuth importAuth);
+    String createLeadAuth(@NotNull @Valid LeadAuth leadAuth);
 
     /**
     * 更新
-    * @param importAuth
+    * @param leadAuth
     */
-    void updateImportAuth(@NotNull @Valid ImportAuth importAuth);
+    void updateLeadAuth(@NotNull @Valid LeadAuth leadAuth);
 
     /**
     * 删除
     * @param id
     */
-    void deleteImportAuth(@NotNull String id);
+    void deleteLeadAuth(@NotNull String id);
 
     @FindOne
-    ImportAuth findOne(@NotNull String id);
+    LeadAuth findOne(@NotNull String id);
     @FindList
-    List<ImportAuth> findList(List<String> idList);
+    List<LeadAuth> findList(List<String> idList);
 
     /**
     * 查找
     * @param id
     * @return
     */
-    ImportAuth findImportAuth(@NotNull String id);
+    LeadAuth findLeadAuth(@NotNull String id);
 
     /**
     * 查找所有
     * @return
     */
     @FindAll
-    List<ImportAuth> findAllImportAuth();
+    List<LeadAuth> findAllLeadAuth();
 
     /**
     * 查询列表
-    * @param importAuthQuery
+    * @param leadAuthQuery
     * @return
     */
-    List<ImportAuth> findImportAuthList(ImportAuthQuery importAuthQuery);
+    List<LeadAuth> findLeadAuthList(LeadAuthQuery leadAuthQuery);
 
 
 }

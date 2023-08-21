@@ -1,35 +1,35 @@
 package io.tiklab.xcode.repository.model;
 
+import io.tiklab.core.order.Order;
+import io.tiklab.core.order.OrderBuilders;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
 import java.io.Serializable;
+import java.util.List;
 
 @ApiModel
-public class RecordCommitQuery implements Serializable {
+public class LeadRecordQuery implements Serializable {
 
-    @ApiProperty(name ="userId",desc = "登录用户")
-    private String  userId;
+    @ApiProperty(name ="orderParams",desc = "排序参数")
+    private List<Order> orderParams = OrderBuilders.instance().asc("id").get();
+    @ApiProperty(name ="RpyId",desc = "仓库id")
+    private String  RpyId;
 
-    @ApiProperty(name ="repositoryId",desc = "仓库id")
-    private String  repositoryId;
 
-
-    public String getUserId() {
-        return userId;
+    public List<Order> getOrderParams() {
+        return orderParams;
     }
 
-    public RecordCommitQuery setUserId(String userId) {
-        this.userId = userId;
-        return this;
+    public void setOrderParams(List<Order> orderParams) {
+        this.orderParams = orderParams;
     }
 
-    public String getRepositoryId() {
-        return repositoryId;
+    public String getRpyId() {
+        return RpyId;
     }
 
-    public RecordCommitQuery setRepositoryId(String repositoryId) {
-        this.repositoryId = repositoryId;
-        return this;
+    public void setRpyId(String rpyId) {
+        RpyId = rpyId;
     }
 }

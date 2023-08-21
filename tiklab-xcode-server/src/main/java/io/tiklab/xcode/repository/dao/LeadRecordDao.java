@@ -4,8 +4,8 @@ import io.tiklab.dal.jpa.JpaTemplate;
 import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
 import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
-import io.tiklab.xcode.repository.entity.LeadAuthEntity;
-import io.tiklab.xcode.repository.model.LeadAuthQuery;
+import io.tiklab.xcode.repository.entity.LeadRecordEntity;
+import io.tiklab.xcode.repository.model.LeadRecordQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,42 +14,42 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * ImportAuthDao-导入外部仓库校验
+ * LeadRecordDao-导入外部仓库记录
  */
 @Repository
-public class LeadAuthDao {
+public class LeadRecordDao {
 
-    private static Logger logger = LoggerFactory.getLogger(LeadAuthDao.class);
+    private static Logger logger = LoggerFactory.getLogger(LeadRecordDao.class);
 
     @Autowired
     JpaTemplate jpaTemplate;
 
     /**
      * 创建
-     * @param importAuthEntity
+     * @param leadRecordEntity
      * @return
      */
-    public String createImportAuth(LeadAuthEntity importAuthEntity) {
-        return jpaTemplate.save(importAuthEntity,String.class);
+    public String createLeadRecord(LeadRecordEntity leadRecordEntity) {
+        return jpaTemplate.save(leadRecordEntity,String.class);
     }
 
     /**
      * 更新
-     * @param importAuthEntity
+     * @param leadRecordEntity
      */
-    public void updateImportAuth(LeadAuthEntity importAuthEntity){
-        jpaTemplate.update(importAuthEntity);
+    public void updateLeadRecord(LeadRecordEntity leadRecordEntity){
+        jpaTemplate.update(leadRecordEntity);
     }
 
     /**
      * 删除
      * @param id
      */
-    public void deleteImportAuth(String id){
-        jpaTemplate.delete(LeadAuthEntity.class,id);
+    public void deleteLeadRecord(String id){
+        jpaTemplate.delete(LeadRecordEntity.class,id);
     }
 
-    public void deleteImportAuth(DeleteCondition deleteCondition){
+    public void deleteLeadRecord(DeleteCondition deleteCondition){
         jpaTemplate.delete(deleteCondition);
     }
 
@@ -58,16 +58,16 @@ public class LeadAuthDao {
      * @param id
      * @return
      */
-    public LeadAuthEntity findImportAuth(String id){
-        return jpaTemplate.findOne(LeadAuthEntity.class,id);
+    public LeadRecordEntity findLeadRecord(String id){
+        return jpaTemplate.findOne(LeadRecordEntity.class,id);
     }
 
     /**
-    * findAllImportAuth
+    * findAllLeadRecord
     * @return
     */
-    public List<LeadAuthEntity> findAllImportAuth() {
-        return jpaTemplate.findAll(LeadAuthEntity.class);
+    public List<LeadRecordEntity> findAllLeadRecord() {
+        return jpaTemplate.findAll(LeadRecordEntity.class);
     }
 
     /**
@@ -75,21 +75,20 @@ public class LeadAuthDao {
      * @param idList
      * @return
      */
-    public List<LeadAuthEntity> findImportAuthList(List<String> idList) {
-        return jpaTemplate.findList(LeadAuthEntity.class,idList);
+    public List<LeadRecordEntity> findLeadRecordList(List<String> idList) {
+        return jpaTemplate.findList(LeadRecordEntity.class,idList);
     }
 
     /**
      * 条件查询插件
-     * @param importAuthQuery
+     * @param leadRecordQuery
      * @return
      */
-    public List<LeadAuthEntity> findImportAuthList(LeadAuthQuery importAuthQuery) {
-        QueryCondition queryCondition = QueryBuilders.createQuery(LeadAuthEntity.class)
-                .eq("type", importAuthQuery.getType())
-                .eq("userId",importAuthQuery.getUserId())
+    public List<LeadRecordEntity> findLeadRecordList(LeadRecordQuery leadRecordQuery) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(LeadRecordEntity.class)
+                .eq("rpyId",leadRecordQuery.getRpyId())
                 .get();
-        return jpaTemplate.findList(queryCondition, LeadAuthEntity.class);
+        return jpaTemplate.findList(queryCondition, LeadRecordEntity.class);
     }
 
 

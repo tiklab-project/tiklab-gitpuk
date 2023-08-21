@@ -14,33 +14,33 @@ import java.sql.Timestamp;
 @ApiModel
 @Join
 @Mapper
-public class ImportAuth {
+public class LeadRecord   {
 
     @ApiProperty(name="id",desc="id")
     private String id;
 
 
-    @ApiProperty(name="address",desc="地址")
-    private String address;
+    @ApiProperty(name="repository",desc="仓库")
+    @Mappings({
+            @Mapping(source = "repository.rpyId",target = "rpyId")
+    })
+    @JoinQuery(key = "rpyId")
+    private Repository repository;
 
-    @ApiProperty(name="accessToken",desc="accessToken")
-    private String accessToken;
 
-    @ApiProperty(name="type",desc="导入类型 gitlab、priGitlab、gitee")
-    private String type;
+    @ApiProperty(name="leadWay",desc="导入方式")
+    private String leadWay;
 
-    @ApiProperty(name="account",desc="账号")
-    private String account;
 
-    @ApiProperty(name="password",desc="密码")
-    private String password;
+    @ApiProperty(name="leadState",desc="导入状态 成功：success、失败：error")
+    private String leadState;
 
-    @ApiProperty(name="userId",desc="创建人")
-    private String userId;
+    @ApiProperty(name="relevanceId",desc="第三方库的关联id")
+    private String relevanceId;
 
     @ApiProperty(name="create_time",desc="创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Timestamp create_time;
+    private Timestamp createTime;
 
     public String getId() {
         return id;
@@ -50,60 +50,44 @@ public class ImportAuth {
         this.id = id;
     }
 
-    public String getAddress() {
-        return address;
+    public Repository getRepository() {
+        return repository;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setRepository(Repository repository) {
+        this.repository = repository;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public String getLeadWay() {
+        return leadWay;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public void setLeadWay(String leadWay) {
+        this.leadWay = leadWay;
     }
 
-    public String getType() {
-        return type;
+    public String getLeadState() {
+        return leadState;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setLeadState(String leadState) {
+        this.leadState = leadState;
     }
 
-    public String getAccount() {
-        return account;
+    public String getRelevanceId() {
+        return relevanceId;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
+    public void setRelevanceId(String relevanceId) {
+        this.relevanceId = relevanceId;
     }
 
-    public String getPassword() {
-        return password;
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Timestamp getCreate_time() {
-        return create_time;
-    }
-
-    public void setCreate_time(Timestamp create_time) {
-        this.create_time = create_time;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
     }
 }
 

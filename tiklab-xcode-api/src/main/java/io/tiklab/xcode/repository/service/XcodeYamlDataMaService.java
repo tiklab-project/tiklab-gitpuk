@@ -29,4 +29,20 @@ public interface XcodeYamlDataMaService {
      */
     String sshPort();
 
+    /**
+     *jdbc host
+     */
+     String host();
+
+    /**
+     *jdbc dbName
+     */
+    String dbName();
+
+    /**
+     *jdbc schemaName
+     */
+    String schemaName();
+
+
 }

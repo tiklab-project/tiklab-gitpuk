@@ -1,34 +1,32 @@
 INSERT INTO pcs_prc_role VALUES ('1', '管理员角色', NULL, 'system', '1', 1, 1, 1);
-INSERT INTO pcs_prc_role VALUES ('2', '普通角色', NULL, 'system', '1', 1, 0, 0);
+INSERT INTO pcs_prc_role VALUES ('2', '普通角色', NULL, 'system', '1', 0, 0, 0);
 INSERT INTO pcs_prc_role VALUES ('3', '项目管理员', NULL, 'system', '2', 1, 0, 0);
+INSERT INTO pcs_prc_role VALUES ('4', '项目成员', NULL, 'system', '2', 0, 0, 0);
 
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('permission','权限', 'xcode_permission',null ,1, 1);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('messtype','消息通知类型', 'message_type',null ,1, 1);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('messmanage','消息管理', 'message_setting',null ,1, 1);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('version','版本许可证', 'xcode_version',null ,1, 1);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('plugin','插件', 'xcode_plugin',null ,1, 1);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('loginexce','操作日志', 'xcode_log',null ,1, 1);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectall','项目设置', 'xcode_setting',null ,1, 2);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectuser','项目成员', 'xcode_user',null ,6, 2);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectdele','删除项目', 'xcode_delete','projectall' ,2, 2);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('projectup','修改项目', 'xcode_update','projectall' ,3, 2);
-INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('backups','备份与恢复项目', 'backups',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xshiro','权限', 'xcode_permission',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xmesstype','消息通知类型', 'message_type',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xmessmanage','消息管理', 'message_setting',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xversion','版本许可证', 'xcode_version',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xplugin','插件', 'xcode_plugin',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xloginexce','操作日志', 'xcode_log',null ,1, 1);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xprojectse','仓库设置', 'xcode_setting',null ,1, 2);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xprojectuse','仓库成员', 'xcode_user',null ,6, 2);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xprojectde','删除仓库', 'xcode_delete','xprojectse' ,2, 2);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xprojectup','修改仓库', 'xcode_update','xprojectse' ,3, 2);
+INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES ('xbackupsVer','备份与恢复项目', 'xcode_backupsVer',null ,1, 1);
 
 
-
-
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('00e840ea5302', '1', 'permission');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('05d66918b2dd', '1', 'messtype');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('064d1a5ddbc5', '1', 'messmanage');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('0fd56de07eaf', '1', 'version');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('1134dbdbb6d0', '1', 'plugin');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('143e6010ba4b', '1', 'loginexce');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('256bca68cd16', '1', 'projectall');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('28b4ec49b63c', '1', 'projectuser');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('3572dd063f4f', '1', 'projectdele');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('39f06b018e83', '1', 'projectup');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('7464415279eb', '1', 'backups');
-INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('74217ab2e9eb', '2', 'loginexce');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('00e840ea5302', '1', 'xshiro');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('05d66918b2dd', '1', 'xmesstype');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('064d1a5ddbc5', '1', 'xmessmanage');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('0fd56de07eaf', '1', 'xversion');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('1134dbdbb6d0', '1', 'xplugin');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('143e6010ba4b', '1', 'xloginexce');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('256bca68cd16', '1', 'xprojectuse');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('3572dd063f4f', '1', 'xprojectde');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('39f06b018e83', '1', 'xprojectup');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('7464415279eb', '1', 'xbackups');
+INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES ('74217ab2e9eb', '2', 'xloginexce');
 
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('81da97f94fa7', '1', '9633d9475886');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('2f8bdda13cdc', '1', '428be660dea3');
@@ -46,7 +44,6 @@ INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('30
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('60b1f9be4fae', '1', '585d26bcbdf3');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('9c78b5a65a5f', '1', '890e7d41decf');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('b2bea716a4ca', '1', 'hf43e412151e');
-INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('5965a1d48065', '1', 'hf43e412151e');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('ff961fcf2ebe', '1', '43e7d41decf7');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('5f5b01ed41ca', '1', 'oug5371be8ec');
 INSERT INTO "pcs_prc_role_function" ("id", "role_id", "function_id") VALUES ('0295fd765def', '1', 'hfg5371be8ec');

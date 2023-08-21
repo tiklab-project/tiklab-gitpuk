@@ -1,14 +1,14 @@
 package io.tiklab.xcode.repository.service;
 
 import io.tiklab.beans.BeanMapper;
+import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
+import io.tiklab.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
-import io.tiklab.user.dmUser.service.DmUserService;
-import io.tiklab.user.user.service.UserService;
-import io.tiklab.xcode.repository.dao.LeadAuthDao;
-import io.tiklab.xcode.repository.entity.LeadAuthEntity;
-import io.tiklab.xcode.repository.model.LeadAuth;
-import io.tiklab.xcode.repository.model.LeadAuthQuery;
+import io.tiklab.xcode.repository.dao.LeadRecordDao;
+import io.tiklab.xcode.repository.entity.LeadRecordEntity;
+import io.tiklab.xcode.repository.model.LeadRecord;
+import io.tiklab.xcode.repository.model.LeadRecordQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,96 +18,88 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
-* ImportAuthServiceImpl-导入第三方仓库的认证
+* LeadRecordServiceImpl-导入记录
 */
 @Service
 @Exporter
-public class LeadAuthServiceImpl implements LeadAuthService {
+public class LeadRecordServiceImpl implements LeadRecordService {
 
     @Autowired
-    LeadAuthDao importAuthDao;
+    LeadRecordDao importAuthDao;
 
 
     @Autowired
     JoinTemplate joinTemplate;
 
-    @Autowired
-    private DmUserService dmUserService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private RepositoryServer repositoryServer;
-
 
     @Override
-    public String createImportAuth(@NotNull @Valid LeadAuth openRecord) {
+    public String createLeadRecord(@NotNull @Valid LeadRecord leadRecord) {
 
-        LeadAuthEntity openRecordEntity = BeanMapper.map(openRecord, LeadAuthEntity.class);
-        openRecordEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        String openRecordId= importAuthDao.createImportAuth(openRecordEntity);
-        return openRecordId;
-    }
-
-    @Override
-    public void updateImportAuth(@NotNull @Valid LeadAuth openRecord) {
-        LeadAuthEntity openRecordEntity = BeanMapper.map(openRecord, LeadAuthEntity.class);
-
-        importAuthDao.updateImportAuth(openRecordEntity);
-    }
-
-    @Override
-    public void deleteImportAuth(@NotNull String id) {
-        importAuthDao.deleteImportAuth(id);
+        LeadRecordEntity leadRecordEntity = BeanMapper.map(leadRecord, LeadRecordEntity.class);
+        leadRecordEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        String leadRecordId= importAuthDao.createLeadRecord(leadRecordEntity);
+        return leadRecordId;
     }
 
 
-
     @Override
-    public LeadAuth findOne(String id) {
-        LeadAuthEntity openRecordEntity = importAuthDao.findImportAuth(id);
-
-        LeadAuth openRecord = BeanMapper.map(openRecordEntity, LeadAuth.class);
-        return openRecord;
+    public void deleteLeadRecord(@NotNull String id) {
+        importAuthDao.deleteLeadRecord(id);
     }
 
     @Override
-    public List<LeadAuth> findList(List<String> idList) {
-        List<LeadAuthEntity> openRecordEntityList =  importAuthDao.findImportAuthList(idList);
+    public void deleteLeadRecord(String field, String value) {
+        DeleteCondition deleteCondition = DeleteBuilders.createDelete(LeadRecordEntity.class)
+                .eq(field, value)
+                .get();
+        importAuthDao.deleteLeadRecord(deleteCondition);
+    }
 
-        List<LeadAuth> openRecordList =  BeanMapper.mapList(openRecordEntityList, LeadAuth.class);
-        return openRecordList;
+
+    @Override
+    public LeadRecord findOne(String id) {
+        LeadRecordEntity leadRecordEntity = importAuthDao.findLeadRecord(id);
+
+        LeadRecord leadRecord = BeanMapper.map(leadRecordEntity, LeadRecord.class);
+        return leadRecord;
     }
 
     @Override
-    public LeadAuth findImportAuth(@NotNull String id) {
-        LeadAuth openRecord = findOne(id);
+    public List<LeadRecord> findList(List<String> idList) {
+        List<LeadRecordEntity> leadRecordEntityList =  importAuthDao.findLeadRecordList(idList);
 
-        joinTemplate.joinQuery(openRecord);
-
-        return openRecord;
+        List<LeadRecord> leadRecordList =  BeanMapper.mapList(leadRecordEntityList, LeadRecord.class);
+        return leadRecordList;
     }
 
     @Override
-    public List<LeadAuth> findAllImportAuth() {
-        List<LeadAuthEntity> openRecordEntityList =  importAuthDao.findAllImportAuth();
+    public LeadRecord findLeadRecord(@NotNull String id) {
+        LeadRecord leadRecord = findOne(id);
 
-        List<LeadAuth> openRecordList =  BeanMapper.mapList(openRecordEntityList, LeadAuth.class);
+        joinTemplate.joinQuery(leadRecord);
 
-        joinTemplate.joinQuery(openRecordList);
-
-
-        return openRecordList;
+        return leadRecord;
     }
 
     @Override
-    public List<LeadAuth> findImportAuthList(LeadAuthQuery ImportAuthQuery) {
-        List<LeadAuthEntity> openRecordEntityList = importAuthDao.findImportAuthList(ImportAuthQuery);
+    public List<LeadRecord> findAllLeadRecord() {
+        List<LeadRecordEntity> leadRecordEntityList =  importAuthDao.findAllLeadRecord();
 
-        List<LeadAuth> openRecordList = BeanMapper.mapList(openRecordEntityList, LeadAuth.class);
+        List<LeadRecord> leadRecordList =  BeanMapper.mapList(leadRecordEntityList, LeadRecord.class);
 
-        return openRecordList;
+        joinTemplate.joinQuery(leadRecordList);
+
+
+        return leadRecordList;
+    }
+
+    @Override
+    public List<LeadRecord> findLeadRecordList(LeadRecordQuery LeadRecordQuery) {
+        List<LeadRecordEntity> leadRecordEntityList = importAuthDao.findLeadRecordList(LeadRecordQuery);
+
+        List<LeadRecord> leadRecordList = BeanMapper.mapList(leadRecordEntityList, LeadRecord.class);
+
+        return leadRecordList;
     }
 
 }

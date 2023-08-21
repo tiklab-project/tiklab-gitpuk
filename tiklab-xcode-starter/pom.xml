@@ -123,7 +123,7 @@
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-linux</artifactId>
-					<version>${project.version}</version>
+					<version>${tiklab-jdk.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -157,7 +157,7 @@
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
 											<artifactId>tiklab-jdk-linux</artifactId>
-											<version>${project.version}</version>
+											<version>${tiklab-jdk.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
@@ -177,7 +177,7 @@
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-windows</artifactId>
-					<version>${project.version}</version>
+					<version>${tiklab-jdk.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -204,7 +204,7 @@
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
 											<artifactId>tiklab-jdk-windows</artifactId>
-											<version>${project.version}</version>
+											<version>${tiklab-jdk.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
@@ -231,14 +231,14 @@
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-mac</artifactId>
-					<version>${project.version}</version>
+					<version>${tiklab-jdk.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-mac</artifactId>
-					<version>${project.version}</version>
+					<version>${tiklab-jdk.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -265,7 +265,7 @@
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
 											<artifactId>tiklab-jdk-mac</artifactId>
-											<version>${project.version}</version>
+											<version>${tiklab-jdk.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>

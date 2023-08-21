@@ -1,6 +1,7 @@
 package io.tiklab.xcode.branch.controller;
 
 import io.tiklab.xcode.branch.model.Branch;
+import io.tiklab.xcode.branch.model.BranchQuery;
 import io.tiklab.xcode.branch.service.BranchServer;
 import io.tiklab.core.Result;
 import io.tiklab.postin.annotation.Api;
@@ -31,6 +32,15 @@ public class BranchController {
     public Result<List<Branch>> findAllBranch(@NotNull String rpyId){
 
         List<Branch> allBranch = branchServer.findAllBranch(rpyId);
+
+        return Result.ok(allBranch);
+    }
+    @RequestMapping(path="/findBranchList",method = RequestMethod.POST)
+    @ApiMethod(name = "findAllBranch",desc = "条件查询分支")
+    @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
+    public Result<List<Branch>> findBranchList(@RequestBody @Valid @NotNull BranchQuery branchQuery){
+
+        List<Branch> allBranch = branchServer.findBranchList(branchQuery);
 
         return Result.ok(allBranch);
     }

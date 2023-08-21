@@ -1,13 +1,12 @@
 package io.tiklab.xcode.repository.controller;
 
 import io.tiklab.core.Result;
-import io.tiklab.core.page.Pagination;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
-import io.tiklab.xcode.repository.model.ImportAuth;
-import io.tiklab.xcode.repository.model.ImportAuthQuery;
-import io.tiklab.xcode.repository.service.ImportAuthService;
+import io.tiklab.xcode.repository.model.LeadAuth;
+import io.tiklab.xcode.repository.model.LeadAuthQuery;
+import io.tiklab.xcode.repository.service.LeadAuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,67 +20,67 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * ImportAuthController
+ * LeadAuthController
  */
 @RestController
-@RequestMapping("/importAuth")
-@Api(name = "ImportAuthController",desc = "导入第三方仓库的认证")
-public class ImportAuthController {
+@RequestMapping("/leadAuth")
+@Api(name = "LeadAuthController",desc = "导入第三方仓库的认证")
+public class LeadAuthController {
 
-    private static Logger logger = LoggerFactory.getLogger(ImportAuthController.class);
+    private static Logger logger = LoggerFactory.getLogger(LeadAuthController.class);
 
     @Autowired
-    private ImportAuthService importAuthService;
+    private LeadAuthService leadAuthService;
 
-    @RequestMapping(path="/createImportAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "createImportAuth",desc = "创建第三方仓库认证")
-    @ApiParam(name = "ImportAuth",desc = "ImportAuth",required = true)
-    public Result<String> createImportAuth(@RequestBody @NotNull @Valid ImportAuth ImportAuth){
-        String id = importAuthService.createImportAuth(ImportAuth);
+    @RequestMapping(path="/createLeadAuth",method = RequestMethod.POST)
+    @ApiMethod(name = "createLeadAuth",desc = "创建第三方仓库认证")
+    @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
+    public Result<String> createLeadAuth(@RequestBody @NotNull @Valid LeadAuth leadAuth){
+        String id = leadAuthService.createLeadAuth(leadAuth);
 
         return Result.ok(id);
     }
 
-    @RequestMapping(path="/updateImportAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "updateImportAuth",desc = "修改第三方仓库认证")
-    @ApiParam(name = "ImportAuth",desc = "ImportAuth",required = true)
-    public Result<Void> updateImportAuth(@RequestBody @NotNull @Valid ImportAuth ImportAuth){
-        importAuthService.updateImportAuth(ImportAuth);
+    @RequestMapping(path="/updateLeadAuth",method = RequestMethod.POST)
+    @ApiMethod(name = "updateLeadAuth",desc = "修改第三方仓库认证")
+    @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
+    public Result<Void> updateLeadAuth(@RequestBody @NotNull @Valid LeadAuth leadAuth){
+        leadAuthService.updateLeadAuth(leadAuth);
 
         return Result.ok();
     }
 
-    @RequestMapping(path="/deleteImportAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteImportAuth",desc = "删除")
+    @RequestMapping(path="/deleteLeadAuth",method = RequestMethod.POST)
+    @ApiMethod(name = "deleteLeadAuth",desc = "删除")
     @ApiParam(name = "id",desc = "id",required = true)
-    public Result<Void> deleteImportAuth(@NotNull String id){
-        importAuthService.deleteImportAuth(id);
+    public Result<Void> deleteLeadAuth(@NotNull String id){
+        leadAuthService.deleteLeadAuth(id);
 
         return Result.ok();
     }
 
-    @RequestMapping(path="/findImportAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "findImportAuth",desc = "通过id 查询")
+    @RequestMapping(path="/findLeadAuth",method = RequestMethod.POST)
+    @ApiMethod(name = "findLeadAuth",desc = "通过id 查询")
     @ApiParam(name = "id",desc = "id",required = true)
-    public Result<ImportAuth> findImportAuth(@NotNull String id){
-        ImportAuth ImportAuth = importAuthService.findImportAuth(id);
+    public Result<LeadAuth> findLeadAuth(@NotNull String id){
+        LeadAuth LeadAuth = leadAuthService.findLeadAuth(id);
 
-        return Result.ok(ImportAuth);
+        return Result.ok(LeadAuth);
     }
 
-    @RequestMapping(path="/findAllImportAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "findAllImportAuth",desc = "查询所有查询")
-    public Result<List<ImportAuth>> findAllImportAuth(){
-        List<ImportAuth> artifactList = importAuthService.findAllImportAuth();
+    @RequestMapping(path="/findAllLeadAuth",method = RequestMethod.POST)
+    @ApiMethod(name = "findAllLeadAuth",desc = "查询所有查询")
+    public Result<List<LeadAuth>> findAllLeadAuth(){
+        List<LeadAuth> artifactList = leadAuthService.findAllLeadAuth();
 
         return Result.ok(artifactList);
     }
 
-    @RequestMapping(path = "/findImportAuthList",method = RequestMethod.POST)
-    @ApiMethod(name = "findImportAuthList",desc = "通过条件查询")
-    @ApiParam(name = "ImportAuthQuery",desc = "ImportAuthQuery",required = true)
-    public Result<List<ImportAuth>> findImportAuthList(@RequestBody @Valid @NotNull ImportAuthQuery importAuthQuery){
-        List<ImportAuth> artifactList = importAuthService.findImportAuthList(importAuthQuery);
+    @RequestMapping(path = "/findLeadAuthList",method = RequestMethod.POST)
+    @ApiMethod(name = "findLeadAuthList",desc = "通过条件查询")
+    @ApiParam(name = "LeadAuthQuery",desc = "LeadAuthQuery",required = true)
+    public Result<List<LeadAuth>> findLeadAuthList(@RequestBody @Valid @NotNull LeadAuthQuery leadAuthQuery){
+        List<LeadAuth> artifactList = leadAuthService.findLeadAuthList(leadAuthQuery);
 
         return Result.ok(artifactList);
     }

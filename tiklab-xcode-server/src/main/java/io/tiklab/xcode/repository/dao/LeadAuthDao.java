@@ -1,12 +1,11 @@
 package io.tiklab.xcode.repository.dao;
 
-import io.tiklab.core.page.Pagination;
 import io.tiklab.dal.jpa.JpaTemplate;
 import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
 import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
-import io.tiklab.xcode.repository.entity.ImportAuthEntity;
-import io.tiklab.xcode.repository.model.ImportAuthQuery;
+import io.tiklab.xcode.repository.entity.LeadAuthEntity;
+import io.tiklab.xcode.repository.model.LeadAuthQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,42 +14,42 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * ImportAuthDao-导入外部仓库校验
+ * LeadAuthDao-导入外部仓库校验
  */
 @Repository
-public class ImportAuthDao {
+public class LeadAuthDao {
 
-    private static Logger logger = LoggerFactory.getLogger(ImportAuthDao.class);
+    private static Logger logger = LoggerFactory.getLogger(LeadAuthDao.class);
 
     @Autowired
     JpaTemplate jpaTemplate;
 
     /**
      * 创建
-     * @param importAuthEntity
+     * @param leadAuthEntity
      * @return
      */
-    public String createImportAuth(ImportAuthEntity importAuthEntity) {
-        return jpaTemplate.save(importAuthEntity,String.class);
+    public String createLeadAuth(LeadAuthEntity leadAuthEntity) {
+        return jpaTemplate.save(leadAuthEntity,String.class);
     }
 
     /**
      * 更新
-     * @param importAuthEntity
+     * @param leadAuthEntity
      */
-    public void updateImportAuth(ImportAuthEntity importAuthEntity){
-        jpaTemplate.update(importAuthEntity);
+    public void updateLeadAuth(LeadAuthEntity leadAuthEntity){
+        jpaTemplate.update(leadAuthEntity);
     }
 
     /**
      * 删除
      * @param id
      */
-    public void deleteImportAuth(String id){
-        jpaTemplate.delete(ImportAuthEntity.class,id);
+    public void deleteLeadAuth(String id){
+        jpaTemplate.delete(LeadAuthEntity.class,id);
     }
 
-    public void deleteImportAuth(DeleteCondition deleteCondition){
+    public void deleteLeadAuth(DeleteCondition deleteCondition){
         jpaTemplate.delete(deleteCondition);
     }
 
@@ -59,16 +58,16 @@ public class ImportAuthDao {
      * @param id
      * @return
      */
-    public ImportAuthEntity findImportAuth(String id){
-        return jpaTemplate.findOne(ImportAuthEntity.class,id);
+    public LeadAuthEntity findLeadAuth(String id){
+        return jpaTemplate.findOne(LeadAuthEntity.class,id);
     }
 
     /**
-    * findAllImportAuth
+    * findAllLeadAuth
     * @return
     */
-    public List<ImportAuthEntity> findAllImportAuth() {
-        return jpaTemplate.findAll(ImportAuthEntity.class);
+    public List<LeadAuthEntity> findAllLeadAuth() {
+        return jpaTemplate.findAll(LeadAuthEntity.class);
     }
 
     /**
@@ -76,21 +75,21 @@ public class ImportAuthDao {
      * @param idList
      * @return
      */
-    public List<ImportAuthEntity> findImportAuthList(List<String> idList) {
-        return jpaTemplate.findList(ImportAuthEntity.class,idList);
+    public List<LeadAuthEntity> findLeadAuthList(List<String> idList) {
+        return jpaTemplate.findList(LeadAuthEntity.class,idList);
     }
 
     /**
      * 条件查询插件
-     * @param importAuthQuery
+     * @param leadAuthQuery
      * @return
      */
-    public List<ImportAuthEntity> findImportAuthList(ImportAuthQuery importAuthQuery) {
-        QueryCondition queryCondition = QueryBuilders.createQuery(ImportAuthEntity.class)
-                .eq("type", importAuthQuery.getType())
-                .eq("userId",importAuthQuery.getUserId())
+    public List<LeadAuthEntity> findLeadAuthList(LeadAuthQuery leadAuthQuery) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(LeadAuthEntity.class)
+                .eq("type", leadAuthQuery.getType())
+                .eq("userId",leadAuthQuery.getUserId())
                 .get();
-        return jpaTemplate.findList(queryCondition, ImportAuthEntity.class);
+        return jpaTemplate.findList(queryCondition, LeadAuthEntity.class);
     }
 
 

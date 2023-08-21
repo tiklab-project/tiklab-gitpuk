@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+/**
+ * LeadToServiceImpl-执行导入
+ */
 @Service
-public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
+public class LeadToServiceImpl implements LeadToService {
 
     @Autowired
     LeadAuthService authService;
@@ -34,6 +36,9 @@ public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
 
     @Autowired
     XcodeYamlDataMaService xcodeYamlDataMaService;
+
+    @Autowired
+    LeadRecordService leadRecordService;
 
     //导入结果
     public static Map<String , String> toLeadResult = new HashMap<>();
@@ -53,22 +58,22 @@ public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
 
 
     @Override
-    public String toLeadRepository(RepositoryToLead repositoryToLead) {
-        String result = toLeadResult.remove(repositoryToLead.getThirdRepositoryId());
+    public String toLeadRepository(LeadTo leadTo) {
+        String result = toLeadResult.remove(leadTo.getThirdRepositoryId());
    /*     if (StringUtils.isNotEmpty(result)){
             throw new SystemException(7000,"该仓库正在导入");
         }*/
         User user = new User();
-        user.setId(repositoryToLead.getUserId());
+        user.setId(leadTo.getUserId());
 
 
         //创建仓库组
         String groupId;
-        RepositoryGroup group = groupServer.findGroupByName(repositoryToLead.getGroupName());
+        RepositoryGroup group = groupServer.findGroupByName(leadTo.getGroupName());
         if (ObjectUtils.isEmpty(group)){
             RepositoryGroup repositoryGroup = new RepositoryGroup();
-            repositoryGroup.setName(repositoryToLead.getGroupName());
-            repositoryGroup.setRules(repositoryToLead.getRule());
+            repositoryGroup.setName(leadTo.getGroupName());
+            repositoryGroup.setRules(leadTo.getRule());
             repositoryGroup.setUser(user);
             groupId = groupServer.createCodeGroup(repositoryGroup);
         }else {
@@ -76,34 +81,49 @@ public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
         }
 
         //创建仓库
-        String rpyId;
         List<Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery()
-                .setGroupId(groupId).setName(repositoryToLead.getRepositoryName()));
-        if (CollectionUtils.isEmpty(repositoryList)){
-            //创建仓库
-            Repository repository = new Repository();
-            repository.setName(repositoryToLead.getRepositoryName());
-            repository.setAddress(repositoryToLead.getRepositoryUrl());
-            RepositoryGroup repositoryGroup = new RepositoryGroup();
-            repositoryGroup.setGroupId(groupId);
-            repository.setGroup(repositoryGroup);
-            repository.setUser(user);
-            repository.setRules(repositoryToLead.getRule());
-             rpyId = repositoryServer.createRpy(repository);
-        }else {
-             rpyId = repositoryList.get(0).getRpyId();
+                .setGroupId(groupId).setName(leadTo.getRepositoryName()));
+        if (!CollectionUtils.isEmpty(repositoryList)){
+            toLeadResult.put(leadTo.getThirdRepositoryId(),"仓库已经导入");
+            return null;
         }
+        //创建仓库
+        Repository repository = new Repository();
+        repository.setName(leadTo.getRepositoryName());
+        repository.setAddress(leadTo.getRepositoryUrl());
+        RepositoryGroup repositoryGroup = new RepositoryGroup();
+        repositoryGroup.setGroupId(groupId);
+        repository.setGroup(repositoryGroup);
+        repository.setUser(user);
+        repository.setRules(leadTo.getRule());
+        String rpyId = repositoryServer.createRpy(repository);
+        repository.setRpyId(rpyId);
+
+        //导入认证
+        LeadAuth importAuth = authService.findLeadAuth(leadTo.getImportAuthId());
+
+        //创建导入记录
+        LeadRecord leadRecord = new LeadRecord();
+        leadRecord.setRepository(repository);
+        leadRecord.setLeadWay(importAuth.getType());
+        leadRecord.setRelevanceId(leadTo.getThirdRepositoryId());
+
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.submit(new Runnable(){
             @Override
             public void run() {
                 try {
-                    LeadAuth importAuth = authService.findLeadAuth(repositoryToLead.getImportAuthId());
                     String repositoryAddress = xcodeYamlDataMaService.repositoryAddress()+"/"+rpyId+".git";
-                    GitUntil.copyRepository(repositoryAddress,repositoryToLead.getHttpRepositoryUrl(),importAuth);
-                    toLeadResult.put(repositoryToLead.getThirdRepositoryId(),"success");
+                    //从第三方复制裸仓库
+                    GitUntil.copyRepository(repositoryAddress,leadTo.getHttpRepositoryUrl(),importAuth);
+                    toLeadResult.put(leadTo.getThirdRepositoryId(),"success");
+
+                    leadRecord.setLeadState("success");
+                    leadRecordService.createLeadRecord(leadRecord);
                 } catch (Exception e) {
-                    toLeadResult.put(repositoryToLead.getThirdRepositoryId(),"error,推送失败");
+                    toLeadResult.put(leadTo.getThirdRepositoryId(),"error,推送失败");
+                    leadRecord.setLeadState("error");
+                    leadRecordService.createLeadRecord(leadRecord);
                     throw new SystemException(9000,e.getMessage());
                 }
             }});
@@ -121,7 +141,7 @@ public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
 
 
     /**
-     *restTemplate  get
+     *restTemplate调用第三方接口
      * @param path 路径
      */
     public List getRestTemplate(String path){

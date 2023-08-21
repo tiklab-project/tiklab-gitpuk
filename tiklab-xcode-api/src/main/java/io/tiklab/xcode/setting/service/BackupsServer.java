@@ -27,6 +27,7 @@ public interface BackupsServer {
      */
     Backups findBackups();
 
+
     /**
      * 数据恢复
      * @param fileName 文件名称
@@ -40,4 +41,5 @@ public interface BackupsServer {
      * @param userId 用户id
      */
     void uploadBackups(InputStream inputStream, String fileName,String userId);
+
 }

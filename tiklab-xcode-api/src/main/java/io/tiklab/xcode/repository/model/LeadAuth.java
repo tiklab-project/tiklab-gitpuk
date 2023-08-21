@@ -2,10 +2,7 @@ package io.tiklab.xcode.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.tiklab.beans.annotation.Mapper;
-import io.tiklab.beans.annotation.Mapping;
-import io.tiklab.beans.annotation.Mappings;
 import io.tiklab.join.annotation.Join;
-import io.tiklab.join.annotation.JoinQuery;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
@@ -14,7 +11,7 @@ import java.sql.Timestamp;
 @ApiModel
 @Join
 @Mapper
-public class ImportAuth {
+public class LeadAuth {
 
     @ApiProperty(name="id",desc="id")
     private String id;

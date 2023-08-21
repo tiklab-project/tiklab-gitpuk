@@ -3,7 +3,7 @@ package io.tiklab.xcode.git;
 
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.user.user.model.User;
-import io.tiklab.xcode.repository.model.ImportAuth;
+import io.tiklab.xcode.repository.model.LeadAuth;
 import io.tiklab.xcode.repository.model.RemoteInfo;
 import io.tiklab.xcode.common.RepositoryUtil;
 import org.eclipse.jgit.api.Git;
@@ -271,7 +271,7 @@ public class GitUntil {
      * @param remoteAddress 远程仓库地址
      *
      */
-    public static void copyRepository(String localAddress,String remoteAddress, ImportAuth importAuth ) throws GitAPIException {
+    public static void copyRepository(String localAddress,String remoteAddress, LeadAuth importAuth ) throws GitAPIException {
         File localPath = new File(localAddress);
         UsernamePasswordCredentialsProvider credentialsProvider =
                 new UsernamePasswordCredentialsProvider("access_token", importAuth.getAccessToken());

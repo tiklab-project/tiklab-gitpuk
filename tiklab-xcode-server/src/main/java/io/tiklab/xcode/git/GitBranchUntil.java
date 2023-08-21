@@ -2,6 +2,8 @@ package io.tiklab.xcode.git;
 
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.xcode.branch.model.BranchQuery;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -83,6 +86,55 @@ public class GitBranchUntil {
 
         List<Branch> list = new ArrayList<>();
         List<Ref> refs = repository.getRefDatabase().getRefs();
+
+        String defaultBranch = " ";
+        for (Ref ref : refs) {
+            Branch branch = new Branch();
+            String name = ref.getName();
+            if (name.equals("HEAD")){
+                Ref target = ref.getTarget();
+                defaultBranch = target.getName();
+                continue;
+            }
+
+            String Id = ref.getObjectId().getName();
+            String s = name.replace(Constants.R_HEADS, "");
+            branch.setBranchId(Id);
+            //判断是否为默认分支
+            if (defaultBranch.equals(name)){
+                branch.setDefaultBranch(true);
+            }
+            branch.setBranchName(s);
+            list.add(branch);
+        }
+
+        // repository.close();
+        git.close();
+
+        if (list.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        return list;
+    }
+
+
+    /**
+     * 条件获取获取仓库分支
+     * @param branchQuery branchQuery
+     * @return 分支集合
+     * @throws IOException 仓库不存在
+     */
+    public static List<Branch> findBranchList(BranchQuery branchQuery) throws IOException {
+
+        Git git = Git.open(new File(branchQuery.getRepositoryAddress()));
+        Repository repository = git.getRepository();
+
+        List<Branch> list = new ArrayList<>();
+        List<Ref> refs = repository.getRefDatabase().getRefs();
+        if (StringUtils.isNotEmpty(branchQuery.getName())){
+            refs=refs.stream().filter(a->a.getName().contains(branchQuery.getName())||a.getName().equals("HEAD")).collect(Collectors.toList());
+        }
 
         String defaultBranch = " ";
         for (Ref ref : refs) {

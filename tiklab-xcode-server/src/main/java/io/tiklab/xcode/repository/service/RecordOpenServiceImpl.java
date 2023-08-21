@@ -10,8 +10,11 @@ import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
+import io.tiklab.xcode.branch.model.Branch;
+import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.repository.dao.RecordOpenDao;
 import io.tiklab.xcode.repository.entity.RecordOpenEntity;
+import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.RecordOpen;
 import io.tiklab.xcode.repository.model.RecordOpenQuery;
 import io.tiklab.xcode.repository.model.Repository;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,6 +46,11 @@ public class RecordOpenServiceImpl implements RecordOpenService {
 
     @Autowired
     JoinTemplate joinTemplate;
+
+    @Autowired
+    XcodeYamlDataMaService yamlDataMaService;
+
+
 
 
     @Override
@@ -149,7 +158,23 @@ public class RecordOpenServiceImpl implements RecordOpenService {
         }
 
         List<RecordOpen> recordOpenList = publicRep.stream().sorted(Comparator.comparing(RecordOpen::getNewOpenTime).reversed()).collect(Collectors.toList());
-
+        //取前面6位
+        List<RecordOpen> recordOpens = recordOpenList.stream().limit(6).collect(Collectors.toList());
+        for (RecordOpen recordOpen:recordOpens){
+           //成员数量
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setDomainId(recordOpen.getRepository().getRpyId());
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+            recordOpen.setMemberNum(dmUserList.size());
+            try {
+                //分支数量
+                String repositoryAddress = yamlDataMaService.repositoryAddress() + "/" + recordOpen.getRepository().getRpyId();
+                List<Branch> branches = GitBranchUntil.findAllBranch(repositoryAddress);
+                recordOpen.setBranchNum(branches.size());
+            } catch (IOException e) {
+                recordOpen.setBranchNum(1);
+            }
+        }
         return recordOpenList;
     }
 

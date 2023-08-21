@@ -3,6 +3,7 @@ package io.tiklab.xcode.branch.service;
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.join.annotation.JoinProvider;
 import io.tiklab.xcode.branch.model.BranchMessage;
+import io.tiklab.xcode.branch.model.BranchQuery;
 
 import java.util.List;
 
@@ -36,8 +37,9 @@ public interface BranchServer {
      */
     void deleteBranch(BranchMessage branchMessage);
 
-
-
-
-
+    /**
+     * 条件查询分支
+     * @param branchQuery
+     */
+    List<Branch> findBranchList(BranchQuery branchQuery);
 }

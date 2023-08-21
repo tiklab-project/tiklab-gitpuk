@@ -4,7 +4,7 @@ import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
 @ApiModel
-public class RepositoryToLead {
+public class LeadTo {
 
     @ApiProperty(name="repositoryName",desc="仓库名字")
     private String repositoryName;
@@ -29,6 +29,8 @@ public class RepositoryToLead {
 
     @ApiProperty(name="importAuthId",desc="importAuthId")
     private String importAuthId;
+
+
 
     public String getRepositoryName() {
         return repositoryName;

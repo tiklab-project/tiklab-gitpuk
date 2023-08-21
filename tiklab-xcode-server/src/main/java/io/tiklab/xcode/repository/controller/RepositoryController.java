@@ -146,6 +146,7 @@ public class RepositoryController {
         return Result.ok(repository);
     }
 
+
     @RequestMapping(path="/findRepositoryByGroupName",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryByGroupName",desc = "通过仓库组名字查询仓库列表")
     @ApiParam(name = "address",desc = "address",required = true)

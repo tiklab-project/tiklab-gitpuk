@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.Null;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,9 +44,6 @@ public class BackupsServerImpl implements BackupsServer{
     @Autowired
     XcodeYamlDataMaService yamlDataMaService;
 
-
-    @Value("${jdbc.url}")
-    String jdbcUrl;
 
     @Value("${jdbc.username}")
     String jdbcUserName;
@@ -83,13 +81,6 @@ public class BackupsServerImpl implements BackupsServer{
         executorService.submit(new Runnable(){
             @Override
             public void run() {
-
-                File file = new File(AppHomeContext.getAppHome()+"/file/backups");
-                String fileData = gainFileData(file);
-
-                JSONObject jsonObject = JSONObject.parseObject(fileData);
-
-                String backupsTime = jsonObject.get("backups-time").toString();
 
                 //添加最后一层目录压缩
                 String backupAddress = yamlDataMaService.backupAddress();
@@ -160,15 +151,16 @@ public class BackupsServerImpl implements BackupsServer{
                      * */
                     FileUtils.deleteDirectory(new File(backupPath));
 
-                    if (StringUtils.isNotEmpty(backupsTime)){
-                        fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
-                    }
-                    //修该备份text信息
-                    writeFile(file,fileData);
+
                     joinBackupsLog(" Backups file success end [DONE]");
+
+                    //修该备份text信息
+                    writeFile();
                 }catch (Exception e){
                     joinBackupsLog(" Backups file fail end,errorMsg:"+e.getMessage());
                     logger.info("错误信息:"+e.getMessage());
+                    //修该备份text信息
+                    writeFile();
                     new ApplicationException(e.getMessage());
                 }
             }
@@ -246,7 +238,14 @@ public class BackupsServerImpl implements BackupsServer{
             String taskState = jsonObject.get("task-state").toString();
              fileData = fileData.replace(taskState, backups.getTaskState());
         }
-        writeFile(file,fileData);
+
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(fileData);
+            fileWriter.close();
+        }catch (Exception e){
+            throw new ApplicationException(5000,e.getMessage());
+        }
     }
 
     @Override
@@ -272,10 +271,9 @@ public class BackupsServerImpl implements BackupsServer{
                backups.setNewResult("success");
            }
         }
-
-
         return backups;
     }
+
 
 
     @Override
@@ -337,24 +335,18 @@ public class BackupsServerImpl implements BackupsServer{
         }
     }
 
-
     /**
      *  dump database 备份脚本
      */
     public void executeScript(String backUpsUrl) throws IOException, InterruptedException {
 
-        String substring = jdbcUrl.substring(jdbcUrl.indexOf("//", 1)+2, jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2));
-        String[] split = substring.split(":");
-
-        String dbName = jdbcUrl.substring(jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2)+1, jdbcUrl.indexOf("?", 1));
-
         String[] args = new String[7];
-        args[0] = "host="+split[0];
+        args[0] = "host="+yamlDataMaService.host();
         args[1] = "port=5432";
         args[2] = "userName="+jdbcUserName;
         args[3] = "password="+jdbcPassword;
-        args[4] = "dbName="+dbName;
-        args[5] = "schemaName=public";
+        args[4] = "dbName="+yamlDataMaService.dbName();
+        args[5] = "schemaName="+yamlDataMaService.schemaName();
         args[6] = "backupsUrl="+backUpsUrl;
 
         String scriptFile = AppHomeContext.getAppHome() + "/file/backups.sh";
@@ -368,19 +360,13 @@ public class BackupsServerImpl implements BackupsServer{
          * @param backUpsSqlUrl 备份sql地址
          */
     public void executeRecoveryScript(String backUpsSqlUrl) throws IOException, InterruptedException {
-
-        String substring = jdbcUrl.substring(jdbcUrl.indexOf("//", 1)+2, jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2));
-        String[] split = substring.split(":");
-
-        String dbName = jdbcUrl.substring(jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2)+1, jdbcUrl.indexOf("?", 1));
-
         String[] args = new String[7];
-        args[0] = "host="+split[0];
+        args[0] = "host="+yamlDataMaService.host();
         args[1] = "port=5432";
         args[2] = "userName="+jdbcUserName;
         args[3] = "password="+jdbcPassword;
-        args[4] = "dbName="+dbName;
-        args[5] = "schemaName=public";
+        args[4] = "dbName="+yamlDataMaService.dbName();
+        args[5] = "schemaName="+yamlDataMaService.schemaName();
         args[6] = "backupsSqlUrl="+backUpsSqlUrl;
 
         Process ps = Runtime.getRuntime().exec(AppHomeContext.getAppHome()+"/file/recovery.sh",args);
@@ -413,16 +399,25 @@ public class BackupsServerImpl implements BackupsServer{
     }
 
     /**
-     *  写入文件
-     *  @param file     文件
+     *  修改备份记录写入文件
      */
-    public void writeFile(File file,String fileData){
-        try {
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(fileData);
-            fileWriter.close();
-        }catch (Exception e){
-            throw new ApplicationException(5000,e.getMessage());
+    public void writeFile(){
+        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
+        if (file.exists()){
+            String  fileData = gainFileData(file);
+
+            JSONObject jsonObject = JSONObject.parseObject(fileData);
+
+            String backupsTime = jsonObject.get("backups-time").toString();
+            fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
+
+            try {
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(fileData);
+                fileWriter.close();
+            }catch (Exception e){
+                throw new ApplicationException(5000,e.getMessage());
+            }
         }
     }
 

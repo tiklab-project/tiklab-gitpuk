@@ -4,6 +4,7 @@ import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.xcode.branch.model.BranchMessage;
 import io.tiklab.xcode.branch.model.Branch;
+import io.tiklab.xcode.branch.model.BranchQuery;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.common.RepositoryUtil;
@@ -60,6 +61,8 @@ public class BranchServerImpl implements BranchServer {
         return branches;
     }
 
+
+
     /**
      * 创建分支
      * @param branchMessage 分支信息
@@ -94,8 +97,16 @@ public class BranchServerImpl implements BranchServer {
 
     }
 
-
-
+    @Override
+    public List<Branch> findBranchList(BranchQuery branchQuery) {
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),branchQuery.getRpyId());
+        try {
+            branchQuery.setRepositoryAddress(repositoryAddress);
+            return GitBranchUntil.findBranchList(branchQuery);
+        } catch (IOException e) {
+            throw new ApplicationException("分支信息获取失败："+e);
+        }
+    }
 }
 
 

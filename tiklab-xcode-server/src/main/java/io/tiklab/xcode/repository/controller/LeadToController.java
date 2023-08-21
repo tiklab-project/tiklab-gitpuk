@@ -4,8 +4,8 @@ import io.tiklab.core.Result;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
-import io.tiklab.xcode.repository.model.RepositoryToLead;
-import io.tiklab.xcode.repository.service.RepositoryToLeadService;
+import io.tiklab.xcode.repository.model.LeadTo;
+import io.tiklab.xcode.repository.service.LeadToService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,11 +18,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/toLead")
-@Api(name = "RepositoryToLeadController",desc = "导入仓库")
+@Api(name = "RepositoryToLeadController",desc = "执行导入仓库")
 public class LeadToController {
 
     @Autowired
-    RepositoryToLeadService toLeadService;
+    LeadToService toLeadService;
 
     @RequestMapping(path="/findThirdRepositoryList",method = RequestMethod.POST)
     @ApiMethod(name = "findThirdRepositoryList",desc = "查询第三方仓库应用的仓库")
@@ -37,9 +37,9 @@ public class LeadToController {
     @RequestMapping(path="/toLeadRepository",method = RequestMethod.POST)
     @ApiMethod(name = "toLeadRepository",desc = " 导入仓库")
     @ApiParam(name = "repositoryAddress",desc = "仓库路径",required = true)
-    public Result<String> toLeadRepository(@RequestBody @NotNull @Valid RepositoryToLead repositoryToLead){
+    public Result<String> toLeadRepository(@RequestBody @NotNull @Valid LeadTo leadTo){
 
-        String repository = toLeadService.toLeadRepository(repositoryToLead);
+        String repository = toLeadService.toLeadRepository(leadTo);
 
         return Result.ok(repository);
     }

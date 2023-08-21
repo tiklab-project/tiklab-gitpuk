@@ -21,6 +21,9 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
     @Value("${xcode.ssh.port:null}")
     private String sshPort;
 
+    @Value("${jdbc.url}")
+    String jdbcUrl;
+
     @Override
     public String repositoryAddress() {
         return repositoryAddress;
@@ -46,5 +49,23 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
         return sshPort;
     }
 
+
+    @Override
+    public String host() {
+        String substring = jdbcUrl.substring(jdbcUrl.indexOf("//", 1)+2, jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2));
+        String[] split = substring.split(":");
+        return split[0];
+    }
+
+    @Override
+    public String dbName() {
+        String dbName = jdbcUrl.substring(jdbcUrl.indexOf("/", jdbcUrl.indexOf("/") + 2)+1, jdbcUrl.indexOf("?", 1));
+        return dbName;
+    }
+
+    @Override
+    public String schemaName() {
+        return "public";
+    }
 
 }

@@ -4,9 +4,9 @@ import io.tiklab.core.Result;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
-import io.tiklab.xcode.repository.model.LeadAuth;
-import io.tiklab.xcode.repository.model.LeadAuthQuery;
-import io.tiklab.xcode.repository.service.LeadAuthService;
+import io.tiklab.xcode.repository.model.LeadRecord;
+import io.tiklab.xcode.repository.model.LeadRecordQuery;
+import io.tiklab.xcode.repository.service.LeadRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,67 +20,59 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * LeadAuthController
+ * LeadRecordController
  */
 @RestController
-@RequestMapping("/leadAuth")
-@Api(name = "LeadAuthController",desc = "导入第三方仓库的认证")
-public class LeadAuthController {
+@RequestMapping("/leadRecord")
+@Api(name = "LeadRecordController",desc = "导入第三方仓库的记录")
+public class LeadRecordController {
 
-    private static Logger logger = LoggerFactory.getLogger(LeadAuthController.class);
+    private static Logger logger = LoggerFactory.getLogger(LeadRecordController.class);
 
     @Autowired
-    private LeadAuthService leadAuthService;
+    private LeadRecordService leadRecordService;
 
-    @RequestMapping(path="/createLeadAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "createLeadAuth",desc = "创建第三方仓库认证")
-    @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
-    public Result<String> createLeadAuth(@RequestBody @NotNull @Valid LeadAuth LeadAuth){
-        String id = leadAuthService.createLeadAuth(LeadAuth);
+    @RequestMapping(path="/createLeadRecord",method = RequestMethod.POST)
+    @ApiMethod(name = "createLeadRecord",desc = "创建第三方仓库记录")
+    @ApiParam(name = "LeadRecord",desc = "LeadRecord",required = true)
+    public Result<String> createLeadRecord(@RequestBody @NotNull @Valid LeadRecord leadRecord){
+        String id = leadRecordService.createLeadRecord(leadRecord);
 
         return Result.ok(id);
     }
+    
 
-    @RequestMapping(path="/updateLeadAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "updateLeadAuth",desc = "修改第三方仓库认证")
-    @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
-    public Result<Void> updateLeadAuth(@RequestBody @NotNull @Valid LeadAuth LeadAuth){
-        leadAuthService.updateLeadAuth(LeadAuth);
+    @RequestMapping(path="/deleteLeadRecord",method = RequestMethod.POST)
+    @ApiMethod(name = "deleteLeadRecord",desc = "删除")
+    @ApiParam(name = "id",desc = "id",required = true)
+    public Result<Void> deleteLeadRecord(@NotNull String id){
+        leadRecordService.deleteLeadRecord(id);
 
         return Result.ok();
     }
 
-    @RequestMapping(path="/deleteLeadAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteLeadAuth",desc = "删除")
+    @RequestMapping(path="/findLeadRecord",method = RequestMethod.POST)
+    @ApiMethod(name = "findLeadRecord",desc = "通过id 查询")
     @ApiParam(name = "id",desc = "id",required = true)
-    public Result<Void> deleteLeadAuth(@NotNull String id){
-        leadAuthService.deleteLeadAuth(id);
+    public Result<LeadRecord> findLeadRecord(@NotNull String id){
+        LeadRecord LeadRecord = leadRecordService.findLeadRecord(id);
 
-        return Result.ok();
+        return Result.ok(LeadRecord);
     }
 
-    @RequestMapping(path="/findLeadAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "findLeadAuth",desc = "通过id 查询")
-    @ApiParam(name = "id",desc = "id",required = true)
-    public Result<LeadAuth> findLeadAuth(@NotNull String id){
-        LeadAuth LeadAuth = leadAuthService.findLeadAuth(id);
-
-        return Result.ok(LeadAuth);
-    }
-
-    @RequestMapping(path="/findAllLeadAuth",method = RequestMethod.POST)
-    @ApiMethod(name = "findAllLeadAuth",desc = "查询所有查询")
-    public Result<List<LeadAuth>> findAllLeadAuth(){
-        List<LeadAuth> artifactList = leadAuthService.findAllLeadAuth();
+    @RequestMapping(path="/findAllLeadRecord",method = RequestMethod.POST)
+    @ApiMethod(name = "findAllLeadRecord",desc = "查询所有查询")
+    public Result<List<LeadRecord>> findAllLeadRecord(){
+        List<LeadRecord> artifactList = leadRecordService.findAllLeadRecord();
 
         return Result.ok(artifactList);
     }
 
-    @RequestMapping(path = "/findLeadAuthList",method = RequestMethod.POST)
-    @ApiMethod(name = "findLeadAuthList",desc = "通过条件查询")
-    @ApiParam(name = "LeadAuthQuery",desc = "LeadAuthQuery",required = true)
-    public Result<List<LeadAuth>> findLeadAuthList(@RequestBody @Valid @NotNull LeadAuthQuery leadAuthQuery){
-        List<LeadAuth> artifactList = leadAuthService.findLeadAuthList(leadAuthQuery);
+    @RequestMapping(path = "/findLeadRecordList",method = RequestMethod.POST)
+    @ApiMethod(name = "findLeadRecordList",desc = "通过条件查询")
+    @ApiParam(name = "LeadRecordQuery",desc = "LeadRecordQuery",required = true)
+    public Result<List<LeadRecord>> findLeadRecordList(@RequestBody @Valid @NotNull LeadRecordQuery leadRecordQuery){
+        List<LeadRecord> artifactList = leadRecordService.findLeadRecordList(leadRecordQuery);
 
         return Result.ok(artifactList);
     }

@@ -21,7 +21,7 @@ public class RemoteMirrorTask {
     RemoteInfoService remoteInfoService;
 
     //凌晨2点 执行
-    @Scheduled(cron = "0 0 2 * * ?")
+  //  @Scheduled(cron = "0 0 2 * * ?")
     public void exeMirror(){
         List<RemoteInfo> allRemoteInfo = remoteInfoService.findAllRemoteInfo();
         for (RemoteInfo remoteInfo:allRemoteInfo){

@@ -1,10 +1,10 @@
 package io.tiklab.xcode.repository.service;
 
-import io.tiklab.xcode.repository.model.RepositoryToLead;
+import io.tiklab.xcode.repository.model.LeadTo;
 
 import java.util.List;
 
-public interface RepositoryToLeadService {
+public interface LeadToService {
 
     /**
      * 查询第三方 的仓库列表
@@ -15,9 +15,9 @@ public interface RepositoryToLeadService {
 
     /**
      * 导入仓库
-     * @param repositoryToLead repositoryToLead
+     * @param leadTo leadTo
      */
-    String toLeadRepository(RepositoryToLead repositoryToLead);
+    String toLeadRepository(LeadTo leadTo);
 
     /**
      * 查询导入仓库结果

@@ -39,6 +39,13 @@ public class RecordOpen  extends BaseModel {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Timestamp createTime;
 
+    /*------其他字段---*/
+    @ApiProperty(name="branchNum",desc="分支数量")
+    private Integer branchNum;
+
+    @ApiProperty(name="memberNum",desc="成员数量")
+    private Integer memberNum;
+
     public String getId() {
         return id;
     }
@@ -77,6 +84,22 @@ public class RecordOpen  extends BaseModel {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getBranchNum() {
+        return branchNum;
+    }
+
+    public void setBranchNum(Integer branchNum) {
+        this.branchNum = branchNum;
+    }
+
+    public Integer getMemberNum() {
+        return memberNum;
+    }
+
+    public void setMemberNum(Integer memberNum) {
+        this.memberNum = memberNum;
     }
 }
 

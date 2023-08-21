@@ -1,13 +1,12 @@
 package io.tiklab.xcode.repository.model;
 
-import io.tiklab.core.page.Page;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
 import java.io.Serializable;
 
 @ApiModel
-public class ImportAuthQuery implements Serializable {
+public class LeadAuthQuery implements Serializable {
 
     @ApiProperty(name ="type",desc = "类型")
     private String  type;

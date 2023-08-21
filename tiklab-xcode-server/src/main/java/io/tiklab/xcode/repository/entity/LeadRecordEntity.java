@@ -5,31 +5,30 @@ import io.tiklab.dal.jpa.annotation.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name="rpy_import_auth")
-public class ImportAuthEntity {
+@Table(name="rpy_lead_record")
+public class LeadRecordEntity {
 
     @Id
     @GeneratorValue(length=12)
     @Column(name = "id")
     private String id;
 
-    @Column(name = "address")
-    private String address;
+    //仓库id
+    @Column(name = "rpy_id")
+    private String rpyId;
 
-    @Column(name = "access_token")
-    private String accessToken;
+    //导入方式
+    @Column(name = "lead_way")
+    private String leadWay;
 
-    @Column(name = "type")
-    private String type;
+    //导入状态
+    @Column(name = "lead_state")
+    private String leadState;
 
-    @Column(name = "account")
-    private String account;
+    //第三方库的关联id
+    @Column(name = "relevance_id")
+    private String relevanceId;
 
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "user_id")
-    private String userId;
     @Column(name = "create_time")
     private Timestamp createTime;
 
@@ -42,44 +41,36 @@ public class ImportAuthEntity {
         this.id = id;
     }
 
-    public String getAddress() {
-        return address;
+    public String getRpyId() {
+        return rpyId;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setRpyId(String rpyId) {
+        this.rpyId = rpyId;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public String getLeadWay() {
+        return leadWay;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public void setLeadWay(String leadWay) {
+        this.leadWay = leadWay;
     }
 
-    public String getType() {
-        return type;
+    public String getLeadState() {
+        return leadState;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setLeadState(String leadState) {
+        this.leadState = leadState;
     }
 
-    public String getAccount() {
-        return account;
+    public String getRelevanceId() {
+        return relevanceId;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setRelevanceId(String relevanceId) {
+        this.relevanceId = relevanceId;
     }
 
     public Timestamp getCreateTime() {
@@ -88,14 +79,6 @@ public class ImportAuthEntity {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 }
 

@@ -104,8 +104,8 @@ repository:
   address: ${DATA_HOME}/repository
 
 backup:
-  address: ${DATA_HOME}/backup
-
+  address:  /opt/tiklab/xcode-backups
+  time: 0 0 2 * * ?
 visit:
   address: http://xcode-ce.demo.tiklab.net
 

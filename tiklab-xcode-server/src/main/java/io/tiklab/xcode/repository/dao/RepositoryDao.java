@@ -115,6 +115,13 @@ public class RepositoryDao {
         return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }
 
+    public List<RepositoryEntity> findRepositoryByNamespace(String  namespace) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
+                .like("address", namespace)
+                .get();
+        return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
+    }
+
     /**
      * 通过仓库组名字查询仓库列表
      * @param groupName

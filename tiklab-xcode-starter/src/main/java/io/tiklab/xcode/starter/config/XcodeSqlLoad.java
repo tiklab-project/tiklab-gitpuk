@@ -33,7 +33,8 @@ public class XcodeSqlLoad {
         });
 
         dsmConfig.newVersion("1.0.1", new String[]{
-                "xcode_1.0.1"
+                "xcode_1.0.1",
+                "xdprivilege_1.0.1"
         });
         return dsmConfig;
     }

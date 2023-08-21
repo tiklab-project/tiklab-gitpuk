@@ -5,8 +5,8 @@ import io.tiklab.dal.jpa.annotation.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name="rpy_import_auth")
-public class ImportAuthEntity {
+@Table(name="rpy_Lead_auth")
+public class LeadAuthEntity {
 
     @Id
     @GeneratorValue(length=12)
