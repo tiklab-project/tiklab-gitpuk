@@ -1,6 +1,5 @@
 package io.tiklab.xcode.repository.service;
 
-import io.tiklab.xcode.repository.model.ImportAuth;
 import io.tiklab.xcode.repository.model.RepositoryToLead;
 
 import java.util.List;

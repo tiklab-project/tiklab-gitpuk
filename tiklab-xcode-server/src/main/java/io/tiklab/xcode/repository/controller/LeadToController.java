@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/toLead")
 @Api(name = "RepositoryToLeadController",desc = "导入仓库")
-public class RepositoryToLeadController {
+public class LeadToController {
 
     @Autowired
     RepositoryToLeadService toLeadService;

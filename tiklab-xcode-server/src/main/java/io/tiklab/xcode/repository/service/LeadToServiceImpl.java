@@ -5,7 +5,6 @@ import io.tiklab.user.user.model.User;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.model.*;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -14,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +24,7 @@ import java.util.concurrent.Executors;
 public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
 
     @Autowired
-    ImportAuthService authService;
+    LeadAuthService authService;
 
     @Autowired
     RepositoryGroupServer groupServer;
@@ -42,7 +40,7 @@ public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
 
     @Override
     public List findThirdRepositoryList(String importAuthId,String page) {
-        ImportAuth importAuth = authService.findImportAuth(importAuthId);
+        LeadAuth importAuth = authService.findLeadAuth(importAuthId);
         String address=null;
         switch (importAuth.getType()){
             case "priGitlab":
@@ -100,7 +98,7 @@ public class RepositoryToLeadServiceImpl implements RepositoryToLeadService {
             @Override
             public void run() {
                 try {
-                    ImportAuth importAuth = authService.findImportAuth(repositoryToLead.getImportAuthId());
+                    LeadAuth importAuth = authService.findLeadAuth(repositoryToLead.getImportAuthId());
                     String repositoryAddress = xcodeYamlDataMaService.repositoryAddress()+"/"+rpyId+".git";
                     GitUntil.copyRepository(repositoryAddress,repositoryToLead.getHttpRepositoryUrl(),importAuth);
                     toLeadResult.put(repositoryToLead.getThirdRepositoryId(),"success");
