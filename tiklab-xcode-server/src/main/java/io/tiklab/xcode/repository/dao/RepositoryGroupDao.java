@@ -1,15 +1,22 @@
 package io.tiklab.xcode.repository.dao;
 
+import io.tiklab.core.page.Page;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.dal.jpa.JpaTemplate;
 import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.tiklab.xcode.repository.entity.RepositoryGroupEntity;
+import io.tiklab.xcode.repository.model.RepositoryGroup;
 import io.tiklab.xcode.repository.model.RepositoryGroupQuery;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class RepositoryGroupDao {
@@ -70,13 +77,27 @@ public class RepositoryGroupDao {
      * @param repositoryGroupQuery
      * @return
      */
-    public Pagination<RepositoryGroupEntity> findRepositoryGroupPage(RepositoryGroupQuery repositoryGroupQuery, String[] ids) {
+    public Pagination<RepositoryGroupEntity> findRepositoryGroupPage(RepositoryGroupQuery repositoryGroupQuery,List ids){
+        Pagination pagination = new Pagination();
+        Page pageParam = repositoryGroupQuery.getPageParam();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("groupIds", ids);
+        NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(jpaTemplate.getJdbcTemplate());
+        int integer = ids.size();
 
-        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryGroupEntity.class)
-                .in("groupId",ids)
-                .pagination(repositoryGroupQuery.getPageParam())
-                .get();
-        return jpaTemplate.findPage(queryCondition,RepositoryGroupEntity.class);
+
+        pagination.setTotalRecord(integer);
+        double result = Math.ceil(integer/pageParam.getPageSize());
+        pagination.setTotalPage((int) result);
+        int offset = (pageParam.getCurrentPage() - 1) * pageParam.getPageSize();
+
+        //查询数据
+        String sql="SELECT gr.group_id ,gr.name,gr.rules,count(re.rpy_id) AS repositoryNum,gr.user_id  FROM rpy_group gr LEFT  JOIN rpy_repository re ON gr.group_id=re.group_id " +
+                " where gr.group_id in (:groupIds) GROUP BY gr.group_id,gr.name,gr.rules,gr.user_id LIMIT " +pageParam.getPageSize()+" offset "+offset;
+
+        List query = jdbc.query(sql, paramMap, new BeanPropertyRowMapper(RepositoryGroupEntity.class));
+        pagination.setDataList(query);
+        return  pagination;
     }
 
     /**
@@ -90,11 +111,11 @@ public class RepositoryGroupDao {
         return jpaTemplate.findList(queryCondition, RepositoryGroupEntity.class);
     }
 
-    /**
+     /* *
      * 通过仓库名字模糊查询仓库列表
      * @param repositoryGroupQuery
-     * @return
-     */
+     * @return*/
+
     public List<RepositoryGroupEntity> findRepositoryListLike(RepositoryGroupQuery repositoryGroupQuery) {
         QueryBuilders queryBuilders = QueryBuilders.createQuery(RepositoryGroupEntity.class)
                 .like("name", repositoryGroupQuery.getName());
@@ -104,6 +125,8 @@ public class RepositoryGroupDao {
         QueryCondition queryCondition = queryBuilders.get();
         return jpaTemplate.findList(queryCondition, RepositoryGroupEntity.class);
     }
+
+
 
     /**
      * 查询所有

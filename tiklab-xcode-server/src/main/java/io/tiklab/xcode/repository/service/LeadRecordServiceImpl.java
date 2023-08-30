@@ -98,6 +98,7 @@ public class LeadRecordServiceImpl implements LeadRecordService {
         List<LeadRecordEntity> leadRecordEntityList = importAuthDao.findLeadRecordList(LeadRecordQuery);
 
         List<LeadRecord> leadRecordList = BeanMapper.mapList(leadRecordEntityList, LeadRecord.class);
+        joinTemplate.joinQuery(leadRecordList);
 
         return leadRecordList;
     }

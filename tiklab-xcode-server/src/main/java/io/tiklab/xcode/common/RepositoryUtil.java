@@ -244,7 +244,31 @@ public class RepositoryUtil {
         }catch (Exception e){
             throw  new ApplicationException(e.getMessage());
         }
+    }
 
+    /**
+     * 获取与当前时间的时间差
+     * @param time
+     * @return 位置
+     */
+    public static String timeBad(Long time){
+        long longTime = System.currentTimeMillis() -time;
+        long days = longTime / (24 * 60 * 60 * 1000); // 计算天数
+        long hours = (longTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000); // 计算小时数
+        long minutes = (longTime % (60 * 60 * 1000)) / (60 * 1000); // 计算分钟数
+
+        String badTime=null;
+        if (days!=0){
+            badTime= days + "天"+ hours + "时前";
+        }
+        if (days==0&&hours!=0){
+            badTime= hours + "时"+ minutes + "分前";
+        }
+        if (days==0&&hours==0){
+            badTime= minutes + "分前";
+        }
+
+        return badTime;
     }
 }
 

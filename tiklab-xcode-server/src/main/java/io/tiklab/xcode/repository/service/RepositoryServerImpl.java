@@ -7,6 +7,7 @@ import io.tiklab.core.exception.SystemException;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.core.page.PaginationBuilder;
 import io.tiklab.eam.common.context.LoginContext;
+import io.tiklab.eam.common.model.EamTicket;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.privilege.dmRole.service.DmRoleService;
 import io.tiklab.rpc.annotation.Exporter;
@@ -15,6 +16,7 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
+import io.tiklab.xcode.authority.ValidUsrPwdServer;
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
@@ -43,6 +45,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,6 +86,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Autowired
     LeadRecordService leadRecordService;
+
+    @Autowired
+    ValidUsrPwdServer validUsrPwdServer;
 
 
     /**
@@ -139,7 +146,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public void deleteRpy(String rpyId) {
         repositoryDao.deleteRpy(rpyId);
-        //删除打卡记录
+        //删除打开记录
         recordOpenService.deleteRecordOpenByRecord(rpyId);
         //删除提交记录
         recordCommitService.deleteRecordCommitByRepository(rpyId);
@@ -356,36 +363,13 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Override
     public Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery) {
-        System.out.println("执行开始时间01:"+new Time(System.currentTimeMillis()));
         List<RepositoryEntity> groupEntityList = repositoryDao.findRepositoryListLike(repositoryQuery);
         List<Repository> allRpy = BeanMapper.mapList(groupEntityList, Repository.class);
 
         if (CollectionUtils.isNotEmpty(allRpy)) {
-            //公共的仓库
-            List<Repository> publicRpy = allRpy.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
-            List<String> canViewRpyId = publicRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
+            List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId());
+            String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
 
-            //私有仓库
-            List<Repository> privateRpy = allRpy.stream().filter(a -> ("private").equals(a.getRules())).collect(Collectors.toList());
-
-            //存在私有库
-            if (CollectionUtils.isNotEmpty(privateRpy)){
-                //查询用户id 查询关联的项目
-                DmUserQuery dmUserQuery = new DmUserQuery();
-                dmUserQuery.setUserId(repositoryQuery.getUserId());
-                List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
-                //存在项目成员
-                if ( CollectionUtils.isNotEmpty(dmUserList)) {
-                    List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
-                    List<String> dmRpyId = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
-
-                    //查询私有相同的仓库id
-                    privateRpyId = privateRpyId.stream().filter(dmRpyId::contains).collect(Collectors.toList());
-                    canViewRpyId = Stream.concat(privateRpyId.stream(), canViewRpyId.stream()).collect(Collectors.toList());
-                }
-            }
-
-            String[] canViewRpyIdList = canViewRpyId.toArray(new String[canViewRpyId.size()]);
            if (canViewRpyIdList.length>0){
                Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
                List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
@@ -393,7 +377,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                return PaginationBuilder.build(pagination,repositoryList);
            }
         }
-        return null;
+        return PaginationBuilder.build(new Pagination<>(),null);
     }
 
     @Override
@@ -486,6 +470,93 @@ public class RepositoryServerImpl implements RepositoryServer {
         return absolutePath;
     }
 
+    @Override
+    public List<Repository> findRepositoryByUser(String account, String password,String DirId) {
+        try {
+            EamTicket eamTicket = validUsrPwdServer.validUser(account, password, DirId);
+            List<RepositoryEntity> repositoryEntityList = repositoryDao.findAllRpy();
+            List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
+            if (CollectionUtils.isNotEmpty(repositoryList)){
+                String address = this.getAddress();
+                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, eamTicket.getUserId());
+
+                List<RepositoryEntity> repositoryEntitys = repositoryDao.findRepositoryListByIds(accessRepositoryId);
+                 repositoryList = BeanMapper.mapList(repositoryEntitys,Repository.class);
+                if (CollectionUtils.isNotEmpty(repositoryList)){
+                    for (Repository repository:repositoryList){
+                        String path = address + "/code/" + repository.getAddress() + ".git";
+                        repository.setFullPath(path);
+                    }
+                }
+            }
+
+            return repositoryList;
+        }catch (Exception e){
+            throw  new SystemException("用户校验失败");
+        }
+    }
+
+    @Override
+    public String getAddress() {
+
+        String visitAddress = yamlDataMaService.visitAddress();
+        if (StringUtils.isEmpty(visitAddress)){
+            String ip=null;
+            try {
+                Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+                while (interfaces.hasMoreElements()) {
+                    NetworkInterface networkInterface = interfaces.nextElement();
+                    if (networkInterface.isLoopback() || networkInterface.isVirtual()) {
+                        continue;  // 跳过回环和虚拟网络接口
+                    }
+                    Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress address = addresses.nextElement();
+                        if (address.isLoopbackAddress()) {
+                            continue;  // 跳过回环地址
+                        }
+                        if (address.getHostAddress().contains(":")) {
+                            continue;  // 跳过IPv6地址
+                        }
+                        ip = address.getHostAddress();
+                    }
+                }
+            } catch (Exception e) {
+                ip = "172.0.0.1";
+            }
+            visitAddress = "http://" + ip + ":" + yamlDataMaService.serverPort();
+        }
+        return visitAddress;
+    }
+
+    @Override
+    public List<Repository> findCommitRepository(String userId) {
+        List<Repository> repositoryList=null;
+
+        List<RecordCommit> commitList = recordCommitService.findRecordCommitList(userId);
+        if (CollectionUtils.isNotEmpty(commitList)){
+            List<Repository> privateRepositoryList = new ArrayList<>();
+            List<Repository> publicRepositories = commitList.stream().filter(a -> ("public").equals(a.getRepository().getRules())).map(RecordCommit::getRepository).collect(Collectors.toList());
+
+            List<RecordCommit> recordCommits = commitList.stream().filter(a -> ("private").equals(a.getRepository().getRules())).collect(Collectors.toList());
+
+            //根据用户id 查询关联的项目
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setUserId(userId);
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+            if ( CollectionUtils.isNotEmpty(dmUserList)&&CollectionUtils.isNotEmpty(recordCommits)) {
+                for (RecordCommit recordCommit:recordCommits){
+                   List<DmUser> collect = dmUserList.stream().filter(a -> recordCommit.getRepository().getRpyId().equals(a.getDomainId())).collect(Collectors.toList());
+                   if (CollectionUtils.isNotEmpty(collect)){
+                       privateRepositoryList.add(recordCommit.getRepository());
+                   }
+                }
+            }
+            repositoryList = Stream.concat(publicRepositories.stream(), privateRepositoryList.stream()).collect(Collectors.toList());
+        }
+        return repositoryList;
+    }
+
 
     public String findDefaultBranch(String repositoryId){
         try {
@@ -502,7 +573,36 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
     }
 
+    /**
+     *查询公共和有权限的仓库
+     */
+    public List<String> findHaveAccessRepository(List<Repository> allRpy,String userId){//公共的仓库
+        List<Repository> publicRpy = allRpy.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
+        List<String> canViewRpyId = publicRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
 
+        //私有仓库
+        List<Repository> privateRpy = allRpy.stream().filter(a -> ("private").equals(a.getRules())).collect(Collectors.toList());
+
+        //存在私有库
+        if (CollectionUtils.isNotEmpty(privateRpy)){
+            //根据用户id 查询关联的项目
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setUserId(userId);
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+            //存在项目成员
+            if ( CollectionUtils.isNotEmpty(dmUserList)) {
+                List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
+                List<String> dmRpyId = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
+
+                //查询私有相同的仓库id
+                privateRpyId = privateRpyId.stream().filter(dmRpyId::contains).collect(Collectors.toList());
+                canViewRpyId = Stream.concat(privateRpyId.stream(), canViewRpyId.stream()).collect(Collectors.toList());
+            }
+        }
+        return canViewRpyId;
+
+
+    }
 }
 
 

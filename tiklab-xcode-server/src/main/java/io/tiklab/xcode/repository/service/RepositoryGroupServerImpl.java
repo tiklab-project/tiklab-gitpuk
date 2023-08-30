@@ -142,15 +142,16 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
                     canViewId = Stream.concat(privateGroupId.stream(), canViewId.stream()).collect(Collectors.toList());
                 }
             }
-            String[] canViewGroupIdList = canViewId.toArray(new String[canViewId.size()]);
-            if (canViewGroupIdList.length>0){
-                Pagination<RepositoryGroupEntity> repositoryGroupPage = repositoryGroupDao.findRepositoryGroupPage(repositoryGroupQuery, canViewGroupIdList);
-                List<RepositoryGroup> repositoryGroupList = BeanMapper.mapList(repositoryGroupPage.getDataList(),RepositoryGroup.class);
-                joinTemplate.joinQuery(repositoryGroupList);
-                return PaginationBuilder.build(repositoryGroupPage,repositoryGroupList);
+            //String[] canViewGroupIdList = canViewId.toArray(new String[canViewId.size()]);
+
+            if (canViewId.size()>0){
+                Pagination<RepositoryGroupEntity> repositoryGroupPage = repositoryGroupDao.findRepositoryGroupPage(repositoryGroupQuery, canViewId);
+                List<RepositoryGroup> repositoryGroups = BeanMapper.mapList(repositoryGroupPage.getDataList(), RepositoryGroup.class);
+                joinTemplate.joinQuery(repositoryGroups);
+                return PaginationBuilder.build(repositoryGroupPage,repositoryGroups);
             }
         }
-        return null;
+        return PaginationBuilder.build(new Pagination<>(),null);
     }
 
     @Override

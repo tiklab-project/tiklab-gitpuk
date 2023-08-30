@@ -27,10 +27,11 @@ public class LeadTo {
     @ApiProperty(name="thirdRepositoryId",desc="第三方仓库的id")
     private String thirdRepositoryId;
 
-    @ApiProperty(name="importAuthId",desc="importAuthId")
+    @ApiProperty(name="importAuthId",desc="导入认证的id")
     private String importAuthId;
 
-
+    @ApiProperty(name="execResult",desc="执行结果")
+    private String execResult;
 
     public String getRepositoryName() {
         return repositoryName;
@@ -94,5 +95,13 @@ public class LeadTo {
 
     public void setImportAuthId(String importAuthId) {
         this.importAuthId = importAuthId;
+    }
+
+    public String getExecResult() {
+        return execResult;
+    }
+
+    public void setExecResult(String execResult) {
+        this.execResult = execResult;
     }
 }

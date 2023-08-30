@@ -12,6 +12,7 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
+import io.tiklab.xcode.common.RepositoryUtil;
 import io.tiklab.xcode.repository.dao.RecordCommitDao;
 import io.tiklab.xcode.repository.entity.RecordCommitEntity;
 import io.tiklab.xcode.repository.entity.RecordOpenEntity;
@@ -162,22 +163,10 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         List<RecordCommit> RecordCommitList = publicRep.stream().limit(4).collect(Collectors.toList());
 
         for (RecordCommit recordCommit:RecordCommitList){
-            long longTime = System.currentTimeMillis() - recordCommit.getCommitTime().getTime();
-            long days = longTime / (24 * 60 * 60 * 1000); // 计算天数
-            long hours = (longTime % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000); // 计算小时数
-            long minutes = (longTime % (60 * 60 * 1000)) / (60 * 1000); // 计算分钟数
 
-            String badTime=null;
-            if (days!=0){
-              badTime= days + "天"+ hours + "时前";
-            }
-            if (days==0&&hours!=0){
-                badTime= hours + "时"+ minutes + "分前";
-            }
-            if (days==0&&hours==0){
-                badTime= minutes + "分前";
-            }
-            recordCommit.setCommitTimeBad(badTime);
+            //计算时间差
+            String timedBad = RepositoryUtil.timeBad(recordCommit.getCommitTime().getTime());
+            recordCommit.setCommitTimeBad(timedBad);
 
             String address = recordCommit.getRepository().getAddress();
             String[] split = address.split("/");
@@ -191,6 +180,23 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         }
 
         return RecordCommitList;
+    }
+
+    @Override
+    public List<RecordCommit> findRecordCommitList(String userId) {
+        List<RecordCommitEntity> openRecordEntityList = recordCommitDao.findRecordCommitList(new RecordCommitQuery().setUserId(userId));
+
+        List<RecordCommit> openRecordList = BeanMapper.mapList(openRecordEntityList, RecordCommit.class);
+
+        if (CollectionUtils.isNotEmpty(openRecordList)){
+           openRecordList = openRecordList.stream()
+                    .distinct()
+                    .collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(a->a.getRepository().getRpyId()))), ArrayList::new));
+
+            joinTemplate.joinQuery(openRecordList);
+        }
+
+        return openRecordList;
     }
 
     @Override
@@ -212,6 +218,9 @@ public class RecordCommitServiceImpl implements RecordCommitService {
             String groupName=split[2];
             String name=split[3].substring(0,split[3].indexOf(".git"));
             Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+            //更新仓库提交时间
+            repositoryServer.updateRpy(repository);
+
 
             RecordCommit recordCommit = new RecordCommit();
             recordCommit.setRepository(repository);

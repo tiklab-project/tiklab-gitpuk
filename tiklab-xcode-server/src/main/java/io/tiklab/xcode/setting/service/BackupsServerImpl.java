@@ -25,12 +25,10 @@ import javax.validation.constraints.Null;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -69,6 +67,8 @@ public class BackupsServerImpl implements BackupsServer{
         if (!file.exists()){
             file.mkdir();
         }
+        
+        File repositoryFile = new File(yamlDataMaService.repositoryAddress());
 
         List<Repository> allRpy = repositoryServer.findAllRpy();
         String loginId = LoginContext.getLoginId();
@@ -81,16 +81,26 @@ public class BackupsServerImpl implements BackupsServer{
         executorService.submit(new Runnable(){
             @Override
             public void run() {
-
-                //添加最后一层目录压缩
-                String backupAddress = yamlDataMaService.backupAddress();
-                String lastName = backupAddress.substring(backupAddress.lastIndexOf("/"));
-
-                String backupPath=backupAddress+lastName;
-                //code 下面存放代码数据
-                File backUpsUrlFile = new File(backupPath+"/code");
-
                 try {
+                    boolean isResidue = memSize(file, repositoryFile);
+                    //当剩余空间不足删除最先备份的那个文件
+                    if(!isResidue){
+                        //获取备份文件夹下面备份文件并根据创建时间排序
+                        File[] files = file.listFiles();
+                        List<File> collected = Arrays.stream(files).sorted(Comparator.comparing(a -> a.lastModified())).collect(Collectors.toList());
+                        File firstFile = collected.get(0);
+                        //删除文件
+                        FileUtils.deleteQuietly(firstFile);
+                    }
+                    //添加最后一层目录压缩
+                    String backupAddress = yamlDataMaService.backupAddress();
+                    String lastName = backupAddress.substring(backupAddress.lastIndexOf("/"));
+
+                    String backupPath=backupAddress+lastName;
+                    //code 下面存放代码数据
+                    File backUpsUrlFile = new File(backupPath+"/code");
+
+
                     if (!backUpsUrlFile.exists() && !backUpsUrlFile.isDirectory()) {
                         backUpsUrlFile.mkdirs();
                     }
@@ -421,20 +431,6 @@ public class BackupsServerImpl implements BackupsServer{
         }
     }
 
-
-    @Scheduled(cron = "0 0 2 * * ?")
-    public void createTemplate(){
-        File file = new File(AppHomeContext.getAppHome() + "/file/backups");
-        String fileData = gainFileData(file);
-
-        JSONObject jsonObject = JSONObject.parseObject(fileData);
-        String state = jsonObject.get("task-state").toString();
-        if ("true".equals(state)){
-            logger.info("定时备份执行");
-           this.backupsExec();
-        }
-    }
-
     /**
      *  拼接备份日志
      *  @param log 日志
@@ -452,7 +448,7 @@ public class BackupsServerImpl implements BackupsServer{
         }else {
             backupsExecLog.put(loginId,logs+"\n"+resultLog);
         }
-        logger.info("日志:"+logs);
+        logger.info("日志:"+log);
     }
 
     /**
@@ -473,6 +469,30 @@ public class BackupsServerImpl implements BackupsServer{
             recoveryLog.put(loginId,logs+"\n"+resultLog);
         }
         logger.info("日志:"+logs);
+    }
+
+    /**
+     *  是否有足够空间备份
+     *  @param backupFile 备份file
+     * @param   repositoryFile 代码库总大小
+     */
+    public boolean memSize(File backupFile,File repositoryFile){
+        //当前文件夹所在磁盘的总大小
+        long totalSpace = backupFile.getTotalSpace();
+        //备份文件夹占用大小
+        long folderSize = FileUtils.sizeOf(backupFile);
+
+        //代码库仓库的大小
+        long repositorySize = FileUtils.sizeOf(repositoryFile);
+        //留出1G的空间
+        long l = repositorySize + 1073741824;
+
+
+        long residue = totalSpace - folderSize;
+        if (residue>l){
+            return  true;
+        }
+        return false;
     }
 
 }

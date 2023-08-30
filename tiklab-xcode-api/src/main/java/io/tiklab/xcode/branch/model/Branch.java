@@ -10,6 +10,9 @@ public class Branch implements Serializable {
     //分支名称
     private String branchName;
 
+    //更新人
+    private String updateUser;
+
     //更新时间
     private String updateTime;
 
@@ -68,5 +71,13 @@ public class Branch implements Serializable {
 
     public void setDefaultBranch(boolean defaultBranch) {
         this.defaultBranch = defaultBranch;
+    }
+
+    public String getUpdateUser() {
+        return updateUser;
+    }
+
+    public void setUpdateUser(String updateUser) {
+        this.updateUser = updateUser;
     }
 }

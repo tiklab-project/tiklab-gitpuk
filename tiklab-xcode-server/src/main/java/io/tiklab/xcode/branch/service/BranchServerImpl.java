@@ -1,6 +1,7 @@
 package io.tiklab.xcode.branch.service;
 
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.core.exception.SystemException;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.xcode.branch.model.BranchMessage;
 import io.tiklab.xcode.branch.model.Branch;
@@ -10,10 +11,14 @@ import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.common.RepositoryUtil;
 import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,9 +107,25 @@ public class BranchServerImpl implements BranchServer {
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),branchQuery.getRpyId());
         try {
             branchQuery.setRepositoryAddress(repositoryAddress);
-            return GitBranchUntil.findBranchList(branchQuery);
+            List<Branch> branchList = GitBranchUntil.findBranchList(branchQuery);
+
+            return branchList;
         } catch (IOException e) {
             throw new ApplicationException("分支信息获取失败："+e);
+        }
+    }
+
+    @Override
+    public void updateDefaultBranch(BranchQuery branchQuery) {
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),branchQuery.getRpyId()) ;
+
+        File file = new File(repositoryAddress);
+        try {
+            Git git = Git.open(file);
+            Repository repository = git.getRepository();
+            GitBranchUntil.updateFullBranch(repository, branchQuery.getName());
+        } catch (IOException e) {
+            throw new SystemException(9000,"切换默认分支失败:"+branchQuery.getName());
         }
     }
 }

@@ -11,7 +11,7 @@ public class BranchQuery implements Serializable {
     @ApiProperty(name ="name",desc = "分支名称")
     private String  name;
 
-    @ApiProperty(name ="state",desc = "分支状态 活跃：active ")
+    @ApiProperty(name ="state",desc = "分支状态 活跃：active、非活跃noActive")
     private String  state;
 
     @ApiProperty(name ="rpyId",desc = "仓库id")

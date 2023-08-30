@@ -4,6 +4,7 @@ import io.tiklab.xcode.commit.model.*;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.common.RepositoryFinal;
 import io.tiklab.xcode.common.RepositoryUtil;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -65,12 +66,12 @@ public class GitCommitUntil {
         List<CommitMessage> list = new ArrayList<>();
         for (RevCommit revCommit : revWalk) {
 
-            if (number != null && i < 50){
+            if (StringUtils.isEmpty(commit.getCommitInfo())&&number != null && i < 50){
                 i++;
                 continue;
             }
-
-            if (number == null && i >= 50){
+            //默认50条，大于50条释放资源
+            if (StringUtils.isEmpty(commit.getCommitInfo())&&number == null && i >= 50){
                 revCommit.disposeBody();
                 revWalk.close();
                 list.sort(Comparator.comparing(CommitMessage::getDateTime).reversed());
@@ -80,16 +81,30 @@ public class GitCommitUntil {
             TreeWalk treeWalk = new TreeWalk(repository);
             treeWalk.reset(revCommit.getTree());
 
-            Date date = revCommit.getAuthorIdent().getWhen();//时间
-            String name = revCommit.getAuthorIdent().getName();//提交人
 
-            CommitMessage commitMessage = new CommitMessage();
-            commitMessage.setCommitId(revCommit.getId().getName());//commitId
-            commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
-            commitMessage.setCommitUser(name);
-            commitMessage.setDateTime(date);
-            commitMessage.setCommitTime(RepositoryUtil.time(date)+"前");//转换时间
+            CommitMessage commitMessage;
+            //根据提交用户查询
+            if (StringUtils.isNotEmpty(commit.getCommitUser())){
+                if (revCommit.getAuthorIdent().getName().equals(commit.getCommitUser())){
+                    commitMessage = getCommitMessage(revCommit);
+                    list.add(commitMessage);
+                }
+                continue;
+            }
+
+            //根据输入提交信息查询
+            if (StringUtils.isNotEmpty(commit.getCommitInfo())){
+                boolean contains = revCommit.getShortMessage().contains(commit.getCommitInfo());
+                if (contains){
+                    commitMessage = getCommitMessage(revCommit);
+                    list.add(commitMessage);
+                }
+                continue;
+            }
+
+            commitMessage = getCommitMessage(revCommit);
             list.add(commitMessage);
+
             treeWalk.close();
             revCommit.disposeBody();
             i++;
@@ -100,35 +115,37 @@ public class GitCommitUntil {
         return list;
     }
 
+
+
     /**
      * 获取分支的提交记录
      * @param repository 仓库
      * @param branch 分支
+     * @param findCommitState 是否是查询提交文件详情的状态 true、false
      * @return 提交记录
      * @throws IOException 仓库不存在
      * @throws ApplicationException 分支不存在
      */
-    public static CommitMessage findOneBranchCommit(Repository repository, String branch)
+    public static CommitMessage findOneBranchCommit(Repository repository, String branch,boolean findCommitState)
             throws IOException , ApplicationException {
 
-        ObjectId objectId = ObjectId.fromString(branch);
+        ObjectId objectId;
+        if (findCommitState){
+             objectId = ObjectId.fromString(branch);
+        }else {
+            objectId=  repository.findRef(branch).getObjectId();
+        }
+
 
         RevWalk revWalk = new RevWalk(repository);
         revWalk.markStart(revWalk.parseCommit(objectId));
 
         for (RevCommit revCommit : revWalk) {
-            CommitMessage commitMessage = new CommitMessage();
+
             TreeWalk treeWalk = new TreeWalk(repository);
             treeWalk.reset(revCommit.getTree());
 
-            Date date = revCommit.getAuthorIdent().getWhen();//时间
-            String name = revCommit.getAuthorIdent().getName();//提交人
-
-            commitMessage.setCommitId(revCommit.getId().getName());//commitId
-            commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
-            commitMessage.setCommitUser(name);
-            commitMessage.setDateTime(date);
-            commitMessage.setCommitTime(RepositoryUtil.time(date)+"前");//转换时间
+            CommitMessage commitMessage = getCommitMessage(revCommit);
 
             treeWalk.close();
             revCommit.disposeBody();
@@ -143,10 +160,11 @@ public class GitCommitUntil {
      * @param repo 仓库信息
      * @param newCommit 新树
      * @param oldCommit 旧树
+     * @param findState 查询状态  all：查询所有
      * @return 文件对比信息
      * @throws IOException 扫描失败
      */
-    public static FileDiffEntry findFileChangedList(Repository repo, RevCommit newCommit, RevCommit oldCommit)
+    public static FileDiffEntry findFileChangedListX(Repository repo, RevCommit newCommit, RevCommit oldCommit,String findState)
             throws IOException {
 
         // 获取文件的详细差异
@@ -174,7 +192,17 @@ public class GitCommitUntil {
 
         FileDiffEntry fileDiffEntry = new FileDiffEntry();
         List<CommitFileDiffList> list = new ArrayList<>();
+        int a = 0;
         for (DiffEntry diffEntry : diffEntries) {
+            //查询状态为查询所有 就直接处理50条以后的参数
+           /* if (findState != null && a <40){
+                a++;
+                continue;
+            }
+            //第一次查询只查询前五条
+            if (findState == null && a >=40){
+                break;
+            }*/
             CommitFileDiffList commitFileDiffList = new CommitFileDiffList();
             String name = diffEntry.getChangeType().name();
             String oldPath = diffEntry.getOldPath();
@@ -215,10 +243,12 @@ public class GitCommitUntil {
             commitFileDiffList.setAddLine(addLine);
             commitFileDiffList.setDeleteLine(deleteLine);
             list.add(commitFileDiffList);
+
+            a++;
         }
         fileDiffEntry.setDiffList(list);
 
-        CommitMessage branchCommit = GitCommitUntil.findOneBranchCommit(repo, newCommit.getId().getName());
+        CommitMessage branchCommit = GitCommitUntil.findOneBranchCommit(repo, newCommit.getId().getName(),true);
 
         if (branchCommit != null){
             fileDiffEntry.setCommitMessage(branchCommit.getCommitMessage());
@@ -438,7 +468,23 @@ public class GitCommitUntil {
         return list;
     }
 
+    /**
+     * 获取CommitMessage对象
+     * @param revCommit revCommit
+     */
+    public static CommitMessage getCommitMessage(RevCommit revCommit ){
+        Date date = revCommit.getAuthorIdent().getWhen();//时间
+        String name = revCommit.getAuthorIdent().getName();//提交人
 
+        CommitMessage commitMessage = new CommitMessage();
+        commitMessage.setCommitId(revCommit.getId().getName());//commitId
+        commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
+        commitMessage.setCommitUser(name);
+        commitMessage.setDateTime(date);
+        commitMessage.setCommitTime(RepositoryUtil.time(date)+"前");//转换时间
+
+        return commitMessage;
+    }
 }
 
 

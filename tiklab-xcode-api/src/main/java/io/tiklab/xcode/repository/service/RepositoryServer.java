@@ -1,6 +1,8 @@
 package io.tiklab.xcode.repository.service;
 
+import io.tiklab.core.Result;
 import io.tiklab.core.page.Pagination;
+import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.repository.model.RepositoryCloneAddress;
@@ -139,6 +141,26 @@ public interface RepositoryServer {
      */
     String findRepositoryAp(String address);
 
+
+    /**
+     * 通过用户查询有权限的仓库
+     * @param account  用户账号
+     * @param  password 密码
+     * @return List<Repository>
+     */
+    List<Repository> findRepositoryByUser(String account,String password,String DirId);
+
+    /**
+     * 获取域名或者ip
+     * @return 绝对路径
+     */
+    String getAddress();
+
+    /**
+     * 查询用户推送过的仓库
+     * @return userId 用户ID
+     */
+    List<Repository> findCommitRepository(String userId);
 }
 
 

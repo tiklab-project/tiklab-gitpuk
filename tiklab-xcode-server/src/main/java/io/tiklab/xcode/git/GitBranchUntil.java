@@ -3,10 +3,12 @@ package io.tiklab.xcode.git;
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.branch.model.BranchQuery;
+import io.tiklab.xcode.commit.model.CommitMessage;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -145,14 +147,32 @@ public class GitBranchUntil {
                 defaultBranch = target.getName();
                 continue;
             }
-
-            String Id = ref.getObjectId().getName();
-            String s = name.replace(Constants.R_HEADS, "");
-            branch.setBranchId(Id);
             //判断是否为默认分支
             if (defaultBranch.equals(name)){
                 branch.setDefaultBranch(true);
             }
+            String Id = ref.getObjectId().getName();
+            String s = name.replace(Constants.R_HEADS, "");
+
+            CommitMessage oneBranchCommit = GitCommitUntil.findOneBranchCommit(repository, s,false);
+
+            branch.setUpdateUser(oneBranchCommit.getCommitUser());
+            branch.setUpdateTime(oneBranchCommit.getCommitTime());
+            //根据活跃状态查询
+            if (StringUtils.isNotEmpty(branchQuery.getState())){
+                if (("active").equals(branchQuery.getState())){
+                    branch.setBranchId(Id);
+                    branch.setBranchName(s);
+                    list.add(branch);
+                    continue;
+                }
+                if (("noActive").equals(branchQuery.getState())){
+                    continue;
+                }
+            }
+
+            branch.setBranchId(Id);
+
             branch.setBranchName(s);
             list.add(branch);
         }

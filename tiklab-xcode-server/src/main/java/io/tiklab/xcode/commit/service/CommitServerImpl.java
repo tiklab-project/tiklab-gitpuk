@@ -47,6 +47,7 @@ public class CommitServerImpl implements CommitServer {
         if (branchCommit.isEmpty()){
            return Collections.emptyList();
         }
+
         return commitSort(branchCommit, new ArrayList<>());
     }
 
@@ -83,8 +84,8 @@ public class CommitServerImpl implements CommitServer {
             RevCommit oldRevCommit =  newOldTree.get("oldTree");
             RevCommit revCommit = newOldTree.get("newTree");
 
-            FileDiffEntry changedList = GitCommitUntil.findFileChangedList(repository, revCommit,
-                    oldRevCommit);
+            FileDiffEntry changedList = GitCommitUntil.findFileChangedListX(repository, revCommit,
+                    oldRevCommit,commit.getNumber());
             List<CommitFileDiffList> diffList = changedList.getDiffList();
             int allAddLine = 0;
             int allDeleteLine = 0;
@@ -118,8 +119,8 @@ public class CommitServerImpl implements CommitServer {
             RevCommit oldRevCommit =  newOldTree.get("oldTree");
             RevCommit revCommit = newOldTree.get("newTree");
 
-            FileDiffEntry changedList = GitCommitUntil.findFileChangedList(repository, revCommit,
-                    oldRevCommit);
+            FileDiffEntry changedList = GitCommitUntil.findFileChangedListX(repository, revCommit,
+                    oldRevCommit,null);
             List<CommitFileDiffList> diffList = changedList.getDiffList();
             List<CommitFileDiffList> lists = new ArrayList<>();
             String likePath = commit.getLikePath();

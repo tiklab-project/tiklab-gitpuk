@@ -167,6 +167,24 @@ public class RepositoryController {
         return Result.ok();
     }
 
+    @RequestMapping(path="/findCommitRepository",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitRepository",desc = "查询用户推送过的仓库")
+    @ApiParam(name = "userId",desc = "用户id",required = true)
+    public Result<List<Repository>> findCommitRepository(@NotNull String userId){
+        List<Repository> repositoryList=repositoryServer.findCommitRepository(userId);
+
+        return Result.ok(repositoryList);
+    }
+
+    @RequestMapping(path="/getAddress",method = RequestMethod.POST)
+    @ApiMethod(name = "getAddress",desc = "获取当前服务起ip 或配置的域名")
+    public Result<String> getAddress(){
+        String address=repositoryServer.getAddress();
+
+        return Result.ok(address);
+    }
+
+
 }
 
 

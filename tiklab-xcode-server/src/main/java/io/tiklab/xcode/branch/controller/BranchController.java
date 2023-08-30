@@ -66,7 +66,15 @@ public class BranchController {
         return Result.ok();
     }
 
+    @RequestMapping(path="/updateDefaultBranch",method = RequestMethod.POST)
+    @ApiMethod(name = "updateDefaultBranch",desc = "修改默认分支")
+    @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
+    public Result<Void> updateDefaultBranch(@RequestBody @Valid @NotNull BranchQuery branchQuery){
 
+        branchServer.updateDefaultBranch(branchQuery);
+
+        return Result.ok();
+    }
 
 }
 

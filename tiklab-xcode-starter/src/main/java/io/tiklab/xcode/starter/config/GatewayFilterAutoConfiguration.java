@@ -78,6 +78,7 @@ public class GatewayFilterAutoConfiguration {
                         "/alterSql/updateId",
                         "/gui",
 
+
                 })
                 .ignorePreUrls(new String[]{
                         "/service",

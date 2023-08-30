@@ -1,5 +1,7 @@
 package io.tiklab.xcode.authority;
 
+import io.tiklab.eam.common.model.EamTicket;
+
 public interface ValidUsrPwdServer {
 
     /**
@@ -11,5 +13,12 @@ public interface ValidUsrPwdServer {
      */
     boolean validUserNamePassword(String username ,String password,String id);
 
-
+    /**
+     * 效验账户 密码
+     * @param username 用户名
+     * @param password 密码
+     * @param id 效验类型
+     * @return EamTicket
+     */
+    EamTicket validUser(String username ,String password,String id);
 }

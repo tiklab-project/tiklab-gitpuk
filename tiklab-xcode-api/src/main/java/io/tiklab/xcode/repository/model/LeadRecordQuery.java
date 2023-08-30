@@ -16,6 +16,10 @@ public class LeadRecordQuery implements Serializable {
     @ApiProperty(name ="RpyId",desc = "仓库id")
     private String  RpyId;
 
+    @ApiProperty(name ="leadWay",desc = "导入方式")
+    private String  leadWay;
+
+
 
     public List<Order> getOrderParams() {
         return orderParams;
@@ -31,5 +35,14 @@ public class LeadRecordQuery implements Serializable {
 
     public void setRpyId(String rpyId) {
         RpyId = rpyId;
+    }
+
+    public String getLeadWay() {
+        return leadWay;
+    }
+
+    public LeadRecordQuery setLeadWay(String leadWay) {
+        this.leadWay = leadWay;
+        return this;
     }
 }

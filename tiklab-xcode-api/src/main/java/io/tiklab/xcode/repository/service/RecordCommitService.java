@@ -76,6 +76,13 @@ public interface RecordCommitService {
     List<RecordCommit> findRecordCommitList(RecordCommitQuery recordCommitQuery);
 
     /**
+     * 查询列表
+     * @param userId
+     * @return
+     */
+    List<RecordCommit> findRecordCommitList(String userId);
+
+    /**
     * 按分页查询
     * @param recordCommitQuery
     * @return

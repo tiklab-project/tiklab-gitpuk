@@ -1,6 +1,7 @@
 package io.tiklab.xcode.repository.entity;
 
 import io.tiklab.dal.jpa.annotation.*;
+import io.tiklab.postin.annotation.ApiProperty;
 
 @Entity
 @Table(name="rpy_group")
@@ -31,6 +32,9 @@ public class RepositoryGroupEntity {
 
     @Column(name = "remarks")
     private String remarks;
+
+    @ApiProperty(name="repositoryNum",desc="仓库数")
+    private String repositoryNum;
 
 
     public String getGroupId() {
@@ -95,6 +99,14 @@ public class RepositoryGroupEntity {
 
     public void setRules(String rules) {
         this.rules = rules;
+    }
+
+    public String getRepositoryNum() {
+        return repositoryNum;
+    }
+
+    public void setRepositoryNum(String repositoryNum) {
+        this.repositoryNum = repositoryNum;
     }
 }
 

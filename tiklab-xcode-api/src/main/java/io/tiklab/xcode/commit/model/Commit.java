@@ -16,7 +16,7 @@ public class Commit {
     private String branch;
 
     /**
-     * 分支是否为commitId
+     * 分支是否为commitId  （通过提交界面查询提交代码文件的详情）
      */
     private boolean findCommitId;
 
@@ -44,6 +44,16 @@ public class Commit {
      * 查询所有
      */
     private String number;
+
+    /**
+     * 输入的查询提交信息
+     */
+    private String commitInfo;
+
+    /**
+     * 提交人
+     */
+    private String commitUser;
 
 
     public int getBegin() {
@@ -108,6 +118,22 @@ public class Commit {
 
     public void setNumber(String number) {
         this.number = number;
+    }
+
+    public String getCommitInfo() {
+        return commitInfo;
+    }
+
+    public void setCommitInfo(String commitInfo) {
+        this.commitInfo = commitInfo;
+    }
+
+    public String getCommitUser() {
+        return commitUser;
+    }
+
+    public void setCommitUser(String commitUser) {
+        this.commitUser = commitUser;
     }
 }
 

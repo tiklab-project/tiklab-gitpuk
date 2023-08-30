@@ -42,4 +42,10 @@ public interface BranchServer {
      * @param branchQuery
      */
     List<Branch> findBranchList(BranchQuery branchQuery);
+
+    /**
+     * 修改默认分支
+     * @param branchQuery
+     */
+    void updateDefaultBranch( BranchQuery branchQuery);
 }

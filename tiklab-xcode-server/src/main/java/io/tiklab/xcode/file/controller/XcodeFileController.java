@@ -62,29 +62,6 @@ public class XcodeFileController {
         return Result.ok();
     }
 
-
-
-    @RequestMapping(path="/test",method = RequestMethod.POST)
-    public Result<Void> test(){
-        List<RoleFunction> allRoleFunction = roleFunctionService.findAllRoleFunction();
-        List<DmRole> allDmRole = dmRoleService.findAllDmRole();
-        for (DmRole dmRole:allDmRole){
-            List<RoleFunction> collected = allRoleFunction.stream().filter(a -> a.getRole().equals(dmRole.getRole())&&a.getFunction().getId().equals("xmirror")).collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(collected)){
-                RoleFunction roleFunction = new RoleFunction();
-                Function function = new Function();
-                function.setId("xmirror");
-                roleFunction.setFunction(function);
-                roleFunction.setRole(dmRole.getRole());
-                roleFunctionService.createRoleFunction(roleFunction);
-                System.out.println("meiyou"+dmRole);
-            }
-        }
-
-        return Result.ok();
-    }
-
-
 }
 
 

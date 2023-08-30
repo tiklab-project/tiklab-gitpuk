@@ -1,5 +1,7 @@
 package io.tiklab.xcode.repository.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.user.user.model.User;
 import io.tiklab.xcode.git.GitUntil;
@@ -14,11 +16,14 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
 /**
  * LeadToServiceImpl-执行导入
  */
@@ -45,6 +50,8 @@ public class LeadToServiceImpl implements LeadToService {
 
     @Override
     public List findThirdRepositoryList(String importAuthId,String page) {
+        List<LeadTo> resultList = new ArrayList<>();
+
         LeadAuth importAuth = authService.findLeadAuth(importAuthId);
         String address=null;
         switch (importAuth.getType()){
@@ -53,8 +60,18 @@ public class LeadToServiceImpl implements LeadToService {
                 break;
         }
         String path=address+"&private_token="+importAuth.getAccessToken();
-        return getRestTemplate(path);
+        List restTemplate = getRestTemplate(path);
+        List<LeadRecord> leadRecordList = leadRecordService.findLeadRecordList(new LeadRecordQuery().setLeadWay(importAuth.getType()));
+        if (!CollectionUtils.isEmpty(restTemplate)){
+            for (Object value:restTemplate){
+                LeadTo leadTo = GitLabData(value, leadRecordList);
+
+                resultList.add(leadTo);
+            }
+        }
+        return resultList;
     }
+
 
 
     @Override
@@ -85,7 +102,7 @@ public class LeadToServiceImpl implements LeadToService {
                 .setGroupId(groupId).setName(leadTo.getRepositoryName()));
         if (!CollectionUtils.isEmpty(repositoryList)){
             toLeadResult.put(leadTo.getThirdRepositoryId(),"仓库已经导入");
-            return null;
+            return "OK";
         }
         //创建仓库
         Repository repository = new Repository();
@@ -141,9 +158,38 @@ public class LeadToServiceImpl implements LeadToService {
 
 
     /**
-     *restTemplate调用第三方接口
-     * @param path 路径
+     *gitLab 仓库参数
+     * @param value gitlab 仓库值
+     * @param leadRecordList 导入记录
      */
+    public LeadTo GitLabData(Object value,List<LeadRecord> leadRecordList){
+        LeadTo leadTo = new LeadTo();
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(value);
+
+        leadTo.setRepositoryName(jsonObject.get("name").toString());
+        //仓库路径
+        leadTo.setRepositoryUrl(jsonObject.get("path_with_namespace").toString());
+        //仓库组名字
+        JSONObject namespace = (JSONObject) jsonObject.get("namespace");
+        String groupName = namespace.get("path").toString();
+        leadTo.setGroupName(groupName);
+
+        leadTo.setHttpRepositoryUrl(jsonObject.get("http_url_to_repo").toString());
+        leadTo.setThirdRepositoryId(jsonObject.get("id").toString());
+        if (!CollectionUtils.isEmpty(leadRecordList)){
+            String id = jsonObject.get("id").toString();
+            List<LeadRecord> records = leadRecordList.stream().filter(a -> a.getRelevanceId().equals(id)).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(records)) {
+                //执行结果
+                leadTo.setExecResult(records.get(0).getLeadState());
+                //权限
+                leadTo.setRule(records.get(0).getRepository().getRules());
+            }
+        }
+        return leadTo;
+    }
+
+
     public List getRestTemplate(String path){
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().set(1,new StringHttpMessageConverter(StandardCharsets.UTF_8));
@@ -154,4 +200,5 @@ public class LeadToServiceImpl implements LeadToService {
         }
         return null;
     }
+
 }

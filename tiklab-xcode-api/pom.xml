@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.tiklab</groupId>
 		<artifactId>tiklab-xcode</artifactId>
-		<version>1.0.0.3</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>tiklab-xcode-api</artifactId>
@@ -37,6 +37,12 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.tiklab</groupId>
+            <artifactId>tiklab-eam-api</artifactId>
+            <version>1.0.0.3</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
