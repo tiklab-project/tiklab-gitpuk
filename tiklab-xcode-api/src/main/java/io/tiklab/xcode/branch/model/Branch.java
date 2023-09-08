@@ -10,6 +10,7 @@ public class Branch implements Serializable {
     //分支名称
     private String branchName;
 
+
     //更新人
     private String updateUser;
 
@@ -24,6 +25,8 @@ public class Branch implements Serializable {
 
     //默认分支
     private boolean defaultBranch;
+
+
 
     public String getBranchId() {
         return branchId;

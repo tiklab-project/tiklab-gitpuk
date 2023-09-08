@@ -9,9 +9,8 @@ import io.tiklab.xcode.branch.model.BranchQuery;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.common.RepositoryUtil;
-import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
@@ -59,7 +58,7 @@ public class BranchServerImpl implements BranchServer {
         List<Branch> branches;
         try {
             branches = GitBranchUntil.findAllBranch(repositoryAddress);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ApplicationException("分支信息获取失败："+e);
         }
 

@@ -163,9 +163,8 @@ public class RepositoryFileUtil {
 
         List<FileTree> list = new ArrayList<>();
         String commitId = message.getBranch();
-        boolean findCommitId = message.isFindCommitId();
-
-        RevTree tree = GitBranchUntil.findBarthCommitRevTree(repository, commitId, findCommitId);
+        //RevTree tree =GitBranchUntil.findBarthCommitRevTree(repository,commitId,message.isFindCommitId());
+        RevTree tree =GitBranchUntil.findBarthCommitRevTree(repository,commitId,message.getFindType());
 
         TreeWalk treeWalk = new TreeWalk(repository);
         treeWalk.addTree(tree);
@@ -233,8 +232,21 @@ public class RepositoryFileUtil {
             String fileAddress = fileName;
 
             String branch = message.getBranch();
-            if (message.isFindCommitId()){
+
+
+            ObjectId objectId = GitBranchUntil.findObjectId(repository, branch, message.getFindType());
+            List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),fileAddress);
+            if (!commitList.isEmpty()){
+                Map<String, String> fileCommit = commitList.get(0);
+                fileTree.setCommitMessage(fileCommit.get("message"));
+                fileTree.setCommitTime(fileCommit.get("time"));
+            }
+
+            if (("commit").equals(message.getFindType())){
                 branch = branch + RepositoryFinal.COMMIT_ONLY_ID;
+            }
+            if (("tag").equals(message.getFindType())){
+                branch = branch + RepositoryFinal.TAG;
             }
 
             if (!RepositoryUtil.isNoNull(file)){
@@ -244,26 +256,6 @@ public class RepositoryFileUtil {
                 path = "/" + type + "/" + branch + file+"/"+ fileName;
             }
             fileTree.setPath(path);
-
-            //获取提交id
-            boolean b = message.isFindCommitId();
-            ObjectId objectId;
-            if (!b){
-                objectId = repository.resolve(Constants.R_HEADS + branch);
-                //objectId = repository.resolve(branch);
-            }else {
-                if(branch.contains(RepositoryFinal.COMMIT_ONLY_ID)){
-                    branch = branch.replace(RepositoryFinal.COMMIT_ONLY_ID,"");
-                }
-                objectId = ObjectId.fromString(branch);
-            }
-
-            List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),fileAddress);
-            if (!commitList.isEmpty()){
-                Map<String, String> fileCommit = commitList.get(0);
-                fileTree.setCommitMessage(fileCommit.get("message"));
-                fileTree.setCommitTime(fileCommit.get("time"));
-            }
             list.add(fileTree);
         }
         treeWalk.close();

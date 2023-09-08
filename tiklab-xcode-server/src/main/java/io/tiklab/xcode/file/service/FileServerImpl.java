@@ -5,7 +5,7 @@ import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.file.model.FileQuery;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.common.RepositoryUtil;
-import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

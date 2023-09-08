@@ -81,6 +81,12 @@ public class Repository implements Serializable {
      */
     private String fullPath;
 
+    /**
+     * 角色
+     */
+    private String role;
+
+
     public String getRpyId() {
         return rpyId;
     }
@@ -210,6 +216,16 @@ public class Repository implements Serializable {
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+
 }
 
 

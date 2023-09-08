@@ -12,7 +12,7 @@ import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import io.tiklab.xcode.common.RepositoryUtil;
-import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

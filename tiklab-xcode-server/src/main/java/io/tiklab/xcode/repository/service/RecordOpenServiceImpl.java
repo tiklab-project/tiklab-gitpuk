@@ -11,20 +11,18 @@ import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.branch.model.Branch;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.repository.dao.RecordOpenDao;
 import io.tiklab.xcode.repository.entity.RecordOpenEntity;
-import io.tiklab.xcode.repository.model.RecordCommit;
 import io.tiklab.xcode.repository.model.RecordOpen;
 import io.tiklab.xcode.repository.model.RecordOpenQuery;
-import io.tiklab.xcode.repository.model.Repository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -171,7 +169,7 @@ public class RecordOpenServiceImpl implements RecordOpenService {
                 String repositoryAddress = yamlDataMaService.repositoryAddress() + "/" + recordOpen.getRepository().getRpyId();
                 List<Branch> branches = GitBranchUntil.findAllBranch(repositoryAddress);
                 recordOpen.setBranchNum(branches.size());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 recordOpen.setBranchNum(1);
             }
         }

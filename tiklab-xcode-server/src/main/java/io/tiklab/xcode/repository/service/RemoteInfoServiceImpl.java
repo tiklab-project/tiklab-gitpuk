@@ -4,6 +4,7 @@ import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RemoteInfoDao;
 import io.tiklab.xcode.repository.entity.RemoteInfoEntity;

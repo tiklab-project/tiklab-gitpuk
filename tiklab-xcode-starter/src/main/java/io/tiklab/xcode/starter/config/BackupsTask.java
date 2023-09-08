@@ -1,12 +1,11 @@
 package io.tiklab.xcode.starter.config;
 
 
-import io.tiklab.xcode.setting.model.Backups;
-import io.tiklab.xcode.setting.service.BackupsServer;
+import io.tiklab.xcode.repository.model.Backups;
+import io.tiklab.xcode.repository.service.BackupsServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 /*
@@ -18,9 +17,6 @@ public class BackupsTask  {
     @Autowired
     BackupsServer backupsServer;
 
-    @Value("${backup.time}")
-    String timeCore;
-
 
     //凌晨2点 执行
     @Scheduled(cron = "${backup.time}")
@@ -30,7 +26,7 @@ public class BackupsTask  {
         //设置了定时备份数据
         if (("true").equals(backups.getTaskState())){
             logger.info("开始执行定时备份");
-            backupsServer.backupsExec();
+            backupsServer.backupsExec(backups);
         }
     }
 

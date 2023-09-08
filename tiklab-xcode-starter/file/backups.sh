@@ -13,7 +13,8 @@ sourceFilePath=$sourceFilePath
 reduceName=$reduceName
 length=$length
 
-mysql_bin="/Users/limingliang/postgreSQL/bin"
+#mysql_bin="/Users/limingliang/postgreSQL/bin"
+mysql_bin=$pgsqlUrl
 psql="${mysql_bin}/psql"
 pg_dump="${mysql_bin}/pg_dump"
 current_time="xcode-backups-"$(date +%s)

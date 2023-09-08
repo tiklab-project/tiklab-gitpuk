@@ -1,4 +1,4 @@
-package io.tiklab.xcode.repository.service;
+package io.tiklab.xcode.common;
 
 public interface XcodeYamlDataMaService {
 
@@ -12,6 +12,11 @@ public interface XcodeYamlDataMaService {
      * 仓库备份地址
      */
     String backupAddress();
+
+    /**
+     * 仓库备份上传地址
+     */
+    String uploadAddress();
 
     /**
      *仓库上传的路径
@@ -43,6 +48,11 @@ public interface XcodeYamlDataMaService {
      *jdbc schemaName
      */
     String schemaName();
+
+    /**
+     * pgsql的地址
+     */
+    String pgSqlAddress();
 
 
 }

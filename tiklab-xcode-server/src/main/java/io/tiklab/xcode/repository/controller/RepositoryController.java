@@ -176,6 +176,16 @@ public class RepositoryController {
         return Result.ok(repositoryList);
     }
 
+    @RequestMapping(path="/findPrivateRepositoryByUser",method = RequestMethod.POST)
+    @ApiMethod(name = "findPrivateRepositoryByUser",desc = "查询用户有权限的私有仓库")
+    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    public Result<Pagination<Repository>> findPrivateRepositoryByUser(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
+        Pagination<Repository> repositoryByUser = repositoryServer.findPrivateRepositoryByUser(repositoryQuery);
+
+        return Result.ok(repositoryByUser);
+    }
+
+
     @RequestMapping(path="/getAddress",method = RequestMethod.POST)
     @ApiMethod(name = "getAddress",desc = "获取当前服务起ip 或配置的域名")
     public Result<String> getAddress(){

@@ -13,12 +13,16 @@ sourceFilePath=$sourceFilePath
 reduceUrl=$reduceUrl
 
 mysql_bin="/Users/limingliang/postgreSQL/bin"
+#mysql_bin=$pgsqlUrl
 psql="${mysql_bin}/psql"
 
 
-PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='${dbName}';"
-PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -c  "DROP DATABASE ${dbName};"
-PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -c "CREATE DATABASE ${dbName};"
+#PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='${dbName}';"
+
+echo PGPASSWORD=${password} ${psql} -U ${userName} -d ${dbName} -h ${host} -p ${port} -c "DROP SCHEMA IF EXISTS ${schemaName} CASCADE;"
+
+PGPASSWORD=${password} ${psql} -U ${userName} -d ${dbName} -h ${host} -p ${port} -c "DROP SCHEMA IF EXISTS ${schemaName} CASCADE;"
+PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -d ${dbName} -c "CREATE schema  ${schemaName};"
 
 
 PGPASSWORD=${password} ${psql} -U ${userName} -h ${host} -p ${port} -d ${dbName}  -n ${schemaName}<${backupsSqlUrl}${dbName}.sql;

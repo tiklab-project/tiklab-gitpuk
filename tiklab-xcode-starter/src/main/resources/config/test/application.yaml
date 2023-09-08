@@ -100,7 +100,7 @@ repository:
   address: ${DATA_HOME}/repository
   code: xcode
 backup:
-  address: /opt/tiklab/xcode-backups
+  address: /opt/tiklab/xcode-backup
   time: 0 0 2 * * ?
 visit:
   address: http://172.11.1.19:8080

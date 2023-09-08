@@ -7,16 +7,21 @@ package io.tiklab.xcode.file.model;
 
 public class FileTreeMessage {
 
+    //仓库id
     private String rpyId;
 
-
+    //分支
     private String branch;
 
-
+    //是否查询提交
     private boolean findCommitId;
 
-
+    //路径
     private String path;
+
+
+    //查询类型 tag、branch、commit
+    private String findType;
 
 
     public String getRpyId() {
@@ -49,5 +54,13 @@ public class FileTreeMessage {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getFindType() {
+        return findType;
+    }
+
+    public void setFindType(String findType) {
+        this.findType = findType;
     }
 }

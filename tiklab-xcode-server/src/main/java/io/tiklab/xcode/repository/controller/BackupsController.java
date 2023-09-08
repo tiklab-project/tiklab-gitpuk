@@ -1,12 +1,14 @@
-package io.tiklab.xcode.setting.controller;
+package io.tiklab.xcode.repository.controller;
 
 import io.tiklab.core.Result;
+import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
-import io.tiklab.xcode.setting.model.Backups;
-import io.tiklab.xcode.setting.service.BackupsServer;
+import io.tiklab.xcode.repository.model.Backups;
+import io.tiklab.xcode.repository.model.ExecLog;
+import io.tiklab.xcode.repository.service.BackupsServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +30,9 @@ public class BackupsController {
     @RequestMapping(path="/backupsExec",method = RequestMethod.POST)
     @ApiMethod(name = "backupsExec",desc = "执行备份")
     @ApiParam(name = "auth",desc = "auth",required = true)
-    public Result<String> backupsExec(){
+    public Result<String> backupsExec(@RequestBody @NotNull @Valid Backups backups){
 
-        String exec = backupsServer.backupsExec();
+        String exec = backupsServer.backupsExec(backups);
 
         return Result.ok(exec);
     }
@@ -38,7 +40,7 @@ public class BackupsController {
     @RequestMapping(path="/findBackups",method = RequestMethod.POST)
     @ApiMethod(name = "findBackups",desc = "查询备份相关数据")
     public Result<Backups> findBackups(){
-
+        String appHome = AppHomeContext.getAppHome();
         Backups backups=  backupsServer.findBackups();
 
         return Result.ok(backups);
@@ -68,9 +70,9 @@ public class BackupsController {
     @RequestMapping(path="/gainBackupsRes",method = RequestMethod.POST)
     @ApiMethod(name = "gainBackupsRes",desc = "获取备份或者数据恢复结果")
     @ApiParam(name = "type",desc = "backups、recovery",required = true)
-    public Result<String> gainBackupsRes(@NotNull String type){
+    public Result<ExecLog> gainBackupsRes(@NotNull String type){
 
-        String gainBackupsRes = backupsServer.gainBackupsRes(type);
+        ExecLog gainBackupsRes = backupsServer.gainBackupsRes(type);
 
         return Result.ok(gainBackupsRes);
     }
@@ -78,11 +80,11 @@ public class BackupsController {
     @RequestMapping(path="/uploadBackups",method = RequestMethod.POST)
     @ApiMethod(name = "uploadBackups",desc = "上传备份数据")
     @ApiParam(name = "uploadFile",desc = "uploadFile",required = true)
-    public Result<String> uploadBackups(@RequestParam("uploadFile") MultipartFile uploadFile,String userId){
+    public Result<String> uploadBackups(@RequestParam("uploadFile") MultipartFile uploadFile){
         try {
             String fileName = uploadFile.getOriginalFilename();   //获取文件名字
             InputStream inputStream = uploadFile.getInputStream();
-            backupsServer.uploadBackups(inputStream,fileName,userId);
+            backupsServer.uploadBackups(inputStream,fileName);
         } catch (IOException e) {
             throw new SystemException(e);
         }

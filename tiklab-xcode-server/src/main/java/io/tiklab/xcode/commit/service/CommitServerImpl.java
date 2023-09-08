@@ -7,7 +7,7 @@ import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.common.RepositoryFileUtil;
 import io.tiklab.xcode.common.RepositoryFinal;
 import io.tiklab.xcode.common.RepositoryUtil;
-import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;

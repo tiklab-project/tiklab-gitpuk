@@ -2,7 +2,7 @@ package io.tiklab.xcode.authority;
 
 
 import io.tiklab.core.exception.ApplicationException;
-import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.setting.service.AuthServer;
 import io.tiklab.xcode.common.RepositoryFinal;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;

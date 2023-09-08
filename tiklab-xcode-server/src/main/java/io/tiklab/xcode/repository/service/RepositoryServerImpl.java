@@ -9,7 +9,11 @@ import io.tiklab.core.page.PaginationBuilder;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.eam.common.model.EamTicket;
 import io.tiklab.join.JoinTemplate;
+import io.tiklab.privilege.dmRole.model.DmRoleUser;
+import io.tiklab.privilege.dmRole.model.DmRoleUserQuery;
 import io.tiklab.privilege.dmRole.service.DmRoleService;
+import io.tiklab.privilege.dmRole.service.DmRoleUserService;
+import io.tiklab.privilege.role.model.PatchUser;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
@@ -18,12 +22,12 @@ import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import io.tiklab.xcode.authority.ValidUsrPwdServer;
 import io.tiklab.xcode.branch.model.Branch;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
 import io.tiklab.xcode.git.GitBranchUntil;
 import io.tiklab.xcode.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RepositoryDao;
-import io.tiklab.xcode.repository.entity.LeadRecordEntity;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.*;
 import io.tiklab.xcode.common.RepositoryFileUtil;
@@ -39,14 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,6 +65,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Autowired
     private DmRoleService dmRoleService;
+
+    @Autowired
+    private DmRoleUserService dmRoleUserService;
 
     @Autowired
     private DmUserService dmUserService;
@@ -130,11 +133,14 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         String repositoryId = repositoryDao.createRpy(groupEntity);
         //创建私有仓库 给创建人设置管理员权限
-        if(ObjectUtils.isEmpty(repository.getUser())){
-            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
-        }else {
-            dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), "xcode");
-        }
+
+        List<PatchUser> arrayList = new ArrayList<>();
+        PatchUser patchUser = new PatchUser();
+        patchUser.setId(LoginContext.getLoginId());
+        patchUser.setAdminRole(true);
+        arrayList.add(patchUser);
+        dmRoleService.initPatchDmRole(repositoryId,arrayList,"xcode");
+
         return repositoryId;
     }
 
@@ -252,6 +258,28 @@ public class RepositoryServerImpl implements RepositoryServer {
 
 
     @Override
+    public List<Repository> findAllRpyList() {
+        List<RepositoryEntity> groupEntityList = repositoryDao.findAllRpy();
+        List<Repository> list = BeanMapper.mapList(groupEntityList, Repository.class);
+
+        joinTemplate.joinQuery(list);
+
+        return list;
+    }
+
+
+    /**
+     * 查询所有仓库
+     * @return 仓库信息列表
+     */
+    @Override
+    public List<Repository> findRpyList() {
+        List<RepositoryEntity> groupEntityList = repositoryDao.findAllRpy();
+        List<Repository> list = BeanMapper.mapList(groupEntityList, Repository.class);
+        return list;
+    }
+
+    @Override
     public List<Repository> findAllRpyList(List<String> idList) {
         List<RepositoryEntity> groupEntities = repositoryDao.findAllRpyList(idList);
         List<RepositoryEntity> entities = groupEntities.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
@@ -366,8 +394,8 @@ public class RepositoryServerImpl implements RepositoryServer {
         List<RepositoryEntity> groupEntityList = repositoryDao.findRepositoryListLike(repositoryQuery);
         List<Repository> allRpy = BeanMapper.mapList(groupEntityList, Repository.class);
 
-        if (CollectionUtils.isNotEmpty(allRpy)) {
-            List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId());
+        if (!ObjectUtils.isEmpty(allRpy)&&CollectionUtils.isNotEmpty(allRpy)) {
+            List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId(),"all");
             String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
 
            if (canViewRpyIdList.length>0){
@@ -478,7 +506,7 @@ public class RepositoryServerImpl implements RepositoryServer {
             List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
             if (CollectionUtils.isNotEmpty(repositoryList)){
                 String address = this.getAddress();
-                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, eamTicket.getUserId());
+                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, eamTicket.getUserId(),"all");
 
                 List<RepositoryEntity> repositoryEntitys = repositoryDao.findRepositoryListByIds(accessRepositoryId);
                  repositoryList = BeanMapper.mapList(repositoryEntitys,Repository.class);
@@ -557,6 +585,37 @@ public class RepositoryServerImpl implements RepositoryServer {
         return repositoryList;
     }
 
+    @Override
+    public Pagination<Repository>  findPrivateRepositoryByUser(RepositoryQuery repositoryQuery) {
+        List<RepositoryEntity> allRpyEntity = repositoryDao.findAllRpy();
+        List<Repository> allRpy = BeanMapper.mapList(allRpyEntity, Repository.class);
+
+        List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId(),"private");
+
+        if (!ObjectUtils.isEmpty(accessRepositoryId)&&accessRepositoryId.size()>0){
+            String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
+            Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
+            List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
+            joinTemplate.joinQuery(repositoryList);
+
+            for (Repository repository:repositoryList){
+                DmRoleUserQuery dmRoleUserQuery = new DmRoleUserQuery();
+                dmRoleUserQuery.setUserId(repositoryQuery.getUserId());
+                dmRoleUserQuery.setDomainId(repository.getRpyId());
+                List<DmRoleUser> dmRoleUserList = dmRoleUserService.findDmRoleUserList(dmRoleUserQuery);
+                if (CollectionUtils.isNotEmpty(dmRoleUserList)){
+                    repository.setRole(dmRoleUserList.get(0).getRole().getName());
+                }else {
+                    repository.setRole("普通成员");
+                }
+            }
+
+            return PaginationBuilder.build(pagination,repositoryList);
+        }
+
+        return PaginationBuilder.build(new Pagination<>(),null);
+    }
+
 
     public String findDefaultBranch(String repositoryId){
         try {
@@ -576,7 +635,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     /**
      *查询公共和有权限的仓库
      */
-    public List<String> findHaveAccessRepository(List<Repository> allRpy,String userId){//公共的仓库
+    public List<String> findHaveAccessRepository(List<Repository> allRpy,String userId,String type){//公共的仓库
+
+        List<String> privateRpyId=null;
         List<Repository> publicRpy = allRpy.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
         List<String> canViewRpyId = publicRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
 
@@ -591,17 +652,19 @@ public class RepositoryServerImpl implements RepositoryServer {
             List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
             //存在项目成员
             if ( CollectionUtils.isNotEmpty(dmUserList)) {
-                List<String> privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
+                 privateRpyId = privateRpy.stream().map(Repository::getRpyId).collect(Collectors.toList());
                 List<String> dmRpyId = dmUserList.stream().map(DmUser::getDomainId).collect(Collectors.toList());
 
                 //查询私有相同的仓库id
                 privateRpyId = privateRpyId.stream().filter(dmRpyId::contains).collect(Collectors.toList());
+
                 canViewRpyId = Stream.concat(privateRpyId.stream(), canViewRpyId.stream()).collect(Collectors.toList());
             }
         }
+        if (("private").equals(type)){
+            return privateRpyId;
+        }
         return canViewRpyId;
-
-
     }
 }
 

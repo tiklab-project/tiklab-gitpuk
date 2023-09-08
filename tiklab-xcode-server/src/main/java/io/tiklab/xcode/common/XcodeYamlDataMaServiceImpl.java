@@ -1,10 +1,16 @@
-package io.tiklab.xcode.repository.service;
+package io.tiklab.xcode.common;
 
+import io.tiklab.core.context.AppHomeContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
 @Service
 public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
+
+    @Value("${DATA_HOME}")
+    private String dataHome;
 
     @Value("${repository.address}")
     private String repositoryAddress;
@@ -32,6 +38,10 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
     @Override
     public String backupAddress() {
         return backupAddress;
+    }
+    @Override
+    public String uploadAddress() {
+        return dataHome+"/upload";
     }
 
     @Override
@@ -66,6 +76,14 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
     @Override
     public String schemaName() {
         return "public";
+    }
+
+    @Override
+    public String pgSqlAddress() {
+        String appHome = AppHomeContext.getAppHome();
+        String path = new File(appHome).getParentFile().getParentFile().getAbsolutePath();
+        return path+"/embbed/pgsql-10.23/bin";
+        //return "/Users/limingliang/postgreSQL/bin";
     }
 
 }

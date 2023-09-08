@@ -66,10 +66,22 @@ public interface RepositoryServer {
     @FindAll
     List<Repository> findAllRpy();
 
+    /**
+     * 查询所有代码库
+     * @return 代码库信息列表
+     */
+    @FindAll
+    List<Repository> findAllRpyList();
+
 
     @FindList
     List<Repository> findAllRpyList(List<String> idList);
 
+    /**
+     * 查询所有仓库
+     * @return 文件集合
+     */
+    List<Repository> findRpyList();
 
     /**
      * 获取文件信息
@@ -161,6 +173,13 @@ public interface RepositoryServer {
      * @return userId 用户ID
      */
     List<Repository> findCommitRepository(String userId);
+
+    /**
+     * 查询用户有权限的私有仓库
+     * @return userId 用户ID
+     */
+    Pagination<Repository> findPrivateRepositoryByUser(RepositoryQuery repositoryQuery);
+
 }
 
 

@@ -76,23 +76,28 @@ public class GitBranchUntil {
     }
 
     /**
-     * 获取仓库所有分支
+     * 获取仓库所有分支以及标签
      * @param repositoryAddress 仓库地址
      * @return 分支集合
      * @throws IOException 仓库不存在
      */
-    public static List<Branch> findAllBranch(String repositoryAddress) throws IOException {
+    public static List<Branch> findAllBranch(String repositoryAddress) throws IOException, GitAPIException {
 
         Git git = Git.open(new File(repositoryAddress));
         Repository repository = git.getRepository();
 
         List<Branch> list = new ArrayList<>();
+        //分支和标签
         List<Ref> refs = repository.getRefDatabase().getRefs();
-
         String defaultBranch = " ";
         for (Ref ref : refs) {
             Branch branch = new Branch();
             String name = ref.getName();
+            //排除标签
+            if (name.contains(Constants.R_TAGS)){
+                continue;
+            }
+
             if (name.equals("HEAD")){
                 Ref target = ref.getTarget();
                 defaultBranch = target.getName();
@@ -100,13 +105,14 @@ public class GitBranchUntil {
             }
 
             String Id = ref.getObjectId().getName();
-            String s = name.replace(Constants.R_HEADS, "");
+            //分支名字
+            String branchName = name.replace(Constants.R_HEADS, "");
             branch.setBranchId(Id);
             //判断是否为默认分支
             if (defaultBranch.equals(name)){
                 branch.setDefaultBranch(true);
             }
-            branch.setBranchName(s);
+            branch.setBranchName(branchName);
             list.add(branch);
         }
 
@@ -142,6 +148,10 @@ public class GitBranchUntil {
         for (Ref ref : refs) {
             Branch branch = new Branch();
             String name = ref.getName();
+            //排除标签
+            if (name.contains(Constants.R_TAGS)){
+                continue;
+            }
             if (name.equals("HEAD")){
                 Ref target = ref.getTarget();
                 defaultBranch = target.getName();
@@ -196,7 +206,7 @@ public class GitBranchUntil {
      * @return 默认分支 无返回 Constants.MASTER
      * @throws IOException 仓库不存在
      */
-    public static String findDefaultBranch(String repositoryAddress) throws IOException {
+    public static String findDefaultBranch(String repositoryAddress) throws Exception {
         List<Branch> branches = findAllBranch(repositoryAddress);
         for (Branch branch : branches) {
             if (branch.isDefaultBranch()){
@@ -225,6 +235,42 @@ public class GitBranchUntil {
         RevTree tree = walk.parseCommit(objectId).getTree();
         walk.close();
         return tree;
+    }
+
+    /**
+     * 获取指定commitId的提交树
+     * @param repository 仓库
+     * @param branch 分支
+     * @return findType 查询类型
+     * @throws IOException 仓库不存在
+     */
+    public static RevTree findBarthCommitRevTree(Repository repository,String branch,String findType) throws IOException {
+        ObjectId objectId = findObjectId(repository, branch, findType);
+        RevWalk walk = new RevWalk(repository);
+        RevTree tree = walk.parseCommit(objectId).getTree();
+        walk.close();
+        return tree;
+    }
+
+    /**
+     * 获取objectId
+     * @param repository 仓库
+     * @param branch 分支
+     * @return findType 查询类型
+     * @throws IOException 仓库不存在
+     */
+    public static ObjectId findObjectId(Repository repository,String branch,String findType) throws IOException {
+        ObjectId objectId =null;
+        if (("tag").equals(findType)){
+            objectId = repository.resolve(Constants.R_TAGS + branch);
+        }
+        if (("branch").equals(findType)){
+            objectId = repository.resolve(Constants.R_HEADS + branch);
+        }
+        if (("commit").equals(findType)){
+            objectId = ObjectId.fromString(branch);
+        }
+        return objectId;
     }
 
     /**

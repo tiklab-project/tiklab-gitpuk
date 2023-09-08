@@ -1,13 +1,21 @@
-package io.tiklab.xcode.setting.service;
+package io.tiklab.xcode.repository.service;
 
 import com.alibaba.fastjson.JSONObject;
+import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.core.exception.SystemException;
 import io.tiklab.eam.common.context.LoginContext;
+import io.tiklab.xcode.repository.dao.BackupsDao;
+import io.tiklab.xcode.repository.entity.BackupsEntity;
+import io.tiklab.xcode.repository.entity.LeadAuthEntity;
+import io.tiklab.xcode.repository.model.ExecLog;
+import io.tiklab.xcode.repository.model.LeadAuth;
 import io.tiklab.xcode.repository.model.Repository;
+import io.tiklab.xcode.repository.service.BackupsServer;
 import io.tiklab.xcode.repository.service.RepositoryServer;
-import io.tiklab.xcode.repository.service.XcodeYamlDataMaService;
-import io.tiklab.xcode.setting.model.Backups;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
+import io.tiklab.xcode.repository.model.Backups;
 import io.tiklab.xcode.common.RepositoryFileUtil;
 import io.tiklab.xcode.common.RepositoryUtil;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -18,10 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
-import javax.validation.constraints.Null;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,9 +39,12 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class BackupsServerImpl implements BackupsServer{
+public class BackupsServerImpl implements BackupsServer {
 
     private static Logger logger = LoggerFactory.getLogger(BackupsServerImpl.class);
+
+    @Autowired
+    BackupsDao backupsDao;
 
     @Autowired
     RepositoryServer repositoryServer;
@@ -52,36 +62,88 @@ public class BackupsServerImpl implements BackupsServer{
 
 
     //数据备份日志
-    public static Map<String , String> backupsExecLog = new HashMap<>();
+    public static Map<String , ExecLog> backupsExecLog = new HashMap<>();
 
     //数据恢复日志
-    public static Map<String , String> recoveryLog = new HashMap<>();
+    public static Map<String , ExecLog> recoveryLog = new HashMap<>();
 
-
-    //执行的文件绝对路径名称
-    public static Map<String , String> fileAbUrlMap = new HashMap<>();
 
     @Override
-    public String backupsExec() {
-        File file = new File(yamlDataMaService.backupAddress());
-        if (!file.exists()){
-            file.mkdir();
-        }
-        
-        File repositoryFile = new File(yamlDataMaService.repositoryAddress());
+    public Backups findBackups() {
+        List<BackupsEntity> allBackups = backupsDao.findAllBackups();
+        BackupsEntity backupsEntity = allBackups.get(0);
+        Backups backups = BeanMapper.map(backupsEntity, Backups.class);
 
-        List<Repository> allRpy = repositoryServer.findAllRpy();
+        backups.setBackupsAddress(yamlDataMaService.backupAddress());
+
+        return backups;
+    }
+
+    @Override
+    public void updateBackups(Backups backups)  {
+        BackupsEntity backupsEntity = BeanMapper.map(backups, BackupsEntity.class);
+
+        backupsDao.updateBackups(backupsEntity);
+    }
+
+    @Override
+    public void uploadBackups(InputStream inputStream, String fileName) {
+        try {
+            String uploadAddress = yamlDataMaService.uploadAddress();
+            //如果文件夹不存在就创建文件夹
+            File reduceDir = new File(uploadAddress);
+            if (!reduceDir.exists() && !reduceDir.isDirectory()) {
+                reduceDir.mkdirs();
+            }
+            //上传备份压缩文件的绝对路径
+            String reduceUrl = uploadAddress + "/" + fileName;
+            File reduceFile = new File(reduceUrl);
+            //文件已经存在
+            if (!reduceFile.exists()) {
+
+                //创建文件
+                File backUpsUrlFile = new File(reduceUrl);
+                backUpsUrlFile.createNewFile();
+                //写入文件
+                FileOutputStream outputStream = new FileOutputStream(reduceUrl);
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush();
+            }
+
+        }catch (Exception e){
+            throw  new ApplicationException(e.getMessage());
+        }
+    }
+
+
+    @Override
+    public String backupsExec(Backups backups) {
+        backups.setExecState("exec");
+        updateBackups(backups);
+
         String loginId = LoginContext.getLoginId();
         recoveryLog.remove(loginId);
         backupsExecLog.remove(loginId);
-        fileAbUrlMap.remove(loginId);
-
         joinBackupsLog("Dumping PostgreSQL database tiklab_xcode...");
         ExecutorService executorService = Executors.newCachedThreadPool();
+
         executorService.submit(new Runnable(){
             @Override
             public void run() {
                 try {
+                    File file = new File(yamlDataMaService.backupAddress());
+                    if (!file.exists()){
+                        file.mkdir();
+                    }
+
+                    File repositoryFile = new File(yamlDataMaService.repositoryAddress());
+
+                    List<Repository> allRpy = repositoryServer.findAllRpyList();
+
                     boolean isResidue = memSize(file, repositoryFile);
                     //当剩余空间不足删除最先备份的那个文件
                     if(!isResidue){
@@ -116,8 +178,8 @@ public class BackupsServerImpl implements BackupsServer{
                         File codeFileUrl = new File(repositoryUrl);
 
                         /*
-                        * 复制代码源文件到备份文件夹
-                        * */
+                         * 复制代码源文件到备份文件夹
+                         * */
                         String backupsCodePath = backupPath + "/code/" + repository.getRpyId()+".git";
                         File backupsCodeFilePath = new File(backupsCodePath);
 
@@ -131,8 +193,8 @@ public class BackupsServerImpl implements BackupsServer{
                     }
 
                     /*
-                    * 压缩备份代码文件夹
-                    * */
+                     * 压缩备份代码文件夹
+                     * */
                     joinBackupsLog(" start compress tar.gz...");
                     String substring = backupPath.substring(0, backupPath.lastIndexOf("/"));
                     LocalDateTime now = LocalDateTime.now();
@@ -156,27 +218,29 @@ public class BackupsServerImpl implements BackupsServer{
                     bos.close();
                     fos.close();
 
-                     /*
+                    /*
                      *  删除备份文件夹
                      * */
                     FileUtils.deleteDirectory(new File(backupPath));
 
-
                     joinBackupsLog(" Backups file success end [DONE]");
 
-                    //修该备份text信息
-                    writeFile();
+                    //修该备份信息
+                    updateBackup(backups,"success");
+
                 }catch (Exception e){
                     joinBackupsLog(" Backups file fail end,errorMsg:"+e.getMessage());
                     logger.info("错误信息:"+e.getMessage());
                     //修该备份text信息
-                    writeFile();
-                    new ApplicationException(e.getMessage());
+                    updateBackup(backups,"fail");
+                    throw new SystemException(e.getMessage());
                 }
             }
         });
         return "OK";
     }
+
+
 
     @Override
     public String recoveryData(String fileName) {
@@ -194,10 +258,10 @@ public class BackupsServerImpl implements BackupsServer{
                      *  解压tar.gz包
                      */
                     //压缩包的绝对路径
-                    String DecFileUrl = yamlDataMaService.backupAddress() + "/" + fileName;
+                    String DecFileUrl = yamlDataMaService.uploadAddress() + "/" + fileName;
                     //压缩后的文件绝对路径
                     String name = fileName.substring(0, fileName.indexOf(".tar.gz"));
-                    String afterDecFileUrl = yamlDataMaService.backupAddress() + "/" + name + "/";
+                    String afterDecFileUrl = yamlDataMaService.uploadAddress() + "/" + name + "/";
                     //解压tar.gz
                     RepositoryFileUtil.decompression(DecFileUrl,afterDecFileUrl);
                     joinRecoveryLog(" decompression "+fileName+" success [DONE]");
@@ -212,7 +276,7 @@ public class BackupsServerImpl implements BackupsServer{
                     /**
                      *  copy代码文件到代码仓库
                      */
-                    List<Repository> allRpy = repositoryServer.findAllRpy();
+                    List<Repository> allRpy = repositoryServer.findAllRpyList();
                     for (Repository repository:allRpy){
                         joinRecoveryLog(repository.getName()+ "  start Recovery ...");
                         String codePath = yamlDataMaService.repositoryAddress() + "/" + repository.getRpyId() + ".git";
@@ -220,137 +284,54 @@ public class BackupsServerImpl implements BackupsServer{
                         joinRecoveryLog(repository.getName()+ " Recovery  success [DONE]");
                     }
 
-                    /**
+                  /* *
                      *  删除解压后的文件
                      */
-                    FileUtils.deleteDirectory(new File(yamlDataMaService.backupAddress() + "/" + name ));
+                    FileUtils.deleteDirectory(new File(yamlDataMaService.uploadAddress() + "/" + name ));
 
                     joinRecoveryLog("Recovery success end [DONE]");
 
                 }catch (Exception e){
                     joinRecoveryLog("Recovery fail end，errorMsg:"+e.getMessage());
-                    throw  new ApplicationException(e.getMessage());
+                    throw  new SystemException(e.getMessage());
                 }
             }
         });
-        return "ok";
-    }
-
-    @Override
-    public void updateBackups(Backups backups)  {
-
-        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
-        String fileData = gainFileData(file);
-
-        JSONObject jsonObject = JSONObject.parseObject(fileData);
-
-        if (StringUtils.isNotEmpty(backups.getTaskState())){
-            String taskState = jsonObject.get("task-state").toString();
-             fileData = fileData.replace(taskState, backups.getTaskState());
-        }
-
-        try {
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(fileData);
-            fileWriter.close();
-        }catch (Exception e){
-            throw new ApplicationException(5000,e.getMessage());
-        }
-    }
-
-    @Override
-    public Backups findBackups() {
-        Backups backups = new Backups();
-        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
-        String fileData = gainFileData(file);
-        if (StringUtils.isEmpty(fileData)){
-            throw  new ApplicationException(5000,"数据不存在");
-        }
-        JSONObject jsonObject = JSONObject.parseObject(fileData);
-        String taskState = jsonObject.get("task-state").toString();
-        String backupsTime = jsonObject.get("backups-time").toString();
-
-        backups.setBackupsAddress(yamlDataMaService.backupAddress());
-        backups.setTaskState(taskState);
-        backups.setNewBackupsTime(backupsTime);
-        backups.setNewResult("non");
-        String result = backupsExecLog.get(LoginContext.getLoginId());
-        if (StringUtils.isNotEmpty(result)){
-            backups.setNewResult("fail");
-           if (result.contains("Backups file success end")){
-               backups.setNewResult("success");
-           }
-        }
-        return backups;
+        return "OK";
     }
 
 
 
+
     @Override
-    public String gainBackupsRes(String type) {
+    public ExecLog gainBackupsRes(String type) {
 
         String loginId = LoginContext.getLoginId();
+        //备份日志
         if (("backups").equals(type)){
-            String backups = backupsExecLog.get(loginId);
-            if (StringUtils.isEmpty(backups)){
+            ExecLog execLog = backupsExecLog.get(loginId);
+            if (ObjectUtils.isEmpty(execLog)){
                 return null;
             }
-           return backups;
+            return execLog;
         }
-        String recovery = recoveryLog.get(loginId);
-        if (StringUtils.isEmpty(recovery)){
+        //恢复的日志
+        ExecLog execLog = recoveryLog.get(loginId);
+        if (ObjectUtils.isEmpty(execLog)){
             return null;
         }
-        return recovery;
+        return execLog;
     }
 
-    @Override
-    public void uploadBackups(InputStream inputStream, String fileName,String userId) {
-        try {
-            //获取text文件信息
-            File file = new File(AppHomeContext.getAppHome() + "/file/backups");
-            String fileData = gainFileData(file);
 
-            JSONObject jsonObject = JSONObject.parseObject(fileData);
-            String backUpsUrl = jsonObject.get("backups-url").toString();
-            String substring = backUpsUrl.substring(0, backUpsUrl.lastIndexOf("/"));
-
-            //如果文件夹不存在就创建文件夹
-            File reduceDir = new File(substring);
-            if (!reduceDir.exists() && !reduceDir.isDirectory()) {
-                reduceDir.mkdirs();
-            }
-
-            //上传备份压缩文件的绝对路径
-            String reduceUrl = substring + "/" + fileName;
-            File reduceFile = new File(reduceUrl);
-            //文件已经存在
-            if (!reduceFile.exists()) {
-
-                //创建文件
-                File backUpsUrlFile = new File(reduceUrl);
-                backUpsUrlFile.createNewFile();
-                //写入文件
-                FileOutputStream outputStream = new FileOutputStream(reduceUrl);
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-                outputStream.flush();
-            }
-
-        }catch (Exception e){
-            throw  new ApplicationException(e.getMessage());
-        }
-    }
 
     /**
      *  dump database 备份脚本
      */
     public void executeScript(String backUpsUrl) throws IOException, InterruptedException {
 
-        String[] args = new String[7];
+        logger.info("备份的pgsql地址："+yamlDataMaService.pgSqlAddress());
+        String[] args = new String[8];
         args[0] = "host="+yamlDataMaService.host();
         args[1] = "port=5432";
         args[2] = "userName="+jdbcUserName;
@@ -358,6 +339,7 @@ public class BackupsServerImpl implements BackupsServer{
         args[4] = "dbName="+yamlDataMaService.dbName();
         args[5] = "schemaName="+yamlDataMaService.schemaName();
         args[6] = "backupsUrl="+backUpsUrl;
+        args[7] = "pgsqlUrl="+yamlDataMaService.pgSqlAddress();
 
         String scriptFile = AppHomeContext.getAppHome() + "/file/backups.sh";
         Process ps = Runtime.getRuntime().exec(scriptFile,args);
@@ -365,12 +347,12 @@ public class BackupsServerImpl implements BackupsServer{
     }
 
 
-        /**
-         *  执行恢复PostgreSQL 数据脚本
-         * @param backUpsSqlUrl 备份sql地址
-         */
+    /**
+     *  执行恢复PostgreSQL 数据脚本
+     * @param backUpsSqlUrl 备份sql地址
+     */
     public void executeRecoveryScript(String backUpsSqlUrl) throws IOException, InterruptedException {
-        String[] args = new String[7];
+        String[] args = new String[8];
         args[0] = "host="+yamlDataMaService.host();
         args[1] = "port=5432";
         args[2] = "userName="+jdbcUserName;
@@ -378,75 +360,47 @@ public class BackupsServerImpl implements BackupsServer{
         args[4] = "dbName="+yamlDataMaService.dbName();
         args[5] = "schemaName="+yamlDataMaService.schemaName();
         args[6] = "backupsSqlUrl="+backUpsSqlUrl;
+        args[7] = "pgsqlUrl="+yamlDataMaService.pgSqlAddress();
 
         Process ps = Runtime.getRuntime().exec(AppHomeContext.getAppHome()+"/file/recovery.sh",args);
+
         ps.waitFor();
-    }
-
-
-    /**
-     *  读取file 文件
-     *  @param file     文件
-     * @return
-     */
-    public String gainFileData(File file){
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
-            StringBuilder result = new StringBuilder();
-            BufferedReader bfr = new BufferedReader(new InputStreamReader(inputStream));
-            String lineTxt = null;
-            while ((lineTxt = bfr.readLine()) != null) {
-                String a=lineTxt;
-                result.append(lineTxt).append(System.lineSeparator());
-            }
-            String toString = result.toString();
-
-            inputStream.close();
-            return toString;
-        }catch (IOException e){
-            throw new ApplicationException(e.getMessage());
+        BufferedReader br = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+        StringBuffer sb = new StringBuffer();
+        String line;
+        while ((line = br.readLine()) != null) {
+            logger.info("执行日志："+line);
+            sb.append(line).append("\n");
         }
     }
 
-    /**
-     *  修改备份记录写入文件
-     */
-    public void writeFile(){
-        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
-        if (file.exists()){
-            String  fileData = gainFileData(file);
-
-            JSONObject jsonObject = JSONObject.parseObject(fileData);
-
-            String backupsTime = jsonObject.get("backups-time").toString();
-            fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
-
-            try {
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(fileData);
-                fileWriter.close();
-            }catch (Exception e){
-                throw new ApplicationException(5000,e.getMessage());
-            }
-        }
-    }
 
     /**
      *  拼接备份日志
      *  @param log 日志
      */
     public void joinBackupsLog(String log){
+
         LocalDateTime now = LocalDateTime.now();
         // 自定义时间格式
         DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String customDateTime = now.format(customFormatter);
         String resultLog = customDateTime + "---" + log;
         String loginId = LoginContext.getLoginId();
-        String logs = backupsExecLog.get(loginId);
-        if (StringUtils.isEmpty(logs)){
-            backupsExecLog.put(loginId,resultLog);
+        ExecLog execResultLog = backupsExecLog.get(loginId);
+        if (ObjectUtils.isEmpty(execResultLog)){
+            ExecLog execLog = new ExecLog();
+            execLog.setExecState("exec");
+            execLog.setLog(resultLog);
+            backupsExecLog.put(loginId,execLog);
         }else {
-            backupsExecLog.put(loginId,logs+"\n"+resultLog);
+            String backupsLog = execResultLog.getLog();
+            String newLog = backupsLog + "\n" + resultLog;
+            if (log.contains("end")){
+                execResultLog.setExecState("end");
+            }
+            execResultLog.setLog(newLog);
+            backupsExecLog.put(loginId,execResultLog);
         }
         logger.info("日志:"+log);
     }
@@ -462,13 +416,22 @@ public class BackupsServerImpl implements BackupsServer{
         String customDateTime = now.format(customFormatter);
         String resultLog = customDateTime + "---" + log;
         String loginId = LoginContext.getLoginId();
-        String logs = recoveryLog.get(loginId);
-        if (StringUtils.isEmpty(logs)){
-            recoveryLog.put(loginId,resultLog);
+        ExecLog execResultLog = recoveryLog.get(loginId);
+        if (ObjectUtils.isEmpty(execResultLog)){
+            ExecLog execLog = new ExecLog();
+            execLog.setExecState("exec");
+            execLog.setLog(resultLog);
+            recoveryLog.put(loginId,execLog);
         }else {
-            recoveryLog.put(loginId,logs+"\n"+resultLog);
+            String backupsLog = execResultLog.getLog();
+            String newLog = backupsLog + "\n" + resultLog;
+            if (log.contains("end")){
+                execResultLog.setExecState("end");
+            }
+            execResultLog.setLog(newLog);
+            recoveryLog.put(loginId,execResultLog);
         }
-        logger.info("日志:"+logs);
+        logger.info("日志:"+execResultLog);
     }
 
     /**
@@ -495,4 +458,59 @@ public class BackupsServerImpl implements BackupsServer{
         return false;
     }
 
+    public void updateBackup(Backups backups,String result){
+        backups.setExecTime(RepositoryUtil.date(1,new Date()));
+        backups.setExecResult(result);
+        backups.setExecState("end");
+        this.updateBackups(backups);
+    }
+
+
+
+    /**
+     *  修改备份记录写入文件
+     */
+    public void writeFile(){
+        File file = new File(AppHomeContext.getAppHome()+"/file/backups");
+        if (file.exists()){
+            String  fileData = gainFileData(file);
+
+            JSONObject jsonObject = JSONObject.parseObject(fileData);
+
+            String backupsTime = jsonObject.get("backups-time").toString();
+            fileData =fileData.replace(backupsTime,RepositoryUtil.date(1,new Date()));
+
+            try {
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(fileData);
+                fileWriter.close();
+            }catch (Exception e){
+                throw new ApplicationException(5000,e.getMessage());
+            }
+        }
+    }
+
+    /**
+     *  读取file 文件
+     *  @param file     文件
+     * @return
+     */
+    public String gainFileData(File file){
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            StringBuilder result = new StringBuilder();
+            BufferedReader bfr = new BufferedReader(new InputStreamReader(inputStream));
+            String lineTxt = null;
+            while ((lineTxt = bfr.readLine()) != null) {
+                String a=lineTxt;
+                result.append(lineTxt).append(System.lineSeparator());
+            }
+            String toString = result.toString();
+
+            inputStream.close();
+            return toString;
+        }catch (IOException e){
+            throw new ApplicationException(e.getMessage());
+        }
+    }
 }

@@ -95,6 +95,7 @@ public class GatewayFilterAutoConfiguration {
                         "/backups",
                         "/remoteInfo",
                         "/toLead",
+                        "/tag",
                 })
                 .get();
     }
