@@ -1,13 +1,13 @@
 #!/bin/sh
 
 DIRS=$(dirname "$PWD")
-JDK_VERSION=jdk-16.0.2
 
-#判断是否自定义jdk
-JAVA_HOME="/usr/local/${JDK_VERSION}"
-if [ -e "${DIRS}/embbed/${JDK_VERSION}" ]; then
-  echo "使用内嵌jdk"
-  JAVA_HOME="${DIRS}/embbed/${JDK_VERSION}"
+JDK_VERSION=jdk-16.0.2
+if [ -d "${DIRS}/embbed/${JDK_VERSION}" ]; then
+    echo "使用内嵌jdk"
+    JAVA_HOME="${DIRS}/embbed/${JDK_VERSION}"
+else
+    JAVA_HOME="/usr/local/jdk-17.0.7"
 fi
 
 
