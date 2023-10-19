@@ -15,8 +15,7 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
     @Value("${repository.address}")
     private String repositoryAddress;
 
-    @Value("${backup.address}")
-    private String backupAddress;
+
 
     @Value("${visit.address:null}")
     private String visitAddress;
@@ -35,10 +34,6 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
         return repositoryAddress;
     }
 
-    @Override
-    public String backupAddress() {
-        return backupAddress;
-    }
     @Override
     public String uploadAddress() {
         return dataHome+"/upload";

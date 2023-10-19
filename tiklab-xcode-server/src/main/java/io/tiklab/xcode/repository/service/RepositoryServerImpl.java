@@ -93,6 +93,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     ValidUsrPwdServer validUsrPwdServer;
 
+    @Autowired
+    XcodeYamlDataMaService xcodeYamlDataMaService;
+
 
     /**
      * 创建仓库
@@ -555,6 +558,12 @@ public class RepositoryServerImpl implements RepositoryServer {
             visitAddress = "http://" + ip + ":" + yamlDataMaService.serverPort();
         }
         return visitAddress;
+    }
+
+    @Override
+    public String getRepositoryPath() {
+
+        return   xcodeYamlDataMaService.repositoryAddress();
     }
 
     @Override

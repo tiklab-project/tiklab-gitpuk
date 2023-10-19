@@ -104,8 +104,9 @@ file:
 repository:
   address: ${DATA_HOME}/repository
 
-backup:
-  address: /opt/tiklab/xcode-backups
+
+backups:
+  dir: /data/xcode
   time: 0 0 2 * * ?
 
 visit:

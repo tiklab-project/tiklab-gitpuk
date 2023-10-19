@@ -29,7 +29,8 @@ public class XcodeSqlLoad {
                 "todotask_1.0.0",
                 //xcode
                 "xcode_1.0.0",
-                "xdprivilege_1.0.0"
+                "xdprivilege_1.0.0",
+                "backups_1.0.0",
         });
 
         dsmConfig.newVersion("1.0.1", new String[]{

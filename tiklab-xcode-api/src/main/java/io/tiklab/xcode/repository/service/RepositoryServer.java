@@ -169,6 +169,12 @@ public interface RepositoryServer {
     String getAddress();
 
     /**
+     * 获取仓库地址
+     * @return 绝对路径
+     */
+    String getRepositoryPath();
+
+    /**
      * 查询用户推送过的仓库
      * @return userId 用户ID
      */

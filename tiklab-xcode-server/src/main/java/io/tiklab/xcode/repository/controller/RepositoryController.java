@@ -194,6 +194,14 @@ public class RepositoryController {
         return Result.ok(address);
     }
 
+    @RequestMapping(path="/getRepositoryPath",method = RequestMethod.POST)
+    @ApiMethod(name = "getRepositoryPath",desc = "获取仓库地址")
+    public Result<String> getRepositoryPath(){
+        String address=repositoryServer.getRepositoryPath();
+
+        return Result.ok(address);
+    }
+
 
 }
 

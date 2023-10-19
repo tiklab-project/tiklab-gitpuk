@@ -19,6 +19,18 @@ psql="${mysql_bin}/psql"
 pg_dump="${mysql_bin}/pg_dump"
 current_time="xcode-backups-"$(date +%s)
 
+echo "用户名:"$userName
+echo "密码:"$password
+echo "host:"$host
+echo "dbName:"$dbName
+echo "schemaName:"$schemaName
+echo "pg_dump:"$pg_dump
+echo "备份地址:"$backupsUrl
+
+
+echo PGPASSWORD=${password} ${pg_dump} -U ${userName} -h ${host} -p ${port} -d ${dbName} -n ${schemaName}>${backupsUrl}/${dbName}.sql
+
+
 PGPASSWORD=${password} ${pg_dump} -U ${userName} -h ${host} -p ${port} -d ${dbName} -n ${schemaName}>${backupsUrl}/${dbName}.sql
 
 

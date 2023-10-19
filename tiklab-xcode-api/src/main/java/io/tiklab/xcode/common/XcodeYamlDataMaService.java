@@ -8,10 +8,6 @@ public interface XcodeYamlDataMaService {
      */
     String repositoryAddress();
 
-    /**
-     * 仓库备份地址
-     */
-    String backupAddress();
 
     /**
      * 仓库备份上传地址

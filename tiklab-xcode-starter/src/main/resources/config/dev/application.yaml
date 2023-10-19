@@ -27,6 +27,7 @@ jdbc:
 postgresql:
   embbed:
     enable: false
+  type: local
   database: tiklab_xcode
 
 eas:
@@ -103,12 +104,14 @@ file:
 
 repository:
   address: ${DATA_HOME}/repository
-backup:
-  address: ${DATA_HOME}/backup
+
+backups:
+  dir: ${DATA_HOME}/backup
   time: 0 0 2 * * ?
 
 visit:
   address: ""
+
 
 
 
