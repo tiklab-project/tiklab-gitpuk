@@ -119,7 +119,7 @@
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
-			<!--<dependencies>
+			<dependencies>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-linux</artifactId>
@@ -127,12 +127,12 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-			</dependencies>-->
+			</dependencies>
 			<properties>
 				<assembly>linux</assembly>
 				<systemType>linux</systemType>
 			</properties>
-		<!--	<build>
+			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -167,13 +167,13 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>-->
+			</build>
 		</profile>
 
 		<!--windows-->
 		<profile>
 			<id>system-windows</id>
-		<!--	<dependencies>
+			<dependencies>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-windows</artifactId>
@@ -181,12 +181,12 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-			</dependencies>-->
+			</dependencies>
 			<properties>
 				<assembly>windows</assembly>
 				<systemType>windows</systemType>
 			</properties>
-			<!--<build>
+			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -211,7 +211,7 @@
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
 											<artifactId>tiklab-postgresql-linux</artifactId>
-											<version>${project.version}</version>
+											<version>${tiklab-postgresql.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
@@ -221,13 +221,12 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>-->
+			</build>
 		</profile>
 
-		<!--mac-->
 		<profile>
 			<id>system-mac</id>
-		<!--	<dependencies>
+			<dependencies>
 				<dependency>
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-jdk-mac</artifactId>
@@ -235,19 +234,12 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-				<dependency>
-					<groupId>io.tiklab</groupId>
-					<artifactId>tiklab-jdk-mac</artifactId>
-					<version>${tiklab-jdk.version}</version>
-					<type>zip</type>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>-->
+			</dependencies>
 			<properties>
 				<assembly>mac</assembly>
 				<systemType>mac</systemType>
 			</properties>
-			<!--<build>
+			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -260,7 +252,7 @@
 								<goals>
 									<goal>unpack</goal>
 								</goals>
-							&lt;!&ndash;	<configuration>
+								<configuration>
 									<artifactItems>
 										<artifactItem>
 											<groupId>io.tiklab</groupId>
@@ -269,20 +261,13 @@
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
-										<artifactItem>
-											<groupId>io.tiklab</groupId>
-											<artifactId>tiklab-mysql-mac</artifactId>
-											<version>${project.version}</version>
-											<type>zip</type>
-											<outputDirectory>embbed</outputDirectory>
-										</artifactItem>
 									</artifactItems>
-								</configuration>&ndash;&gt;
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
 				</plugins>
-			</build>-->
+			</build>
 		</profile>
 
 		<!--dev-->

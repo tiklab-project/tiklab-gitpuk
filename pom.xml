@@ -39,6 +39,7 @@
 
         <tiklab-upgrade.version>1.0.0</tiklab-upgrade.version>
         <tiklab-postin.version>1.0.0</tiklab-postin.version>
+        <tiklab-jdk.version>1.0.0</tiklab-jdk.version>
 
         <!--other-->
         <commons-compress.version>1.19</commons-compress.version>
@@ -46,7 +47,6 @@
         <sshd-core.version>2.9.2</sshd-core.version>
         <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <tiklab-jdk.version>1.0.0.3</tiklab-jdk.version>
     </properties>
 
     <modules>
