@@ -1,7 +1,7 @@
 package io.tiklab.xcode.commit.service;
 
 import io.tiklab.xcode.commit.model.*;
-import io.tiklab.xcode.git.GitCommitUntil;
+import io.tiklab.xcode.common.git.GitCommitUntil;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.common.RepositoryFileUtil;

@@ -13,7 +13,6 @@ import io.tiklab.privilege.dmRole.model.DmRoleUser;
 import io.tiklab.privilege.dmRole.model.DmRoleUserQuery;
 import io.tiklab.privilege.dmRole.service.DmRoleService;
 import io.tiklab.privilege.dmRole.service.DmRoleUserService;
-import io.tiklab.privilege.role.model.PatchUser;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
@@ -25,8 +24,8 @@ import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.file.model.FileTree;
 import io.tiklab.xcode.file.model.FileTreeMessage;
-import io.tiklab.xcode.git.GitBranchUntil;
-import io.tiklab.xcode.git.GitUntil;
+import io.tiklab.xcode.common.git.GitBranchUntil;
+import io.tiklab.xcode.common.git.GitUntil;
 import io.tiklab.xcode.repository.dao.RepositoryDao;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.*;
@@ -135,15 +134,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
 
         String repositoryId = repositoryDao.createRpy(groupEntity);
+
         //创建私有仓库 给创建人设置管理员权限
-
-        List<PatchUser> arrayList = new ArrayList<>();
-        PatchUser patchUser = new PatchUser();
-        patchUser.setId(LoginContext.getLoginId());
-        patchUser.setAdminRole(true);
-        arrayList.add(patchUser);
-        dmRoleService.initPatchDmRole(repositoryId,arrayList,"xcode");
-
+        dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
         return repositoryId;
     }
 

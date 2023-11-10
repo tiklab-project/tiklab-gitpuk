@@ -17,7 +17,7 @@
 
     <properties>
         <tiklab-toolkit.version>1.0.0</tiklab-toolkit.version>
-        <tiklab-plugin.version>1.0.0</tiklab-plugin.version>
+        <tiklab-plugin.version>1.0.1-SNAPSHOT</tiklab-plugin.version>
         <tiklab-gateway.version>1.0.0</tiklab-gateway.version>
         <tiklab-rpc.version>1.0.0</tiklab-rpc.version>
         <tiklab-dss.version>1.0.0</tiklab-dss.version>

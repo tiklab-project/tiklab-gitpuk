@@ -96,6 +96,7 @@ public class GatewayFilterAutoConfiguration {
                         "/remoteInfo",
                         "/toLead",
                         "/tag",
+                        "/codeScan"
                 })
                 .get();
     }

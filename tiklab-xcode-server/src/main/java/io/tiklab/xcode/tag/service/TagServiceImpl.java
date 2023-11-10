@@ -2,7 +2,7 @@ package io.tiklab.xcode.tag.service;
 
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.xcode.common.RepositoryUtil;
-import io.tiklab.xcode.git.GitTagUntil;
+import io.tiklab.xcode.common.git.GitTagUntil;
 import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.tag.model.Tag;
 import org.apache.commons.collections.CollectionUtils;

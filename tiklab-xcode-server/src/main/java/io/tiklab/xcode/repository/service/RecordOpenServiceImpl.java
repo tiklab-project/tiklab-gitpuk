@@ -12,7 +12,7 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.xcode.common.XcodeYamlDataMaService;
-import io.tiklab.xcode.git.GitBranchUntil;
+import io.tiklab.xcode.common.git.GitBranchUntil;
 import io.tiklab.xcode.repository.dao.RecordOpenDao;
 import io.tiklab.xcode.repository.entity.RecordOpenEntity;
 import io.tiklab.xcode.repository.model.RecordOpen;

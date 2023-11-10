@@ -7,7 +7,7 @@ import io.tiklab.xcode.branch.model.BranchMessage;
 import io.tiklab.xcode.branch.model.Branch;
 import io.tiklab.xcode.branch.model.BranchQuery;
 import io.tiklab.xcode.repository.service.RepositoryServer;
-import io.tiklab.xcode.git.GitBranchUntil;
+import io.tiklab.xcode.common.git.GitBranchUntil;
 import io.tiklab.xcode.common.RepositoryUtil;
 import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import org.apache.commons.collections.CollectionUtils;

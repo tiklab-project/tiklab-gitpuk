@@ -1,8 +1,8 @@
 package io.tiklab.xcode.common;
 
 import io.tiklab.xcode.file.model.FileTree;
-import io.tiklab.xcode.git.GitBranchUntil;
-import io.tiklab.xcode.git.GitCommitUntil;
+import io.tiklab.xcode.common.git.GitBranchUntil;
+import io.tiklab.xcode.common.git.GitCommitUntil;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.file.model.FileMessage;
 import io.tiklab.xcode.file.model.FileTreeMessage;
