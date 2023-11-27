@@ -7,10 +7,7 @@ import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.xcode.scan.dao.ScanRuleDao;
 import io.tiklab.xcode.scan.entity.ScanRuleEntity;
-import io.tiklab.xcode.scan.model.ScanRule;
-import io.tiklab.xcode.scan.model.ScanRuleQuery;
-import io.tiklab.xcode.scan.model.ScanRecord;
-import io.tiklab.xcode.scan.model.ScanRecordQuery;
+import io.tiklab.xcode.scan.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,14 +33,33 @@ public class ScanRuleServiceImpl implements ScanRuleService {
     @Autowired
     ScanRecordService scanRecordService;
 
+    @Autowired
+    ScanSchemeRuleSetService scanSchemeRuleSetService;
+
+    @Autowired
+    ScanSchemeRuleService scanSchemeRuleService;
+
     @Override
-    public String createScanRule(@NotNull @Valid ScanRule openRecord) {
+    public String createScanRule(@NotNull @Valid ScanRule scanRule) {
 
-        ScanRuleEntity openRecordEntity = BeanMapper.map(openRecord, ScanRuleEntity.class);
-        openRecordEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        String openRecordId= scanRuleDao.createScanRule(openRecordEntity);
+        ScanRuleEntity ruleEntity = BeanMapper.map(scanRule, ScanRuleEntity.class);
+        ruleEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        String scanRuleId= scanRuleDao.createScanRule(ruleEntity);
+        scanRule.setId(scanRuleId);
 
-        return openRecordId;
+        List<ScanSchemeRuleSet> schemeRuleSetList = scanSchemeRuleSetService.findScanSchemeRuleSetList(new ScanSchemeRuleSetQuery().setRuleSetId(scanRule.getRuleSetId()));
+        if (CollectionUtils.isNotEmpty(schemeRuleSetList)){
+            for (ScanSchemeRuleSet schemeRuleSet:schemeRuleSetList){
+                ScanSchemeRule scanSchemeRule = new ScanSchemeRule();
+
+                scanSchemeRule.setSchemeRulesetId(schemeRuleSet.getId());
+                scanSchemeRule.setScanRule(scanRule);
+                scanSchemeRule.setProblemLevel(scanRule.getProblemLevel());
+                scanSchemeRule.setScanSchemeId(schemeRuleSet.getScanSchemeId());
+                scanSchemeRuleService.createScanSchemeRule(scanSchemeRule);
+            }
+        }
+        return scanRuleId;
     }
 
     @Override
@@ -55,6 +71,8 @@ public class ScanRuleServiceImpl implements ScanRuleService {
 
     @Override
     public void deleteScanRule(@NotNull String id) {
+        scanSchemeRuleService.deleteScanSchemeRuleByCondition("ruleId",id);
+
         scanRuleDao.deleteScanRule(id);
     }
 
@@ -114,7 +132,7 @@ public class ScanRuleServiceImpl implements ScanRuleService {
         Pagination<ScanRuleEntity>  pagination = scanRuleDao.findScanRulePage(ScanRuleQuery);
 
         List<ScanRule> openRecordList = BeanMapper.mapList(pagination.getDataList(), ScanRule.class);
-        joinTemplate.joinQuery(pagination.getDataList());
+        joinTemplate.joinQuery(openRecordList);
 
         return PaginationBuilder.build(pagination,openRecordList);
     }

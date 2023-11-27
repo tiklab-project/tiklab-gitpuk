@@ -15,12 +15,17 @@ public class ScanSchemeRuleEntity {
     @Column(name = "scan_scheme_id" ,notNull = true)
     private String scanSchemeId;
 
-    @Column(name = "rule_set_id",notNull = true)
-    private String ruleSetId;
+    @Column(name = "scheme_ruleset_id",notNull = true)
+    private String schemeRulesetId;
 
-    @Column(name = "language",notNull = true)
-    private String language;
+    @Column(name = "rule_Id",notNull = true)
+    private String ruleId;
 
+    @Column(name = "problem_level",notNull = true)
+    private Integer problemLevel;
+
+    @Column(name = "is_disable",notNull = true)
+    private Integer isDisable;
 
     @Column(name = "create_time")
     private Timestamp createTime;
@@ -41,12 +46,33 @@ public class ScanSchemeRuleEntity {
         this.scanSchemeId = scanSchemeId;
     }
 
-    public String getRuleSetId() {
-        return ruleSetId;
+    public String getSchemeRulesetId() {
+        return schemeRulesetId;
     }
 
-    public void setRuleSetId(String ruleSetId) {
-        this.ruleSetId = ruleSetId;
+    public void setSchemeRulesetId(String schemeRulesetId) {
+        this.schemeRulesetId = schemeRulesetId;
+    }
+
+    public void setProblemLevel(Integer problemLevel) {
+        this.problemLevel = problemLevel;
+    }
+
+    public String getRuleId() {
+        return ruleId;
+    }
+
+    public void setRuleId(String ruleId) {
+        this.ruleId = ruleId;
+    }
+
+
+    public Integer getIsDisable() {
+        return isDisable;
+    }
+
+    public void setIsDisable(Integer isDisable) {
+        this.isDisable = isDisable;
     }
 
     public Timestamp getCreateTime() {
@@ -57,11 +83,7 @@ public class ScanSchemeRuleEntity {
         this.createTime = createTime;
     }
 
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
+    public Integer getProblemLevel() {
+        return problemLevel;
     }
 }

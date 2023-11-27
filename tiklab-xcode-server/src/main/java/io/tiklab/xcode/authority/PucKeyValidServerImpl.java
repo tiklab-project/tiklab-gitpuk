@@ -7,6 +7,8 @@ import io.tiklab.xcode.common.RepositoryUtil;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 import java.math.BigInteger;
@@ -22,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
 public class PucKeyValidServerImpl implements PublickeyAuthenticator {
-
+    private static Logger logger = LoggerFactory.getLogger(PucKeyValidServerImpl.class);
 
     private final AuthServer authServer;
 
@@ -32,6 +34,7 @@ public class PucKeyValidServerImpl implements PublickeyAuthenticator {
 
     @Override
     public boolean authenticate(String username, PublicKey key, ServerSession session) throws AsyncAuthException {
+        logger.info("1234");
         String algorithm = key.getAlgorithm();
         if (algorithm.equals(RepositoryFinal.SSH_ENCODER_RSA)){
             List<Auth> userAuth = authServer.findUserAuth();

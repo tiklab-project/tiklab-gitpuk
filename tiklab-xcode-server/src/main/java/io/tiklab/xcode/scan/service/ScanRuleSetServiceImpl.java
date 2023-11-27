@@ -7,10 +7,7 @@ import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.xcode.scan.dao.ScanRuleSetDao;
 import io.tiklab.xcode.scan.entity.ScanRuleSetEntity;
-import io.tiklab.xcode.scan.model.ScanRuleSet;
-import io.tiklab.xcode.scan.model.ScanRuleSetQuery;
-import io.tiklab.xcode.scan.model.ScanRecord;
-import io.tiklab.xcode.scan.model.ScanRecordQuery;
+import io.tiklab.xcode.scan.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * ScanRuleSetServiceImpl-扫描计划集接口实现
@@ -32,6 +30,9 @@ public class ScanRuleSetServiceImpl implements ScanRuleSetService {
 
     @Autowired
     JoinTemplate joinTemplate;
+
+    @Autowired
+    ScanSchemeRuleSetService scanSchemeRuleSetService;
 
 
     @Override
@@ -116,5 +117,27 @@ public class ScanRuleSetServiceImpl implements ScanRuleSetService {
 
 
         return PaginationBuilder.build(pagination,openRecordList);
+    }
+
+    @Override
+    public List<ScanRuleSet> findScanRuleSetBySchemeId(String schemeId) {
+        List<ScanRuleSet> scanRuleSets=null;
+        List<ScanSchemeRuleSet> schemeRuleList = scanSchemeRuleSetService.findScanSchemeRuleSetList(new ScanSchemeRuleSetQuery().setScanSchemeId(schemeId));
+        if(CollectionUtils.isNotEmpty(schemeRuleList)){
+           scanRuleSets = schemeRuleList.stream().map(ScanSchemeRuleSet::getScanRuleSet).collect(Collectors.toList());
+        }
+        return scanRuleSets;
+    }
+
+    @Override
+    public List<ScanRuleSet> findScanRuleSetNotScheme(String schemeId) {
+        List<ScanRuleSet> scanRuleSets = this.findAllScanRuleSet();
+
+        List<ScanSchemeRuleSet> schemeRuleList = scanSchemeRuleSetService.findScanSchemeRuleSetList(new ScanSchemeRuleSetQuery().setScanSchemeId(schemeId));
+        if (CollectionUtils.isNotEmpty(schemeRuleList)){
+             scanRuleSets = scanRuleSets.stream().filter(ruleSet -> schemeRuleList.stream().
+                    allMatch(schemeRule -> !ruleSet.getId().equals(schemeRule.getScanRuleSet().getId()))).collect(Collectors.toList());
+        }
+        return scanRuleSets;
     }
 }

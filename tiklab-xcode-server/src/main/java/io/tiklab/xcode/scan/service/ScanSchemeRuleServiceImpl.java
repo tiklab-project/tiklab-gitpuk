@@ -3,15 +3,15 @@ package io.tiklab.xcode.scan.service;
 import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.core.page.PaginationBuilder;
+import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
+import io.tiklab.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
+import io.tiklab.xcode.repository.entity.RecordOpenEntity;
 import io.tiklab.xcode.scan.dao.ScanSchemeRuleDao;
 import io.tiklab.xcode.scan.entity.ScanSchemeRuleEntity;
 import io.tiklab.xcode.scan.model.ScanSchemeRule;
 import io.tiklab.xcode.scan.model.ScanSchemeRuleQuery;
-import io.tiklab.xcode.scan.model.ScanRecord;
-import io.tiklab.xcode.scan.model.ScanRecordQuery;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
-* ScanSchemeRuleServiceImpl-扫描方案规则集关系
+* ScanSchemeRuleServiceImpl-扫描方案规则关系
 */
 @Service
 @Exporter
@@ -37,20 +37,20 @@ public class ScanSchemeRuleServiceImpl implements ScanSchemeRuleService {
     ScanRecordService scanRecordService;
 
     @Override
-    public String createScanSchemeRule(@NotNull @Valid ScanSchemeRule openRecord) {
+    public String createScanSchemeRule(@NotNull @Valid ScanSchemeRule scanSchemeRule) {
 
-        ScanSchemeRuleEntity openRecordEntity = BeanMapper.map(openRecord, ScanSchemeRuleEntity.class);
-        openRecordEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        String openRecordId= scanSchemeRuleDao.createScanSchemeRule(openRecordEntity);
+        ScanSchemeRuleEntity scanSchemeRuleEntity = BeanMapper.map(scanSchemeRule, ScanSchemeRuleEntity.class);
+        scanSchemeRuleEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        String scanSchemeRuleId= scanSchemeRuleDao.createScanSchemeRule(scanSchemeRuleEntity);
 
-        return openRecordId;
+        return scanSchemeRuleId;
     }
 
     @Override
-    public void updateScanSchemeRule(@NotNull @Valid ScanSchemeRule openRecord) {
-        ScanSchemeRuleEntity openRecordEntity = BeanMapper.map(openRecord, ScanSchemeRuleEntity.class);
+    public void updateScanSchemeRule(@NotNull @Valid ScanSchemeRule scanSchemeRule) {
+        ScanSchemeRuleEntity scanSchemeRuleEntity = BeanMapper.map(scanSchemeRule, ScanSchemeRuleEntity.class);
 
-        scanSchemeRuleDao.updateScanSchemeRule(openRecordEntity);
+        scanSchemeRuleDao.updateScanSchemeRule(scanSchemeRuleEntity);
     }
 
     @Override
@@ -60,62 +60,66 @@ public class ScanSchemeRuleServiceImpl implements ScanSchemeRuleService {
 
     @Override
     public void deleteScanSchemeRuleByCondition(String key, String value) {
-
+        DeleteCondition deleteCondition = DeleteBuilders.createDelete(ScanSchemeRuleEntity.class)
+                .eq(key, value)
+                .get();
+        scanSchemeRuleDao.deleteScanSchemeRule(deleteCondition);
     }
 
     @Override
     public ScanSchemeRule findOne(String id) {
-        ScanSchemeRuleEntity openRecordEntity = scanSchemeRuleDao.findScanSchemeRule(id);
+        ScanSchemeRuleEntity scanSchemeRuleEntity = scanSchemeRuleDao.findScanSchemeRule(id);
 
-        ScanSchemeRule openRecord = BeanMapper.map(openRecordEntity, ScanSchemeRule.class);
-        return openRecord;
+        ScanSchemeRule scanSchemeRule = BeanMapper.map(scanSchemeRuleEntity, ScanSchemeRule.class);
+        return scanSchemeRule;
     }
 
     @Override
     public List<ScanSchemeRule> findList(List<String> idList) {
-        List<ScanSchemeRuleEntity> openRecordEntityList =  scanSchemeRuleDao.findScanSchemeRuleList(idList);
+        List<ScanSchemeRuleEntity> scanSchemeRuleEntityList =  scanSchemeRuleDao.findScanSchemeRuleList(idList);
 
-        List<ScanSchemeRule> openRecordList =  BeanMapper.mapList(openRecordEntityList, ScanSchemeRule.class);
-        return openRecordList;
+        List<ScanSchemeRule> scanSchemeRuleList =  BeanMapper.mapList(scanSchemeRuleEntityList, ScanSchemeRule.class);
+        return scanSchemeRuleList;
     }
 
     @Override
     public ScanSchemeRule findScanSchemeRule(@NotNull String id) {
-        ScanSchemeRule openRecord = findOne(id);
+        ScanSchemeRule scanSchemeRule = findOne(id);
 
-        joinTemplate.joinQuery(openRecord);
+        joinTemplate.joinQuery(scanSchemeRule);
 
-        return openRecord;
+        return scanSchemeRule;
     }
 
     @Override
     public List<ScanSchemeRule> findAllScanSchemeRule() {
-        List<ScanSchemeRuleEntity> openRecordEntityList =  scanSchemeRuleDao.findAllScanSchemeRule();
+        List<ScanSchemeRuleEntity> scanSchemeRuleEntityList =  scanSchemeRuleDao.findAllScanSchemeRule();
 
-        List<ScanSchemeRule> openRecordList =  BeanMapper.mapList(openRecordEntityList, ScanSchemeRule.class);
+        List<ScanSchemeRule> scanSchemeRuleList =  BeanMapper.mapList(scanSchemeRuleEntityList, ScanSchemeRule.class);
 
-        joinTemplate.joinQuery(openRecordList);
+        joinTemplate.joinQuery(scanSchemeRuleList);
 
-        return openRecordList;
+        return scanSchemeRuleList;
     }
 
     @Override
     public List<ScanSchemeRule> findScanSchemeRuleList(ScanSchemeRuleQuery ScanSchemeRuleQuery) {
-        List<ScanSchemeRuleEntity> openRecordEntityList = scanSchemeRuleDao.findScanSchemeRuleList(ScanSchemeRuleQuery);
+        List<ScanSchemeRuleEntity> scanSchemeRuleEntityList = scanSchemeRuleDao.findScanSchemeRuleList(ScanSchemeRuleQuery);
 
-        List<ScanSchemeRule> openRecordList = BeanMapper.mapList(openRecordEntityList, ScanSchemeRule.class);
-        joinTemplate.joinQuery(openRecordList);
+        List<ScanSchemeRule> scanSchemeRuleList = BeanMapper.mapList(scanSchemeRuleEntityList, ScanSchemeRule.class);
+        joinTemplate.joinQuery(scanSchemeRuleList);
 
-        return openRecordList;
+        return scanSchemeRuleList;
     }
 
     @Override
     public Pagination<ScanSchemeRule> findScanSchemeRulePage(ScanSchemeRuleQuery ScanSchemeRuleQuery) {
         Pagination<ScanSchemeRuleEntity>  pagination = scanSchemeRuleDao.findScanSchemeRulePage(ScanSchemeRuleQuery);
 
-        List<ScanSchemeRule> openRecordList = BeanMapper.mapList(pagination.getDataList(), ScanSchemeRule.class);
-        joinTemplate.joinQuery(pagination.getDataList());
+        List<ScanSchemeRule> scanSchemeRuleList = BeanMapper.mapList(pagination.getDataList(), ScanSchemeRule.class);
+        joinTemplate.joinQuery(scanSchemeRuleList);
 
-        return PaginationBuilder.build(pagination,openRecordList);
+        return PaginationBuilder.build(pagination,scanSchemeRuleList);
     }
+
 }

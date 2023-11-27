@@ -1,10 +1,16 @@
 package io.tiklab.xcode.authority;
 
 
+import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.xcode.common.XcodeYamlDataMaService;
+import io.tiklab.xcode.repository.model.RepositoryQuery;
+import io.tiklab.xcode.repository.service.RepositoryServer;
+import io.tiklab.xcode.scan.service.CodeScanSpotBugsServiceImpl;
 import io.tiklab.xcode.setting.service.AuthServer;
 import io.tiklab.xcode.common.RepositoryFinal;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -13,10 +19,13 @@ import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.command.CommandFactory;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.UploadPack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 
 /**
@@ -36,12 +46,15 @@ import java.nio.file.Paths;
 
 @Configuration
 public class SshService {
-
+    private static Logger logger = LoggerFactory.getLogger(SshService.class);
     @Autowired
     ValidUsrPwdServer validUsrPwdServer;
 
     @Autowired
-    private AuthServer authServer;
+    AuthServer authServer;
+
+    @Autowired
+    RepositoryServer repositoryServer;
 
 
     @Value("${xcode.ssh.port:10000}")
@@ -49,6 +62,9 @@ public class SshService {
 
     @Value("${xcode.ssh.key:/conf/id_rsa}")
     private String sshKey;
+
+    @Autowired
+    XcodeYamlDataMaService xcodeYamlDataMaService;
 
 
 
@@ -58,30 +74,33 @@ public class SshService {
         sshServer.setPort(sshPort);
         sshServer.setHost (RepositoryFinal.SSH_HOST);
         String property = System.getProperty("user.dir");
-        if (!property.endsWith(RepositoryFinal.APP_NAME)){
+      /*  if (!property.endsWith(RepositoryFinal.APP_NAME)){
             File file = new File(property);
             property= file.getParent();
-        }
-        Path ssh_key = Paths.get(property+"/"+sshKey);
+        }*/
+        String appHome = AppHomeContext.getAppHome();
+        Path ssh_key = Paths.get(appHome+"/file/id_rsa");
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
 
+
+        // 设置公钥认证器
+        PucKeyValidServerImpl publicKeyAuthenticator = new PucKeyValidServerImpl(authServer);
+        sshServer.setPublickeyAuthenticator(publicKeyAuthenticator);
         try {
+            sshServer.setCommandFactory(new XcodeSshCommandFactory(xcodeYamlDataMaService,repositoryServer));
             sshServer.start();
-            sshServer.setCommandFactory(new XcodeSshCommandFactory());
+
         } catch (Exception e) {
             throw new ApplicationException(e);
         }
 
-        //秘钥认证失败
-        PucKeyValidServerImpl publicKeyAuthenticator = new PucKeyValidServerImpl(authServer);
-        sshServer.setPublickeyAuthenticator(publicKeyAuthenticator);
 
-        //效验账户名密码
+
+      /*  //效验账户名密码
         PasswordAuthenticator passwordAuthenticator =
                 (username, password, session) -> validUsrPwdServer.validUserNamePassword(username,password,"1");
-        sshServer.setPasswordAuthenticator(passwordAuthenticator);
-
+        sshServer.setPasswordAuthenticator(passwordAuthenticator);*/
     }
 
 
@@ -89,42 +108,54 @@ public class SshService {
      * 通过不同请求触发不同钩子
      */
     private static class XcodeSshCommandFactory implements CommandFactory {
+        private static Logger logger = LoggerFactory.getLogger(XcodeSshCommandFactory.class);
 
-        @Autowired
-        XcodeYamlDataMaService yamlDataMaService;
+        private final XcodeYamlDataMaService yamlDataMaService;
 
+        private final RepositoryServer repositoryServer;
 
-        public XcodeSshCommandFactory() {
+        public XcodeSshCommandFactory(XcodeYamlDataMaService yamlDataMaService, RepositoryServer repositoryServer) {
+            this.yamlDataMaService = yamlDataMaService;
+            this.repositoryServer=repositoryServer;
         }
+
 
         @Override
         public Command createCommand(ChannelSession channelSession, String command) {
+
             String cmd = command.replace("'", "");
             String s = cmd.split(" ")[1];
-            File file = new File(yamlDataMaService.repositoryAddress() + s);
-            String repositoryPath = file.getAbsolutePath();
+           /* File file = new File(yamlDataMaService.repositoryAddress() + s);
+            String repositoryPath = file.getAbsolutePath();*/
+           if (s.startsWith("/")){
+                s = s.substring(1).replace(".git","");
+           }
+            io.tiklab.xcode.repository.model.Repository repositoryByAddress = repositoryServer.findRepositoryByAddress(s);
+            if (ObjectUtils.isNotEmpty(repositoryByAddress)){
+                String rpyId = repositoryByAddress.getRpyId();
+                String repositoryPath = yamlDataMaService.repositoryAddress() +"/"+ rpyId+".git";
+                try {
+                    File file1 = new File(repositoryPath);
 
+                    if (!file1.exists()) {
+                        throw new ApplicationException("仓库不存在");
+                    }
+                    Repository repo = Git.open(file1).getRepository();
 
-            try {
-                File file1 = new File(repositoryPath);
-
-                if (!file1.exists()) {
+                    if (command.startsWith("git-upload-pack")) {
+                        UploadPack uploadPack = new UploadPack(repo);
+                        repo.close();
+                        return new UploadPackCommand(uploadPack);
+                    } else if (command.startsWith("git-receive-pack")) {
+                        ReceivePack receivePack = new ReceivePack(repo);
+                        repo.close();
+                        return new ReceivePackCommand(receivePack);
+                    }
+                } catch (Exception | Error e) {
                     throw new ApplicationException("仓库不存在");
                 }
-                Repository repo = Git.open(file1).getRepository();
-
-                if (command.startsWith("git-upload-pack")) {
-                    UploadPack uploadPack = new UploadPack(repo);
-                    repo.close();
-                    return new UploadPackCommand(uploadPack);
-                } else if (command.startsWith("git-receive-pack")) {
-                    ReceivePack receivePack = new ReceivePack(repo);
-                    repo.close();
-                    return new ReceivePackCommand(receivePack);
-                }
-            } catch (Exception | Error e) {
-                throw new ApplicationException("仓库不存在");
             }
+            logger.info("仓库不存在");
             return null;
         }
 
@@ -266,27 +297,6 @@ public class SshService {
 
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 

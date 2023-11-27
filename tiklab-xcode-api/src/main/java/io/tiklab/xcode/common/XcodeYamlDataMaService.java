@@ -50,5 +50,14 @@ public interface XcodeYamlDataMaService {
      */
     String pgSqlAddress();
 
+    /**
+     * spotbugsAddress的地址
+     */
+    String spotbugsAddress();
 
+
+    /**
+     * 扫描文件存放地址
+     */
+    String scanFileAddress();
 }

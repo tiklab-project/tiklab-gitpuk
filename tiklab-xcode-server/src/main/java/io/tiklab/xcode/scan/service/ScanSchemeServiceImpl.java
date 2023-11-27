@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * ScanSchemeServiceImpl-扫描方案
@@ -110,7 +112,7 @@ public class ScanSchemeServiceImpl implements ScanSchemeService {
         List<ScanScheme> openRecordList = BeanMapper.mapList(pagination.getDataList(), ScanScheme.class);
         joinTemplate.joinQuery(pagination.getDataList());
 
-
+       openRecordList = openRecordList.stream().sorted(Comparator.comparing(ScanScheme::getCreateTime).reversed()).collect(Collectors.toList());
         return PaginationBuilder.build(pagination,openRecordList);
     }
 }

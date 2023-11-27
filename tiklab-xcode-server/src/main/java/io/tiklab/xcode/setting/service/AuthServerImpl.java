@@ -106,16 +106,16 @@ public class AuthServerImpl implements AuthServer {
         if (allAuth.isEmpty()){
             return Collections.emptyList();
         }
-        List<Auth> list = new ArrayList<>();
+      /*  List<Auth> list = new ArrayList<>();
         for (Auth auth : allAuth) {
             User user = auth.getUser();
             if (!user.getId().equals(LoginContext.getLoginId())){
                 continue;
             }
             list.add(auth);
-        }
+        }*/
 
-        return list;
+        return allAuth;
     }
     
 }

@@ -85,6 +85,7 @@ public class RepositoryDao {
                 .eq("name", repositoryQuery.getName())
                 .eq("userId", repositoryQuery.getUserId())
                 .eq("groupId",repositoryQuery.getGroupId())
+                .eq("address",repositoryQuery.getAddress())
                 .get();
         return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }

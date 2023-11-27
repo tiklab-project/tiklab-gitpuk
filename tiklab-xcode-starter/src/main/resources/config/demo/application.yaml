@@ -105,8 +105,10 @@ repository:
 
 
 backups:
-  dir: /data/xcode
   time: 0 0 2 * * ?
+  dir: /data
+  xcode:
+    dir: ${DATA_HOME}/repository
 
 visit:
   address: http://xcode-ce.demo.tiklab.net

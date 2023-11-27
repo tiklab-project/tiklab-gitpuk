@@ -96,4 +96,22 @@ public class ScanRuleSetController {
         return Result.ok(pagination);
     }
 
+    @RequestMapping(path = "/findScanRuleSetBySchemeId",method = RequestMethod.POST)
+    @ApiMethod(name = "findScanRuleSetBySchemeId",desc = "通过方案查询规则集")
+    @ApiParam(name = "schemeId",desc = "scanRuleSetQuery",required = true)
+    public Result<List<ScanRuleSet>> findScanRuleSetBySchemeId( @NotNull String schemeId){
+        List<ScanRuleSet> scanRuleSetList = scanRuleSetService.findScanRuleSetBySchemeId(schemeId);
+
+        return Result.ok(scanRuleSetList);
+    }
+
+
+    @RequestMapping(path = "/findScanRuleSetNotScheme",method = RequestMethod.POST)
+    @ApiMethod(name = "findScanRuleSetNotScheme",desc = "查询没有添加到当前方案的规则集")
+    @ApiParam(name = "schemeId",desc = "scanRuleSetQuery",required = true)
+    public Result<List<ScanRuleSet>> findScanRuleSetNotScheme( @NotNull String schemeId){
+        List<ScanRuleSet> scanRuleSetList = scanRuleSetService.findScanRuleSetNotScheme(schemeId);
+
+        return Result.ok(scanRuleSetList);
+    }
 }

@@ -7,6 +7,7 @@ import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.tiklab.xcode.scan.entity.ScanSchemeRuleEntity;
 import io.tiklab.xcode.scan.model.ScanSchemeRuleQuery;
+import io.tiklab.xcode.scan.model.ScanSchemeRuleSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * ScanSchemeRuleDao-扫描方案规则集关系
+ * ScanSchemeRuleDao-扫描方案和规则关系
  */
 @Repository
 public class ScanSchemeRuleDao {
@@ -92,6 +93,7 @@ public class ScanSchemeRuleDao {
     public List<ScanSchemeRuleEntity> findScanSchemeRuleList(ScanSchemeRuleQuery scanSchemeRuleQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(ScanSchemeRuleEntity.class)
                 .eq("scanSchemeId",scanSchemeRuleQuery.getScanSchemeId())
+                .eq("schemeRulesetId", scanSchemeRuleQuery.getSchemeRulesetId())
                 .orders(scanSchemeRuleQuery.getOrderParams())
                 .get();
         return jpaTemplate.findList(queryCondition,ScanSchemeRuleEntity.class);
@@ -105,6 +107,7 @@ public class ScanSchemeRuleDao {
     public Pagination<ScanSchemeRuleEntity> findScanSchemeRulePage(ScanSchemeRuleQuery scanSchemeRuleQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(ScanSchemeRuleEntity.class)
                 .eq("scanSchemeId",scanSchemeRuleQuery.getScanSchemeId())
+                .eq("schemeRulesetId", scanSchemeRuleQuery.getSchemeRulesetId())
                 .orders(scanSchemeRuleQuery.getOrderParams())
                 .pagination(scanSchemeRuleQuery.getPageParam())
                 .get();

@@ -451,6 +451,7 @@ public class GitCommitUntil {
 
         ObjectId objectId = ObjectId.fromString(commitId);
 
+
         RevCommit revCommits = git.getRepository().parseCommit(objectId);
 
         Iterable<RevCommit> log = git.log()
@@ -461,8 +462,10 @@ public class GitCommitUntil {
             Map<String,String> map = new HashMap<>();
             Date date = revCommit.getAuthorIdent().getWhen();
             String message = revCommit.getShortMessage();
+
             map.put("message",message);//转换时间
             map.put("time", RepositoryUtil.time(date)+"前");
+            map.put("date", String.valueOf(date.getTime()));
             list.add(map);
         }
         return list;

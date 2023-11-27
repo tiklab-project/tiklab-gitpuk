@@ -8,11 +8,11 @@ public interface CodeScanService {
 
     /**
      * 代码扫描
-     * @param repositoryId
+     * @param scanPlayId
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败
      */
-    boolean codeScanExec(String  repositoryId);
+    String codeScanExec(String  scanPlayId);
 
 
     /**
@@ -26,11 +26,12 @@ public interface CodeScanService {
 
     /**
      * 查询代码扫描状态
-     * @param repositoryId 代码仓库id
+     * @param scanPlayId 扫描计划
+     * @param scanWay 扫描方式  rule、sonar
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败
      */
-    CodeScanInstance findScanState(String repositoryId);
+    String findScanState(String scanPlayId,String scanWay);
 
     /**
      * 创建扫描方案
@@ -46,5 +47,6 @@ public interface CodeScanService {
      * @throws ApplicationException 运行失败
      */
     CodeScan findCodeScanByRpyId(String repositoryId);
+
 
 }

@@ -29,6 +29,13 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
     @Value("${jdbc.url}")
     String jdbcUrl;
 
+    @Value("${spotbugs.address:null}")
+    private String spotbugsAddress;
+
+
+    @Value("${DATA_HOME}")
+    String DATA_HOME;
+
     @Override
     public String repositoryAddress() {
         return repositoryAddress;
@@ -73,12 +80,30 @@ public class XcodeYamlDataMaServiceImpl implements XcodeYamlDataMaService {
         return "public";
     }
 
+
     @Override
     public String pgSqlAddress() {
         String appHome = AppHomeContext.getAppHome();
         String path = new File(appHome).getParentFile().getParentFile().getAbsolutePath();
         return path+"/embbed/pgsql-10.23/bin";
         //return "/Users/limingliang/postgreSQL/bin";
+    }
+
+    @Override
+    public String scanFileAddress() {
+        return DATA_HOME+"/scan";
+    }
+
+    @Override
+    public String spotbugsAddress() {
+        String appHome = AppHomeContext.getAppHome();
+        String path;
+        if ("null".equals(spotbugsAddress)){
+            path = new File(appHome).getParentFile().getParent()+"/embbed/spotbugs-4.8.1/bin";
+        }else {
+            path = appHome + spotbugsAddress;
+        }
+        return  path;
     }
 
 }

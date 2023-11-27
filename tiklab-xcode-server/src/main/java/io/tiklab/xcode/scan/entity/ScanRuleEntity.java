@@ -27,7 +27,7 @@ public class ScanRuleEntity {
     private String ruleOverview;
 
     @Column(name = "problem_level")
-    private String problemLevel;
+    private Integer problemLevel;
 
     @Column(name = "describe")
     private String describe;
@@ -76,11 +76,11 @@ public class ScanRuleEntity {
     }
 
 
-    public String getProblemLevel() {
+    public Integer getProblemLevel() {
         return problemLevel;
     }
 
-    public void setProblemLevel(String problemLevel) {
+    public void setProblemLevel(Integer problemLevel) {
         this.problemLevel = problemLevel;
     }
 

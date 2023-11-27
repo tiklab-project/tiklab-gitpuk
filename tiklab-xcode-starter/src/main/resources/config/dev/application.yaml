@@ -13,9 +13,9 @@ spring:
 
 xcode:
   ssh:
-    port: 10000
-    key: tiklab-xcode-starter\file\id_rsa
-  file: tiklab-xcode-starter\file
+    port: 10002
+    key: tiklab-xcode-starter/file/id_rsa
+  file: tiklab-xcode-starter/file
 
 jdbc:
   driverClassName: org.postgresql.Driver
@@ -106,15 +106,18 @@ repository:
   address: ${DATA_HOME}/repository
 
 backups:
-  dir: ${DATA_HOME}/backup
   time: 0 0 2 * * ?
+  dir: ${DATA_HOME}
+  xcode:
+    dir: /Users/limingliang/tiklab/tiklab-xcode/repository
+  pgsql:
+    dir: /Users/limingliang/postgreSQL/bin
 
 visit:
   address: ""
 
-
-
-
+spotbugs:
+  address: /embbed/spotbugs-4.8.1/bin
 
 
 

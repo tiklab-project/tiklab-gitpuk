@@ -31,6 +31,7 @@ import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.*;
 import io.tiklab.xcode.common.RepositoryFileUtil;
 import io.tiklab.xcode.common.RepositoryUtil;
+import io.tiklab.xcode.scan.service.ScanPlayService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -94,6 +95,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Autowired
     XcodeYamlDataMaService xcodeYamlDataMaService;
+
+    @Autowired
+    ScanPlayService scanPlayService;
 
 
     /**
@@ -161,6 +165,8 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (!file.exists()){
             return;
         }
+
+        scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
         RepositoryFileUtil.deleteFile(file);
     }
 
@@ -276,7 +282,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     }
 
     @Override
-    public List<Repository> findAllRpyList(List<String> idList) {
+    public List<Repository> findList(List<String> idList) {
         List<RepositoryEntity> groupEntities = repositoryDao.findAllRpyList(idList);
         List<RepositoryEntity> entities = groupEntities.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
         List<Repository> list = BeanMapper.mapList(entities, Repository.class);
@@ -497,12 +503,12 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public List<Repository> findRepositoryByUser(String account, String password,String DirId) {
         try {
-            EamTicket eamTicket = validUsrPwdServer.validUser(account, password, DirId);
+            validUsrPwdServer.validUser(account, password, DirId);
             List<RepositoryEntity> repositoryEntityList = repositoryDao.findAllRpy();
             List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
             if (CollectionUtils.isNotEmpty(repositoryList)){
                 String address = this.getAddress();
-                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, eamTicket.getUserId(),"all");
+                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, LoginContext.getLoginId(),"all");
 
                 List<RepositoryEntity> repositoryEntitys = repositoryDao.findRepositoryListByIds(accessRepositoryId);
                  repositoryList = BeanMapper.mapList(repositoryEntitys,Repository.class);
@@ -616,6 +622,26 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
 
         return PaginationBuilder.build(new Pagination<>(),null);
+    }
+
+    @Override
+    public String findRepositoryAuth(String rpyId) {
+        RepositoryEntity oneRpy = repositoryDao.findOneRpy(rpyId);
+        Repository repository = BeanMapper.map(oneRpy, Repository.class);
+        if (!ObjectUtils.isEmpty(repository)){
+            if (("public").equals(repository.getRules())){
+                return "true";
+            }
+            String userId = LoginContext.getLoginId();
+            DmUserQuery dmUserQuery = new DmUserQuery();
+            dmUserQuery.setUserId(userId);
+            dmUserQuery.setDomainId(rpyId);
+            List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+            if (CollectionUtils.isNotEmpty(dmUserList)){
+                return "true";
+            }
+        }
+        return "false";
     }
 
 

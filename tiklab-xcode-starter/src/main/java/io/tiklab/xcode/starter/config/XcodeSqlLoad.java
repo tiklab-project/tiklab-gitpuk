@@ -44,6 +44,9 @@ public class XcodeSqlLoad {
         dsmConfig.newVersion("1.0.3", new String[]{
                 "xcode_1.0.3",
         });
+        dsmConfig.newVersion("1.0.4", new String[]{
+                "xcode_1.0.4",
+        });
         return dsmConfig;
     }
 }

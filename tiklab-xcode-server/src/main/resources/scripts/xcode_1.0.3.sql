@@ -21,9 +21,10 @@ create table rpy_scan_record(
         scan_user_id           varchar (12),
         scan_result           varchar (12),
         scan_way                varchar (32),
+        all_trouble         integer,
         severity_trouble      integer,
         error_trouble         integer,
-        warn_trouble           integer,
+        notice_trouble           integer,
         suggest_trouble         integer,
         create_time  timestamp
 );
@@ -60,7 +61,7 @@ create table rpy_scan_scheme(
 -- ---------------------------
 -- 扫描方案规则关系
 -- ----------------------------
-create table rpy_scan_scheme_rule(
+create table rpy_scan_scheme_ruleset(
         id          varchar(12) PRIMARY KEY,
         scan_scheme_id  varchar (12) NOT NULL,
         rule_set_id     varchar(12),
@@ -98,7 +99,7 @@ create table rpy_scan_rule(
       rule_name  varchar (128) NOT NULL,
       scan_tool varchar(32),
       rule_overview varchar(528),
-      problem_level    varchar(12),
+      problem_level    integer,
       create_time  timestamp,
       describe       text
 );

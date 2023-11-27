@@ -101,8 +101,10 @@ repository:
   code: xcode
 
 backups:
-  dir: /data/xcode
   time: 0 0 2 * * ?
+  dir: /data
+  xcode:
+    dir: ${DATA_HOME}/repository
 
 visit:
   address: http://172.11.1.19:8080

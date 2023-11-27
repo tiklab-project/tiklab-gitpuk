@@ -12,12 +12,14 @@ import java.util.List;
 public class ScanSchemeRuleQuery {
 
     @ApiProperty(name ="orderParams",desc = "排序参数")
-    private List<Order> orderParams = OrderBuilders.instance().asc("id").get();
+    private List<Order> orderParams = OrderBuilders.instance().asc("problemLevel").get();
 
     @ApiProperty(name ="pageParam",desc = "分页参数")
     private Page pageParam = new Page();
 
     private String scanSchemeId;
+
+    private String schemeRulesetId;
 
     public List<Order> getOrderParams() {
         return orderParams;
@@ -39,7 +41,17 @@ public class ScanSchemeRuleQuery {
         return scanSchemeId;
     }
 
-    public void setScanSchemeId(String scanSchemeId) {
+    public ScanSchemeRuleQuery setScanSchemeId(String scanSchemeId) {
         this.scanSchemeId = scanSchemeId;
+        return this;
+    }
+
+    public String getSchemeRulesetId() {
+        return schemeRulesetId;
+    }
+
+    public ScanSchemeRuleQuery setSchemeRulesetId(String schemeRulesetId) {
+        this.schemeRulesetId = schemeRulesetId;
+        return this;
     }
 }

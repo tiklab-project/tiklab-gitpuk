@@ -32,21 +32,25 @@ public class CodeScanController {
 
     @RequestMapping(path="/codeScanExec",method = RequestMethod.POST)
     @ApiMethod(name = "CodeScanExec",desc = "执行代码扫描")
-    @ApiParam(name = "repositoryId",desc = "repositoryId",required = true)
-    public Result<String> codeScanExec( @NotNull String  repositoryId){
-        boolean scanExec = codeScanService.codeScanExec(repositoryId);
+    @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
+    public Result<String> codeScanExec( @NotNull String  scanPlayId){
+        String scanExec = codeScanService.codeScanExec(scanPlayId);
 
         return Result.ok(scanExec);
     }
 
     @RequestMapping(path="/findScanState",method = RequestMethod.POST)
     @ApiMethod(name = "findScanState",desc = "获取扫描状态")
-    @ApiParam(name = "repositoryId",desc = "repositoryId",required = true)
-    public Result<CodeScanInstance> findScanState( @NotNull String  repositoryId){
-        CodeScanInstance scanResult = codeScanService.findScanState(repositoryId);
+    @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
+    public Result<String> findScanState( @NotNull String  scanPlayId,@NotNull String scanWay){
+        String scanResult = codeScanService.findScanState(scanPlayId,scanWay);
 
         return Result.ok(scanResult);
     }
+
+
+
+
 
     @RequestMapping(path="/findScanResult",method = RequestMethod.POST)
     @ApiMethod(name = "findScanResult",desc = "查询扫描后项目结果")
@@ -76,24 +80,6 @@ public class CodeScanController {
     }
 
 
-    @RequestMapping(path="/codeScanBySonar",method = RequestMethod.POST)
-    @ApiMethod(name = "codeScanBySonar",desc = "通过sonar扫描代码")
-    @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
-    public Result<String> codeScanBySonar( @NotNull String  scanPlayId){
-        String scanExec = codeScanSonarService.codeScanBySonar(scanPlayId);
-
-        return Result.ok(scanExec);
-    }
-
-    @RequestMapping(path="/findScanBySonar",method = RequestMethod.POST)
-    @ApiMethod(name = "findScanBySonar",desc = "查询")
-    @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
-    public Result<String> findScanBySonar( @NotNull String  scanPlayId){
-        String scanBySonar = codeScanSonarService.findScanBySonar(scanPlayId);
-
-        return Result.ok(scanBySonar);
-    }
-
     @RequestMapping(path="/findScanIssuesBySonar",method = RequestMethod.POST)
     @ApiMethod(name = "findScanIssuesBySonar",desc = "查询sonar执行的问题列表")
     @ApiParam(name = "scanIssuesQuery",desc = "scanIssuesQuery",required = true)
@@ -112,4 +98,13 @@ public class CodeScanController {
         return Result.ok(issuesDeBySonar);
     }
 
+
+    @RequestMapping(path="/findScanBySonar",method = RequestMethod.POST)
+    @ApiMethod(name = "findScanBySonar",desc = "查询")
+    @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
+    public Result<String> findScanBySonar( @NotNull String  scanPlayId){
+        String scanBySonar = codeScanSonarService.findScanBySonar(scanPlayId);
+
+        return Result.ok(scanBySonar);
+    }
 }

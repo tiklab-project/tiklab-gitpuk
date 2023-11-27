@@ -3,10 +3,13 @@ package io.tiklab.xcode.scan.service;
 import io.tiklab.beans.BeanMapper;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.core.page.PaginationBuilder;
+import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
+import io.tiklab.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.tiklab.join.JoinTemplate;
 import io.tiklab.rpc.annotation.Exporter;
 
 
+import io.tiklab.xcode.repository.entity.RecordCommitEntity;
 import io.tiklab.xcode.scan.dao.ScanPlayDao;
 import io.tiklab.xcode.scan.entity.ScanPlayEntity;
 import io.tiklab.xcode.scan.model.ScanPlay;
@@ -66,7 +69,10 @@ public class ScanPlayServiceImpl implements ScanPlayService {
 
     @Override
     public void deleteScanPlayByCondition(String key, String value) {
-
+        DeleteCondition deleteCondition = DeleteBuilders.createDelete(RecordCommitEntity.class)
+                .eq(key, value)
+                .get();
+        scanPlayDao.deleteScanPlay(deleteCondition);
     }
 
     @Override
@@ -80,7 +86,7 @@ public class ScanPlayServiceImpl implements ScanPlayService {
             ScanRecord scanRecord = recordList.get(0);
             openRecord.setUserName(scanRecord.getScanUser().getName());
             openRecord.setLatScanTime(scanRecord.getCreateTime());
-            int num = scanRecord.getSeverityTrouble() + scanRecord.getErrorTrouble() + scanRecord.getWarnTrouble() + scanRecord.getSuggestTrouble();
+            int num = scanRecord.getSeverityTrouble() + scanRecord.getErrorTrouble() + scanRecord.getNoticeTrouble() + scanRecord.getSuggestTrouble();
             openRecord.setAllReqNum(num);
         }
         return openRecord;
@@ -100,8 +106,6 @@ public class ScanPlayServiceImpl implements ScanPlayService {
         ScanPlay openRecord = findOne(id);
 
         joinTemplate.joinQuery(openRecord);
-
-
 
         return openRecord;
     }
@@ -132,7 +136,7 @@ public class ScanPlayServiceImpl implements ScanPlayService {
         Pagination<ScanPlayEntity>  pagination = scanPlayDao.findScanPlayPage(ScanPlayQuery);
 
         List<ScanPlay> openRecordList = BeanMapper.mapList(pagination.getDataList(), ScanPlay.class);
-        joinTemplate.joinQuery(pagination.getDataList());
+        joinTemplate.joinQuery(openRecordList);
 
         if (CollectionUtils.isNotEmpty(openRecordList)){
             for (ScanPlay scanPlay:openRecordList){

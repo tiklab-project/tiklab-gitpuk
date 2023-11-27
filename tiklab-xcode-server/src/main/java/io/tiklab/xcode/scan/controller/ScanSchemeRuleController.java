@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/scanSchemeRule")
-@Api(name = "ScanSchemeRuleController",desc = "扫描方案规则集关系")
+@Api(name = "ScanSchemeRuleController",desc = "扫描方案规则关系")
 public class ScanSchemeRuleController {
 
     private static Logger logger = LoggerFactory.getLogger(ScanSchemeRuleController.class);
@@ -34,7 +34,7 @@ public class ScanSchemeRuleController {
     private ScanSchemeRuleService scanSchemeRuleService;
 
     @RequestMapping(path="/createScanSchemeRule",method = RequestMethod.POST)
-    @ApiMethod(name = "createScanSchemeRule",desc = "添加扫方案规则集关系")
+    @ApiMethod(name = "createScanSchemeRule",desc = "添加扫方案规则关系")
     @ApiParam(name = "scanSchemeRule",desc = "scanSchemeRule",required = true)
     public Result<String> createScanSchemeRule(@RequestBody @Valid @NotNull ScanSchemeRule scanSchemeRule){
         String scanSchemeRuleId = scanSchemeRuleService.createScanSchemeRule(scanSchemeRule);
@@ -43,7 +43,7 @@ public class ScanSchemeRuleController {
     }
 
     @RequestMapping(path="/updateScanSchemeRule",method = RequestMethod.POST)
-    @ApiMethod(name = "updateScanSchemeRule",desc = "更新扫描方案规则集关系")
+    @ApiMethod(name = "updateScanSchemeRule",desc = "更新扫描方案规则关系")
     @ApiParam(name = "scanSchemeRule",desc = "scanSchemeRule",required = true)
     public Result<String> updateScanSchemeRule(@RequestBody @Valid @NotNull ScanSchemeRule scanSchemeRule){
          scanSchemeRuleService.updateScanSchemeRule(scanSchemeRule);
@@ -53,7 +53,7 @@ public class ScanSchemeRuleController {
 
 
     @RequestMapping(path="/deleteScanSchemeRule",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteScanSchemeRule",desc = "删除扫描方案规则集关系")
+    @ApiMethod(name = "deleteScanSchemeRule",desc = "删除扫描方案规则关系")
     @ApiParam(name = "id",desc = "id",required = true)
     public Result<Void> deleteScanSchemeRule(@NotNull String id){
         scanSchemeRuleService.deleteScanSchemeRule(id);
@@ -62,7 +62,7 @@ public class ScanSchemeRuleController {
     }
 
     @RequestMapping(path="/findScanSchemeRule",method = RequestMethod.POST)
-    @ApiMethod(name = "findScanSchemeRule",desc = "通过id查询扫描方案规则集关系")
+    @ApiMethod(name = "findScanSchemeRule",desc = "通过id查询扫描方案规则关系")
     @ApiParam(name = "id",desc = "id",required = true)
     public Result<ScanSchemeRule> findScanSchemeRule(@NotNull String id){
         ScanSchemeRule scanSchemeRule = scanSchemeRuleService.findScanSchemeRule(id);
@@ -71,7 +71,7 @@ public class ScanSchemeRuleController {
     }
 
     @RequestMapping(path="/findAllScanSchemeRule",method = RequestMethod.POST)
-    @ApiMethod(name = "findAllScanSchemeRule",desc = "查询所有扫描方案规则集关系")
+    @ApiMethod(name = "findAllScanSchemeRule",desc = "查询所有扫描方案规则关系")
     public Result<List<ScanSchemeRule>> findAllScanSchemeRule(){
         List<ScanSchemeRule> scanSchemeRuleList = scanSchemeRuleService.findAllScanSchemeRule();
 
@@ -79,7 +79,7 @@ public class ScanSchemeRuleController {
     }
 
     @RequestMapping(path = "/findScanSchemeRuleList",method = RequestMethod.POST)
-    @ApiMethod(name = "findScanSchemeRuleList",desc = "条件查询扫描方案规则集关系")
+    @ApiMethod(name = "findScanSchemeRuleList",desc = "条件查询扫描方案规则关系")
     @ApiParam(name = "scanSchemeRuleQuery",desc = "scanSchemeRuleQuery",required = true)
     public Result<List<ScanSchemeRule>> findScanSchemeRuleList(@RequestBody @Valid @NotNull ScanSchemeRuleQuery scanSchemeRuleQuery){
         List<ScanSchemeRule> scanSchemeRuleList = scanSchemeRuleService.findScanSchemeRuleList(scanSchemeRuleQuery);
@@ -88,7 +88,7 @@ public class ScanSchemeRuleController {
     }
 
     @RequestMapping(path = "/findScanSchemeRulePage",method = RequestMethod.POST)
-    @ApiMethod(name = "findScanSchemeRulePage",desc = "条件分页查询扫描方案规则集关系")
+    @ApiMethod(name = "findScanSchemeRulePage",desc = "条件分页查询扫描方案规则关系")
     @ApiParam(name = "scanSchemeRuleQuery",desc = "scanSchemeRuleQuery",required = true)
     public Result<Pagination<ScanSchemeRule>> findScanSchemeRulePage(@RequestBody @Valid @NotNull ScanSchemeRuleQuery scanSchemeRuleQuery){
         Pagination<ScanSchemeRule> pagination = scanSchemeRuleService.findScanSchemeRulePage(scanSchemeRuleQuery);

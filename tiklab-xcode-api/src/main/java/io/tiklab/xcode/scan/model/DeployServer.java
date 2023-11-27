@@ -1,5 +1,6 @@
 package io.tiklab.xcode.scan.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.tiklab.beans.annotation.Mapper;
 import io.tiklab.join.annotation.Join;
 import io.tiklab.postin.annotation.ApiModel;
@@ -38,6 +39,7 @@ public class DeployServer implements Serializable {
     private String privateKey;
 
     @ApiProperty(name="createTime",desc="创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
     private Timestamp createTime;
 
     public String getId() {

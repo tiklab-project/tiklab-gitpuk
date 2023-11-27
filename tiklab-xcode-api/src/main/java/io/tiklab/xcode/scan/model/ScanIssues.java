@@ -20,7 +20,7 @@ public class ScanIssues implements Serializable {
     @ApiProperty(name="scanRecordId",desc="扫描记录id")
     private String scanRecordId;
 
-    @ApiProperty(name="issuesSeverity",desc="扫描问题严重等级")
+    @ApiProperty(name="issuesSeverity",desc="扫描问题严重等级 ")
     private String issuesSeverity;
 
     @ApiProperty(name="scanIssuesKey",desc="扫描问题的key")

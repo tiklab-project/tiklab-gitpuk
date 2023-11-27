@@ -80,4 +80,17 @@ public interface ScanRuleSetService {
     */
     Pagination<ScanRuleSet> findScanRuleSetPage(ScanRuleSetQuery scanRuleSetQuery);
 
+    /**
+     * 通过扫描方案id 查询扫描规则集
+     * @param schemeId
+     * @return
+     */
+    List<ScanRuleSet> findScanRuleSetBySchemeId(String schemeId);
+
+    /**
+     * 查询没有添加到当前方案的规则集
+     * @param schemeId
+     * @return
+     */
+    List<ScanRuleSet> findScanRuleSetNotScheme(String schemeId);
 }

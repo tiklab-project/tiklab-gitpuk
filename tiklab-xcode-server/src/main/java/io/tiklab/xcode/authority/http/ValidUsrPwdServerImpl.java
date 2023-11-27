@@ -1,8 +1,8 @@
-package io.tiklab.xcode.authority;
+package io.tiklab.xcode.authority.http;
 
-import io.tiklab.eam.common.model.EamTicket;
 import io.tiklab.eam.passport.user.model.UserPassport;
 import io.tiklab.eam.passport.user.service.UserPassportService;
+import io.tiklab.xcode.authority.ValidUsrPwdServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
             userPassport.setAccount(username);
             userPassport.setDirId(id);
 
-            userPassportService.login(userPassport);
+            userPassportService.validLogin(userPassport);
             return true;
         } catch (Exception e) {
             return false;
@@ -33,14 +33,13 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
     }
 
     @Override
-    public EamTicket validUser(String username, String password, String id) {
+    public void validUser(String username, String password, String id) {
         UserPassport userPassport = new UserPassport();
         userPassport.setPassword(password);
         userPassport.setAccount(username);
         userPassport.setDirId(id);
 
-        EamTicket eamTicket = userPassportService.login(userPassport);
-        return eamTicket;
+        userPassportService.validLogin(userPassport);
     }
 
 }

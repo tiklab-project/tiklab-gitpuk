@@ -121,7 +121,7 @@ public class ScanRecordServiceImpl implements ScanRecordService {
 
         List<ScanRecord> openRecordList = BeanMapper.mapList(pagination.getDataList(), ScanRecord.class);
         joinTemplate.joinQuery(openRecordList);
-       openRecordList = openRecordList.stream().sorted(Comparator.comparing(ScanRecord::getCreateTime).reversed()).collect(Collectors.toList());
+        openRecordList = openRecordList.stream().sorted(Comparator.comparing(ScanRecord::getCreateTime).reversed()).collect(Collectors.toList());
         return PaginationBuilder.build(pagination,openRecordList);
     }
 }

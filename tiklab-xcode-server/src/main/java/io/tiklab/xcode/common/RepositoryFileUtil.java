@@ -151,6 +151,27 @@ public class RepositoryFileUtil {
         return file.delete();
     }
 
+
+    /**
+     * 获取仓库的所有file
+     * @param git 文件信息
+     * @return branch 分支名字
+     */
+    public static List<String> findRepositoryAllFile(Git git,String branch) throws IOException {
+        Repository repository = git.getRepository();
+
+        RevTree tree =GitBranchUntil.findBarthCommitRevTree(repository,branch,"branch");
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
+        List<String> arrayList = new ArrayList<>();
+        while (treeWalk.next()) {
+            String pathString = treeWalk.getPathString();
+            arrayList.add(pathString);
+        }
+        return arrayList;
+    }
+
     /**
      * 获取仓库文件
      * @param message 文件信息
@@ -235,7 +256,7 @@ public class RepositoryFileUtil {
 
 
             ObjectId objectId = GitBranchUntil.findObjectId(repository, branch, message.getFindType());
-            List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),fileAddress);
+            List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),pathString);
             if (!commitList.isEmpty()){
                 Map<String, String> fileCommit = commitList.get(0);
                 fileTree.setCommitMessage(fileCommit.get("message"));

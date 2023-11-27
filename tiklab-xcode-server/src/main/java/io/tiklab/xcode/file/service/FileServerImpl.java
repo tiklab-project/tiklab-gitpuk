@@ -56,8 +56,10 @@ public class FileServerImpl implements FileServer {
             Git git = Git.open(new java.io.File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
             boolean findCommitId = fileQuery.isFindCommitId();
-            String substring = fileAddress.substring(1);
-            fileMessage =  RepositoryFileUtil.readBranchFile(repository, branch, substring, findCommitId);
+            if (fileAddress.startsWith("/")){
+                 fileAddress = fileAddress.substring(1);
+            }
+            fileMessage =  RepositoryFileUtil.readBranchFile(repository, branch, fileAddress, findCommitId);
             git.close();
         } catch (IOException e) {
             throw new RuntimeException(e);

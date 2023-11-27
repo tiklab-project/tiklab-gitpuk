@@ -78,8 +78,9 @@ public class RepositoryQuery implements Serializable {
         return address;
     }
 
-    public void setAddress(String address) {
+    public RepositoryQuery setAddress(String address) {
         this.address = address;
+        return this;
     }
 
     public String getFindType() {

@@ -9,7 +9,7 @@ import io.tiklab.postin.annotation.ApiProperty;
 import java.util.List;
 
 @ApiModel
-public class ScanSchemeSonarQuery {
+public class ScanSchemeRuleSetQuery {
 
     @ApiProperty(name ="orderParams",desc = "排序参数")
     private List<Order> orderParams = OrderBuilders.instance().asc("id").get();
@@ -18,6 +18,10 @@ public class ScanSchemeSonarQuery {
     private Page pageParam = new Page();
 
     private String scanSchemeId;
+
+    //规则集id
+    private String ruleSetId;
+
 
     public List<Order> getOrderParams() {
         return orderParams;
@@ -39,8 +43,17 @@ public class ScanSchemeSonarQuery {
         return scanSchemeId;
     }
 
-    public ScanSchemeSonarQuery setScanSchemeId(String scanSchemeId) {
+    public ScanSchemeRuleSetQuery setScanSchemeId(String scanSchemeId) {
         this.scanSchemeId = scanSchemeId;
+        return this;
+    }
+
+    public String getRuleSetId() {
+        return ruleSetId;
+    }
+
+    public ScanSchemeRuleSetQuery setRuleSetId(String ruleSetId) {
+        this.ruleSetId = ruleSetId;
         return this;
     }
 }

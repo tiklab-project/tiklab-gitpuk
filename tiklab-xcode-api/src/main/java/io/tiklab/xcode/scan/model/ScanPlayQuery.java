@@ -19,6 +19,9 @@ public class ScanPlayQuery {
 
     private String repositoryId;
 
+    @ApiProperty(name ="scanSchemeId",desc = "扫描方案")
+    private String scanSchemeId;
+
     public List<Order> getOrderParams() {
         return orderParams;
     }
@@ -41,5 +44,13 @@ public class ScanPlayQuery {
 
     public void setRepositoryId(String repositoryId) {
         this.repositoryId = repositoryId;
+    }
+
+    public String getScanSchemeId() {
+        return scanSchemeId;
+    }
+
+    public void setScanSchemeId(String scanSchemeId) {
+        this.scanSchemeId = scanSchemeId;
     }
 }

@@ -38,11 +38,14 @@ public class ScanRecord implements Serializable {
     @JoinQuery(key = "id")
     private User scanUser;
 
-    @ApiProperty(name="scanResult",desc="扫描结果")
+    @ApiProperty(name="scanResult",desc="扫描结果 通过：success、失败：fail")
     private String scanResult;
 
     @ApiProperty(name="scanWay",desc="扫描方式 hand：手动")
     private String scanWay;
+
+    @ApiProperty(name="allTrouble",desc="所有问题数量")
+    private Integer allTrouble;
 
     @ApiProperty(name="severityTrouble",desc="严重问题")
     private Integer severityTrouble;
@@ -50,8 +53,8 @@ public class ScanRecord implements Serializable {
     @ApiProperty(name="severityTrouble",desc="错误问题")
     private Integer errorTrouble;
 
-    @ApiProperty(name="warnTrouble",desc="警告问题")
-    private Integer warnTrouble;
+    @ApiProperty(name="noticeTrouble",desc="警告问题")
+    private Integer noticeTrouble;
 
     @ApiProperty(name="suggestTrouble",desc="建议问题")
     private Integer suggestTrouble;
@@ -109,12 +112,12 @@ public class ScanRecord implements Serializable {
         this.severityTrouble = severityTrouble;
     }
 
-    public Integer getWarnTrouble() {
-        return warnTrouble;
+    public Integer getNoticeTrouble() {
+        return noticeTrouble;
     }
 
-    public void setWarnTrouble(Integer warnTrouble) {
-        this.warnTrouble = warnTrouble;
+    public void setNoticeTrouble(Integer noticeTrouble) {
+        this.noticeTrouble = noticeTrouble;
     }
 
     public Integer getSuggestTrouble() {
@@ -155,5 +158,13 @@ public class ScanRecord implements Serializable {
 
     public void setErrorTrouble(Integer errorTrouble) {
         this.errorTrouble = errorTrouble;
+    }
+
+    public Integer getAllTrouble() {
+        return allTrouble;
+    }
+
+    public void setAllTrouble(Integer allTrouble) {
+        this.allTrouble = allTrouble;
     }
 }

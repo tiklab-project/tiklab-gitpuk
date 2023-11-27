@@ -36,6 +36,7 @@
         <tiklab-todotask.version>1.0.0</tiklab-todotask.version>
         <tiklab-eam.version>1.0.0</tiklab-eam.version>
         <tiklab-postgresql.version>1.0.0</tiklab-postgresql.version>
+        <tiklab-spotbugs.version>1.0.0</tiklab-spotbugs.version>
 
         <tiklab-upgrade.version>1.0.0</tiklab-upgrade.version>
         <tiklab-postin.version>1.0.0</tiklab-postin.version>

@@ -20,5 +20,5 @@ public interface ValidUsrPwdServer {
      * @param id 效验类型
      * @return EamTicket
      */
-    EamTicket validUser(String username ,String password,String id);
+    void validUser(String username ,String password,String id);
 }

@@ -8,11 +8,13 @@ import io.tiklab.join.annotation.Join;
 import io.tiklab.join.annotation.JoinQuery;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
-import io.tiklab.xcode.repository.model.Repository;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+/*
+* 扫描方案的规则关系
+* */
 @ApiModel
 @Join
 @Mapper
@@ -24,12 +26,24 @@ public class ScanSchemeRule implements Serializable {
     @ApiProperty(name="scanSchemeId",desc="扫描方案id")
     private String scanSchemeId;
 
-    @ApiProperty(name="language",desc="语言")
-    private String language;
+
+    @ApiProperty(name="scheme_ruleset_id",desc="扫描方案规则集关系表id")
+    private String schemeRulesetId;
 
 
-    @ApiProperty(name="ruleSetId",desc="规则集id")
-    private String ruleSetId;
+
+    @ApiProperty(name="scanRule",desc="规则")
+    @Mappings({
+            @Mapping(source = "scanRule.id",target = "ruleId")
+    })
+    @JoinQuery(key = "id")
+    private ScanRule scanRule;
+
+    @ApiProperty(name="problemLevel",desc="问题等级 严重:1、警告：2、建议:3")
+    private Integer problemLevel;
+
+    @ApiProperty(name="isDisable",desc="是否禁用 0：使用 1禁用")
+    private Integer isDisable=0;
 
     @ApiProperty(name="createTime",desc="创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
@@ -51,12 +65,36 @@ public class ScanSchemeRule implements Serializable {
         this.scanSchemeId = scanSchemeId;
     }
 
-    public String getRuleSetId() {
-        return ruleSetId;
+    public String getSchemeRulesetId() {
+        return schemeRulesetId;
     }
 
-    public void setRuleSetId(String ruleSetId) {
-        this.ruleSetId = ruleSetId;
+    public void setSchemeRulesetId(String schemeRulesetId) {
+        this.schemeRulesetId = schemeRulesetId;
+    }
+
+    public ScanRule getScanRule() {
+        return scanRule;
+    }
+
+    public void setScanRule(ScanRule scanRule) {
+        this.scanRule = scanRule;
+    }
+
+    public Integer getProblemLevel() {
+        return problemLevel;
+    }
+
+    public void setProblemLevel(Integer problemLevel) {
+        this.problemLevel = problemLevel;
+    }
+
+    public Integer getIsDisable() {
+        return isDisable;
+    }
+
+    public void setIsDisable(Integer isDisable) {
+        this.isDisable = isDisable;
     }
 
     public Timestamp getCreateTime() {
@@ -65,13 +103,5 @@ public class ScanSchemeRule implements Serializable {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
     }
 }

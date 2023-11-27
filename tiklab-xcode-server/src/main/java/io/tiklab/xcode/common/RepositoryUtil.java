@@ -5,6 +5,7 @@ import io.tiklab.core.exception.ApplicationException;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 public class RepositoryUtil {
@@ -269,6 +270,24 @@ public class RepositoryUtil {
         }
 
         return badTime;
+    }
+
+    /**
+     * 递归获取文件夹下面的所有文件
+     * @param path
+     * @return 位置
+     */
+    public static List<String> getFilePath(File path, List<String> list){
+        File[] fa = path.listFiles();
+        if (fa != null) {
+            for (File file : fa) {
+                if (file.isDirectory()){
+                    getFilePath(file,list);
+                }
+                list.add(file.getPath());
+            }
+        }
+        return list;
     }
 }
 

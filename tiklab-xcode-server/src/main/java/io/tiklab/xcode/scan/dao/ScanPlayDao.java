@@ -92,6 +92,7 @@ public class ScanPlayDao {
     public List<ScanPlayEntity> findScanPlayList(ScanPlayQuery scanPlayQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(ScanPlayEntity.class)
                 .eq("repositoryId",scanPlayQuery.getRepositoryId())
+                .eq("scanSchemeId",scanPlayQuery.getScanSchemeId())
                 .orders(scanPlayQuery.getOrderParams())
                 .get();
         return jpaTemplate.findList(queryCondition,ScanPlayEntity.class);
@@ -105,6 +106,7 @@ public class ScanPlayDao {
     public Pagination<ScanPlayEntity> findScanPlayPage(ScanPlayQuery scanPlayQuery) {
         QueryCondition queryCondition = QueryBuilders.createQuery(ScanPlayEntity.class)
                 .eq("repositoryId",scanPlayQuery.getRepositoryId())
+                .eq("scanSchemeId",scanPlayQuery.getScanSchemeId())
                 .orders(scanPlayQuery.getOrderParams())
                 .pagination(scanPlayQuery.getPageParam())
                 .get();

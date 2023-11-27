@@ -203,6 +203,17 @@ public class RepositoryController {
     }
 
 
+    @RequestMapping(path="/findRepositoryAuth",method = RequestMethod.POST)
+    @ApiMethod(name = "findRepositoryAuth",desc = "查询用户是否有当前项目权限")
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    public Result<String> findRepositoryAuth( @NotNull String rpyId){
+
+        String repositoryAuth = repositoryServer.findRepositoryAuth(rpyId);
+
+        return Result.ok(repositoryAuth);
+    }
+
+
 }
 
 

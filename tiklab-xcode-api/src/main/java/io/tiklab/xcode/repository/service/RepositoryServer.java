@@ -49,8 +49,10 @@ public interface RepositoryServer {
      * @param rpyId 代码库id
      * @return 代码库信息
      */
-    @FindOne
     Repository findOneRpy(String rpyId);
+
+    @FindOne
+    Repository findOne(String rpyId);
 
     /**
      * 查询用户仓库
@@ -70,12 +72,12 @@ public interface RepositoryServer {
      * 查询所有代码库
      * @return 代码库信息列表
      */
-    @FindAll
+
     List<Repository> findAllRpyList();
 
 
     @FindList
-    List<Repository> findAllRpyList(List<String> idList);
+    List<Repository> findList(List<String> idList);
 
     /**
      * 查询所有仓库
@@ -186,6 +188,12 @@ public interface RepositoryServer {
      */
     Pagination<Repository> findPrivateRepositoryByUser(RepositoryQuery repositoryQuery);
 
+    /**
+     *查询用户是否有当前项目权限
+     * @return userId 用户ID
+     */
+
+    String findRepositoryAuth(String rpyId);
 }
 
 

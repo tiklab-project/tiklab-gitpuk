@@ -29,6 +29,8 @@ import javax.xml.bind.DatatypeConverter;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class CodeScanServiceImpl implements CodeScanService {
@@ -53,90 +55,87 @@ public class CodeScanServiceImpl implements CodeScanService {
 
     @Autowired
     XcodeYamlDataMaService yamlDataMaService;
+
+
+    @Autowired
+    ScanPlayService scanPlayService;
+
+    @Autowired
+    ScanSchemeRuleSetService scanSchemeRuleSetService;
+
+    @Autowired
+    CodeScanSpotBugsService scanSpotBugsService;
+
+    @Autowired
+    CodeScanSonarService scanSonarService;
     
     public static Map<String , String> codeScanState = new HashMap<>();
 
     public static Map<String , CodeScanInstance> codeScanLog = new HashMap<>();
 
 
+    @Override
+    public String codeScanExec(String scanPlayId) {
+        ScanPlay scanPlay = scanPlayService.findScanPlay(scanPlayId);
+        //扫描计划中的扫描方案
+        ScanScheme scanScheme = scanPlay.getScanScheme();
+
+        //启动线程执行代码扫描
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(new Runnable(){
+            @Override
+            public void run() {
+                if (("rule").equals(scanScheme.getScanWay())){
+                    //查询出规则集
+                    List<ScanSchemeRuleSet> schemeRuleList = scanSchemeRuleSetService.findScanSchemeRuleSetList(new ScanSchemeRuleSetQuery().setScanSchemeId(scanScheme.getId()));
+                    if (CollectionUtils.isEmpty(schemeRuleList)){
+                        throw new SystemException(900,"关联的方案中没有添加规则");
+                    }
+                    //通过spotBugs 扫描
+                    scanSpotBugsService.codeScanBySpotBugs(scanPlay);
+                }
+                //通过sonar扫描
+                if (("sonar").equals(scanScheme.getScanWay())){
+                     scanSonarService.codeScanBySonar(scanPlayId);
+                }
+            }});
+        return "ok";
+    }
 
     @Override
-    public boolean codeScanExec(String repositoryId) {
-        codeScanLog.remove(repositoryId);
-        CodeScanInstance scanInstance = new CodeScanInstance();
-        scanInstance.setRepositoryId(repositoryId);
-        scanInstance.setTaskName("123");
-
-        CodeScan codeScan = findCodeScanByRpyId(repositoryId);
-        if (ObjectUtils.isEmpty(codeScan)){
-            scanInstance.setRunState("false");
-            codeScanLog.put(repositoryId,scanInstance);
-            throw new ApplicationException(6006,"请先设置里面选择配置");
-        }
-        if (ObjectUtils.isEmpty(codeScan.getDeployEnvId())){
-            scanInstance.setRunState("false");
-            codeScanLog.put(repositoryId,scanInstance);
-            throw new ApplicationException(6006,"不存在maven配置");
-        }
-        DeployEnv deployEnv = deployEnvService.findDeployEnv(codeScan.getDeployEnvId());
-        String execOrder =  "mvn clean verify sonar:sonar ";
-
-        if (ObjectUtils.isEmpty(codeScan.getDeployEnvId())){
-            scanInstance.setRunState("false");
-            codeScanLog.put(repositoryId,scanInstance);
-            throw new ApplicationException(6006,"不存在sonar配置");
-        }
-        DeployServer deployServer = codeScan.getDeployServer();
-
-        String mavenAddress = deployEnv.getEnvAddress();
-        RepositoryUtil.validFile(mavenAddress,21);
-
-        execOrder = execOrder +
-                " -Dsonar.projectKey="+ codeScan.getRepository().getName()+
-                " -Dsonar.host.url="+ deployServer.getServerAddress();
-        if ( "account".equals(deployServer.getAuthType())){
-            execOrder = execOrder +
-                    " -Dsonar.login="+deployServer.getUserName()+
-                    " -Dsonar.password="+deployServer.getPassWord();
+    public String findScanState(String scanPlayId,String scanWay) {
+        if (("sonar").equals(scanWay)){
+            return scanSonarService.findScanBySonar(scanPlayId);
         }else {
-            execOrder = execOrder +
-                    " -Dsonar.login="+deployServer.getPrivateKey();
+            return scanSpotBugsService.findScanBySpotBugs(scanPlayId);
         }
+    }
 
-        String cloneRepositoryUrl = RepositoryUtil.SystemTypeAddress(yamlDataMaService.repositoryAddress()+"/clone/" + codeScan.getRepository().getName());
-        String order = " ./" + execOrder + " " + "-f" +" " +cloneRepositoryUrl ;
-        if (RepositoryUtil.findSystemType() == 1){
-            order = " .\\" + execOrder + " " + "-f"+" "  +cloneRepositoryUrl;
-        }
 
-        Process process;
+    /**
+     *  执行日志
+     *  @param process:process
+     */
+    public void  readFile(Process process) throws IOException {
 
-        try {
-            //克隆项目
-            String repositoryUrl = RepositoryUtil.SystemTypeAddress(yamlDataMaService.repositoryAddress() +"/"+ codeScan.getRepository().getName() + ".git");
-            String cloneUrl =  RepositoryUtil.SystemTypeAddress(yamlDataMaService.repositoryAddress()+"/clone/"+codeScan.getRepository().getName());
-            GitUntil.cloneRepository(repositoryUrl, "master", cloneUrl);
+        // 获取命令行输出
+        InputStream inputStream = process.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
 
-            process = RepositoryUtil.process(mavenAddress, order);
-            readFile(process,repositoryId,scanInstance);
-
-            scanInstance.setRunState("true");
-            codeScanLog.put(repositoryId,scanInstance);
-            instanceService.createCodeScanInstance(scanInstance);
-            return true;
-        }catch (Exception e){
-            //这个异常是已经有存在的项目
-            if (e.getMessage().contains("already exists and is not an empty directory")){
-                scanInstance.setRunState("false");
-                codeScanLog.put(repositoryId,scanInstance);
-                throw  new ApplicationException(6005,"该项目正在扫描中");
-            }
-            scanInstance.setRunState("false");
-            codeScanLog.put(repositoryId,scanInstance);
-            throw new ApplicationException(e.getMessage());
+        // 读取命令行输出
+        StringBuilder excOutput = new StringBuilder();
+        while ((line = reader.readLine()) != null) {
+            logger.info("执行命令日志:"+line);
+            excOutput.append(line);
         }
 
     }
+
+
+
+
+
 
     @Override
     public CodeScan findScanResult(String repositoryId) {
@@ -195,15 +194,6 @@ public class CodeScanServiceImpl implements CodeScanService {
         return codeScan;
     }
 
-    @Override
-    public CodeScanInstance findScanState(String repositoryId) {
-        CodeScanInstance scanInstance = codeScanLog.get(repositoryId);
-        if (!ObjectUtils.isEmpty(scanInstance)){
-            Repository repository = repositoryServer.findOneRpy(repositoryId);
-            RepositoryUtil.deleteDireAndFile(yamlDataMaService.repositoryAddress()+"/clone/",repository.getName());
-        }
-        return   scanInstance;
-    }
 
     /**
      *  restTemplate 调用
@@ -293,5 +283,7 @@ public class CodeScanServiceImpl implements CodeScanService {
         }
         return codeScan;
     }
+
+
 
 }

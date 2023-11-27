@@ -39,7 +39,8 @@ public class ScanRuleQuery {
         return ruleSetId;
     }
 
-    public void setRuleSetId(String ruleSetId) {
+    public ScanRuleQuery setRuleSetId(String ruleSetId) {
         this.ruleSetId = ruleSetId;
+        return this;
     }
 }

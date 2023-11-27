@@ -30,6 +30,8 @@ public class ScanRecordEntity {
     @Column(name = "scan_way")
     private String scanWay;
 
+    @Column(name = "all_trouble")
+    private Integer allTrouble;
 
     @Column(name = "severity_trouble")
     private Integer severityTrouble;
@@ -38,8 +40,8 @@ public class ScanRecordEntity {
     @Column(name = "error_trouble")
     private Integer errorTrouble;
 
-    @Column(name = "warn_trouble")
-    private Integer warnTrouble;
+    @Column(name = "notice_trouble")
+    private Integer noticeTrouble;
 
     @Column(name = "suggest_trouble")
     private Integer suggestTrouble;
@@ -95,12 +97,12 @@ public class ScanRecordEntity {
         this.severityTrouble = severityTrouble;
     }
 
-    public Integer getWarnTrouble() {
-        return warnTrouble;
+    public Integer getNoticeTrouble() {
+        return noticeTrouble;
     }
 
-    public void setWarnTrouble(Integer warnTrouble) {
-        this.warnTrouble = warnTrouble;
+    public void setNoticeTrouble(Integer noticeTrouble) {
+        this.noticeTrouble = noticeTrouble;
     }
 
     public Integer getSuggestTrouble() {
@@ -141,5 +143,13 @@ public class ScanRecordEntity {
 
     public void setErrorTrouble(Integer errorTrouble) {
         this.errorTrouble = errorTrouble;
+    }
+
+    public Integer getAllTrouble() {
+        return allTrouble;
+    }
+
+    public void setAllTrouble(Integer allTrouble) {
+        this.allTrouble = allTrouble;
     }
 }
