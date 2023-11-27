@@ -32,6 +32,7 @@ public class LeadAuthController {
     @Autowired
     private LeadAuthService leadAuthService;
 
+
     @RequestMapping(path="/createLeadAuth",method = RequestMethod.POST)
     @ApiMethod(name = "createLeadAuth",desc = "创建第三方仓库认证")
     @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
