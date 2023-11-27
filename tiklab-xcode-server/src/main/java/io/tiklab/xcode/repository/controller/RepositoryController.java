@@ -29,7 +29,6 @@ public class RepositoryController {
     @Autowired
     private RepositoryServer repositoryServer;
 
-
     @RequestMapping(path="/createRpy",method = RequestMethod.POST)
     @ApiMethod(name = "create",desc = "创建仓库")
     @ApiParam(name = "repository",desc = "repository",required = true)
@@ -47,7 +46,6 @@ public class RepositoryController {
     public Result<Void> delete(@NotNull String rpyId){
 
         repositoryServer.deleteRpy(rpyId);
-
         return Result.ok();
     }
 

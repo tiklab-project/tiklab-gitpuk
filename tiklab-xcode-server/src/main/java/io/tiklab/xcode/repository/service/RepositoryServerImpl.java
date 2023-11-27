@@ -99,7 +99,6 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     ScanPlayService scanPlayService;
 
-
     /**
      * 创建仓库
      * @param repository 信息
@@ -122,7 +121,6 @@ public class RepositoryServerImpl implements RepositoryServer {
             logger.info("创建仓库ignoreFilePath:"+ignoreFilePath);
 
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
-
 
             return repositoryId;
         } else {

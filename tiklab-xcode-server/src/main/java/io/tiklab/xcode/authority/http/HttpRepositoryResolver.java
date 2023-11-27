@@ -21,7 +21,7 @@ import java.io.IOException;
 public  class HttpRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
    private RepositoryServer repositoryServer;
-   
+
     public HttpRepositoryResolver(RepositoryServer repositoryServer){
         this.repositoryServer= repositoryServer;
     }
