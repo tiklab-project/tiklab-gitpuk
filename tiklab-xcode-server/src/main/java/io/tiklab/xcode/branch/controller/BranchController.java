@@ -76,6 +76,15 @@ public class BranchController {
         return Result.ok();
     }
 
+    @RequestMapping(path="/mergeBranch",method = RequestMethod.POST)
+    @ApiMethod(name = "mergeBranch",desc = "合并分支")
+    @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
+    public Result<Void> mergeBranch(@RequestBody @Valid @NotNull BranchQuery branchQuery){
+
+        branchServer.mergeBranch(branchQuery);
+
+        return Result.ok();
+    }
 }
 
 

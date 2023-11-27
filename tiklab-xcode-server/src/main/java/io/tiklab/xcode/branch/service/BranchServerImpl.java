@@ -127,6 +127,20 @@ public class BranchServerImpl implements BranchServer {
             throw new SystemException(9000,"切换默认分支失败:"+branchQuery.getName());
         }
     }
+
+    @Override
+    public void mergeBranch(BranchQuery branchQuery) {
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),branchQuery.getRpyId()) ;
+
+        File file = new File(repositoryAddress);
+        try {
+            Git git = Git.open(file);
+            Repository repository = git.getRepository();
+            GitBranchUntil.mergeBranch(repository, branchQuery.getName());
+        } catch (IOException e) {
+            throw new SystemException(9000,"切换默认分支失败:"+branchQuery.getName());
+        }
+    }
 }
 
 

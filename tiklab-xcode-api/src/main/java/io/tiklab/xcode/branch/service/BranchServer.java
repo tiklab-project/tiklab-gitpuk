@@ -48,4 +48,10 @@ public interface BranchServer {
      * @param branchQuery
      */
     void updateDefaultBranch( BranchQuery branchQuery);
+
+    /**
+     * 合并分支
+     * @param branchQuery
+     */
+    void mergeBranch(BranchQuery branchQuery);
 }

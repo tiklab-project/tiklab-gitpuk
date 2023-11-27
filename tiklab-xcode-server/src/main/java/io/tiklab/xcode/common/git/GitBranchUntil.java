@@ -6,6 +6,8 @@ import io.tiklab.xcode.branch.model.BranchQuery;
 import io.tiklab.xcode.commit.model.CommitMessage;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeCommand;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -290,6 +292,51 @@ public class GitBranchUntil {
         }
     }
 
+    /**
+     * 合并分支
+     * @param git git
+     * @param branch 源分支
+     * @throws ApplicationException 切换失败
+     */
+    public static void mergeBranch( Repository repository,String branch) {
+
+        try {
+            Git git = new Git(repository);
+
+            //默认分支
+            String deBranch = git.getRepository().getBranch();
+
+            Ref sourceRef = repository.exactRef("refs/heads/" + deBranch);
+            Ref targetRef = repository.exactRef("refs/heads/" + branch);
+
+            // 执行分支合并操作
+            MergeCommand mergeCommand = git.merge();
+            mergeCommand.include(sourceRef.getObjectId());
+            mergeCommand.setFastForward(MergeCommand.FastForwardMode.FF);
+            MergeResult called = mergeCommand.call();
+
+            if (called.getMergeStatus().isSuccessful()) {
+                System.out.println("分支合并成功！");
+
+                // 更新目标分支引用
+                RefUpdate refUpdate = repository.updateRef(targetRef.getName());
+                refUpdate.setNewObjectId(called.getNewHead());
+                refUpdate.setForceUpdate(true);
+                RefUpdate.Result updateResult = refUpdate.update();
+
+                if (updateResult == RefUpdate.Result.NEW || updateResult == RefUpdate.Result.FAST_FORWARD) {
+                    System.out.println("目标分支引用更新成功！");
+                } else {
+                    System.out.println("目标分支引用更新失败！");
+                }
+            } else {
+                System.out.println("分支合并失败！");
+            }
+
+        } catch (Exception e) {
+            throw new ApplicationException("切换默认分支失败:"+e.getMessage());
+        }
+    }
 
 
 }
