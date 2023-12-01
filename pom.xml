@@ -18,7 +18,7 @@
     <properties>
         <tiklab-toolkit.version>1.0.0</tiklab-toolkit.version>
         <tiklab-plugin.version>1.0.1-SNAPSHOT</tiklab-plugin.version>
-        <tiklab-gateway.version>1.0.0</tiklab-gateway.version>
+        <tiklab-gateway.version>1.0.1-SNAPSHOT</tiklab-gateway.version>
         <tiklab-rpc.version>1.0.0</tiklab-rpc.version>
         <tiklab-dss.version>1.0.0</tiklab-dss.version>
         <tiklab-dfs.version>1.0.0</tiklab-dfs.version>
@@ -26,17 +26,20 @@
         <tiklab-integration.version>1.0.0</tiklab-integration.version>
         <tiklab-join.version>1.0.0</tiklab-join.version>
         <tiklab-dal.version>1.0.0</tiklab-dal.version>
+        <tiklab-openapi-version>1.0.0-SNAPSHOT</tiklab-openapi-version>
 
         <!--平台组件-->
-        <tiklab-privilege.version>1.0.0</tiklab-privilege.version>
-        <tiklab-licence.version>1.0.0</tiklab-licence.version>
-        <tiklab-user.version>1.0.0</tiklab-user.version>
-        <tiklab-security.version>1.0.0</tiklab-security.version>
-        <tiklab-message.version>1.0.0</tiklab-message.version>
-        <tiklab-todotask.version>1.0.0</tiklab-todotask.version>
-        <tiklab-eam.version>1.0.0</tiklab-eam.version>
-        <tiklab-postgresql.version>1.0.0</tiklab-postgresql.version>
+        <tiklab-privilege.version>1.0.1-SNAPSHOT</tiklab-privilege.version>
+        <tiklab-licence.version>1.0.1-SNAPSHOT</tiklab-licence.version>
+        <tiklab-user.version>1.0.1-SNAPSHOT</tiklab-user.version>
+        <tiklab-security.version>1.0.1-SNAPSHOT</tiklab-security.version>
+        <tiklab-message.version>1.0.1-SNAPSHOT</tiklab-message.version>
+        <tiklab-todotask.version>1.0.1-SNAPSHOT</tiklab-todotask.version>
+        <tiklab-eam.version>1.0.1-SNAPSHOT</tiklab-eam.version>
+        <tiklab-postgresql.version>1.0.1-SNAPSHOT</tiklab-postgresql.version>
         <tiklab-spotbugs.version>1.0.0</tiklab-spotbugs.version>
+
+        <tiklab-postin-doclet-version>1.0.1-SNAPSHOT</tiklab-postin-doclet-version>
 
         <tiklab-upgrade.version>1.0.0</tiklab-upgrade.version>
         <tiklab-postin.version>1.0.0</tiklab-postin.version>

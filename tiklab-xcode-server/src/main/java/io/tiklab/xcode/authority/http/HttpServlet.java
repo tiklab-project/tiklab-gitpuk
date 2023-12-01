@@ -1,24 +1,19 @@
 package io.tiklab.xcode.authority.http;
 
-import io.tiklab.core.Result;
-import io.tiklab.postin.annotation.Api;
-import io.tiklab.postin.annotation.ApiMethod;
-import io.tiklab.postin.annotation.ApiParam;
-import io.tiklab.user.user.model.User;
-import io.tiklab.user.user.service.UserService;
+
 import io.tiklab.xcode.authority.ValidUsrPwdServer;
-import io.tiklab.xcode.repository.model.RecordCommit;
+
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.MemoryManService;
 import io.tiklab.xcode.repository.service.RecordCommitService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
 import org.eclipse.jgit.http.server.GitServlet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StreamUtils;
+
 
 import javax.annotation.Resource;
 import javax.servlet.*;
@@ -29,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.Base64;
 
@@ -63,24 +59,38 @@ public class HttpServlet extends GitServlet {
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-                HttpServletResponse res1 = (HttpServletResponse) res;
-                boolean authorized = isAuthorized((HttpServletRequest) req);
-                String requestURI = ((HttpServletRequest) req).getRequestURI();
+            HttpServletResponse res1 = (HttpServletResponse) res;
+            boolean authorized = isAuthorized((HttpServletRequest) req);
+            String requestURI = ((HttpServletRequest) req).getRequestURI();
+            //git push提交 （客户端第三次请求发送数据 以git-receive-pack结尾）
+            if (requestURI.endsWith("git-receive-pack")){
+                String contentLengthHeader = ((HttpServletRequest) req).getHeader("Content-Length");
+                if (contentLengthHeader != null) {
+                    long contentLength = Long.parseLong(contentLengthHeader);
 
-                if (!authorized){
-                        res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
-                        res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    String[] split = requestURI.split("/");
+                    String groupName=split[2];
+                    String name=split[3].substring(0,split[3].indexOf(".git"));
+                    Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+                    repository.setSize(String.valueOf(contentLength));
+                    repositoryServer.updateRpy(repository);
                 }
+            }
 
-                //查询是否还有剩余内存
-                boolean resMemory = memoryManService.findResMemory();
-                if (!resMemory){
-                        logger.warn("存储空间不足");
-                        res1.setHeader("Content-Type", "text/plain");
-                        res1.setStatus(201);
-                        res1.getWriter().write("pack exceeds maximum allowed size");
-                        return;
-                }
+            if (!authorized){
+                res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
+                res1.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            }
+
+            //查询是否还有剩余内存
+            boolean resMemory = memoryManService.findResMemory();
+            if (!resMemory){
+                 logger.warn("存储空间不足");
+                 res1.setHeader("Content-Type", "text/plain");
+                 res1.setStatus(201);
+                 res1.getWriter().write("pack exceeds maximum allowed size");
+                 return;
+            }
 
                 /*//仓库上传权限
                 if (requestURI.endsWith("git-receive-pack")){
@@ -97,7 +107,9 @@ public class HttpServlet extends GitServlet {
                                 return;
                         }
                 }*/
-                super.service(req, res);
+
+
+            super.service(req, res);
 
         }
 
@@ -114,21 +126,33 @@ public class HttpServlet extends GitServlet {
         private boolean isAuthorized(HttpServletRequest req) {
                 String authHeader = req.getHeader("Authorization");
                 if (authHeader != null && authHeader.startsWith("Basic ")) {
-                        byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
-                        String[] authTokens = new String(decode).split(":");
-                        if (authTokens.length == 2) {
-                                String username = authTokens[0];
-                                String password = authTokens[1];
-                                boolean result = validUsrPwdServer.validUserNamePassword(username, password, "1");
-                                if (result){
-                                        commitService.updateCommitRecord(req.getRequestURI(),username);
-                                }
-                                return result;
+                    byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
+                    String[] authTokens = new String(decode).split(":");
+                    if (authTokens.length == 2) {
+                    String username = authTokens[0];
+                    String password = authTokens[1];
+                    //校验用户信息
+                     boolean result = validUsrPwdServer.validUserNamePassword(username, password, "1");
+                     if (result){
+                          //请求路径以git-receive-pack 结尾为提交
+                          if (req.getRequestURI().endsWith("git-receive-pack")){
+                           //修改提交时间和创建提交记录
+                          commitService.updateCommitRecord(req.getRequestURI(),username);
 
-                        }
+                          }
+                     }
+                     return result;
                 }
-                return false;
         }
+        return false;
+   }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("执行了dopost");
+        super.doPost(req, resp);
+    }
+
 }
 
 

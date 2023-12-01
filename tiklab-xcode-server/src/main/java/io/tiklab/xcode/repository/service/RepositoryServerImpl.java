@@ -33,6 +33,7 @@ import io.tiklab.xcode.common.RepositoryFileUtil;
 import io.tiklab.xcode.common.RepositoryUtil;
 import io.tiklab.xcode.scan.service.ScanPlayService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -137,8 +138,13 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         String repositoryId = repositoryDao.createRpy(groupEntity);
 
-        //创建私有仓库 给创建人设置管理员权限
-        dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+        if (!ObjectUtils.isEmpty(repository.getUser())&&StringUtils.isNotEmpty(repository.getUser().getId())){
+            //创建私有仓库 给创建人设置管理员权限
+            dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), "xcode");
+        }else {
+            //创建私有仓库 给创建人设置管理员权限
+            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
+        }
         return repositoryId;
     }
 
@@ -402,6 +408,12 @@ public class RepositoryServerImpl implements RepositoryServer {
                Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
                List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
                joinTemplate.joinQuery(repositoryList);
+               for (Repository repository:repositoryList){
+                   if (StringUtils.isNotEmpty(repository.getSize())){
+                       String size = RepositoryUtil.formatSize(Long.parseLong(repository.getSize()));
+                       repository.setSize(size);
+                   }
+               }
                return PaginationBuilder.build(pagination,repositoryList);
            }
         }

@@ -138,7 +138,7 @@ public class BranchServerImpl implements BranchServer {
             Repository repository = git.getRepository();
             GitBranchUntil.mergeBranch(repository, branchQuery.getName());
         } catch (IOException e) {
-            throw new SystemException(9000,"切换默认分支失败:"+branchQuery.getName());
+            throw new SystemException(9000,"获取仓库失败:"+branchQuery.getName());
         }
     }
 }

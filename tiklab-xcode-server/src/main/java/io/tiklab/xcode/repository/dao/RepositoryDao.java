@@ -1,5 +1,7 @@
 package io.tiklab.xcode.repository.dao;
 
+import io.tiklab.core.order.Order;
+import io.tiklab.core.order.OrderBuilders;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.dal.jdbc.JdbcTemplate;
 import io.tiklab.dal.jpa.JpaTemplate;
@@ -7,6 +9,7 @@ import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.tiklab.xcode.repository.entity.RepositoryEntity;
 import io.tiklab.xcode.repository.model.RepositoryQuery;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Repository;
@@ -97,10 +100,19 @@ public class RepositoryDao {
      */
     public Pagination<RepositoryEntity> findRepositoryPage(RepositoryQuery repositoryQuery, String[] ids) {
 
-        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
-                .in("rpyId",ids)
-                .pagination(repositoryQuery.getPageParam())
-                .get();
+        QueryBuilders pagination = QueryBuilders.createQuery(RepositoryEntity.class)
+                .in("rpyId", ids)
+                .pagination(repositoryQuery.getPageParam());
+
+
+        if (StringUtils.isNotEmpty(repositoryQuery.getSort())){
+            if (repositoryQuery.getSort().equals("asc")){
+                pagination.orders(OrderBuilders.instance().asc("size").get());
+            }else {
+                pagination.orders(OrderBuilders.instance().desc("size").get());
+            }
+        }
+        QueryCondition queryCondition = pagination.get();
         return jpaTemplate.findPage(queryCondition,RepositoryEntity.class);
     }
 

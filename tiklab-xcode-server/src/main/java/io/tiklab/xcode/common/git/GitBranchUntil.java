@@ -294,7 +294,7 @@ public class GitBranchUntil {
 
     /**
      * 合并分支
-     * @param git git
+     * @param repository repository
      * @param branch 源分支
      * @throws ApplicationException 切换失败
      */
@@ -316,19 +316,30 @@ public class GitBranchUntil {
             MergeResult called = mergeCommand.call();
 
             if (called.getMergeStatus().isSuccessful()) {
-                System.out.println("分支合并成功！");
 
                 // 更新目标分支引用
                 RefUpdate refUpdate = repository.updateRef(targetRef.getName());
                 refUpdate.setNewObjectId(called.getNewHead());
                 refUpdate.setForceUpdate(true);
                 RefUpdate.Result updateResult = refUpdate.update();
+                String name = updateResult.name();
 
-                if (updateResult == RefUpdate.Result.NEW || updateResult == RefUpdate.Result.FAST_FORWARD) {
-                    System.out.println("目标分支引用更新成功！");
-                } else {
-                    System.out.println("目标分支引用更新失败！");
+                /*
+                *   NEW：表示引用是新创建的。
+                *   FORCED：表示引用已被强制更新。
+                *   FAST_FORWARD：表示引用是通过快进方式更新的。
+                *   NO_CHANGE：表示引用没有发生变化，无需更新。
+                *   LOCK_FAILURE：表示在更新引用时遇到了锁定失败。
+                *   REJECTED：表示更新引用被拒绝。
+                *   IO_FAILURE：表示在更新引用时遇到了I/O错误。
+                * */
+                if (("NEW").equals(name)||("FORCED").equals(name)||("FAST_FORWARD").equals(name)){
+
                 }
+                if (("NO_CHANGE").equals(name)){
+
+                }
+
             } else {
                 System.out.println("分支合并失败！");
             }

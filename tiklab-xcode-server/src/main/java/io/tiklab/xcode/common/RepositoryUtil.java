@@ -3,6 +3,7 @@ package io.tiklab.xcode.common;
 import io.tiklab.core.exception.ApplicationException;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -288,6 +289,18 @@ public class RepositoryUtil {
             }
         }
         return list;
+    }
+
+    public static String formatSize(long size) {
+        String[] units = {"B", "KB", "MB", "GB", "TB"};
+        double temp = size;
+        int index = 0;
+        while (temp >= 1024) {
+            temp /= 1024;
+            index++;
+        }
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(temp) + units[index];
     }
 }
 

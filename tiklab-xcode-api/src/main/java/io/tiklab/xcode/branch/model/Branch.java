@@ -2,28 +2,68 @@ package io.tiklab.xcode.branch.model;
 
 import java.io.Serializable;
 
+/**
+ *  @pi.model: io.tiklab.xcode.branch.model.Branch
+ */
 public class Branch implements Serializable {
 
-    //分支id
+    /**
+     * @pi.name: branchId
+     * @pi.dataType:string
+     * @pi.desc: 分支id
+     * @pi.value: branchId
+     */
     private String branchId;
 
-    //分支名称
+
+    /**
+     * @pi.name: branchName
+     * @pi.dataType:string
+     * @pi.desc: 分支名称
+     * @pi.value: branchName
+     */
     private String branchName;
 
+    /**
+     * @pi.name: updateUser
+     * @pi.dataType:string
+     * @pi.desc: 更新人
+     * @pi.value: updateUser
+     */
 
-    //更新人
     private String updateUser;
 
-    //更新时间
+    /**
+     * @pi.name: updateTime
+     * @pi.dataType:string
+     * @pi.desc: 更新时间
+     * @pi.value: updateTime
+     */
+
     private String updateTime;
 
-    //类型
+    /**
+     * @pi.name: type
+     * @pi.dataType:int
+     * @pi.desc: 类型
+     * @pi.value: type
+     */
     private int type;
 
-    //状态
+    /**
+     * @pi.name: state
+     * @pi.dataType:int
+     * @pi.desc: 状态
+     * @pi.value: state
+     */
     private int state;
 
-    //默认分支
+    /**
+     * @pi.name: defaultBranch
+     * @pi.dataType:boolean
+     * @pi.desc: 默认分支
+     * @pi.value: defaultBranch
+     */
     private boolean defaultBranch;
 
 

@@ -8,6 +8,7 @@ import io.tiklab.eam.boot.starter.annotation.EnableEamServer;
 import io.tiklab.gateway.boot.starter.annotation.EnableGateway;
 import io.tiklab.licence.boot.starter.annotation.EnableLicenceServer;
 import io.tiklab.messsage.boot.starter.annotation.EnableMessageServer;
+import io.tiklab.openapi.boot.starter.annotation.EnableOpenApi;
 import io.tiklab.plugin.starter.EnablePluginServer;
 import io.tiklab.postgresql.EnablePostgresql;
 import io.tiklab.privilege.boot.starter.annotation.EnablePrivilegeServer;
@@ -29,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableDal
 @EnableDcsServer
 @EnableDcsClient
-
+@EnableOpenApi
 @EnableRpc
 
 

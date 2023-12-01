@@ -108,7 +108,16 @@
 			<version>2.0.5</version>
 		</dependency>-->
 
-
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-openapi-spring-boot-starter</artifactId>
+			<version>${tiklab-openapi-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-postin-doclet</artifactId>
+			<version>${tiklab-postin-doclet-version}</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -353,7 +362,6 @@
 
 	<build>
 		<plugins>
-
 			<!--jar去掉配置文件-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -449,6 +457,32 @@
 					<outputDirectory>${project.basedir}/plugin</outputDirectory>
 				</configuration>
 			</plugin>-->
+
+			<!--postin-doclet-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>io.tiklab.postin.doclet.starter.DocletApplication</mainClass>
+					<arguments>
+						<!-- modules 传入api，server两个文件-->
+						<argument>/Users/limingliang/xcode-xpack/tiklab-xcode/tiklab-xcode-api;/Users/limingliang/xcode-xpack/tiklab-xcode/tiklab-xcode-server</argument>
+						<!-- workspaceId 空间Id，放到哪个空间-->
+						<argument>61887b155f39</argument>
+						<!-- server  postin服务-->
+						<argument>http://192.168.10.21:8090</argument>
+					</arguments>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

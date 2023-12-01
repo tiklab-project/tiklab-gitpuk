@@ -11,60 +11,145 @@ import io.tiklab.user.user.model.User;
 
 import java.io.Serializable;
 
+/**
+ *  @pi.model: io.tiklab.xcode.repository.model.Repository
+ */
 @ApiModel
 @Join
 @Mapper
 public class Repository implements Serializable {
 
+    /**
+     * @pi.name: rpyId
+     * @pi.dataType:string
+     * @pi.desc: 仓库id
+     * @pi.value: rpyId
+     */
     @ApiProperty(name="rpyId",desc="仓库id")
     private String rpyId;
 
-    //仓库组id
+    /**
+     * @pi.model: RepositoryGroup
+     * @pi.desc: 所属空间
+     */
     @Mappings({
             @Mapping(source = "group.groupId",target = "groupId")
     })
     @JoinQuery(key = "groupId")
     private RepositoryGroup group;
 
+    /**
+     * @pi.name: name
+     * @pi.dataType:string
+     * @pi.desc: 仓库名称
+     * @pi.value: name
+     */
     @ApiProperty(name="name",desc="仓库名称")
     private String name;
 
+    /**
+     * @pi.name: address
+     * @pi.dataType:string
+     * @pi.desc: 仓库地址
+     * @pi.value: address
+     */
     @ApiProperty(name="address",desc="仓库地址")
     private String address;
 
+    /**
+     * @pi.name: createTime
+     * @pi.dataType:string
+     * @pi.desc: 创建时间
+     * @pi.value: createTime
+     */
     @ApiProperty(name="createTime",desc="创建时间")
     private String createTime;
 
+    /**
+     * @pi.name: updateTime
+     * @pi.dataType:string
+     * @pi.desc: 更新时间
+     * @pi.value: updateTime
+     */
     @ApiProperty(name="updateTime",desc="更新时间")
     private String updateTime;
 
 
+    /**
+     * @pi.name: type
+     * @pi.dataType:int
+     * @pi.desc: 类型
+     * @pi.value: type
+     */
     @ApiProperty(name="type",desc="类型")
     private int type;
 
+    /**
+     * @pi.name: rules
+     * @pi.dataType:string
+     * @pi.desc: 仓库权限public、private
+     * @pi.value: rules
+     */
     @ApiProperty(name = "rules" ,desc =" 仓库权限 public、private")
     private String rules;
 
-    //创建人
+    /**
+     * @pi.model: User
+     * @pi.desc: 创建人
+     */
     @Mappings({
             @Mapping(source = "user.id",target = "userId")
     })
     @JoinQuery(key = "id")
     private User user;
 
+    /**
+     * @pi.name: remarks
+     * @pi.dataType:string
+     * @pi.desc: 描述
+     * @pi.value: remarks
+     */
     @ApiProperty(name="remarks",desc="描述")
     private String remarks;
 
+    /**
+     * @pi.name: language
+     * @pi.dataType:string
+     * @pi.desc: 语言
+     * @pi.value: language
+     */
     @ApiProperty(name="language",desc="语言")
     private String language;
 
+    /**
+     * @pi.name: state
+     * @pi.dataType:int
+     * @pi.desc: 仓库状态 1.所有 2.只读
+     * @pi.value: state
+     */
     @ApiProperty(name="state",desc="仓库状态 1.所有 2.只读 ")
     private int state=1;
 
+    /**
+     * @pi.name: classifyState
+     * @pi.dataType:string
+     * @pi.desc: 代码归档状态 "ture" "false"
+     * @pi.value: classifyState
+     */
     @ApiProperty(name="classifyState",desc="代码归档状态 ture false")
     private String classifyState="false";
 
+    /**
+     * @pi.name: size
+     * @pi.dataType:string
+     * @pi.desc: 仓库大小 单位：字节
+     * @pi.value: classifyState
+     */
+    @ApiProperty(name="size",desc="仓库大小 单位：字节")
+    private String size;
+
     /*--------其他字段---------*/
+
 
     /**
      * 默认分支
@@ -225,7 +310,13 @@ public class Repository implements Serializable {
         this.role = role;
     }
 
+    public String getSize() {
+        return size;
+    }
 
+    public void setSize(String size) {
+        this.size = size;
+    }
 }
 
 

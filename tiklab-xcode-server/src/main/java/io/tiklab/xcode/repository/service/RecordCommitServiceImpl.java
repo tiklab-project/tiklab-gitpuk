@@ -211,24 +211,22 @@ public class RecordCommitServiceImpl implements RecordCommitService {
 
     @Override
     public void updateCommitRecord(String requestURI,String userName) {
-        if (requestURI.endsWith("git-receive-pack")){
-            User user = userService.findUserByUsername(userName);
+        User user = userService.findUserByUsername(userName,null);
 
-            String[] split = requestURI.split("/");
-            String groupName=split[2];
-            String name=split[3].substring(0,split[3].indexOf(".git"));
-            Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
-            //更新仓库提交时间
-            repositoryServer.updateRpy(repository);
+        String[] split = requestURI.split("/");
+        String groupName=split[2];
+        String name=split[3].substring(0,split[3].indexOf(".git"));
+        Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+        //更新仓库提交时间
+        repositoryServer.updateRpy(repository);
 
 
-            RecordCommit recordCommit = new RecordCommit();
-            recordCommit.setRepository(repository);
-            recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
-            recordCommit.setUserId(user.getId());
-            this.createRecordCommit(recordCommit);
+        RecordCommit recordCommit = new RecordCommit();
+        recordCommit.setRepository(repository);
+        recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
+        recordCommit.setUserId(user.getId());
+        this.createRecordCommit(recordCommit);
         }
-    }
 
 
 }

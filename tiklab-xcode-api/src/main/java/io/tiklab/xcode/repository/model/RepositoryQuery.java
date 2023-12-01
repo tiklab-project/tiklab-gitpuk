@@ -15,7 +15,7 @@ public class RepositoryQuery implements Serializable {
     @ApiProperty(name ="userId",desc = "登录用户")
     private String  userId;
 
-    @ApiProperty(name ="sort",desc = "排序方式")
+    @ApiProperty(name ="sort",desc = "排序方式 desc、asc")
     private String  sort;
 
     @ApiProperty(name ="userId",desc = "仓库名称")
@@ -29,6 +29,7 @@ public class RepositoryQuery implements Serializable {
 
     @ApiProperty(name ="findType",desc = "查询类型 自己创建的：oneself、有权限看的：viewable")
     private String  findType;
+
 
 
     public String getUserId() {

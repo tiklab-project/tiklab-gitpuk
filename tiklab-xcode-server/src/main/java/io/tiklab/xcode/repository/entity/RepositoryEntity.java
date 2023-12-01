@@ -51,6 +51,8 @@ public class RepositoryEntity extends BaseModel {
     @Column(name = "classify_state")
     private String classifyState;
 
+    @Column(name = "size")
+    private String size;
 
     public String getRpyId() {
         return rpyId;
@@ -154,6 +156,14 @@ public class RepositoryEntity extends BaseModel {
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 }
 

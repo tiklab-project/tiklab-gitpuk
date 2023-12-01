@@ -1,0 +1,1 @@
+ALTER TABLE rpy_repository ADD size varchar;
