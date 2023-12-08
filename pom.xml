@@ -5,45 +5,46 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.tiklab</groupId>
-        <artifactId>tiklab-dependencies</artifactId>
+        <groupId>io.thoughtware</groupId>
+        <artifactId>thoughtware-dependencies</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>tiklab-xcode</artifactId>
+    <groupId>io.thoughtware</groupId>
+    <artifactId>thoughtware-gittork</artifactId>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
     <version>1.0.1-SNAPSHOT</version>
 
     <properties>
-        <tiklab-toolkit.version>1.0.0</tiklab-toolkit.version>
-        <tiklab-plugin.version>1.0.1-SNAPSHOT</tiklab-plugin.version>
-        <tiklab-gateway.version>1.0.1-SNAPSHOT</tiklab-gateway.version>
-        <tiklab-rpc.version>1.0.0</tiklab-rpc.version>
-        <tiklab-dss.version>1.0.0</tiklab-dss.version>
-        <tiklab-dfs.version>1.0.0</tiklab-dfs.version>
-        <tiklab-dcs.version>1.0.0</tiklab-dcs.version>
-        <tiklab-integration.version>1.0.0</tiklab-integration.version>
-        <tiklab-join.version>1.0.0</tiklab-join.version>
-        <tiklab-dal.version>1.0.0</tiklab-dal.version>
-        <tiklab-openapi-version>1.0.0-SNAPSHOT</tiklab-openapi-version>
+        <thoughtware-toolkit.version>1.0.0</thoughtware-toolkit.version>
+        <thoughtware-plugin.version>1.0.1-SNAPSHOT</thoughtware-plugin.version>
+        <thoughtware-gateway.version>1.0.1-SNAPSHOT</thoughtware-gateway.version>
+        <thoughtware-rpc.version>1.0.0</thoughtware-rpc.version>
+        <thoughtware-dss.version>1.0.0</thoughtware-dss.version>
+        <thoughtware-dfs.version>1.0.0</thoughtware-dfs.version>
+        <thoughtware-dcs.version>1.0.0</thoughtware-dcs.version>
+        <thoughtware-integration.version>1.0.0</thoughtware-integration.version>
+        <thoughtware-join.version>1.0.0</thoughtware-join.version>
+        <thoughtware-dal.version>1.0.0</thoughtware-dal.version>
+        <thoughtware-openapi-version>1.0.0-SNAPSHOT</thoughtware-openapi-version>
 
         <!--平台组件-->
-        <tiklab-privilege.version>1.0.1-SNAPSHOT</tiklab-privilege.version>
-        <tiklab-licence.version>1.0.1-SNAPSHOT</tiklab-licence.version>
-        <tiklab-user.version>1.0.1-SNAPSHOT</tiklab-user.version>
-        <tiklab-security.version>1.0.1-SNAPSHOT</tiklab-security.version>
-        <tiklab-message.version>1.0.1-SNAPSHOT</tiklab-message.version>
-        <tiklab-todotask.version>1.0.1-SNAPSHOT</tiklab-todotask.version>
-        <tiklab-eam.version>1.0.1-SNAPSHOT</tiklab-eam.version>
-        <tiklab-postgresql.version>1.0.1-SNAPSHOT</tiklab-postgresql.version>
-        <tiklab-spotbugs.version>1.0.0</tiklab-spotbugs.version>
+        <thoughtware-privilege.version>1.0.1-SNAPSHOT</thoughtware-privilege.version>
+        <thoughtware-licence.version>1.0.1-SNAPSHOT</thoughtware-licence.version>
+        <thoughtware-user.version>1.0.1-SNAPSHOT</thoughtware-user.version>
+        <thoughtware-security.version>1.0.1-SNAPSHOT</thoughtware-security.version>
+        <thoughtware-message.version>1.0.1-SNAPSHOT</thoughtware-message.version>
+        <thoughtware-todotask.version>1.0.1-SNAPSHOT</thoughtware-todotask.version>
+        <thoughtware-eam.version>1.0.1-SNAPSHOT</thoughtware-eam.version>
+        <thoughtware-postgresql.version>1.0.1-SNAPSHOT</thoughtware-postgresql.version>
+        <thoughtware-spotbugs.version>1.0.0</thoughtware-spotbugs.version>
 
-        <tiklab-postin-doclet-version>1.0.1-SNAPSHOT</tiklab-postin-doclet-version>
+        <thoughtware-postin-doclet-version>1.0.1-SNAPSHOT</thoughtware-postin-doclet-version>
 
-        <tiklab-upgrade.version>1.0.0</tiklab-upgrade.version>
-        <tiklab-postin.version>1.0.0</tiklab-postin.version>
-        <tiklab-jdk.version>1.0.0</tiklab-jdk.version>
+        <thoughtware-upgrade.version>1.0.0</thoughtware-upgrade.version>
+        <thoughtware-postin.version>1.0.1-SNAPSHOT</thoughtware-postin.version>
+        <thoughtware-jdk.version>1.0.0</thoughtware-jdk.version>
 
         <!--other-->
         <commons-compress.version>1.19</commons-compress.version>
@@ -54,9 +55,9 @@
     </properties>
 
     <modules>
-        <module>tiklab-xcode-api</module>
-        <module>tiklab-xcode-server</module>
-        <module>tiklab-xcode-starter</module>
+        <module>thoughtware-gittork-api</module>
+        <module>thoughtware-gittork-server</module>
+        <module>thoughtware-gittork-starter</module>
     </modules>
 
 

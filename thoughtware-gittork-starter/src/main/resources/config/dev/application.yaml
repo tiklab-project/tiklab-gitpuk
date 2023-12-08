@@ -1,0 +1,128 @@
+app:
+  name: thoughtware-gittork
+
+APP_HOME: ${APP_HOME}
+application: thoughtware
+
+server:
+  port: 8090
+
+spring:
+  freemarker:
+    checkTemplateLocation: false
+
+gittork:
+  ssh:
+    port: 10002
+    key: tiklab-gittork-starter/file/id_rsa
+  file: tiklab-gittork-starter/file
+
+jdbc:
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://172.10.1.10:5432/thoughtware-gittork?stringtype=unspecified
+  #url: jdbc:postgresql://172.13.1.23:5432/xcode_ee?stringtype=unspecified
+  username: postgres
+  password: darth2020
+
+postgresql:
+  embbed:
+    enable: false
+  type: local
+  database: thoughtware-gittork
+
+eas:
+  embbed:
+    enable: true
+
+#plugin config
+DATA_HOME: ${user.home}/tiklab/${app.name}
+plugin:
+  path: ${DATA_HOME}/plugin
+
+#dfs config
+dfs:
+  server:
+    enabled: false
+    mode: server
+    port: 4000
+    datapath: ${DATA_HOME}/files
+  client:
+    url: 127.0.0.1:4000
+    bucket: ${app.name}
+
+#dcs config
+dcs:
+  server:
+    enabled: true
+    port: 5001
+    datapath: ${DATA_HOME}/data
+  client:
+    url: 127.0.0.1:5001
+    group: g1
+    database: dcs1
+    expire: 600
+
+#dcs config
+dss:
+  server:
+    enabled: false
+    mode: server
+    port: 6000
+    datapath: ${DATA_HOME}/index
+  client:
+    url: 127.0.0.1:6000
+    bucket: ${app.name}
+
+datapath: ${DATA_HOME}/caches
+
+message:
+  sms:
+    enabled: true
+
+
+#    enable: false
+#  address: http://192.168.10.14:8080
+#  web:
+#    address: http://192.168.10.14:3003
+
+base:
+  url: http://eas-ce.dev.tiklab.net
+
+
+
+#homes
+homes:
+  address: http://192.168.10.7:8080
+
+#license
+
+
+#file
+file:
+  path: http://file.dev.tiklab.net
+
+
+repository:
+  address: ${DATA_HOME}/repository
+
+backups:
+  time: 0 0 2 * * ?
+  dir: ${DATA_HOME}
+  gittork:
+    dir: /Users/limingliang/tiklab/thoughtware-gittork/repository
+  pgsql:
+    dir: /Users/limingliang/postgreSQL/bin
+
+visit:
+  address: ""
+
+spotbugs:
+  address: /embbed/spotbugs-4.8.1/bin
+
+
+
+
+
+
+
+
