@@ -36,6 +36,8 @@ public class RepositoryGroupEntity {
     @ApiProperty(name="repositoryNum",desc="仓库数")
     private String repositoryNum;
 
+    @Column(name = "color")
+    private Integer color;
 
     public String getGroupId() {
         return groupId;
@@ -107,6 +109,14 @@ public class RepositoryGroupEntity {
 
     public void setRepositoryNum(String repositoryNum) {
         this.repositoryNum = repositoryNum;
+    }
+
+    public Integer getColor() {
+        return color;
+    }
+
+    public void setColor(Integer color) {
+        this.color = color;
     }
 }
 

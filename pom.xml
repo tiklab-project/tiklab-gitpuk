@@ -13,7 +13,7 @@
     <artifactId>tiklab-xcode</artifactId>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <properties>
         <tiklab-toolkit.version>1.0.0</tiklab-toolkit.version>
@@ -156,11 +156,11 @@
             <distributionManagement>
                 <snapshotRepository>
                     <id>xpack</id>
-                    <url>http://172.13.1.5:8080/repository/maven-snapshots</url>
+                    <url>http://192.168.10.17:8081/repository/maven-snapshot</url>
                 </snapshotRepository>
                 <repository>
                     <id>xpack</id>
-                    <url>http://172.13.1.5:8080/repository/maven-releases</url>
+                    <url>http://192.168.10.17:8081/repository/maven-release</url>
                 </repository>
             </distributionManagement>
             <build>

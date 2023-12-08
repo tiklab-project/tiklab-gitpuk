@@ -13,15 +13,19 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.xcode.repository.dao.RepositoryGroupDao;
 import io.tiklab.xcode.repository.entity.RepositoryGroupEntity;
+import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.model.RepositoryGroup;
 import io.tiklab.xcode.repository.model.RepositoryGroupQuery;
 import io.tiklab.xcode.common.RepositoryUtil;
+import io.tiklab.xcode.repository.model.RepositoryQuery;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +44,9 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
 
     @Autowired
     private DmRoleService dmRoleService;
+
+    @Autowired
+    private RepositoryServer repositoryServer;
     /**
      * 创建仓库组
      * @param repositoryGroup 信息
@@ -48,7 +55,10 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Override
     public String createCodeGroup(RepositoryGroup repositoryGroup) {
         RepositoryGroupEntity groupEntity = BeanMapper.map(repositoryGroup, RepositoryGroupEntity.class);
-
+        Random random = new Random();
+        // 生成0到4之间的随机数
+        int randomNum = random.nextInt(5);
+        groupEntity.setColor(randomNum);
         groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
         String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
         dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), "xcode");
@@ -71,7 +81,28 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Override
     public void updateCodeGroup(RepositoryGroup repositoryGroup) {
         RepositoryGroupEntity groupEntity = BeanMapper.map(repositoryGroup, RepositoryGroupEntity.class);
+
+
+        Thread thread = new Thread() {
+            public void run() {
+                RepositoryGroupEntity group = repositoryGroupDao.findRepositoryGroup(repositoryGroup.getGroupId());
+                if (!ObjectUtils.isEmpty(group)){
+                    if (!group.getName().equals(repositoryGroup.getName())){
+                        List<Repository> repositoryList = repositoryServer.findRepositoryList(group.getGroupId());
+                        if (CollectionUtils.isNotEmpty(repositoryList)){
+                            for (Repository repository:repositoryList){
+                                String name = repositoryGroup.getName();
+                                repository.setAddress(name+"/"+repository.getName());
+                                repositoryServer.updateRepository(repository);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        thread.start();
         repositoryGroupDao.updateCodeGroup(groupEntity);
+
     }
 
     /**

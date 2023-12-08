@@ -31,6 +31,9 @@ public class RepositoryQuery implements Serializable {
     private String  findType;
 
 
+    @ApiProperty(name ="groupName",desc = "仓库组名字")
+    private String  groupName;
+
 
     public String getUserId() {
         return userId;
@@ -90,6 +93,15 @@ public class RepositoryQuery implements Serializable {
 
     public void setFindType(String findType) {
         this.findType = findType;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public RepositoryQuery setGroupName(String groupName) {
+        this.groupName = groupName;
+        return this;
     }
 }
 

@@ -41,6 +41,12 @@ public class RecordCommit {
     @ApiProperty(name="groupName",desc="组名")
     private String groupName;
 
+    @ApiProperty(name="branch",desc="分支")
+    private String branch;
+
+    @ApiProperty(name="commitMsg",desc="提交信息")
+    private String commitMsg;
+
     public String getId() {
         return id;
     }
@@ -88,6 +94,22 @@ public class RecordCommit {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public String getCommitMsg() {
+        return commitMsg;
+    }
+
+    public void setCommitMsg(String commitMsg) {
+        this.commitMsg = commitMsg;
     }
 }
 

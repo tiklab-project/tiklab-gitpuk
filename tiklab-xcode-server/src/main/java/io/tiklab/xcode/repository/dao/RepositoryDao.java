@@ -101,9 +101,7 @@ public class RepositoryDao {
     public Pagination<RepositoryEntity> findRepositoryPage(RepositoryQuery repositoryQuery, String[] ids) {
 
         QueryBuilders pagination = QueryBuilders.createQuery(RepositoryEntity.class)
-                .in("rpyId", ids)
-                .pagination(repositoryQuery.getPageParam());
-
+                .in("rpyId", ids);
 
         if (StringUtils.isNotEmpty(repositoryQuery.getSort())){
             if (repositoryQuery.getSort().equals("asc")){
@@ -112,7 +110,8 @@ public class RepositoryDao {
                 pagination.orders(OrderBuilders.instance().desc("size").get());
             }
         }
-        QueryCondition queryCondition = pagination.get();
+        QueryCondition queryCondition = pagination.pagination(repositoryQuery.getPageParam())
+                .get();
         return jpaTemplate.findPage(queryCondition,RepositoryEntity.class);
     }
 
@@ -137,11 +136,15 @@ public class RepositoryDao {
 
     /**
      * 通过仓库组名字查询仓库列表
-     * @param groupName
+     * @param repositoryQuery
      * @return
      */
-    public  List<RepositoryEntity> findRepositoryByGroupName(String groupName) {
-        String sql="SELECT re.* FROM rpy_repository re LEFT JOIN rpy_group gr ON re.group_id=gr.group_id WHERE gr.name ='"+groupName+"'";
+    public  List<RepositoryEntity> findGroupRepository(RepositoryQuery repositoryQuery) {
+        String sql="SELECT re.* FROM rpy_repository re LEFT JOIN rpy_group gr ON re.group_id=gr.group_id WHERE gr.name ='"+repositoryQuery.getGroupName()+"'";
+        if (StringUtils.isNotEmpty(repositoryQuery.getName())){
+             sql = sql + " and re.name like '%" + repositoryQuery.getName() + "%'";
+        }
+
         JdbcTemplate jdbcTemplate = jpaTemplate.getJdbcTemplate();
         List<RepositoryEntity> repositoryEntities = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(RepositoryEntity.class));
         return repositoryEntities;

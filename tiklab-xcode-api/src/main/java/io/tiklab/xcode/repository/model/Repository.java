@@ -146,9 +146,23 @@ public class Repository implements Serializable {
      * @pi.value: classifyState
      */
     @ApiProperty(name="size",desc="仓库大小 单位：字节")
-    private String size;
+    private Long size;
+
+    /**
+     * @pi.name: color
+     * @pi.dataType:string
+     * @pi.desc: 仓库图标颜色 0-4
+     * @pi.value: classifyState
+     */
+    @ApiProperty(name="color",desc="仓库图标颜色 0-4")
+    private Integer color;
 
     /*--------其他字段---------*/
+
+    /**
+     * 仓库大小
+     */
+    private String rpySize;
 
 
     /**
@@ -310,12 +324,28 @@ public class Repository implements Serializable {
         this.role = role;
     }
 
-    public String getSize() {
+    public Long getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(Long size) {
         this.size = size;
+    }
+
+    public Integer getColor() {
+        return color;
+    }
+
+    public void setColor(Integer color) {
+        this.color = color;
+    }
+
+    public String getRpySize() {
+        return rpySize;
+    }
+
+    public void setRpySize(String rpySize) {
+        this.rpySize = rpySize;
     }
 }
 

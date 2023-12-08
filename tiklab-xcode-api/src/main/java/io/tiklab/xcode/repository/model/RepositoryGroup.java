@@ -44,6 +44,8 @@ public class RepositoryGroup implements Serializable {
     @ApiProperty(name="remarks",desc="描述")
     private String remarks;
 
+    @ApiProperty(name="color",desc="仓库图标颜色 0-4")
+    private Integer color;
 
     /*-----------其他字段----------*/
 
@@ -121,6 +123,14 @@ public class RepositoryGroup implements Serializable {
 
     public void setRepositoryNum(String repositoryNum) {
         this.repositoryNum = repositoryNum;
+    }
+
+    public Integer getColor() {
+        return color;
+    }
+
+    public void setColor(Integer color) {
+        this.color = color;
     }
 }
 

@@ -234,20 +234,20 @@ public class RepositoryController {
     }
 
     /**
-     * @pi.name:通过仓库组名字查询仓库列表
-     * @pi.path:/rpy/findRepositoryByGroupName
+     * @pi.name:条件查询仓库组下面的仓库
+     * @pi.path:/rpy/findGroupRepository
      * @pi.methodType:post
      * @pi.request-type:formdata
      * @pi.param:  name=groupName;dataType=string;value=groupName;
      */
-    @RequestMapping(path="/findRepositoryByGroupName",method = RequestMethod.POST)
-    @ApiMethod(name = "findRepositoryByGroupName",desc = "通过仓库组名字查询仓库列表")
-    @ApiParam(name = "address",desc = "address",required = true)
-    public Result<List<Repository>> findRepositoryByGroupName( @NotNull String groupName){
+    @RequestMapping(path="/findGroupRepository",method = RequestMethod.POST)
+    @ApiMethod(name = "findGroupRepository",desc = "条件查询仓库组下面的仓库")
+    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    public Result<List<Repository>> findGroupRepository(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
 
-        List<Repository> repository= repositoryServer.findRepositoryByGroupName(groupName);
+        Pagination<Repository> groupRepository = repositoryServer.findGroupRepository(repositoryQuery);
 
-        return Result.ok(repository);
+        return Result.ok(groupRepository);
     }
 
     /**
@@ -338,7 +338,14 @@ public class RepositoryController {
 
         return Result.ok(repositoryAuth);
     }
+    @RequestMapping(path="/updateRep",method = RequestMethod.POST)
+    @ApiMethod(name = "updateRep",desc = "查询用户是否有当前项目权限")
+    public Result<String> updateRep( ){
 
+      repositoryServer.updateRep();
+
+        return Result.ok();
+    }
 
 }
 

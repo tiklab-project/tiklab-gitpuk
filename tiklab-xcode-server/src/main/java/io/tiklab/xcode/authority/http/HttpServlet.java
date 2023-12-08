@@ -3,15 +3,20 @@ package io.tiklab.xcode.authority.http;
 
 import io.tiklab.xcode.authority.ValidUsrPwdServer;
 
+import io.tiklab.xcode.common.RepositoryUtil;
+import io.tiklab.xcode.common.XcodeYamlDataMaService;
 import io.tiklab.xcode.repository.model.Repository;
 import io.tiklab.xcode.repository.service.MemoryManService;
 import io.tiklab.xcode.repository.service.RecordCommitService;
 import io.tiklab.xcode.repository.service.RepositoryServer;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.http.server.GitServlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 
 
@@ -56,6 +61,9 @@ public class HttpServlet extends GitServlet {
         @Resource
         MemoryManService memoryManService;
 
+        @Autowired
+        XcodeYamlDataMaService yamlDataMaService;
+
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -64,17 +72,7 @@ public class HttpServlet extends GitServlet {
             String requestURI = ((HttpServletRequest) req).getRequestURI();
             //git push提交 （客户端第三次请求发送数据 以git-receive-pack结尾）
             if (requestURI.endsWith("git-receive-pack")){
-                String contentLengthHeader = ((HttpServletRequest) req).getHeader("Content-Length");
-                if (contentLengthHeader != null) {
-                    long contentLength = Long.parseLong(contentLengthHeader);
-
-                    String[] split = requestURI.split("/");
-                    String groupName=split[2];
-                    String name=split[3].substring(0,split[3].indexOf(".git"));
-                    Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
-                    repository.setSize(String.valueOf(contentLength));
-                    repositoryServer.updateRpy(repository);
-                }
+                addRepositorySize(req,requestURI);
             }
 
             if (!authorized){
@@ -153,6 +151,38 @@ public class HttpServlet extends GitServlet {
         super.doPost(req, resp);
     }
 
+    /**
+     * 添加仓库的大小
+     * @param req
+     * @param requestURI
+     */
+    public void addRepositorySize(ServletRequest req,String requestURI){
+        String contentLengthHeader = ((HttpServletRequest) req).getHeader("Content-Length");
+        if (contentLengthHeader != null) {
+            long contentLength = Long.parseLong(contentLengthHeader);
+
+            String[] split = requestURI.split("/");
+            String groupName=split[split.length-3];
+
+
+            String name=split[split.length-2].substring(0,split[split.length-2].indexOf(".git"));
+            Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+            if (!ObjectUtils.isEmpty(repository)){
+                if (!ObjectUtils.isEmpty(repository.getSize())){
+                    contentLength = repository.getSize()+contentLength;
+                }else {
+                    String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
+                    File file = new File(repositoryUrl);
+                    if (file.exists()){
+                        long logBytes = FileUtils.sizeOfDirectory(file);
+                        contentLength =  logBytes+contentLength;
+                    }
+                }
+                repository.setSize(contentLength);
+                repositoryServer.updateRepository(repository);
+            }
+        }
+    }
 }
 
 

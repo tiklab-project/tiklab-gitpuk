@@ -291,6 +291,11 @@ public class RepositoryUtil {
         return list;
     }
 
+    /**
+     * 转换文件大小单位
+     * @param size 单位字节
+     * @return 位置
+     */
     public static String formatSize(long size) {
         String[] units = {"B", "KB", "MB", "GB", "TB"};
         double temp = size;
@@ -301,6 +306,31 @@ public class RepositoryUtil {
         }
         DecimalFormat df = new DecimalFormat("#.##");
         return df.format(temp) + units[index];
+    }
+
+
+    /**
+     * 生成随机数
+     * @param length 随机数个数
+     * @return 位置
+     */
+    public static String gen(int length) {
+        char[] ss = new char[length];
+        int[] flag = {0,0,0}; //A-Z, a-z, 0-9
+        int i=0;
+        while(flag[0]==0 || flag[1]==0 || flag[2]==0 || i<length) {
+            i = i%length;
+            int f = (int) (Math.random()*3%3);
+            if(f==0)
+                ss[i] = (char) ('A'+Math.random()*26);
+            else if(f==1)
+                ss[i] = (char) ('a'+Math.random()*26);
+            else
+                ss[i] = (char) ('0'+Math.random()*10);
+            flag[f]=1;
+            i++;
+        }
+        return new String(ss);
     }
 }
 

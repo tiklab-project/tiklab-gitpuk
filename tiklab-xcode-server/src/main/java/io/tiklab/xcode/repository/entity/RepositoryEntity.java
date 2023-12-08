@@ -52,7 +52,10 @@ public class RepositoryEntity extends BaseModel {
     private String classifyState;
 
     @Column(name = "size")
-    private String size;
+    private Integer size;
+
+    @Column(name = "color")
+    private Integer color;
 
     public String getRpyId() {
         return rpyId;
@@ -158,12 +161,20 @@ public class RepositoryEntity extends BaseModel {
         this.updateTime = updateTime;
     }
 
-    public String getSize() {
+    public Integer getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(Integer size) {
         this.size = size;
+    }
+
+    public Integer getColor() {
+        return color;
+    }
+
+    public void setColor(Integer color) {
+        this.color = color;
     }
 }
 

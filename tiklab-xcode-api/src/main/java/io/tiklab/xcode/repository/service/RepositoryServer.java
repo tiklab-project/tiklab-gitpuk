@@ -44,6 +44,13 @@ public interface RepositoryServer {
      */
     void updateRpy(Repository repository);
 
+
+    /**
+     * 更新代码库
+     * @param repository 代码库信息
+     */
+    void updateRepository(Repository repository);
+
     /**
      * 查询单个代码库
      * @param rpyId 代码库id
@@ -106,12 +113,24 @@ public interface RepositoryServer {
      */
     List<Repository> findRepositoryList(RepositoryQuery repositoryQuery);
 
+    /**
+     * 通过仓库组id查询仓库
+     * @param groupId groupId
+     */
+    List<Repository> findRepositoryList(String groupId);
 
     /**
      * 分页条件查询仓库
      * @param repositoryQuery repositoryQuery
      */
      Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery);
+
+    /**
+     * 查询仓库组的仓库
+     * @param repositoryQuery
+     * @return 仓库
+     */
+    Pagination<Repository> findGroupRepository(RepositoryQuery repositoryQuery);
 
     /**
      * 通过仓库id 查询仓库
@@ -135,12 +154,8 @@ public interface RepositoryServer {
      */
     Repository findRepositoryByAddress(String address);
 
-    /**
-     * 通过仓库组名字查询仓库列表
-     * @param groupName
-     * @return 仓库
-     */
-    List<Repository> findRepositoryByGroupName(String groupName);
+
+
 
     /**
      * 根据路径删除仓库
@@ -194,6 +209,17 @@ public interface RepositoryServer {
      */
 
     String findRepositoryAuth(String rpyId);
+
+    /**
+     *查询当前仓库的默认分支
+     * @return userId 用户ID
+     */
+    String findDefaultBranch(String repositoryId);
+
+    void updateRep();
+
+
+
 }
 
 

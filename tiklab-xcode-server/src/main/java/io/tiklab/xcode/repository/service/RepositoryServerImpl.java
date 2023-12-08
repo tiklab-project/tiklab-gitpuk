@@ -133,6 +133,10 @@ public class RepositoryServerImpl implements RepositoryServer {
     public String createRpy(Repository repository) {
         repository.setCreateTime(RepositoryUtil.date(1,new Date()));
         repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
+        Random random = new Random();
+        // 生成0到4之间的随机数
+        int randomNum = random.nextInt(5);
+        repository.setColor(randomNum);
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
 
 
@@ -145,6 +149,7 @@ public class RepositoryServerImpl implements RepositoryServer {
             //创建私有仓库 给创建人设置管理员权限
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "xcode");
         }
+
         return repositoryId;
     }
 
@@ -202,6 +207,19 @@ public class RepositoryServerImpl implements RepositoryServer {
                 throw  new SystemException(9001,"仓库地址重复");
             }
         }
+
+        repositoryDao.updateRpy(groupEntity);
+    }
+
+
+    /**
+     * 更新仓库
+     * @param repository 仓库信息
+     */
+    @Override
+    public void updateRepository(Repository repository) {
+        RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+        groupEntity.setUpdateTime(RepositoryUtil.date(1,new Date()));
 
         repositoryDao.updateRpy(groupEntity);
     }
@@ -394,28 +412,30 @@ public class RepositoryServerImpl implements RepositoryServer {
         return repositoryList;
     }
 
+    @Override
+    public List<Repository> findRepositoryList(String groupId) {
+        List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(new RepositoryQuery().setGroupId(groupId));
+        List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
+        return repositoryList;
+    }
+
+    @Override
+    public Pagination<Repository> findGroupRepository(RepositoryQuery repositoryQuery) {
+        List<RepositoryEntity> repositoryEntityList= repositoryDao.findGroupRepository(repositoryQuery);
+        List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
+        if (CollectionUtils.isNotEmpty(repositoryList)) {
+            return findViewRepository(repositoryQuery,repositoryList);
+        }
+        return PaginationBuilder.build(new Pagination<>(),null);
+    }
 
     @Override
     public Pagination<Repository> findRepositoryPage(RepositoryQuery repositoryQuery) {
         List<RepositoryEntity> groupEntityList = repositoryDao.findRepositoryListLike(repositoryQuery);
         List<Repository> allRpy = BeanMapper.mapList(groupEntityList, Repository.class);
 
-        if (!ObjectUtils.isEmpty(allRpy)&&CollectionUtils.isNotEmpty(allRpy)) {
-            List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId(),"all");
-            String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
-
-           if (canViewRpyIdList.length>0){
-               Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
-               List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
-               joinTemplate.joinQuery(repositoryList);
-               for (Repository repository:repositoryList){
-                   if (StringUtils.isNotEmpty(repository.getSize())){
-                       String size = RepositoryUtil.formatSize(Long.parseLong(repository.getSize()));
-                       repository.setSize(size);
-                   }
-               }
-               return PaginationBuilder.build(pagination,repositoryList);
-           }
+        if (CollectionUtils.isNotEmpty(allRpy)) {
+            return findViewRepository(repositoryQuery,allRpy);
         }
         return PaginationBuilder.build(new Pagination<>(),null);
     }
@@ -480,13 +500,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         return repository;
     }
 
-    @Override
-    public List<Repository> findRepositoryByGroupName(String groupName) {
-        List<RepositoryEntity> repositoryEntityList= repositoryDao.findRepositoryByGroupName(groupName);
-        List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
-        joinTemplate.joinQuery(repositoryList);
-        return repositoryList;
-    }
+
 
     @Override
     public void deleteRpyByAddress(String address) {
@@ -671,6 +685,29 @@ public class RepositoryServerImpl implements RepositoryServer {
     }
 
     /**
+     *查询有权限的仓库
+     */
+    public Pagination<Repository> findViewRepository(RepositoryQuery repositoryQuery,List<Repository> AllRepository){
+        List<String> accessRepositoryId = findHaveAccessRepository(AllRepository, repositoryQuery.getUserId(),"all");
+        String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
+
+        if (canViewRpyIdList.length>0){
+            Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
+            List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
+            joinTemplate.joinQuery(repositoryList);
+            for (Repository repository:repositoryList){
+                if (!ObjectUtils.isEmpty(repository.getSize())){
+                    String size = RepositoryUtil.formatSize(repository.getSize());
+                    repository.setRpySize(size);
+                }
+            }
+            return PaginationBuilder.build(pagination,repositoryList);
+        }
+        return PaginationBuilder.build(new Pagination<>(),null);
+    }
+
+
+    /**
      *查询公共和有权限的仓库
      */
     public List<String> findHaveAccessRepository(List<Repository> allRpy,String userId,String type){//公共的仓库
@@ -704,6 +741,27 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
         return canViewRpyId;
     }
+
+    public void updateRep(){
+        List<RepositoryEntity> allRpyEntity = repositoryDao.findAllRpy();
+        List<Repository> allRpy = BeanMapper.mapList(allRpyEntity, Repository.class);
+
+        for (Repository repository:allRpy){
+            String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
+            File file = new File(repositoryUrl);
+            if (file.exists()){
+                long logBytes = FileUtils.sizeOfDirectory(file);
+                repository.setSize(logBytes);
+
+                RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+                repositoryDao.updateRpy(groupEntity);
+
+            }
+        }
+    }
+
+
+
 }
 
 

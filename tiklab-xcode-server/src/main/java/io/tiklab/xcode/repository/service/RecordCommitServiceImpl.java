@@ -12,6 +12,9 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
+import io.tiklab.xcode.commit.model.Commit;
+import io.tiklab.xcode.commit.model.CommitMessage;
+import io.tiklab.xcode.commit.service.CommitServer;
 import io.tiklab.xcode.common.RepositoryUtil;
 import io.tiklab.xcode.repository.dao.RecordCommitDao;
 import io.tiklab.xcode.repository.entity.RecordCommitEntity;
@@ -54,6 +57,9 @@ public class RecordCommitServiceImpl implements RecordCommitService {
 
     @Autowired
     private RepositoryServer repositoryServer;
+
+    @Autowired
+    CommitServer commitServer;
 
 
     @Override
@@ -160,7 +166,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         }
 
 
-        List<RecordCommit> RecordCommitList = publicRep.stream().limit(4).collect(Collectors.toList());
+        List<RecordCommit> RecordCommitList = publicRep.stream().limit(7).collect(Collectors.toList());
 
         for (RecordCommit recordCommit:RecordCommitList){
 
@@ -177,6 +183,16 @@ public class RecordCommitServiceImpl implements RecordCommitService {
                 groupName = split[0];
             }
             recordCommit.setGroupName(groupName);
+
+            String defaultBranch = repositoryServer.findDefaultBranch(recordCommit.getRepository().getRpyId());
+            recordCommit.setBranch(defaultBranch);
+
+            Commit commit = new Commit();
+            commit.setRpyId(recordCommit.getRepository().getRpyId());
+            commit.setBranch(defaultBranch);
+            CommitMessage branchCommit = commitServer.findLatelyBranchCommit(commit);
+
+            recordCommit.setCommitMsg(branchCommit.getCommitMessage());
         }
 
         return RecordCommitList;
@@ -218,7 +234,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         String name=split[3].substring(0,split[3].indexOf(".git"));
         Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
         //更新仓库提交时间
-        repositoryServer.updateRpy(repository);
+        repositoryServer.updateRepository(repository);
 
 
         RecordCommit recordCommit = new RecordCommit();
