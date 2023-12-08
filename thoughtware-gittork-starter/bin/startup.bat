@@ -17,7 +17,7 @@ goto begin
 
 set DIRS=%P1Path%
 
-set APP_MAIN=net.tiklab.xcode.XcodeApplication
+set APP_MAIN=net.thoughtware.xcode.XcodeApplication
 
 set JAVA_HOME=%DIRS%jdk-16.0.2
 
@@ -44,7 +44,7 @@ set public=%DIRS%lib\
 @echo off & setlocal enabledelayedexpansion
 for /f "delims=" %%i in ('dir /b /s "%public%"') do (set s=!s!%public%%%~nxi;)
 
-set comment=%DIRS%tiklab-eas\comment\
+set comment=%DIRS%thoughtware-eas\comment\
 @echo off & setlocal enabledelayedexpansion
 for /f "delims=" %%i in ('dir /b /s "%comment%"') do (set st=!st!%comment%%%~nxi;)
 

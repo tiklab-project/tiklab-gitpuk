@@ -1,5 +1,5 @@
 app:
-  name: tiklab-gittork
+  name: thoughtware-gittork
 
 APP_HOME: ${APP_HOME}
 application: gittork
@@ -30,7 +30,7 @@ postgresql:
     password: darth2020
     address: ${DATA_HOME}/postgresql
 
-eas:
+darth:
   embbed:
     enable: true
 

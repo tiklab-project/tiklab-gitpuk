@@ -1,8 +1,8 @@
 app:
-  name: tiklab-xcode
+  name: thoughtware-gittork
 
 APP_HOME: ${APP_HOME}
-application: xcode
+application: gittork
 
 server:
   port: 8080
@@ -30,10 +30,10 @@ postgresql:
     password: darth2020
     address: ${DATA_HOME}/postgresql
 
-eas:
+darth:
   embbed:
     enable: false
-  address:  http://eas-ce.demo.tiklab.net
+  address:  http://darth-ce.demo.tiklab.cn
 
 #plugin config
 DATA_HOME: /opt/tiklab/xcode

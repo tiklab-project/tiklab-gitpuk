@@ -1,5 +1,5 @@
 app:
-  name: tiklab-gittork
+  name: thoughtware-gittork
 
 APP_HOME: ${APP_HOME}
 application: gittork
@@ -39,10 +39,10 @@ postgresql:
   database: tiklab_xcode
 
 
-eas:
+darth:
   embbed:
     enable: false
-  address: http://e.eas.tiklab.net
+  address: http://e.darth.tiklab.cn
 
 #dfs config
 dfs:

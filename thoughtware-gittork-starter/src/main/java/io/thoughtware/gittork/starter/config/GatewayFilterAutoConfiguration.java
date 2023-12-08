@@ -92,6 +92,7 @@ public class GatewayFilterAutoConfiguration {
                         "/start",
                         "/eas",
                         "/gittork",
+                        "/xcode",
                         "/backups",
                         "/remoteInfo",
                         "/toLead",

@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------------------------------------------------
 DIRS=$(dirname "$PWD")
 
-APP_MAIN="io.tiklab.xcode.starter.XcodeApplication"
+APP_MAIN="io.thoughtware.gittork.starter.GitTorkApplication"
 
 JDK_VERSION=jdk-16.0.2
 if [ -d "${DIRS}/embbed/${JDK_VERSION}" ]; then
@@ -55,7 +55,7 @@ echo "APP_MAIN="$APP_MAIN
 #   程序开始
 #-------------------------------------------------------------------------------------------------------------
 
-APPLY=xcode-ce
+APPLY=gittork-ce
 
 enableApply(){
 
@@ -68,7 +68,7 @@ enableApply(){
       if [ ! -e "${applyserver}" ]; then
 cat << EOF >  ${applyserver}
 [Unit]
-Description=Start Tiklab Apply
+Description=Start thoughtware Apply
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
@@ -91,7 +91,7 @@ EOF
   else
 cat << EOF >  ${applyserver}
 [Unit]
-Description=Start Tiklab Apply
+Description=Start thoughtware Apply
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]

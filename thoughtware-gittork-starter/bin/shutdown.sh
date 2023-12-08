@@ -13,7 +13,7 @@ fi
 
 
 #APP_MAIN=${application.main.class}
-APP_MAIN="io.tiklab.xcode.starter.XcodeApplication"
+APP_MAIN="io.thoughtware.gittork.starter.GitTorkApplication"
 
 PID=0
 getPID(){

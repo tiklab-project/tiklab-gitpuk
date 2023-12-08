@@ -30,7 +30,7 @@ postgresql:
   type: local
   database: thoughtware-gittork
 
-eas:
+darth:
   embbed:
     enable: true
 
@@ -108,7 +108,7 @@ repository:
 backups:
   time: 0 0 2 * * ?
   dir: ${DATA_HOME}
-  gittork:
+  xcode:
     dir: /Users/limingliang/tiklab/thoughtware-gittork/repository
   pgsql:
     dir: /Users/limingliang/postgreSQL/bin
