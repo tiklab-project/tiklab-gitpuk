@@ -86,7 +86,7 @@ message:
     enabled: true
 
 base:
-  url: http://e.eas.tiklab.net
+  url: http://e.gittork.thoughtware.cn
 
 
 #homes

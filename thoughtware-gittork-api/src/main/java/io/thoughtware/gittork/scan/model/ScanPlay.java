@@ -63,6 +63,11 @@ public class ScanPlay implements Serializable {
     @ApiProperty(name="allReqNum",desc="总问题数量")
     private Integer allReqNum;
 
+    @ApiProperty(name="scanObject",desc="扫描对象 （git 提交的id）")
+    private String scanObject;
+
+    private String recordId;
+
     public String getId() {
         return id;
     }
@@ -157,5 +162,21 @@ public class ScanPlay implements Serializable {
 
     public void setAllReqNum(Integer allReqNum) {
         this.allReqNum = allReqNum;
+    }
+
+    public String getScanObject() {
+        return scanObject;
+    }
+
+    public void setScanObject(String scanObject) {
+        this.scanObject = scanObject;
+    }
+
+    public String getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
     }
 }

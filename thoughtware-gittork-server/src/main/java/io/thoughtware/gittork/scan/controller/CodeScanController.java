@@ -1,13 +1,11 @@
 package io.thoughtware.gittork.scan.controller;
 
-import io.thoughtware.gittork.scan.model.CodeScan;
-import io.thoughtware.gittork.scan.model.ScanIssues;
-import io.thoughtware.gittork.scan.model.ScanIssuesDetails;
-import io.thoughtware.gittork.scan.model.ScanIssuesQuery;
+import io.thoughtware.gittork.scan.model.*;
 import io.thoughtware.gittork.scan.service.CodeScanService;
 import io.thoughtware.gittork.scan.service.CodeScanSonarService;
 import io.thoughtware.core.Result;
 import io.thoughtware.core.page.Pagination;
+import io.thoughtware.gittork.scan.service.CodeScanSpotBugsService;
 import io.thoughtware.postin.annotation.Api;
 import io.thoughtware.postin.annotation.ApiMethod;
 import io.thoughtware.postin.annotation.ApiParam;
@@ -32,6 +30,9 @@ public class CodeScanController {
     @Autowired
     CodeScanSonarService codeScanSonarService;
 
+    @Autowired
+    CodeScanSpotBugsService codeScanSpotBugsService;
+
     @RequestMapping(path="/codeScanExec",method = RequestMethod.POST)
     @ApiMethod(name = "CodeScanExec",desc = "执行代码扫描")
     @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
@@ -44,8 +45,8 @@ public class CodeScanController {
     @RequestMapping(path="/findScanState",method = RequestMethod.POST)
     @ApiMethod(name = "findScanState",desc = "获取扫描状态")
     @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
-    public Result<String> findScanState( @NotNull String  scanPlayId,@NotNull String scanWay){
-        String scanResult = codeScanService.findScanState(scanPlayId,scanWay);
+    public Result<ScanRecord> findScanState(@NotNull String  scanPlayId, @NotNull String scanWay){
+        ScanRecord scanResult = codeScanService.findScanState(scanPlayId,scanWay);
 
         return Result.ok(scanResult);
     }
@@ -82,15 +83,6 @@ public class CodeScanController {
     }
 
 
-    @RequestMapping(path="/findScanIssuesBySonar",method = RequestMethod.POST)
-    @ApiMethod(name = "findScanIssuesBySonar",desc = "查询sonar执行的问题列表")
-    @ApiParam(name = "scanIssuesQuery",desc = "scanIssuesQuery",required = true)
-    public Result<Pagination<ScanIssues>> findScanIssuesBySonar(@RequestBody @Valid @NotNull ScanIssuesQuery scanIssuesQuery){
-        Pagination<ScanIssues> pagination =codeScanSonarService.findScanIssuesBySonar(scanIssuesQuery);
-
-        return Result.ok(pagination);
-    }
-
     @RequestMapping(path="/findScanIssuesDeBySonar",method = RequestMethod.POST)
     @ApiMethod(name = "findScanIssuesDeBySonar",desc = "查询sonar执行的问题详情")
     @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
@@ -105,8 +97,18 @@ public class CodeScanController {
     @ApiMethod(name = "findScanBySonar",desc = "查询")
     @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
     public Result<String> findScanBySonar( @NotNull String  scanPlayId){
-        String scanBySonar = codeScanSonarService.findScanBySonar(scanPlayId);
+        ScanRecord scanBySonar = codeScanSonarService.findScanBySonar(scanPlayId);
 
         return Result.ok(scanBySonar);
     }
+
+    @RequestMapping(path="/findLog",method = RequestMethod.POST)
+    @ApiMethod(name = "findLog",desc = "查询")
+    @ApiParam(name = "scanPlayId",desc = "scanPlayId",required = true)
+    public Result<String> findLog( @NotNull String  scanPlayId){
+        String log = codeScanSpotBugsService.findLog(scanPlayId);
+
+        return Result.ok(log);
+    }
+
 }

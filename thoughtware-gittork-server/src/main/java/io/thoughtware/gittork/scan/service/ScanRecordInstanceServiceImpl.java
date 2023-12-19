@@ -185,6 +185,9 @@ public class ScanRecordInstanceServiceImpl implements ScanRecordInstanceService 
                     //通过扫描包扫描 获取的结果实例
                     if (("rule").equals(scanScheme.getScanWay())){
                         List<String> allFile = RepositoryFileUtil.findRepositoryAllFile(git, scanPlay.getBranch());
+                        if(CollectionUtils.isNotEmpty(allFile)){
+                            continue;
+                        }
                         List<String> collect = allFile.stream().filter(a -> a.endsWith(recordInstance.getFileName())).collect(Collectors.toList());
                         if (CollectionUtils.isNotEmpty(collect)){
                             fileName = collect.get(0);
@@ -194,8 +197,6 @@ public class ScanRecordInstanceServiceImpl implements ScanRecordInstanceService 
                     Map<String, String> stringMap = mapList.get(mapList.size()-1);
                     long data = Long.parseLong(stringMap.get("date"));
                     recordInstance.setImportTime(new Timestamp(data));
-
-
                 }
             }catch (Exception e){
                 throw new ApplicationException( "获取信息失败：" + e.getMessage());

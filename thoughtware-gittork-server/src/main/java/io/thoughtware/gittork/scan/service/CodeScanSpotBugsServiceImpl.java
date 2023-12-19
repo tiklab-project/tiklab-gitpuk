@@ -4,13 +4,13 @@ import io.thoughtware.gittork.commit.model.Commit;
 import io.thoughtware.gittork.commit.model.CommitMessage;
 import io.thoughtware.gittork.commit.service.CommitServer;
 import io.thoughtware.gittork.common.GitTorkYamlDataMaService;
+import io.thoughtware.gittork.common.git.GitUntil;
 import io.thoughtware.gittork.repository.model.Repository;
 import io.thoughtware.gittork.scan.model.*;
 import io.thoughtware.core.exception.SystemException;
 import io.thoughtware.eam.common.context.LoginContext;
 import io.thoughtware.user.user.model.User;
 import io.thoughtware.gittork.common.RepositoryUtil;
-import io.thoughtware.gittork.common.git.GitUntil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -24,9 +24,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.crypto.Data;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,15 +56,39 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
     //扫描项目的所有类
     public static Map<String , List<String>> projectClassFileMap = new HashMap<>();
-    public static Map<String , String> codeScanResult = new HashMap<>();
+
+
+    //执行扫描的日志
+    public static Map<String , String> scanExecLog = new HashMap<>();
+
+    //执行扫描的状态
+    public static Map<String , ScanRecord> scanExecRecord = new HashMap<>();
+
+
+    //执行扫描执行开始时间
+    public static Map<String , Date> scanExecStarTime = new HashMap<>();
 
     @Override
     public void codeScanBySpotBugs(ScanPlay scanPlay)  {
-        codeScanResult.put(scanPlay.getId(),"start");
-        Repository repository = scanPlay.getRepository();
-        String spotbugsAddress = yamlDataMaService.spotbugsAddress();
+        ScanRecord scanRecord = new ScanRecord();
+        //执行开始时间
+        scanExecStarTime.put(scanPlay.getId(),new Date(System.currentTimeMillis()));
+        //每次执行先清空当前计划的日志
+        scanExecLog.remove(scanPlay.getId());
+        scanExecRecord.remove(scanPlay.getId());
 
+        //初始化扫描记录数据
+        initScanRecord(scanRecord,scanPlay);
+
+        //拼接日志
+         joinScanLog(scanRecord, "执行扫描任务：" + scanPlay.getPlayName(),"run");
+
+        Repository repository = scanPlay.getRepository();
+
+        //spotbugs的地址
+        String spotbugsAddress = yamlDataMaService.spotbugsAddress();
         String spotbugsPath = spotbugsAddress + "/spotbugs";
+
         try {
             //仓库原地址
             String repositoryUrl = RepositoryUtil.SystemTypeAddress(yamlDataMaService.repositoryAddress() + "/" + scanPlay.getRepository().getRpyId() + ".git");
@@ -74,9 +103,15 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
             logger.info("SpotBugs扫描->mvn 开始编译");
             Process  mvnProcess = RepositoryUtil.process(cloneUrl, "mvn clean compile");
+
+            joinScanLog(scanRecord,"开始编译项目："+scanPlay.getRepository().getName(),"run");
+            //项目编译日志
+            readFile(scanRecord,mvnProcess);
+
             int mvnWaitFor = mvnProcess.waitFor();
             logger.info("SpotBugs扫描->mvn 编译结果"+mvnWaitFor);
             if (mvnWaitFor==0){
+                joinScanLog(scanRecord,"编译成功","run");
                 //将扫描项目的所有类文件放入map
                 List<String> filePath = RepositoryUtil.getFilePath(new File(cloneUrl), new ArrayList<>());
                 List<String> stringList = filePath.stream().filter(a -> a.endsWith(".java")).collect(Collectors.toList());
@@ -95,40 +130,71 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
                 logger.info("SpotBugs扫描->spotbugsPath路径"+spotbugsPath);
                 logger.info("SpotBugs扫描->扫描结果输出路径"+scanFilePath);
+                joinScanLog(scanRecord,"开始执行仓库扫描","run");
                 Process  process = RepositoryUtil.process(spotbugsAddress, execOrder);
 
                 //读取执行的日志
-                readFile(process);
+                readFile(scanRecord,process);
 
                 int waitFor = process.waitFor();
                 if (waitFor==0){
                     logger.info("SpotBugs扫描->扫描成功");
-                    codeScanResult.put(scanPlay.getId(),"success");
+                    joinScanLog(scanRecord,"扫描成功","success");
+
+
+                    //扫描成功创建扫描记录
+                    createSpotBugRecord(scanRecord);
                     //解析扫描结果xml文件信息
-                    findScanBugs(scanPlay,scanFilePath);
+                    findScanBugs(scanPlay,scanRecord,scanFilePath);
                 }else {
                     logger.info("SpotBugs扫描-扫描失败");
-                    codeScanResult.put(scanPlay.getId(),"fail");
+
+
+                    joinScanLog(scanRecord,"扫描失败","fail");
+                    //扫描失败创建扫描记录
+                    createSpotBugRecord(scanRecord);
                 }
                // FileUtils.deleteDirectory(new File(scanFilePath.substring(0, scanFilePath.lastIndexOf("/"))));
             }else {
-                codeScanResult.put(scanPlay.getId(),"fail");
                 logger.info("SpotBugs扫描->mvn 编译扫描项目失败");
-                throw new SystemException("编译扫描项目失败");
+
+
+                joinScanLog(scanRecord,"编译失败","fail");
+
+                //编译失败创建扫描记录
+                createSpotBugRecord(scanRecord);
+
             }
             //执行完成后删除clone 的文件
             FileUtils.deleteDirectory(new File(cloneUrl));
         }catch (Exception e){
-            codeScanResult.put(scanPlay.getId(),"fail");
             logger.info("SpotBugs扫描->SpotBugs扫描失败"+e.getMessage());
+
+            joinScanLog(scanRecord,"扫描失败"+e.getMessage(),"fail");
+
+
+            //编译失败创建扫描记录
+            createSpotBugRecord(scanRecord);
+
             throw  new SystemException(600,"SpotBugs扫描失败："+e.getMessage());
         }
     }
 
     @Override
-    public String findScanBySpotBugs(String scanPlayId) {
-        return  codeScanResult.get(scanPlayId);
+    public ScanRecord findScanBySpotBugs(String scanPlayId) {
+        Date date = scanExecStarTime.get(scanPlayId);
+        //计算扫描耗时
+        String time = RepositoryUtil.time(date);
+        ScanRecord scanRecord = scanExecRecord.get(scanPlayId);
+        if (ObjectUtils.isNotEmpty(scanRecord)){
+            scanRecord.setScanTime(time);
+            scanRecord.setExecLog(scanExecLog.get(scanPlayId));
+        }
+
+        return   scanRecord;
     }
+
+
 
 
     /**
@@ -136,26 +202,8 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
      * @param xmlPath xml路径
      * @param  scanPlay 扫描计划
      */
-    public void findScanBugs(ScanPlay scanPlay,String xmlPath) throws Exception {
-        ScanRecord scanRecord = new ScanRecord();
-        //创建扫描记录
-        scanRecord.setScanPlayId(scanPlay.getId());
-        scanRecord.setRepositoryId(scanPlay.getRepository().getRpyId());
-        User user = new User();
-        user.setId(LoginContext.getLoginId());
-        scanRecord.setScanUser(user);
-        scanRecord.setScanResult("success");
-        scanRecord.setScanWay("hand");
+    public void findScanBugs(ScanPlay scanPlay,ScanRecord scanRecord,String xmlPath) throws Exception {
 
-        Commit commit = new Commit();
-        commit.setRpyId(scanPlay.getRepository().getRpyId());
-        commit.setBranch(scanPlay.getBranch());
-        CommitMessage branchCommit = commitServer.findLatelyBranchCommit(commit);
-        scanRecord.setScanObject(branchCommit.getCommitId());
-
-        String scanRecordId = scanRecordService.createScanRecord(scanRecord);
-        scanRecord.setId(scanRecordId);
-        logger.info("SpotBugs扫描->创建扫描记录成功");
         try {
             // 读取XML文件
             File xmlFile = new File(xmlPath);
@@ -231,7 +279,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                         String substring = filePath.substring(fileIndex);
                         recordInstance.setFilePath(substring);
 
-                        recordInstance.setScanRecordId(scanRecordId);  //扫描记录id
+                        recordInstance.setScanRecordId(scanRecord.getId());  //扫描记录id
                         recordInstance.setScanPlayId(scanPlay.getId());   //扫描计划id
                         recordInstance.setFileName(sourceLineMap.get("fileName"));  //class 名称
                         String problemLine = sourceLineMap.get("problemLine");
@@ -358,19 +406,29 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
     /**
      *  执行日志
      *  @param process:process
+     * @param  scanRecord 扫描计划的id
      */
-    public void  readFile(Process process) throws IOException {
+    public void  readFile(ScanRecord scanRecord,Process process) throws IOException {
 
         // 获取命令行输出
         InputStream inputStream = process.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
 
-        // 读取命令行输出
-        StringBuilder excOutput = new StringBuilder();
+        // mvn 编译日志
         while ((line = reader.readLine()) != null) {
             logger.info("执行命令日志:"+line);
-            excOutput.append(line);
+            joinScanLog(scanRecord,line,"in");
+
+        }
+
+        //spotBugs日志
+        InputStream errorStream = process.getErrorStream();
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+        String errorLine;
+        while ((errorLine = errorReader.readLine()) != null) {
+            logger.info("执行命令日志02:"+errorLine);
+            joinScanLog(scanRecord,errorLine,"in");
         }
 
     }
@@ -443,5 +501,137 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
         }catch (Exception e){
             throw new SystemException("解析Xml文件失败，path:"+xmlPath+" ，message："+e.getMessage());
         }
+    }
+
+    /**
+     *  初始化扫描结果数据
+     *  @param scanPlay 扫描计划
+     * @param scanRecord scanRecord
+     */
+    public void initScanRecord(ScanRecord scanRecord,ScanPlay scanPlay ) {
+
+        scanRecord.setRepositoryId(scanPlay.getRepository().getRpyId());
+        scanRecord.setScanPlayId(scanPlay.getId());
+        User user = new User();
+        user.setId(LoginContext.getLoginId());
+
+        scanRecord.setScanUser(user);
+        scanRecord.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        scanRecord.setScanResult("run");
+        scanRecord.setScanWay("hand");
+        //扫描对象
+        Commit commit = new Commit();
+        commit.setRpyId(scanPlay.getRepository().getRpyId());
+        commit.setBranch(scanPlay.getBranch());
+        CommitMessage branchCommit = commitServer.findLatelyBranchCommit(commit);
+        scanRecord.setScanObject(branchCommit.getCommitId());
+
+        scanExecRecord.put(scanPlay.getId(),scanRecord);
+    }
+
+    /**
+     *  拼接扫描日志
+     * @param  scanRecord 扫描记录
+     * @param  execState  执行状态
+     *  @param log 日志
+     */
+    public void joinScanLog(ScanRecord scanRecord,String log,String execState){
+        String scanPlayId = scanRecord.getScanPlayId();
+        LocalDateTime now = LocalDateTime.now();
+        // 自定义时间格式
+        DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String customDateTime = now.format(customFormatter);
+        //拼接的日志
+        String resultLog = "["+customDateTime + "] " + log;
+        String logs = scanExecLog.get(scanPlayId);
+        if (StringUtils.isEmpty(logs)){
+            scanExecLog.put(scanPlayId,resultLog);
+        }else {
+            scanExecLog.put(scanPlayId,logs+"\n"+resultLog);
+        }
+        initRecordLog(scanRecord,execState);
+    }
+
+    /**
+     *  初始化扫描结果的日志
+     * @param  scanRecord 扫描记录
+     * @param  execState  执行状态
+     */
+    public void initRecordLog(ScanRecord scanRecord,String execState){
+        scanRecord.setScanResult(execState);
+        scanExecRecord.put(scanRecord.getScanPlayId(),scanRecord);
+
+    }
+
+
+
+    /**
+     *  创建扫描结果
+     * @param  scanRecord 扫描记录
+     */
+    public void createSpotBugRecord(ScanRecord scanRecord){
+        //计算扫描耗时
+        String time = RepositoryUtil.time(new Date(scanRecord.getCreateTime().getTime()));
+        scanRecord.setScanTime(time);
+        scanRecord.setExecLog( scanExecLog.get(scanRecord.getScanPlayId()));
+
+        String scanRecordId = scanRecordService.createScanRecord(scanRecord);
+        scanRecord.setId(scanRecordId);
+    }
+
+
+
+    @Override
+    public String findLog(String playId) {
+            try {
+                // 读取XML文件
+                File xmlFile = new File("/Users/limingliang/tiklab/thoughtware-gittork/scan/170263048/thoughtware-gittork.xml");
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(xmlFile);
+
+                // 可选：根据需要对Document进行额外的配置
+                doc.getDocumentElement().normalize();
+
+                // 获取根元素
+                Element rootElement = doc.getDocumentElement();
+
+                // 获取BugInstance元素的列表
+                NodeList bugInstanceList = rootElement.getElementsByTagName("BugInstance");
+
+                //解析BugPattern节点获取扫描问题的概述和详细
+                Map<String, Map<String, String>> analysisBugPattern = analysisBugPattern(rootElement);
+                logger.info("SpotBugs扫描->解析xml");
+                //扫描方案中的规则
+                List<ScanSchemeRule> schemeRuleList = schemeRuleService.findScanSchemeRuleList(new ScanSchemeRuleQuery().setScanSchemeId("6edce30db979"));
+                List<ScanSchemeRule> scanSchemeRules = schemeRuleList.stream().filter(a -> a.getIsDisable() == 0&&
+                        ("SpotBugs").equals(a.getScanRule().getScanTool())).collect(Collectors.toList());
+                logger.info("SpotBugs扫描->查询schemeRuleList"+schemeRuleList);
+                logger.info("SpotBugs扫描->查询scanSchemeRules"+scanSchemeRules);
+                if (CollectionUtils.isNotEmpty(scanSchemeRules)) {
+                    int severityNum = 0;
+                    int noticeNum = 0;
+                    int suggestNum = 0;
+                    logger.info("SpotBugs扫描->进入解析xml");
+                    // 遍历BugInstance元素列表
+                    for (int i = 0; i < bugInstanceList.getLength(); i++) {
+                        //扫描记录实例
+                        ScanRecordInstance recordInstance = new ScanRecordInstance();
+                        Node bugInstanceNode = bugInstanceList.item(i);
+                        if (bugInstanceNode.getNodeType() == Node.ELEMENT_NODE) {
+                            Element bugInstanceElement = (Element) bugInstanceNode;
+
+
+                            // 解析SourceLine
+                            Map<String, String> sourceLineMap = analysisSourceLine(bugInstanceElement, "33b00791f33d");
+                            System.out.println("");
+                        }
+                    }
+                }
+            }catch (Exception e){
+                System.out.println("123"+e.getMessage());
+            }
+
+        return null;
     }
 }

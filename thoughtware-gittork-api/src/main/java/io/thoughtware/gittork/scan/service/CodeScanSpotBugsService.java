@@ -2,6 +2,7 @@ package io.thoughtware.gittork.scan.service;
 
 import io.thoughtware.gittork.scan.model.ScanPlay;
 import io.thoughtware.core.exception.ApplicationException;
+import io.thoughtware.gittork.scan.model.ScanRecord;
 
 /*
 * spotBugs扫描 service
@@ -20,5 +21,7 @@ public interface CodeScanSpotBugsService {
      * 查询扫描的问题
      * @param scanPlayId 扫描计划Id
      */
-    String findScanBySpotBugs( String scanPlayId) ;
+    ScanRecord findScanBySpotBugs(String scanPlayId) ;
+
+    String findLog(String playId);
 }

@@ -47,6 +47,9 @@ public class RecordCommit {
     @ApiProperty(name="commitMsg",desc="提交信息")
     private String commitMsg;
 
+    @ApiProperty(name="commitId",desc="git提交的id")
+    private String commitId;
+
     public String getId() {
         return id;
     }
@@ -110,6 +113,14 @@ public class RecordCommit {
 
     public void setCommitMsg(String commitMsg) {
         this.commitMsg = commitMsg;
+    }
+
+    public String getCommitId() {
+        return commitId;
+    }
+
+    public void setCommitId(String commitId) {
+        this.commitId = commitId;
     }
 }
 

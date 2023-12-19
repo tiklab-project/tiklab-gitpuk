@@ -79,6 +79,7 @@ public class GatewayFilterAutoConfiguration {
                         "/gui",
 
 
+
                 })
                 .ignorePreUrls(new String[]{
                         "/service",
@@ -99,16 +100,17 @@ public class GatewayFilterAutoConfiguration {
                         "/tag",
                         "/codeScan",
                         "/branch",
+                        "/message"
                 })
                 .get();
     }
 
 
     //路由转发配置
-    @Value("${eas.address:null}")
+    @Value("${darth.address:null}")
     String authAddress;
 
-    @Value("${eas.embbed.enable:false}")
+    @Value("${darth.embbed.enable:false}")
     Boolean enableEam;
 
     //gateway路由配置

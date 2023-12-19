@@ -30,6 +30,13 @@ public class ScanRecordEntity {
     @Column(name = "scan_way")
     private String scanWay;
 
+    @Column(name = "log")
+    private String execLog;
+
+    @Column(name = "scan_time")
+    private String scanTime;
+
+
     @Column(name = "all_trouble")
     private Integer allTrouble;
 
@@ -151,5 +158,21 @@ public class ScanRecordEntity {
 
     public void setAllTrouble(Integer allTrouble) {
         this.allTrouble = allTrouble;
+    }
+
+    public String getExecLog() {
+        return execLog;
+    }
+
+    public void setExecLog(String execLog) {
+        this.execLog = execLog;
+    }
+
+    public String getScanTime() {
+        return scanTime;
+    }
+
+    public void setScanTime(String scanTime) {
+        this.scanTime = scanTime;
     }
 }

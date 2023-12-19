@@ -28,7 +28,27 @@ create table rpy_scan_record(
         suggest_trouble         integer,
         create_time  timestamp
 );
-
+-- ---------------------------
+-- 扫描记录的明细
+-- ----------------------------
+create table rpy_scan_record_instance(
+         id                 varchar(12) PRIMARY KEY,
+         scan_record_id     varchar(12) NOT NULL,
+         scan_play_id       varchar(12),
+         file_name          varchar(248),
+         file_path           varchar(248),
+         problem_level      integer,
+         problem_line       integer,
+         rule_name          varchar(64),
+         repair_overview    varchar(524),
+         repair_desc   text,
+         problem_overview   varchar(524),
+         problem_desc       text,
+         problem_state      varchar(12),
+         import_user        varchar(32),
+         import_time        timestamp,
+         create_time        timestamp
+);
 -- ---------------------------
 -- 扫描问题列表
 -- ----------------------------
@@ -116,27 +136,7 @@ create table rpy_scan_scheme_rule(
      is_disable       integer,
      create_time  timestamp
 );
--- ---------------------------
--- 扫描记录的明细
--- ----------------------------
-create table rpy_scan_record_instance(
-         id                 varchar(12) PRIMARY KEY,
-         scan_record_id     varchar(12) NOT NULL,
-         scan_play_id       varchar(12),
-         file_name          varchar(248),
-         file_path           varchar(248),
-         problem_level      integer,
-         problem_line       integer,
-         rule_name          varchar(64),
-         repair_overview    varchar(524),
-         repair_desc   text,
-         problem_overview   varchar(524),
-         problem_desc       text,
-         problem_state      varchar(12),
-         import_user        varchar(32),
-         import_time        timestamp,
-         create_time        timestamp
-);
+
 
 
 

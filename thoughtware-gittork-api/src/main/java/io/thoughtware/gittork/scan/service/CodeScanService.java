@@ -2,6 +2,7 @@ package io.thoughtware.gittork.scan.service;
 
 import io.thoughtware.gittork.scan.model.CodeScan;
 import io.thoughtware.core.exception.ApplicationException;
+import io.thoughtware.gittork.scan.model.ScanRecord;
 
 public interface CodeScanService {
 
@@ -30,7 +31,7 @@ public interface CodeScanService {
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败
      */
-    String findScanState(String scanPlayId,String scanWay);
+    ScanRecord findScanState(String scanPlayId, String scanWay);
 
     /**
      * 创建扫描方案

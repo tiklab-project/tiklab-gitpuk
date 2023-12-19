@@ -1,8 +1,11 @@
 package io.thoughtware.gittork.repository.service;
 
 
+import io.thoughtware.gittork.common.GitTorkFinal;
+import io.thoughtware.gittork.common.GitTorkMessageService;
 import io.thoughtware.gittork.common.RepositoryUtil;
 import io.thoughtware.gittork.repository.dao.RepositoryGroupDao;
+import io.thoughtware.gittork.repository.entity.RepositoryEntity;
 import io.thoughtware.gittork.repository.entity.RepositoryGroupEntity;
 import io.thoughtware.gittork.repository.model.Repository;
 import io.thoughtware.gittork.repository.model.RepositoryGroup;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -48,6 +52,10 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
 
     @Autowired
     private RepositoryServer repositoryServer;
+
+    @Autowired
+    GitTorkMessageService gitTorkMessageService;
+
     /**
      * 创建仓库组
      * @param repositoryGroup 信息
@@ -63,6 +71,9 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
         String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
         dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), "gittork");
+
+        //发送消息
+        initRepositoryMap(groupEntity,"create",null);
         return codeGroupId;
     }
 
@@ -72,7 +83,11 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
      */
     @Override
     public void deleteCodeGroup(String codeGroupId) {
+        RepositoryGroupEntity repositoryGroup = repositoryGroupDao.findRepositoryGroup(codeGroupId);
         repositoryGroupDao.deleteCodeGroup(codeGroupId);
+
+        //发送消息
+        initRepositoryMap(repositoryGroup,"delete",null);
     }
 
     /**
@@ -81,6 +96,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
      */
     @Override
     public void updateCodeGroup(RepositoryGroup repositoryGroup) {
+        RepositoryGroupEntity group = repositoryGroupDao.findRepositoryGroup(repositoryGroup.getGroupId());
         RepositoryGroupEntity groupEntity = BeanMapper.map(repositoryGroup, RepositoryGroupEntity.class);
 
 
@@ -104,6 +120,10 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         thread.start();
         repositoryGroupDao.updateCodeGroup(groupEntity);
 
+        //发送消息
+        if (!group.getName().equals(repositoryGroup.getName())){
+            initRepositoryMap(group,"update",repositoryGroup.getName());
+        }
     }
 
     /**
@@ -210,6 +230,43 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         List<RepositoryGroupEntity> allGroupEntity = repositoryGroupDao.findCanCreateRpyGroup(userId);
         List<RepositoryGroup>  repositoryGroups = BeanMapper.mapList(allGroupEntity, RepositoryGroup.class);
         return repositoryGroups;
+    }
+
+
+    /**
+     *操作仓库组发送消息
+     * @param oldGroupRepository 操作的仓库组
+     * @param type  操作类型
+     * @param  updateName 更新名字
+     */
+    public void initRepositoryMap(RepositoryGroupEntity oldGroupRepository, String type, String updateName){
+
+        HashMap<String, Object> map = gitTorkMessageService.initMap();
+
+        map.put("groupId",oldGroupRepository.getGroupId());
+        map.put("action",oldGroupRepository.getName());
+        if (("delete").equals(type)){
+            map.put("message", "删除了仓库组"+oldGroupRepository.getName());
+            map.put("link", GitTorkFinal.GROUP_RPY_DELETE);
+            gitTorkMessageService.settingMessage(map,GitTorkFinal.LOG_TYPE_GROUP_DELETE);
+            gitTorkMessageService.settingLog(map,GitTorkFinal.LOG_TYPE_GROUP_DELETE,"repositoryGroup");
+        }
+
+        if (("update").equals(type)){
+            map.put("message", oldGroupRepository.getName()+"更改为"+updateName);
+            map.put("link",GitTorkFinal.GROUP_RPY_UPDATE);
+            map.put("groupName",oldGroupRepository.getName());
+            gitTorkMessageService.settingMessage(map,GitTorkFinal.LOG_TYPE_GROUP_UPDATE);
+            gitTorkMessageService.settingLog(map,GitTorkFinal.LOG_TYPE_GROUP_UPDATE,"repositoryGroup");
+        }
+
+        if (("create").equals(type)){
+            map.put("message", "创建了仓库组"+oldGroupRepository.getName());
+            map.put("link",GitTorkFinal.GROUP_RPY_CREATE);
+            map.put("groupName",oldGroupRepository.getName());
+            gitTorkMessageService.settingMessage(map,GitTorkFinal.LOG_TYPE_GROUP_CREATE);
+            gitTorkMessageService.settingLog(map,GitTorkFinal.LOG_TYPE_GROUP_CREATE,"repositoryGroup");
+        }
     }
 
 }

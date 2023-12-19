@@ -43,6 +43,10 @@ public class ScanRecord implements Serializable {
     @ApiProperty(name="scanWay",desc="扫描方式 hand：手动")
     private String scanWay;
 
+    @ApiProperty(name="scanTime",desc="扫描耗时")
+    private String scanTime;
+
+
     @ApiProperty(name="allTrouble",desc="所有问题数量")
     private Integer allTrouble;
 
@@ -61,6 +65,10 @@ public class ScanRecord implements Serializable {
     @ApiProperty(name="createTime",desc="创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
     private Timestamp createTime;
+
+    @ApiProperty(name="execLog",desc="日志")
+    private String execLog;
+
 
 
     public String getId() {
@@ -166,4 +174,22 @@ public class ScanRecord implements Serializable {
     public void setAllTrouble(Integer allTrouble) {
         this.allTrouble = allTrouble;
     }
+
+
+    public String getScanTime() {
+        return scanTime;
+    }
+
+    public void setScanTime(String scanTime) {
+        this.scanTime = scanTime;
+    }
+
+    public String getExecLog() {
+        return execLog;
+    }
+
+    public void setExecLog(String execLog) {
+        this.execLog = execLog;
+    }
+
 }

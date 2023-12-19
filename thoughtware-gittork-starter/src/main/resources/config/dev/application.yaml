@@ -86,7 +86,7 @@ message:
 #    address: http://192.168.10.14:3003
 
 base:
-  url: http://eas-ce.dev.tiklab.net
+  url: http://192.168.10.17:8090
 
 
 

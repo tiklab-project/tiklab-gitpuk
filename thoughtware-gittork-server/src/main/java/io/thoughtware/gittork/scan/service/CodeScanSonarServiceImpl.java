@@ -15,6 +15,7 @@ import io.thoughtware.gittork.common.RepositoryUtil;
 import io.thoughtware.gittork.common.git.GitUntil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -56,21 +59,45 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
 
     public static Map<String , String> codeScanResult = new HashMap<>();
 
-    public static Map<String , CodeScanInstance> codeScanLog = new HashMap<>();
+    //执行扫描的日志
+    public static Map<String , String> scanExecLog = new HashMap<>();
+
+    //执行扫描的状态
+    public static Map<String , ScanRecord> scanExecRecord = new HashMap<>();
+
+
+    //执行扫描执行开始时间
+    public static Map<String , java.sql.Date> scanExecStarTime = new HashMap<>();
 
     @Override
-    public void codeScanBySonar(String scanPlayId) {
+    public void codeScanBySonar(ScanPlay scanPlay) {
+        ScanRecord scanRecord = new ScanRecord();
+        String scanPlayId = scanPlay.getId();
         logger.info("sonar扫描->开始执行");
         codeScanResult.put(scanPlayId,"start");
-        ScanPlay scanPlay = scanPlayService.findScanPlay(scanPlayId);
+        //每次执行先清空当前计划的日志
+        scanExecLog.remove(scanPlay.getId());
+        scanExecRecord.remove(scanPlayId);
+        //执行开始时间
+        scanExecStarTime.put(scanPlay.getId(),new java.sql.Date(System.currentTimeMillis()));
+        //初始化扫描结果数据
+        initScanRecord(scanRecord,scanPlay);
+
+        //拼接日志
+        joinScanLog(scanRecord, "执行扫描任务：" + scanPlay.getPlayName());
+
+
         try {
             List<ScanSchemeSonar> schemeSonarList = schemeSonarService.findScanSchemeSonarList(new ScanSchemeSonarQuery().setScanSchemeId(scanPlay.getScanScheme().getId()));
             ScanSchemeSonar scanSchemeSonar = schemeSonarList.get(0);
             DeployEnv deployEnv = scanSchemeSonar.getDeployEnv();
             DeployServer deployServer = scanSchemeSonar.getDeployServer();
             if (ObjectUtils.isEmpty(deployServer)){
-                throw  new SystemException(600,"sonar没有配置");
+                joinScanLog(scanRecord, "没有配置sonar环境");
+                scanRecord(scanRecord,scanPlay.getRepository().getName(),"fail");
             }
+
+            joinScanLog(scanRecord, "获取sonar环境");
 
             String execOrder =  "mvn clean verify sonar:sonar ";
 
@@ -101,17 +128,20 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
             if (file.exists()){
                 FileUtils.deleteDirectory(new File(cloneRepositoryUrl));
             }
+            joinScanLog(scanRecord, "开始执行sonar扫描");
             GitUntil.cloneRepository(repositoryUrl, scanPlay.getBranch(), cloneRepositoryUrl);
             logger.info("sonar扫描->推送sonar");
             Process  process = RepositoryUtil.process(deployEnv.getEnvAddress(), order);
             //读取执行日志
-            readFile(process);
+            readFile(scanRecord,process);
             int waitFor = process.waitFor();
             if (waitFor==0){
-                scanRecord(scanPlay,"success");
+                joinScanLog(scanRecord, "扫描成功");
+                scanRecord(scanRecord,scanPlay.getRepository().getName(),"success");
                 codeScanResult.put(scanPlayId,"success");
             }else {
-                scanRecord(scanPlay,"fail");
+                joinScanLog(scanRecord, "扫描失败");
+                scanRecord(scanRecord,scanPlay.getRepository().getName(),"fail");
                 codeScanResult.put(scanPlayId,"fail");
             }
             //执行完成后删除clone 的文件
@@ -119,46 +149,49 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
 
         }catch (Exception e){
             logger.info("使用sonar扫描错误日志:"+e.getMessage());
-            scanRecord(scanPlay,"fail");
+
+            joinScanLog(scanRecord, "使用sonar扫描错误"+e.getMessage());
+            scanRecord(scanRecord,scanPlay.getRepository().getName(),"fail");
             codeScanResult.put(scanPlayId,"fail");
         }
     }
 
     @Override
-    public String findScanBySonar(String scanPlayId) {
-        String result = codeScanResult.get(scanPlayId);
+    public ScanRecord findScanBySonar(String scanPlayId) {
+        java.sql.Date date = scanExecStarTime.get(scanPlayId);
+        //计算扫描耗时
+        String time = RepositoryUtil.time(date);
+        ScanRecord scanRecord = scanExecRecord.get(scanPlayId);
+        if (org.apache.commons.lang3.ObjectUtils.isNotEmpty(scanRecord)){
+            scanRecord.setScanTime(time);
+            scanRecord.setExecLog(scanExecLog.get(scanPlayId));
+        }
 
-        return result;
+        return   scanRecord;
     }
 
 
     /**
      *  创建扫描记录
-     *  @param scanPlay:扫描计划
+     *  @param scanRecord
      * @param  state 执行结果状态
      */
-    public void scanRecord(ScanPlay scanPlay,String state) {
-        ScanRecord scanRecord = new ScanRecord();
-
-        Commit commit = new Commit();
-        commit.setRpyId(scanPlay.getRepository().getRpyId());
-        commit.setBranch(scanPlay.getBranch());
-        CommitMessage branchCommit = commitServer.findLatelyBranchCommit(commit);
-        scanRecord.setScanObject(branchCommit.getCommitId());
+    public void scanRecord(ScanRecord scanRecord,String repositoryName,String state) {
+        scanRecord.setScanResult(state);
+        scanExecRecord.put(scanRecord.getScanPlayId(),scanRecord);
         try {
             if (("fail").equals(state)){
-                scanRecord.setRepositoryId(scanPlay.getRepository().getRpyId());
-                scanRecord.setScanPlayId(scanPlay.getId());
+                scanRecord.setRepositoryId(scanRecord.getRepositoryId());
+                scanRecord.setScanPlayId(scanRecord.getScanPlayId());
 
                 User user = new User();
                 user.setId(LoginContext.getLoginId());
                 scanRecord.setScanUser(user);
                 scanRecord.setScanWay("hand");
-                scanRecord.setScanResult("fail");
             }else {
                 List<DeployServer> deployServerList = deployServerService.findDeployServerList(new DeployServerQuery().setServerName("sonar"));
                 DeployServer deployServer = deployServerList.get(0);
-                String findRepositoryUrl=deployServer.getServerAddress()+"/api/projects/search?projects="+scanPlay.getRepository().getName();
+                String findRepositoryUrl=deployServer.getServerAddress()+"/api/projects/search?projects="+repositoryName;
                 JSONObject findResultBody = restTemplate(findRepositoryUrl, deployServer);
                 Object components = findResultBody.get("components");
                 List<Object> resultList = new ArrayList<>();
@@ -205,7 +238,7 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
                     scanRecord.setAllTrouble(allTrouble);
                 }
                 //查询项目扫描状态
-                String stateUrl=deployServer.getServerAddress()+"/api/qualitygates/project_status?projectKey="+scanPlay.getRepository().getName();
+                String stateUrl=deployServer.getServerAddress()+"/api/qualitygates/project_status?projectKey="+repositoryName;
                 JSONObject statResultBody = restTemplate(stateUrl, deployServer);
                 LinkedHashMap projectStatus = (LinkedHashMap) statResultBody.get("projectStatus");
                 String status = projectStatus.get("status").toString();
@@ -229,8 +262,8 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
                         scanRecord.setSuggestTrouble(Integer.valueOf(jsonObject.get("value").toString()));
                     }
                 }*/
-                scanRecord.setRepositoryId(scanPlay.getRepository().getRpyId());
-                scanRecord.setScanPlayId(scanPlay.getId());
+                scanRecord.setRepositoryId(scanRecord.getRepositoryId());
+                scanRecord.setScanPlayId(scanRecord.getScanPlayId());
                 User user = new User();
                 user.setId(LoginContext.getLoginId());
                 scanRecord.setScanUser(user);
@@ -243,62 +276,6 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
         }
     }
 
-
-    /**
-     *  创建扫描问题列表
-     *  @param scanIssuesQuery:扫描计划
-     */
-    public Pagination<ScanIssues> findScanIssuesBySonar(ScanIssuesQuery scanIssuesQuery){
-        Pagination<ScanIssues> objectPagination = new Pagination<>();
-        List<ScanIssues> resultList = new ArrayList<>();
-
-        ScanPlay scanPlay = scanPlayService.findScanPlay(scanIssuesQuery.getScanPlayId());
-        try {
-            List<DeployServer> deployServerList = deployServerService.findDeployServerList(new DeployServerQuery().setServerName("sonar"));
-            DeployServer deployServer = deployServerList.get(0);
-            String findRepositoryUrl=deployServer.getServerAddress()+"/api/projects/search?projects="+scanPlay.getRepository().getName();
-            JSONObject findResultBody = restTemplate(findRepositoryUrl, deployServer);
-            Object components = findResultBody.get("components");
-            List<Object> list = new ArrayList<>();
-            for (Object o : (List<Object>) components){
-                list.add(o);
-            }
-            LinkedHashMap hashMap = (LinkedHashMap) list.get(0);
-            String key = hashMap.get("key").toString();
-
-            Integer pageSize = scanIssuesQuery.getPageParam().getPageSize();
-            Integer currentPage = scanIssuesQuery.getPageParam().getCurrentPage();
-
-            String findReList=deployServer.getServerAddress()+ "/api/issues/search?componentKeys="+key+"&severities=INFO,MINOR,MAJOR,CRITICAL,BLOCKER&p="+currentPage+"&ps="+pageSize;
-            JSONObject statResultBody = restTemplate(findReList, deployServer);
-            //问题总条数
-            Integer allTotal =Integer.valueOf(statResultBody.get("total").toString()) ;
-
-            List<Objects> objectsList = (List<Objects>) statResultBody.get("issues");
-            for (Object object:objectsList){
-                ScanIssues scanIssues = new ScanIssues();
-                HashMap value = (HashMap) object;
-                scanIssues.setIssuesMessage(value.get("message").toString());
-                scanIssues.setIssuesSeverity(value.get("severity").toString());
-                scanIssues.setFileName(value.get("component").toString());
-                scanIssues.setRuleName(value.get("rule").toString());
-                scanIssues.setLeadInTime(value.get("creationDate").toString());
-                scanIssues.setIssuesLine(Integer.valueOf(value.get("line").toString()));
-                scanIssues.setScanIssuesKey(value.get("key").toString());
-                resultList.add(scanIssues);
-            }
-            objectPagination.setTotalRecord(allTotal);
-            Integer size = scanIssuesQuery.getPageParam().getPageSize();
-            int ceil =(int) Math.ceil((double) allTotal / size);
-            objectPagination.setTotalPage(ceil);
-            objectPagination.setCurrentPage(scanIssuesQuery.getPageParam().getCurrentPage());
-        }catch (Exception e){
-            throw new SystemException(e.getMessage());
-        }
-        objectPagination.setDataList(resultList);
-        return objectPagination;
-
-    }
 
     @Override
     public Pagination<ScanRecordInstance> findScanIssuesBySonar(ScanRecordInstanceQuery scanRecordInstanceQuery) {
@@ -427,6 +404,26 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
         return resultBody;
     }
 
+    /**
+     *  拼接扫描日志
+     * @param  scanRecord 扫描记录
+     *  @param log 日志
+     */
+    public void joinScanLog(ScanRecord scanRecord,String log ){
+        String scanPlayId = scanRecord.getScanPlayId();
+        LocalDateTime now = LocalDateTime.now();
+        // 自定义时间格式
+        DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String customDateTime = now.format(customFormatter);
+        //拼接的日志
+        String resultLog = "["+customDateTime + "] " + log;
+        String logs = scanExecLog.get(scanPlayId);
+        if (StringUtils.isEmpty(logs)){
+            scanExecLog.put(scanPlayId,resultLog);
+        }else {
+            scanExecLog.put(scanPlayId,logs+"\n"+resultLog);
+        }
+    }
 
 
 
@@ -434,7 +431,7 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
      *  restTemplate 调用
      *  @param process:process
      */
-    public void  readFile(Process process){
+    public void  readFile(ScanRecord scanRecord,Process process){
       //  CodeScanInstance instance = codeScanLog.get(repositoryId);
         try {
             // 获取命令行输出
@@ -446,10 +443,37 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
             StringBuilder excOutput = new StringBuilder();
             while ((line = reader.readLine()) != null) {
                 logger.info("执行命令日志:"+line);
+                joinScanLog(scanRecord, line);
                 excOutput.append(line);
             }
         }catch (Exception e){
             throw new ApplicationException(e.getMessage());
         }
+    }
+
+    /**
+     *  初始化扫描结果数据
+     *  @param scanPlay 扫描计划
+     * @param scanRecord scanRecord
+     */
+    public void initScanRecord(ScanRecord scanRecord,ScanPlay scanPlay ) {
+
+        scanRecord.setRepositoryId(scanPlay.getRepository().getRpyId());
+        scanRecord.setScanPlayId(scanPlay.getId());
+        User user = new User();
+        user.setId(LoginContext.getLoginId());
+
+        scanRecord.setScanUser(user);
+        scanRecord.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        scanRecord.setScanResult("run");
+        scanRecord.setScanWay("hand");
+        //扫描对象
+        Commit commit = new Commit();
+        commit.setRpyId(scanPlay.getRepository().getRpyId());
+        commit.setBranch(scanPlay.getBranch());
+        CommitMessage branchCommit = commitServer.findLatelyBranchCommit(commit);
+        scanRecord.setScanObject(branchCommit.getCommitId());
+
+        scanExecRecord.put(scanPlay.getId(),scanRecord);
     }
 }

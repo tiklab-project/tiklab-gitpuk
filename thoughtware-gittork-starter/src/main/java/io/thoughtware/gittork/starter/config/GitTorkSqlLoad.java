@@ -35,6 +35,19 @@ public class GitTorkSqlLoad {
 
         dsmConfig.newVersion("1.0.1", new String[]{
                 "xcode_1.0.1",
+                "oplog_1.0.1",
+                "message_1.0.1",
+                "todotask_1.0.1",
+                "xdprivilege_1.0.1",
+
+        });
+        dsmConfig.newVersion("1.0.2", new String[]{
+                "xcode_1.0.2",
+                "message_1.0.2",
+                "oplog_1.0.2"
+        });
+        dsmConfig.newVersion("1.0.3", new String[]{
+                "message_1.0.3"
         });
         return dsmConfig;
     }

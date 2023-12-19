@@ -12,6 +12,7 @@ import io.thoughtware.join.JoinTemplate;
 import io.thoughtware.gittork.scan.dao.CodeScanDao;
 import io.thoughtware.gittork.scan.entity.CodeScanEntity;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,12 @@ public class CodeScanServiceImpl implements CodeScanService {
 
     @Override
     public String codeScanExec(String scanPlayId) {
+   /*     String state = codeScanState.get(scanPlayId);
+        //扫描状态不为空且正在执行中
+        if (StringUtils.isNotEmpty(state)&&("true").equals(state)){
+            throw new SystemException(918,"该扫描计划正在执行中");
+        }*/
+
         ScanPlay scanPlay = scanPlayService.findScanPlay(scanPlayId);
         //扫描计划中的扫描方案
         ScanScheme scanScheme = scanPlay.getScanScheme();
@@ -83,6 +90,7 @@ public class CodeScanServiceImpl implements CodeScanService {
         executorService.submit(new Runnable(){
             @Override
             public void run() {
+                codeScanState.put(scanPlayId,"true");
                 if (("rule").equals(scanScheme.getScanWay())){
                     //查询出规则集
                     List<ScanSchemeRuleSet> schemeRuleList = scanSchemeRuleSetService.findScanSchemeRuleSetList(new ScanSchemeRuleSetQuery().setScanSchemeId(scanScheme.getId()));
@@ -94,14 +102,14 @@ public class CodeScanServiceImpl implements CodeScanService {
                 }
                 //通过sonar扫描
                 if (("sonar").equals(scanScheme.getScanWay())){
-                     scanSonarService.codeScanBySonar(scanPlayId);
+                     scanSonarService.codeScanBySonar(scanPlay);
                 }
             }});
         return "ok";
     }
 
     @Override
-    public String findScanState(String scanPlayId,String scanWay) {
+    public ScanRecord findScanState(String scanPlayId,String scanWay) {
         if (("sonar").equals(scanWay)){
             return scanSonarService.findScanBySonar(scanPlayId);
         }else {

@@ -2,9 +2,7 @@ package io.thoughtware.gittork.repository.service;
 
 import io.thoughtware.gittork.authority.ValidUsrPwdServer;
 import io.thoughtware.gittork.branch.model.Branch;
-import io.thoughtware.gittork.common.RepositoryFileUtil;
-import io.thoughtware.gittork.common.RepositoryUtil;
-import io.thoughtware.gittork.common.GitTorkYamlDataMaService;
+import io.thoughtware.gittork.common.*;
 import io.thoughtware.gittork.common.git.GitBranchUntil;
 import io.thoughtware.gittork.common.git.GitUntil;
 import io.thoughtware.gittork.file.model.FileTree;
@@ -29,6 +27,7 @@ import io.thoughtware.privilege.dmRole.model.DmRoleUserQuery;
 import io.thoughtware.privilege.dmRole.service.DmRoleService;
 import io.thoughtware.privilege.dmRole.service.DmRoleUserService;
 import io.thoughtware.rpc.annotation.Exporter;
+import io.thoughtware.security.logging.model.Logging;
 import io.thoughtware.user.dmUser.model.DmUser;
 import io.thoughtware.user.dmUser.model.DmUserQuery;
 import io.thoughtware.user.dmUser.service.DmUserService;
@@ -100,6 +99,9 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     ScanPlayService scanPlayService;
 
+    @Autowired
+    GitTorkMessageService gitTorkMessageService;
+
     /**
      * 创建仓库
      * @param repository 信息
@@ -120,10 +122,10 @@ public class RepositoryServerImpl implements RepositoryServer {
             String ignoreFilePath = appHome+"/file/.gitignore";
             String mdFilePath =appHome+"file/README.md";
             logger.info("创建仓库ignoreFilePath:"+ignoreFilePath);
-
             GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
 
             return repositoryId;
+
         } else {
             throw  new ApplicationException(4006,"内存不足");
         }
@@ -143,13 +145,15 @@ public class RepositoryServerImpl implements RepositoryServer {
         String repositoryId = repositoryDao.createRpy(groupEntity);
 
         if (!ObjectUtils.isEmpty(repository.getUser())&&StringUtils.isNotEmpty(repository.getUser().getId())){
-            //创建私有仓库 给创建人设置管理员权限
+            //创建仓库 给创建人设置管理员权限
             dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), "gittork");
         }else {
-            //创建私有仓库 给创建人设置管理员权限
+            //创建仓库 给创建人设置管理员权限
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "gittork");
         }
 
+        //发送消息
+        initRepositoryMap(groupEntity,"create",null);
         return repositoryId;
     }
 
@@ -160,6 +164,8 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     @Override
     public void deleteRpy(String rpyId) {
+        RepositoryEntity oneRpy = repositoryDao.findOneRpy(rpyId);
+
         repositoryDao.deleteRpy(rpyId);
         //删除打开记录
         recordOpenService.deleteRecordOpenByRecord(rpyId);
@@ -177,6 +183,10 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
         RepositoryFileUtil.deleteFile(file);
+
+        //发送消息
+        initRepositoryMap(oneRpy, "delete",null);
+
     }
 
     /**
@@ -185,6 +195,9 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     @Override
     public void updateRpy(Repository repository) {
+        //更新名称
+        RepositoryEntity oneRpy = repositoryDao.findOneRpy(repository.getRpyId());
+
         RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
         groupEntity.setUpdateTime(RepositoryUtil.date(1,new Date()));
 
@@ -207,8 +220,13 @@ public class RepositoryServerImpl implements RepositoryServer {
                 throw  new SystemException(9001,"仓库地址重复");
             }
         }
-
         repositoryDao.updateRpy(groupEntity);
+
+        //更新名字后发送消息
+        if (!oneRpy.getName().equals(repository.getName())){
+            initRepositoryMap(oneRpy,"update",repository.getName());
+
+        }
     }
 
 
@@ -387,9 +405,9 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         String http;
         if (StringUtils.isNotEmpty(yamlDataMaService.visitAddress())){
-             http = yamlDataMaService.visitAddress() + "/xcode/"+ path + ".git";
+             http = yamlDataMaService.visitAddress() + "/"+ path + ".git";
         }else {
-             http = "http://" + ip + ":" + yamlDataMaService.serverPort() + "/xcode/"+ path + ".git";
+             http = "http://" + ip + ":" + yamlDataMaService.serverPort() + "/"+ path + ".git";
         }
         String SSH=null;
 
@@ -538,7 +556,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                  repositoryList = BeanMapper.mapList(repositoryEntitys,Repository.class);
                 if (CollectionUtils.isNotEmpty(repositoryList)){
                     for (Repository repository:repositoryList){
-                        String path = address + "/xcode/" + repository.getAddress() + ".git";
+                        String path = address + "/" + repository.getAddress() + ".git";
                         repository.setFullPath(path);
                     }
                 }
@@ -760,7 +778,41 @@ public class RepositoryServerImpl implements RepositoryServer {
         }
     }
 
+    /**
+     *操作仓库发送消息
+     * @param oldRepository 操作的仓库
+     * @param type  操作类型
+     * @param  updateName 更新名字
+     */
+    public void initRepositoryMap(RepositoryEntity oldRepository,String type,String updateName){
 
+        HashMap<String, Object> map = gitTorkMessageService.initMap();
+
+        map.put("repositoryId",oldRepository.getRpyId());
+        map.put("action",oldRepository.getName());
+        if (("delete").equals(type)){
+            map.put("message", "删除了仓库"+oldRepository.getName());
+            map.put("link",GitTorkFinal.LOG_RPY_DELETE);
+            gitTorkMessageService.settingMessage(map,GitTorkFinal.LOG_TYPE_DELETE);
+            gitTorkMessageService.settingLog(map,GitTorkFinal.LOG_TYPE_DELETE,"repository");
+        }
+
+        if (("update").equals(type)){
+            map.put("message", oldRepository.getName()+"更改为"+updateName);
+            map.put("link",GitTorkFinal.LOG_RPY_UPDATE);
+            map.put("repositoryPath",oldRepository.getAddress());
+            gitTorkMessageService.settingMessage(map,GitTorkFinal.LOG_TYPE_UPDATE);
+            gitTorkMessageService.settingLog(map,GitTorkFinal.LOG_TYPE_UPDATE,"repository");
+        }
+
+        if (("create").equals(type)){
+            map.put("message", "创建了仓库"+oldRepository.getName());
+            map.put("link",GitTorkFinal.LOG_RPY_CREATE);
+            map.put("repositoryPath",oldRepository.getAddress());
+            gitTorkMessageService.settingMessage(map,GitTorkFinal.LOG_TYPE_CREATE);
+            gitTorkMessageService.settingLog(map,GitTorkFinal.LOG_TYPE_CREATE,"repository");
+        }
+    }
 
 }
 

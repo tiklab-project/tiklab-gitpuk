@@ -188,6 +188,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
             commit.setBranch(defaultBranch);
             CommitMessage branchCommit = commitServer.findLatelyBranchCommit(commit);
 
+            recordCommit.setCommitId(branchCommit.getCommitId());
             recordCommit.setCommitMsg(branchCommit.getCommitMessage());
         }
 

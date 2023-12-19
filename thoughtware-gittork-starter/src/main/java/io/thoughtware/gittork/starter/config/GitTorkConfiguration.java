@@ -8,6 +8,7 @@ import io.thoughtware.eam.boot.starter.annotation.EnableEamClient;
 import io.thoughtware.eam.boot.starter.annotation.EnableEamServer;
 import io.thoughtware.gateway.boot.starter.annotation.EnableGateway;
 import io.thoughtware.licence.boot.starter.annotation.EnableLicenceServer;
+import io.thoughtware.messsage.boot.starter.annotation.EnableMessageClient;
 import io.thoughtware.messsage.boot.starter.annotation.EnableMessageServer;
 import io.thoughtware.openapi.boot.starter.annotation.EnableOpenApi;
 import io.thoughtware.plugin.starter.EnablePluginServer;
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableLicenceServer
 @EnableUserServer
 @EnableUserClient
+@EnableMessageClient
 @EnableMessageServer
 @EnableGateway
 @EnableTodoTaskServer

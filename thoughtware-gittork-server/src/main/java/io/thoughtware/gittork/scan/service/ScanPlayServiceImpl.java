@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * ScanPlayServiceImpl-扫描计划接口实现
@@ -142,11 +144,13 @@ public class ScanPlayServiceImpl implements ScanPlayService {
             for (ScanPlay scanPlay:openRecordList){
                 List<ScanRecord> scanRecordList = scanRecordService.findScanRecordList(new ScanRecordQuery().setScanPlayId(scanPlay.getId()));
                 if (CollectionUtils.isNotEmpty(scanRecordList)){
-                    ScanRecord scanRecord = scanRecordList.get(0);
+                    List<ScanRecord> scanRecords = scanRecordList.stream().sorted(Comparator.comparing(ScanRecord::getCreateTime).reversed()).collect(Collectors.toList());
+                    ScanRecord scanRecord = scanRecords.get(0);
                     scanPlay.setScanTime(scanRecord.getCreateTime());
                     scanPlay.setScanWay(scanRecord.getScanWay());
                     scanPlay.setUserName(scanRecord.getScanUser().getName());
-                    scanPlay.setScanResult(scanRecord.getScanResult());
+                    scanPlay.setScanResult(scanRecord.getScanResult());scanPlay.setScanObject(scanRecord.getScanObject());
+                    scanPlay.setRecordId(scanRecord.getId());
                 }
             }
         }

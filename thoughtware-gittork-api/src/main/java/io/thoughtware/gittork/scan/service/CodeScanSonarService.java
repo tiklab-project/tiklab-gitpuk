@@ -11,11 +11,11 @@ public interface CodeScanSonarService {
 
     /**
      * 通过sonar 扫描
-     * @param scanPlayId 扫描计划id
+     * @param scanPlay 扫描计划
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败
      */
-    void codeScanBySonar(String scanPlayId);
+    void codeScanBySonar(ScanPlay scanPlay);
 
     /**
      * 查询通过sonar 扫描的结果
@@ -23,13 +23,9 @@ public interface CodeScanSonarService {
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败
      */
-    String findScanBySonar(String scanPlayId);
+    ScanRecord findScanBySonar(String scanPlayId);
 
-    /**
-     * 查询通过sonar 问题列表
-     * @param scanIssuesQuery 扫描计划id
-     */
-    Pagination<ScanIssues> findScanIssuesBySonar(ScanIssuesQuery scanIssuesQuery);
+
 
     /**
      * 查询通过sonar 问题列表
