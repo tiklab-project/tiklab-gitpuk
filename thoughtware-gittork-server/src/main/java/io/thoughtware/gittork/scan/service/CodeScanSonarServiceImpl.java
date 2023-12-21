@@ -95,6 +95,7 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
             if (ObjectUtils.isEmpty(deployServer)){
                 joinScanLog(scanRecord, "没有配置sonar环境");
                 scanRecord(scanRecord,scanPlay.getRepository().getName(),"fail");
+                return;
             }
 
             joinScanLog(scanRecord, "获取sonar环境");
@@ -136,10 +137,12 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
             readFile(scanRecord,process);
             int waitFor = process.waitFor();
             if (waitFor==0){
+                logger.info("sonar扫描->扫描成功");
                 joinScanLog(scanRecord, "扫描成功");
                 scanRecord(scanRecord,scanPlay.getRepository().getName(),"success");
                 codeScanResult.put(scanPlayId,"success");
             }else {
+                logger.info("sonar扫描->扫描失败");
                 joinScanLog(scanRecord, "扫描失败");
                 scanRecord(scanRecord,scanPlay.getRepository().getName(),"fail");
                 codeScanResult.put(scanPlayId,"fail");
@@ -160,7 +163,7 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
     public ScanRecord findScanBySonar(String scanPlayId) {
         java.sql.Date date = scanExecStarTime.get(scanPlayId);
         //计算扫描耗时
-        String time = RepositoryUtil.time(date);
+        String time = RepositoryUtil.time(date,"scan");
         ScanRecord scanRecord = scanExecRecord.get(scanPlayId);
         if (org.apache.commons.lang3.ObjectUtils.isNotEmpty(scanRecord)){
             scanRecord.setScanTime(time);
@@ -282,7 +285,7 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
         Pagination<ScanRecordInstance> objectPagination = new Pagination<>();
         List<ScanRecordInstance> resultList = new ArrayList<>();
 
-        ScanPlay scanPlay = scanPlayService.findScanPlay(scanRecordInstanceQuery.getScanPlayId());
+        ScanPlay scanPlay = scanPlayService.findOne(scanRecordInstanceQuery.getScanPlayId());
         try {
             List<DeployServer> deployServerList = deployServerService.findDeployServerList(new DeployServerQuery().setServerName("sonar"));
             DeployServer deployServer = deployServerList.get(0);

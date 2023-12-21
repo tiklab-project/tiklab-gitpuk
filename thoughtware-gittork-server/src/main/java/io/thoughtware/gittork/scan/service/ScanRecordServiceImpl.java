@@ -35,6 +35,9 @@ public class ScanRecordServiceImpl implements ScanRecordService {
     @Autowired
     JoinTemplate joinTemplate;
 
+    @Autowired
+    ScanRecordInstanceService scanRecordInstanceService;
+
     @Override
     public String createScanRecord(@NotNull @Valid ScanRecord openRecord) {
 
@@ -55,7 +58,8 @@ public class ScanRecordServiceImpl implements ScanRecordService {
     @Override
     public void deleteScanRecord(@NotNull String id) {
         scanRecordDao.deleteScanRecord(id);
-
+        //删除扫描记录实例
+        scanRecordInstanceService.deleteScanRecordInstanceByCondition("scanRecordId",id);
     }
 
     @Override

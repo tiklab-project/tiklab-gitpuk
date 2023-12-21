@@ -323,11 +323,10 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Override
     public List<Repository> findList(List<String> idList) {
-        List<RepositoryEntity> groupEntities = repositoryDao.findAllRpyList(idList);
-        List<RepositoryEntity> entities = groupEntities.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
-        List<Repository> list = BeanMapper.mapList(entities, Repository.class);
+        List<RepositoryEntity> groupEntities = repositoryDao.findRepositoryList(idList);
+      //  List<RepositoryEntity> entities = groupEntities.stream().filter(a -> !ObjectUtils.isEmpty(a)).collect(Collectors.toList());
+        List<Repository> list = BeanMapper.mapList(groupEntities, Repository.class);
 
-        joinTemplate.joinQuery(list);
         return list;
     }
 

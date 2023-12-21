@@ -139,8 +139,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                 int waitFor = process.waitFor();
                 if (waitFor==0){
                     logger.info("SpotBugs扫描->扫描成功");
-                    joinScanLog(scanRecord,"扫描成功","success");
-
+                    joinScanLog(scanRecord,"扫描执行完成","run");
 
                     //扫描成功创建扫描记录
                     createSpotBugRecord(scanRecord);
@@ -163,7 +162,6 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
                 //编译失败创建扫描记录
                 createSpotBugRecord(scanRecord);
-
             }
             //执行完成后删除clone 的文件
             FileUtils.deleteDirectory(new File(cloneUrl));
@@ -184,7 +182,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
     public ScanRecord findScanBySpotBugs(String scanPlayId) {
         Date date = scanExecStarTime.get(scanPlayId);
         //计算扫描耗时
-        String time = RepositoryUtil.time(date);
+        String time = RepositoryUtil.time(date,"scan");
         ScanRecord scanRecord = scanExecRecord.get(scanPlayId);
         if (ObjectUtils.isNotEmpty(scanRecord)){
             scanRecord.setScanTime(time);
@@ -203,7 +201,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
      * @param  scanPlay 扫描计划
      */
     public void findScanBugs(ScanPlay scanPlay,ScanRecord scanRecord,String xmlPath) throws Exception {
-
+        joinScanLog(scanRecord,"开始解析扫描结果","run");
         try {
             // 读取XML文件
             File xmlFile = new File(xmlPath);
@@ -249,6 +247,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                         logger.info("SpotBugs扫描->扫描方案的规则类型："+stringList);
                         List<ScanSchemeRule> scanSchemeRuleList = scanSchemeRules.stream().filter(a -> bugType.equals(a.getScanRule().getRuleName())).collect(Collectors.toList());
                         logger.info("SpotBugs扫描->扫描的bug类型："+bugType);
+
                         if (CollectionUtils.isEmpty(scanSchemeRuleList)){
                             continue;
                         }
@@ -264,10 +263,14 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
                         // 解析SourceLine
                         Map<String, String> sourceLineMap = analysisSourceLine(bugInstanceElement,scanPlay.getRepository().getRpyId());
-
+                        if (ObjectUtils.isEmpty(sourceLineMap)){
+                            continue;
+                        }
                         if (("false").equals(sourceLineMap.get("state"))){
                             continue;
                         }
+
+                        joinScanLog(scanRecord,"解析文件"+sourceLineMap.get("fileName"),"success");
                         String abbrev = bugInstanceElement.getAttribute("abbrev");
 
                         String category = bugInstanceElement.getAttribute("category");
@@ -315,9 +318,12 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                 scanRecord.setNoticeTrouble(noticeNum);
                 scanRecord.setSuggestTrouble(suggestNum);
                 scanRecord.setAllTrouble(allTrouble);
+                scanRecord.setScanResult("success");
+                joinScanLog(scanRecord,"扫描结果解析成功","success");
                 scanRecordService.updateScanRecord(scanRecord);
             }
         }catch (Exception e){
+            joinScanLog(scanRecord,"扫描结果解析失败","fail");
             logger.info("SpotBugs扫描->扫描失败");
             scanRecord.setScanResult("fail");
             scanRecordService.updateScanRecord(scanRecord);
@@ -384,16 +390,17 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                 //问题类路径
                 String sourcePath = lineNode.getAttribute("sourcepath");
                 logger.info("SpotBugs扫描->扫描的sourcePath："+sourcePath);
-              /*  List<String> stringList = classFile.stream().filter(a -> a.endsWith(sourcePath)).collect(Collectors.toList());
+                List<String> stringList = classFile.stream().filter(a -> a.endsWith(sourcePath)).collect(Collectors.toList());
                 if (CollectionUtils.isEmpty(stringList)){
                     sourceLineMap.put("state","false");
                     continue;
-                }*/
+                }
                 //问题类
                 String sourceFile = lineNode.getAttribute("sourcefile");
+                logger.info("SpotBugs扫描->扫描项目sourcePath："+stringList.get(0));
                // String message =  lineNode.getElementsByTagName("Message").item(0).getTextContent();
                 sourceLineMap.put("state","true");
-                sourceLineMap.put("filePath",classFile.get(0));
+                sourceLineMap.put("filePath",stringList.get(0));
                 sourceLineMap.put("fileName",sourcePath);
                 sourceLineMap.put("problemLine",start);
 
@@ -571,7 +578,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
      */
     public void createSpotBugRecord(ScanRecord scanRecord){
         //计算扫描耗时
-        String time = RepositoryUtil.time(new Date(scanRecord.getCreateTime().getTime()));
+        String time = RepositoryUtil.time(new Date(scanRecord.getCreateTime().getTime()),"scan");
         scanRecord.setScanTime(time);
         scanRecord.setExecLog( scanExecLog.get(scanRecord.getScanPlayId()));
 
@@ -585,7 +592,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
     public String findLog(String playId) {
             try {
                 // 读取XML文件
-                File xmlFile = new File("/Users/limingliang/tiklab/thoughtware-gittork/scan/170263048/thoughtware-gittork.xml");
+                File xmlFile = new File("/Users/limingliang/tiklab/thoughtware-gittork/scan/170296861/thoughtware-gittork.xml");
                 DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                 Document doc = dBuilder.parse(xmlFile);
@@ -623,7 +630,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
 
                             // 解析SourceLine
-                            Map<String, String> sourceLineMap = analysisSourceLine(bugInstanceElement, "33b00791f33d");
+                            Map<String, String> sourceLineMap = analysisSourceLine(bugInstanceElement, "397a18472f7a");
                             System.out.println("");
                         }
                     }

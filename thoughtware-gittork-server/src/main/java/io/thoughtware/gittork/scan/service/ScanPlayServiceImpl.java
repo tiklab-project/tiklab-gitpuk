@@ -17,6 +17,8 @@ import io.thoughtware.gittork.repository.entity.RecordCommitEntity;
 import io.thoughtware.gittork.scan.dao.ScanPlayDao;
 import io.thoughtware.gittork.scan.entity.ScanPlayEntity;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,9 @@ public class ScanPlayServiceImpl implements ScanPlayService {
     @Autowired
     ScanRecordService scanRecordService;
 
+    @Autowired
+    ScanRecordInstanceService scanRecordInstanceService;
+
     @Override
     public String createScanPlay(@NotNull @Valid ScanPlay openRecord) {
 
@@ -64,7 +69,11 @@ public class ScanPlayServiceImpl implements ScanPlayService {
     public void deleteScanPlay(@NotNull String id) {
         scanPlayDao.deleteScanPlay(id);
 
+        //删除扫描记录
         scanRecordService.deleteScanRecordByCondition("scanPlayId",id);
+
+        //删除扫描记录的实例
+        scanRecordInstanceService.deleteScanRecordInstanceByCondition("scanPlayId",id);
 
 
     }
@@ -83,14 +92,8 @@ public class ScanPlayServiceImpl implements ScanPlayService {
 
         ScanPlay openRecord = BeanMapper.map(openRecordEntity, ScanPlay.class);
 
-        List<ScanRecord> recordList = scanRecordService.findScanRecordList(new ScanRecordQuery().setScanPlayId(id));
-        if (CollectionUtils.isNotEmpty(recordList)){
-            ScanRecord scanRecord = recordList.get(0);
-            openRecord.setUserName(scanRecord.getScanUser().getName());
-            openRecord.setLatScanTime(scanRecord.getCreateTime());
-            int num = scanRecord.getSeverityTrouble() + scanRecord.getErrorTrouble() + scanRecord.getNoticeTrouble() + scanRecord.getSuggestTrouble();
-            openRecord.setAllReqNum(num);
-        }
+        joinTemplate.joinQuery(openRecord);
+
         return openRecord;
     }
 
@@ -107,8 +110,16 @@ public class ScanPlayServiceImpl implements ScanPlayService {
     public ScanPlay findScanPlay(@NotNull String id) {
         ScanPlay openRecord = findOne(id);
 
-        joinTemplate.joinQuery(openRecord);
-
+        List<ScanRecord> recordList = scanRecordService.findScanRecordList(new ScanRecordQuery().setScanPlayId(id));
+        if (CollectionUtils.isNotEmpty(recordList)){
+            ScanRecord scanRecord = recordList.get(0);
+            String name = StringUtils.isNotEmpty(scanRecord.getScanUser().getNickname()) ? scanRecord.getScanUser().getNickname() :
+                    scanRecord.getScanUser().getName();
+            openRecord.setUserName(name);
+            openRecord.setLatScanTime(scanRecord.getCreateTime());
+            int num = scanRecord.getSeverityTrouble() + scanRecord.getErrorTrouble() + scanRecord.getNoticeTrouble() + scanRecord.getSuggestTrouble();
+            openRecord.setAllReqNum(num);
+        }
         return openRecord;
     }
 
@@ -148,7 +159,11 @@ public class ScanPlayServiceImpl implements ScanPlayService {
                     ScanRecord scanRecord = scanRecords.get(0);
                     scanPlay.setScanTime(scanRecord.getCreateTime());
                     scanPlay.setScanWay(scanRecord.getScanWay());
-                    scanPlay.setUserName(scanRecord.getScanUser().getName());
+                    if (StringUtils.isNotEmpty(scanRecord.getScanUser().getNickname())){
+                        scanPlay.setUserName(scanRecord.getScanUser().getNickname());
+                    }else {
+                        scanPlay.setUserName(scanRecord.getScanUser().getName());
+                    }
                     scanPlay.setScanResult(scanRecord.getScanResult());scanPlay.setScanObject(scanRecord.getScanObject());
                     scanPlay.setRecordId(scanRecord.getId());
                 }

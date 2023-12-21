@@ -81,7 +81,7 @@ public class CodeScanServiceImpl implements CodeScanService {
             throw new SystemException(918,"该扫描计划正在执行中");
         }*/
 
-        ScanPlay scanPlay = scanPlayService.findScanPlay(scanPlayId);
+        ScanPlay scanPlay = scanPlayService.findOne(scanPlayId);
         //扫描计划中的扫描方案
         ScanScheme scanScheme = scanPlay.getScanScheme();
 

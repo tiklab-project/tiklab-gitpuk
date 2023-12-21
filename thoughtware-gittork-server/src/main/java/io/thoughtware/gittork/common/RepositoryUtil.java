@@ -123,17 +123,25 @@ public class RepositoryUtil {
     /**
      * 获取与当前时间的时间差
      * @param date 时间
+     * @param  type 类型 scan、commit
      * @return 时间差
      */
-    public static String time(Date date){
+    public static String time(Date date,String type){
         long time = new Date().getTime();
         long dateTime = date.getTime();
         long l=time-dateTime;
+
+
         long day=l/(24*60*60*1000);
         long hour=(l/(60*60*1000)-day*24);
         long minute=((l/(60*1000))-day*24*60-hour*60);
         long second=(l/1000-day*24*60*60-hour*60*60-minute*60);
-
+        if (("scan").equals(type)){
+            if (minute != 0){
+                return minute+"分钟"+second+"秒";
+            }
+            return second+"秒";
+        }
         if (day != 0){
             return day+"天";
         }
@@ -331,6 +339,34 @@ public class RepositoryUtil {
             i++;
         }
         return new String(ss);
+    }
+
+    /**
+     *通过字节计算大小
+     * @param sizeByte 大小 单位字节
+     * @return
+     */
+    public static String countStorageSize(long sizeByte){
+        DecimalFormat decimalFormat = new DecimalFormat("#.00");
+
+        double num =(double) sizeByte / 1024;
+        if (sizeByte<1048576){
+            String KbNum = decimalFormat.format(num);
+            return KbNum+"Kb";
+        }
+        //小于1G
+        if (num<1048576){
+            double l = (double) sizeByte / (1024 * 1024);
+            String MB = decimalFormat.format(l);
+            return MB+"MB";
+        }
+        //大于1G
+        if (num>=1048576){
+            double gbNum =(double) sizeByte / 1024/1024/1024;
+            String GB = decimalFormat.format(gbNum);
+            return GB+"GB";
+        }
+        return null;
     }
 }
 

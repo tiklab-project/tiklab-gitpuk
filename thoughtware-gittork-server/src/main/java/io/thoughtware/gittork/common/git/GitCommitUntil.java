@@ -464,7 +464,7 @@ public class GitCommitUntil {
             String message = revCommit.getShortMessage();
 
             map.put("message",message);//转换时间
-            map.put("time", RepositoryUtil.time(date)+"前");
+            map.put("time", RepositoryUtil.time(date,"commit")+"前");
             map.put("date", String.valueOf(date.getTime()));
             list.add(map);
         }
@@ -484,7 +484,7 @@ public class GitCommitUntil {
         commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
         commitMessage.setCommitUser(name);
         commitMessage.setDateTime(date);
-        commitMessage.setCommitTime(RepositoryUtil.time(date)+"前");//转换时间
+        commitMessage.setCommitTime(RepositoryUtil.time(date,"commit")+"前");//转换时间
 
         return commitMessage;
     }

@@ -152,7 +152,7 @@ public class ScanRecordInstanceServiceImpl implements ScanRecordInstanceService 
     @Override
     public Pagination<ScanRecordInstance> findRecordInstancePageByPlay(ScanRecordInstanceQuery scanRecordInstanceQuery) {
         //扫描计划中的扫描方案
-        ScanPlay scanPlay = scanPlayService.findScanPlay(scanRecordInstanceQuery.getScanPlayId());
+        ScanPlay scanPlay = scanPlayService.findOne(scanRecordInstanceQuery.getScanPlayId());
         ScanScheme scanScheme = scanPlay.getScanScheme();
 
         Pagination<ScanRecordInstance> scanRecordInstancePage=null;
@@ -168,7 +168,7 @@ public class ScanRecordInstanceServiceImpl implements ScanRecordInstanceService 
             return null;
         }
         List<ScanRecordInstance> instances = scanRecordInstancePage.getDataList();
-        if (CollectionUtils.isNotEmpty(instances)){
+     /*   if (CollectionUtils.isNotEmpty(instances)){
             try {
                 String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),scanPlay.getRepository().getRpyId()) ;
                 Git git = Git.open(new File(repositoryAddress));
@@ -202,7 +202,7 @@ public class ScanRecordInstanceServiceImpl implements ScanRecordInstanceService 
                 throw new ApplicationException( "获取信息失败：" + e.getMessage());
             }
 
-        }
+        }*/
 
         return scanRecordInstancePage;
     }

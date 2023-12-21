@@ -65,7 +65,7 @@ public class RepositoryDao {
     }
 
 
-    public List<RepositoryEntity> findAllRpyList(List<String> idList){
+    public List<RepositoryEntity> findRepositoryList(List<String> idList){
         return jpaTemplate.findList(RepositoryEntity.class,idList);
     }
 
