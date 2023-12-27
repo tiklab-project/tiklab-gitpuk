@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>io.thoughtware</groupId>
-    <artifactId>thoughtware-gittork</artifactId>
+    <artifactId>thoughtware-gittok</artifactId>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
     <version>1.0.1-SNAPSHOT</version>
@@ -27,6 +27,7 @@
         <thoughtware-integration.version>1.0.0</thoughtware-integration.version>
         <thoughtware-join.version>1.0.0</thoughtware-join.version>
         <thoughtware-dal.version>1.0.0</thoughtware-dal.version>
+        <thoughtware-dsm.version>1.0.0</thoughtware-dsm.version>
         <thoughtware-openapi-version>1.0.0-SNAPSHOT</thoughtware-openapi-version>
 
         <!--平台组件-->
@@ -51,13 +52,15 @@
         <commons-io.version>2.11.0</commons-io.version>
         <sshd-core.version>2.9.2</sshd-core.version>
         <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
+       <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version>-->
+
         <commons-lang3.version>3.12.0</commons-lang3.version>
     </properties>
 
     <modules>
-        <module>thoughtware-gittork-api</module>
-        <module>thoughtware-gittork-server</module>
-        <module>thoughtware-gittork-starter</module>
+        <module>thoughtware-gittok-api</module>
+        <module>thoughtware-gittok-server</module>
+        <module>thoughtware-gittok-starter</module>
     </modules>
 
 
