@@ -28,6 +28,7 @@ jdbc:
   password: darth2020
 
 
+
 #plugin config
 DATA_HOME: /opt/tiklab/thoughtware_gittok
 plugin:
@@ -113,7 +114,7 @@ repository:
 
 
 visit:
-  address: http://gittok_ce.demo.thoughtware.cn
+  address: http://gittok-ce.demo.thoughtware.cn
 
 backups:
   time: 0 0 2 * * ?

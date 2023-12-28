@@ -401,7 +401,7 @@
 							<descriptors>
 								<descriptor>assembly/distribution-${assembly}.xml</descriptor>
 							</descriptors>
-							<finalName>thoughtware-gittork${version}-${timestamp}</finalName>
+							<finalName>thoughtware-gittok-${version}-${timestamp}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 						<phase>package</phase>
