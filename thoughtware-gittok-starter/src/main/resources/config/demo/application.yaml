@@ -46,7 +46,7 @@ postgresql:
 eas:
   embbed:
     enable: false
-  address: http://eas_ce.demo.thoughtware.cn
+  address: http://eas-ce.demo.thoughtware.cn
 
 #dfs config
 dfs:
@@ -90,12 +90,12 @@ message:
     enabled: true
 
 base:
-  url: http://eas_ce.demo.thoughtware.cn
+  url: http://eas-ce.demo.thoughtware.cn
 
 
 #homes
 homes:
-  address: http://192.168.10.19:8080
+  address: http://homes.thoughtware.cn
 
 #license
 licences:

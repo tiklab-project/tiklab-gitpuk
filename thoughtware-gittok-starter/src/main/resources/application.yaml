@@ -89,10 +89,6 @@ base:
   url: http://e.eas.tiklab.net
 
 
-#homes
-homes:
-  address: http://192.168.10.19:8080
-
 #license
 licences:
   path: ${APP_HOME}/licences
