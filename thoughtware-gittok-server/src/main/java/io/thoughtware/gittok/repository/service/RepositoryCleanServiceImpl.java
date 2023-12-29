@@ -282,7 +282,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
         return repositoryCleans;
     }
 
-   /* @Override
+    @Override
     public String clearLargeFile(RepositoryCleanQuery repositoryCleanQuery) {
 
         String repositoryId = repositoryCleanQuery.getRepositoryId();
@@ -399,9 +399,9 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
         return "fail";
 
-    }*/
+    }
 
-    @Override
+ /*   @Override
     public String clearLargeFile(RepositoryCleanQuery repositoryCleanQuery) {
 
         String repositoryId = repositoryCleanQuery.getRepositoryId();
@@ -424,14 +424,14 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
 
                         File file = new File(cleanRpyPath);
-                       /* if (file.exists()) {
+                       *//* if (file.exists()) {
                             FileUtils.deleteDirectory(new File(cleanRpyPath));
                         }
                         //克隆所有分支的仓库
                         logger.info("开始准备清理仓库的仓库" );
                         joinClearLargeFileLog(repositoryId,"准备清理仓库","run");
                         GitUntil.cloneAllBranchRepository(rpyPath,cleanRpyPath);
-                        joinClearLargeFileLog(repositoryId,"成功准备清理仓库","run");*/
+                        joinClearLargeFileLog(repositoryId,"成功准备清理仓库","run");*//*
 
                         //进入执行环境
                         logger.info("进入清理仓库的仓库" );
@@ -443,31 +443,31 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
                         Git git = Git.open(new File(cleanRpyPath));
                         // 暂存当前工作目录的修改
-                /*        logger.info("保存临时修改文件");
+                *//*        logger.info("保存临时修改文件");
                         joinClearLargeFileLog(repositoryId,"执行保存临时修改文件","run");
                         StashCreateCommand stashCreateCommand = git.stashCreate();
                         stashCreateCommand.call();
                         joinClearLargeFileLog(repositoryId,"成功执行保存临时修改文件","run");
-*/
+*//*
 
 
-                    /*    //执行stash命令
+                    *//*    //执行stash命令
                         logger.info("保存临时修改文件");
                         joinClearLargeFileLog(repositoryId,"执行保存临时修改文件","run");
                         String stash="git stash";
                         execOrder(stash,cleanRpyPath,repositoryId);
-                        joinClearLargeFileLog(repositoryId,"成功执行保存临时修改文件","run");*/
+                        joinClearLargeFileLog(repositoryId,"成功执行保存临时修改文件","run");*//*
 
                         //删除文件
                        // removeFile(repositoryCleanQuery, cleanRpyPath);
                         removeFile(repositoryCleanQuery,git);
 
                         //回收空间
-                       /* logger.info("删除原始引用");
+                       *//* logger.info("删除原始引用");
                         joinClearLargeFileLog(repositoryId,"执行删除原始引用","run");
                         String eachRef= "git for-each-ref --format='delete %(refname)' refs/original | git update-ref --stdin";
                         execOrder(eachRef,cleanRpyPath,repositoryId);
-                        joinClearLargeFileLog(repositoryId,"成功执行删除原始引用","run");*/
+                        joinClearLargeFileLog(repositoryId,"成功执行删除原始引用","run");*//*
 
                       logger.info("删除.git/refs/original下面引用");
                         joinClearLargeFileLog(repositoryId,"删除.git/refs/original下面引用","run");
@@ -475,7 +475,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                         execOrder(rmRf,cleanRpyPath,repositoryId);
                         joinClearLargeFileLog(repositoryId,"成功删除.git/refs/original下面引用","run");
 
-                       /*   logger.info("删除日志引用");
+                       *//*   logger.info("删除日志引用");
                         joinClearLargeFileLog(repositoryId,"删除日志引用","run");
                         String reflog= "git reflog expire --expire=now --all";
                         execOrder(reflog,cleanRpyPath,repositoryId);
@@ -518,7 +518,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                             long length = new File(rpyPath).length();
                             repository.setSize(length);
                         }
-                        repositoryServer.updateRepository(repository);*/
+                        repositoryServer.updateRepository(repository);*//*
                         logger.info("执行成功");
                         joinClearLargeFileLog(repositoryId,"清除成功","success");
                     }catch (Exception e){
@@ -532,7 +532,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
         return "fail";
 
-    }
+    }*/
     @Override
     public Map<String, String> findClearResult(String repositoryId)   {
 

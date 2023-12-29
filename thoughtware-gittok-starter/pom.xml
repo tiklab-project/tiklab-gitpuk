@@ -147,6 +147,13 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
+				<dependency>
+					<groupId>io.thoughtware</groupId>
+					<artifactId>thoughtware-postgresql-linux</artifactId>
+					<version>${thoughtware-postgresql.version}</version>
+					<type>zip</type>
+					<scope>provided</scope>
+				</dependency>
 			</dependencies>
 			<properties>
 				<assembly>linux</assembly>
@@ -170,7 +177,7 @@
 										<artifactItem>
 											<groupId>io.thoughtware</groupId>
 											<artifactId>thoughtware-postgresql-linux</artifactId>
-											<version>${project.version}</version>
+											<version>${thoughtware-postgresql.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>

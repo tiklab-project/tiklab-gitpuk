@@ -22,22 +22,26 @@ gittok:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://172.13.1.13:5432/tiklab_xcode?stringtype=unspecified
+  url: jdbc:postgresql://localhost:5432/thoughtware_gittok?stringtype=unspecified
   username: postgres
   password: darth2020
 
 
 
-DATA_HOME: /opt/tiklab/xcode
+DATA_HOME: /opt/thoughtware/gittok
 
 plugin:
   path: ${DATA_HOME}/plugin
 
 postgresql:
   embbed:
-    enable: false
-  database: tiklab_xcode
-
+    enable: true
+  database: thoughtware_gittok
+  db:
+    port: 5432
+    username: postgres
+    password: darth2020
+    address: ${DATA_HOME}/postgresql
 
 eas:
   embbed:
@@ -87,6 +91,10 @@ message:
 
 base:
   url: http://e.gittok.thoughtware.cn
+
+  #homes
+homes:
+  address: http://homes.thoughtware.cn
 
 
 #license
