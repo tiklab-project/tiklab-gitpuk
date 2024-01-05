@@ -31,4 +31,10 @@ public class GitTokFinal {
     public static final String GROUP_RPY_DELETE = "/group";
     //仓库组更新
     public static final String GROUP_RPY_UPDATE = "/group/${groupName}/setting/info";
+
+
+    /**
+     * DEFAULT
+     */
+    public static final String DEFAULT = "default";
 }

@@ -50,6 +50,7 @@ public class GitTokSqlLoad {
                 "xdprivilege_1.0.2",
         });
         dsmConfig.newVersion("1.0.3", new String[]{
+                "xcode_1.0.3",
                 "message_1.0.3",
                 "oplog_1.0.3",
         });
