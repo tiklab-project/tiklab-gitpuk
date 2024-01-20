@@ -175,7 +175,7 @@ public class Repository implements Serializable {
     private boolean notNull;
 
     /**
-     * 仓库全路径
+     * 仓库http拉取路径
      */
     private String fullPath;
 

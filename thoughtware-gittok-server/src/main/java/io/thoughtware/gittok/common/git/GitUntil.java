@@ -187,7 +187,7 @@ public class GitUntil {
         // 打开普通仓库
         Repository normalRepository = Git.open(new File(normalRepoDir)).getRepository();
 
-        // 打开普通仓库
+        // 打开远程仓库
         Repository bareRepository = Git.open(new File(bareRepoDir)).getRepository();
 
 

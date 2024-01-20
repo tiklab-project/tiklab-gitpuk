@@ -62,10 +62,7 @@ public class HttpServlet extends GitServlet {
             HttpServletResponse res1 = (HttpServletResponse) res;
             boolean authorized = isAuthorized((HttpServletRequest) req);
             String requestURI = ((HttpServletRequest) req).getRequestURI();
-            //git push提交 （客户端第三次请求发送数据 以git-receive-pack结尾）
-            if (requestURI.endsWith("git-receive-pack")){
-                addRepositorySize(req,requestURI);
-            }
+
 
             if (!authorized){
                 res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
@@ -98,9 +95,15 @@ public class HttpServlet extends GitServlet {
                         }
                 }*/
 
-
+            if (requestURI.endsWith("git-receive-pack")){
+                addRepositorySize(req,requestURI);
+            }
             super.service(req, res);
 
+            //git push提交 （客户端第三次请求发送数据 以git-receive-pack结尾）
+            if (requestURI.endsWith("git-receive-pack")){
+                addRepositorySize(req,requestURI);
+            }
         }
 
         @Override
@@ -144,14 +147,15 @@ public class HttpServlet extends GitServlet {
     }
 
     /**
-     * 添加仓库的大小
+     * 推送仓库后执行操作
      * @param req
      * @param requestURI
      */
     public void addRepositorySize(ServletRequest req,String requestURI){
+
         String contentLengthHeader = ((HttpServletRequest) req).getHeader("Content-Length");
         if (contentLengthHeader != null) {
-            long contentLength = Long.parseLong(contentLengthHeader);
+            //long contentLength = Long.parseLong(contentLengthHeader);
 
             String[] split = requestURI.split("/");
             String groupName=split[split.length-3];
@@ -160,18 +164,15 @@ public class HttpServlet extends GitServlet {
             String name=split[split.length-2].substring(0,split[split.length-2].indexOf(".git"));
             Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
             if (!ObjectUtils.isEmpty(repository)){
-                if (!ObjectUtils.isEmpty(repository.getSize())){
-                    contentLength = repository.getSize()+contentLength;
-                }else {
-                    String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
-                    File file = new File(repositoryUrl);
-                    if (file.exists()){
-                        long logBytes = FileUtils.sizeOfDirectory(file);
-                        contentLength =  logBytes+contentLength;
-                    }
+
+                //修改仓库大小
+                String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
+                File file = new File(repositoryUrl);
+                if (file.exists()){
+                    long logBytes = FileUtils.sizeOfDirectory(file);
+                    repository.setSize(logBytes);
+                    repositoryServer.updateRepository(repository);
                 }
-                repository.setSize(contentLength);
-                repositoryServer.updateRepository(repository);
             }
         }
     }

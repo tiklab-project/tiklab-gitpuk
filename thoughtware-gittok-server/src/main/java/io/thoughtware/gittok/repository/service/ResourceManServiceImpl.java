@@ -31,12 +31,13 @@ public class ResourceManServiceImpl implements ResourceManService{
             return null;
         }
 
+        //使用大小
         long logBytes = FileUtils.sizeOfDirectory(file);
         String size = RepositoryUtil.countStorageSize(logBytes);
         resourceMan.setUsedSpace(size);
 
-        float diskSize = RepositoryUtil.findDiskSize(repositoryAddress);
-        resourceMan.setAllSpace(diskSize+"GB");
+        //总大小
+        resourceMan.setAllSpace(getDiskSize(repositoryAddress));
 
         Version version = versionService.getVersion();
         resourceMan.setVersion(version.getRelease());
@@ -44,4 +45,14 @@ public class ResourceManServiceImpl implements ResourceManService{
 
         return resourceMan;
     }
+
+    /**
+     * 磁盘大小
+     * @return
+     */
+    public String getDiskSize(String repositoryAddress){
+        float diskSize = RepositoryUtil.findDiskSize(repositoryAddress);
+        return diskSize+"GB";
+    }
+
 }

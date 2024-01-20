@@ -27,6 +27,13 @@ public interface RepositoryCleanService {
     List<RepositoryClean> findLargeFileResult(RepositoryCleanQuery repositoryCleanQuery);
 
     /**
+     * 执行清理裸仓库中你的无效文件
+     * @param rpyId
+     * @return 仓库组id
+     */
+    String execCleanFile(String rpyId);
+
+    /**
      * 删除大文件
      * @param repositoryCleanQuery
      * @return 仓库组id
@@ -41,4 +48,6 @@ public interface RepositoryCleanService {
 
 
       void deleteFile(String filName);
+
+
 }

@@ -10,7 +10,7 @@ import io.thoughtware.gittok.scan.model.ScanRecord;
 public interface CodeScanSpotBugsService {
 
     /**
-     * 通过sonar 扫描
+     * 通过SpotBugs 扫描
      * @param scanPlay 扫描计划
      * @return 执行状态 true:成功 false:失败
      * @throws ApplicationException 运行失败

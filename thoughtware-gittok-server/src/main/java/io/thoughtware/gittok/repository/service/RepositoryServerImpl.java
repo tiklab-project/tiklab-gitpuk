@@ -251,10 +251,7 @@ public class RepositoryServerImpl implements RepositoryServer {
         RepositoryEntity groupEntity = repositoryDao.findOneRpy(rpyId);
         Repository repository = BeanMapper.map(groupEntity, Repository.class);
         joinTemplate.joinQuery(repository);
-        if (!ObjectUtils.isEmpty(repository)){
-            RepositoryCloneAddress cloneAddress = findCloneAddress(rpyId);
-            repository.setFullPath(cloneAddress.getHttpAddress());
-        }
+
         return repository;
     }
 
@@ -467,7 +464,10 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Override
     public Repository findRepository(String id) {
         Repository repository = this.findOneRpy(id);
-
+        if (!ObjectUtils.isEmpty(repository)){
+            RepositoryCloneAddress cloneAddress = findCloneAddress(id);
+            repository.setFullPath(cloneAddress.getHttpAddress());
+        }
         try {
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),id);
             File file = new File(repositoryAddress);

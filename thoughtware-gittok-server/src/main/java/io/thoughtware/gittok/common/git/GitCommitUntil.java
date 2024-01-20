@@ -479,6 +479,7 @@ public class GitCommitUntil {
         Date date = revCommit.getAuthorIdent().getWhen();//时间
         String name = revCommit.getAuthorIdent().getName();//提交人
 
+
         CommitMessage commitMessage = new CommitMessage();
         commitMessage.setCommitId(revCommit.getId().getName());//commitId
         commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息

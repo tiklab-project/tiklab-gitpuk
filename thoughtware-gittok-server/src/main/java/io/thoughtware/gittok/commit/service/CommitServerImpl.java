@@ -9,6 +9,7 @@ import io.thoughtware.core.exception.ApplicationException;
 import io.thoughtware.gittok.common.RepositoryFileUtil;
 import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.RepositoryUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CommitServerImpl implements CommitServer {
@@ -48,7 +50,6 @@ public class CommitServerImpl implements CommitServer {
         if (branchCommit.isEmpty()){
            return Collections.emptyList();
         }
-
         return commitSort(branchCommit, new ArrayList<>());
     }
 

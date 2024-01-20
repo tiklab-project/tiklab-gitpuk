@@ -44,6 +44,16 @@ public class RepositoryCleanController {
         return Result.ok(repositoryClean);
     }
 
+    @RequestMapping(path="/execCleanFile",method = RequestMethod.POST)
+    @ApiMethod(name = "execCleanFile",desc = "执行清理裸仓库中你的无效文件")
+    @ApiParam(name = "execCleanFile",desc = "repositoryCleanQuery",required = true)
+    public Result<String> execCleanFile(String rpyId){
+        String largeFile = cleanService.execCleanFile(rpyId);
+
+        return Result.ok(largeFile);
+    }
+
+
     @RequestMapping(path="/clearLargeFile",method = RequestMethod.POST)
     @ApiMethod(name = "clearLargeFile",desc = "删除大文件")
     @ApiParam(name = "repositoryCleanQuery",desc = "repositoryCleanQuery",required = true)
@@ -62,12 +72,5 @@ public class RepositoryCleanController {
         return Result.ok(result);
     }
 
-    @RequestMapping(path="/deleteFile",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteFile",desc = "获取清除结果")
-    @ApiParam(name = "fileName",desc = "fileName",required = true)
-    public Result<Map> deleteFile(@NotNull String fileName){
-       cleanService.deleteFile(fileName);
 
-        return Result.ok();
-    }
 }
