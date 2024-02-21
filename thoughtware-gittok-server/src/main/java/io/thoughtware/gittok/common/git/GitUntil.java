@@ -7,6 +7,7 @@ import io.thoughtware.gittok.repository.model.RemoteInfo;
 import io.thoughtware.core.exception.ApplicationException;
 import io.thoughtware.user.user.model.User;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.transport.*;
@@ -286,7 +287,15 @@ public class GitUntil {
             git.push().setCredentialsProvider(credentialsProvider)
                     .setPushAll()
                     .call();
-        } else {
+        }
+        //通过令牌推送
+        if (("token").equals(remoteInfo.getAuthWay())){
+            PushCommand pushCommand = git.push();
+            pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(remoteInfo.getSecretKey(), ""));
+            pushCommand.call();
+            System.out.println("推送成功");
+        }
+
 
            /* //ssh 认证
             SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
@@ -310,7 +319,6 @@ public class GitUntil {
             }).setPushAll().call();
         }*/
             git.close();
-        }
     }
 
     /**
@@ -350,65 +358,3 @@ public class GitUntil {
         return process;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

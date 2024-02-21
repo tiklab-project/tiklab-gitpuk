@@ -40,6 +40,7 @@ public class GitTokSqlLoad {
                 "message_1.0.1",
                 "todotask_1.0.1",
                 "xdprivilege_1.0.1",
+                "apply-auth_1.0.1",
 
         });
         dsmConfig.newVersion("1.0.2", new String[]{

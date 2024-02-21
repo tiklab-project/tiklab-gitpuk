@@ -129,7 +129,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
 
                 logger.info("SpotBugs扫描->spotbugsPath路径"+spotbugsPath);
                 logger.info("SpotBugs扫描->扫描结果输出路径"+scanFilePath);
-                joinScanLog(scanRecord,"开始执行仓库扫描","run");
+                joinScanLog(scanRecord,"开始执行仓库扫描，扫描时间稍长，请耐心等待 ，执行中...","run");
                 Process  process = RepositoryUtil.process(spotbugsAddress, execOrder);
 
                 //读取执行的日志
@@ -152,7 +152,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                     //扫描失败创建扫描记录
                     createSpotBugRecord(scanRecord);
                 }
-               // FileUtils.deleteDirectory(new File(scanFilePath.substring(0, scanFilePath.lastIndexOf("/"))));
+                FileUtils.deleteDirectory(new File(scanFilePath.substring(0, scanFilePath.lastIndexOf("/"))));
             }else {
                 logger.info("SpotBugs扫描->mvn 编译扫描项目失败");
 
@@ -269,7 +269,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                             continue;
                         }
 
-                        joinScanLog(scanRecord,"解析文件"+sourceLineMap.get("fileName"),"success");
+                        joinScanLog(scanRecord,"解析文件"+sourceLineMap.get("fileName"),"run");
                         String abbrev = bugInstanceElement.getAttribute("abbrev");
 
                         String category = bugInstanceElement.getAttribute("category");

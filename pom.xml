@@ -162,11 +162,11 @@
             <distributionManagement>
                 <snapshotRepository>
                     <id>xpack</id>
-                    <url>http://192.168.10.17:8081/repository/maven-snapshot</url>
+                    <url>http://192.168.10.9:8080/repository/maven-snapshot</url>
                 </snapshotRepository>
                 <repository>
                     <id>xpack</id>
-                    <url>http://192.168.10.17:8081/repository/maven-release</url>
+                    <url>http://192.168.10.9:8080/repository/maven-release</url>
                 </repository>
             </distributionManagement>
             <build>

@@ -224,7 +224,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         //更新名字后发送消息
         if (!oneRpy.getName().equals(repository.getName())){
             initRepositoryMap(oneRpy,"update",repository.getName());
-
         }
     }
 
