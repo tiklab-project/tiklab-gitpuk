@@ -30,7 +30,7 @@ postgresql:
     password: darth2020
     address: ${DATA_HOME}/postgresql
 
-darth:
+eas:
   embbed:
     enable: true
 
