@@ -16,14 +16,14 @@ gittok:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/xcode?stringtype=unspecified
+  url: jdbc:postgresql://localhost:5432/thoughtware_gittok?stringtype=unspecified
   username: postgres
   password: darth2020
 
 postgresql:
   embbed:
     enable: true
-  database: xcode
+  database: thoughtware_gittok
   db:
     port: 5432
     username: postgres
@@ -35,7 +35,7 @@ darth:
     enable: true
 
 #plugin config
-DATA_HOME: /opt/tiklab/xcode
+DATA_HOME: /opt/tiklab/gittok
 plugin:
   path: ${DATA_HOME}/plugin
 
