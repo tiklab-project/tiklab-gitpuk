@@ -92,9 +92,9 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                     RevCommit commit = revWalk.parseCommit(head.getObjectId());
                     revWalk.markStart(commit);*/
 
-                    //long sizeMb = repositoryCleanQuery.getFileSize() * 1048576;
+                    long sizeMb = repositoryCleanQuery.getFileSize() * 1048576;
 
-                    long sizeMb =138860;
+                    //long sizeMb =138860;
                     //获取项目所有提交
                     Iterable<RevCommit> commits = git.log().all().call();
 
@@ -209,11 +209,9 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                         }
                     }
 
-
                     // 按照创建时间进行排序
                     idxFileList.sort(Comparator.comparingLong(File::lastModified).reversed());
                     for (int i=0;i<idxFileList.size();i++){
-                        String name = idxFileList.get(i).getName();
                         if (i>0){
                             idxFileList.get(i).delete();
                         }

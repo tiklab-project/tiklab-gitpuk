@@ -59,10 +59,11 @@ public class HttpServlet extends GitServlet {
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+
             HttpServletResponse res1 = (HttpServletResponse) res;
             boolean authorized = isAuthorized((HttpServletRequest) req);
             String requestURI = ((HttpServletRequest) req).getRequestURI();
-
+            logger.info("推送代码请求" + requestURI);
 
             if (!authorized){
                 res1.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
