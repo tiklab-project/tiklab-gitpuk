@@ -1,5 +1,6 @@
 package io.thoughtware.gittok.repository.controller;
 
+import io.thoughtware.core.exception.SystemException;
 import io.thoughtware.gittok.file.model.FileTree;
 import io.thoughtware.gittok.file.model.FileTreeMessage;
 import io.thoughtware.gittok.repository.model.Repository;
@@ -17,8 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.List;
 /**
  * @pi.protocol: http
@@ -338,58 +343,6 @@ public class RepositoryController {
 
         return Result.ok(repositoryAuth);
     }
-    @RequestMapping(path="/updateRep",method = RequestMethod.POST)
-    @ApiMethod(name = "updateRep",desc = "查询用户是否有当前项目权限")
-    public Result<String> updateRep( ){
 
-      repositoryServer.updateRep();
-
-        return Result.ok();
-    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

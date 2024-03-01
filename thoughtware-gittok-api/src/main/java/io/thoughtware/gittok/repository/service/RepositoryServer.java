@@ -216,8 +216,6 @@ public interface RepositoryServer {
      */
     String findDefaultBranch(String repositoryId);
 
-    void updateRep();
-
 
 
 }

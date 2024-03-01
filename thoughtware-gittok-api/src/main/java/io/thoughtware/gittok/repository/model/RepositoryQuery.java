@@ -1,16 +1,22 @@
 package io.thoughtware.gittok.repository.model;
 
+import io.thoughtware.core.order.Order;
+import io.thoughtware.core.order.OrderBuilders;
 import io.thoughtware.core.page.Page;
 import io.thoughtware.postin.annotation.ApiModel;
 import io.thoughtware.postin.annotation.ApiProperty;
 
 import java.io.Serializable;
+import java.util.List;
 
 @ApiModel
 public class RepositoryQuery implements Serializable {
 
     @ApiProperty(name ="pageParam",desc = "分页参数")
     private Page pageParam = new Page();
+
+    @ApiProperty(name ="orderParams",desc = "排序参数")
+    private List<Order> orderParams = OrderBuilders.instance().desc("createTime").get();
 
     @ApiProperty(name ="userId",desc = "登录用户")
     private String  userId;
@@ -33,6 +39,9 @@ public class RepositoryQuery implements Serializable {
 
     @ApiProperty(name ="groupName",desc = "仓库组名字")
     private String  groupName;
+
+    @ApiProperty(name ="category",desc = "1 、演示 ；2、正式仓库")
+    private Integer  category;
 
 
     public String getUserId() {
@@ -102,6 +111,23 @@ public class RepositoryQuery implements Serializable {
     public RepositoryQuery setGroupName(String groupName) {
         this.groupName = groupName;
         return this;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public RepositoryQuery setCategory(Integer category) {
+        this.category = category;
+        return this;
+    }
+
+    public List<Order> getOrderParams() {
+        return orderParams;
+    }
+
+    public void setOrderParams(List<Order> orderParams) {
+        this.orderParams = orderParams;
     }
 }
 

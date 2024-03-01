@@ -15,6 +15,11 @@ public class RepositoryEntity extends BaseModel {
     @Column(name = "group_id")
     private String groupId;
 
+
+    //种类 1 、演示 ；2、正式仓库
+    @Column(name = "category")
+    private Integer category;
+
     @Column(name = "name")
     private String name;
 
@@ -173,6 +178,14 @@ public class RepositoryEntity extends BaseModel {
 
     public void setColor(Integer color) {
         this.color = color;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 }
 

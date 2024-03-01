@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.RefSpec;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,12 +53,21 @@ public class GitBranchUntil {
      * @throws GitAPIException 仓库删除失败
      */
     public static void deleteRepositoryBranch(String repositoryAddress,String branchName) throws IOException, GitAPIException {
-        Git git = Git.open(new File(repositoryAddress));
-        git.branchDelete()
+        Repository repository = Git.open(new File(repositoryAddress)).getRepository();
+        Git git = new Git(repository);
+
+        // 删除分支 (分支名字和标签名字相同时)
+        git.push()
+                .setRemote(repository.getDirectory().getAbsolutePath())
+                .setRefSpecs(new RefSpec(":" + "refs/heads/" + branchName))
+                .call();
+        git.close();
+
+      /*  git.branchDelete()
                 .setBranchNames(branchName)
                 .setForce(true) //是否强制删除分支
                 .call();
-        git.close();
+        git.close();*/
     }
 
     /**

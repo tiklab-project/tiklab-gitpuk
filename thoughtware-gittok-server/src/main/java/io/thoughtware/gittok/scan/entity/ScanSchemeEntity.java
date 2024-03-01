@@ -21,6 +21,10 @@ public class ScanSchemeEntity {
     @Column(name = "scan_way",notNull = true)
     private String scanWay;
 
+    //种类 1 、默认 ；2、自定义
+    @Column(name = "category")
+    private Integer category;
+
 
     @Column(name = "describe",notNull = true)
     private String describe;
@@ -74,5 +78,13 @@ public class ScanSchemeEntity {
 
     public void setScanWay(String scanWay) {
         this.scanWay = scanWay;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 }

@@ -2,6 +2,8 @@ package io.thoughtware.gittok.repository.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.thoughtware.gittok.common.RepositoryUtil;
+import io.thoughtware.gittok.common.git.GitBranchUntil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -22,10 +24,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,7 +56,7 @@ public class test {
             System.out.println(updatedJsonString);*/
 
 
-            // 创建请求头对象
+         /*   // 创建请求头对象
             HttpHeaders headers = new HttpHeaders();
             String s ="admin"+ ":" +"123456";
             String baseString = Base64.getEncoder().encodeToString(s.getBytes());
@@ -68,8 +73,18 @@ public class test {
             RestTemplate restTemplate = new RestTemplate(factory);
             ResponseEntity<byte[]> entity = restTemplate.exchange("http://192.168.10.9:8080/repository/maven-public/test", HttpMethod.GET, requestEntity, byte[].class);
             // ResponseEntity<byte[]> entity = restTemplate.getForEntity(relativeAbsoluteUrl, byte[].class);
-            System.out.println("123");
+            System.out.println("123");*/
+            LocalDateTime currentTime = LocalDateTime.now();
+            LocalDateTime newTime = currentTime.minusMinutes(1).minusSeconds(5);
 
+            ZoneId zoneId = ZoneId.systemDefault();
+            java.util.Date date = Date.from(newTime.atZone(zoneId).toInstant());
+            String time = RepositoryUtil.time(date,"scan");
+
+            System.out.println("time"+time);
+
+
+            FileUtils.deleteQuietly(new File("/Users/limingliang/source/thoughtware-cms-api-1.0.0-javadoc.jar.asc"));
 
         } catch (Exception e) {
             e.printStackTrace();

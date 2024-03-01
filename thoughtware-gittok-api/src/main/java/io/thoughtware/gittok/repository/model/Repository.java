@@ -56,6 +56,15 @@ public class Repository implements Serializable {
     private String address;
 
     /**
+     * @pi.name: category
+     * @pi.dataType:Integer
+     * @pi.desc: 1 、演示 ；2、正式仓库
+     * @pi.value: category
+     */
+    @ApiProperty(name="category",desc="1 、演示 ；2、正式仓库")
+    private Integer category=2;
+
+    /**
      * @pi.name: createTime
      * @pi.dataType:string
      * @pi.desc: 创建时间
@@ -72,6 +81,7 @@ public class Repository implements Serializable {
      */
     @ApiProperty(name="updateTime",desc="更新时间")
     private String updateTime;
+
 
 
     /**
@@ -345,6 +355,14 @@ public class Repository implements Serializable {
 
     public void setRpySize(String rpySize) {
         this.rpySize = rpySize;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 }
 

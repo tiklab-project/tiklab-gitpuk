@@ -29,6 +29,7 @@ create table rpy_repository(
     classify_state          VARCHAR(12),
     update_time           varchar(255),
     state                int,
+    category              int,
     size            bigint,
     color           int
 );
@@ -66,16 +67,7 @@ create table rpy_record_commit(
       user_id          varchar(12),
       commit_time    timestamp
 );
--- ---------------------------
--- 环境配置
--- ----------------------------
-create table rpy_deploy_env(
-   id             varchar(12) PRIMARY KEY ,
-   env_type       varchar (32) NOT NULL,
-   env_name       varchar(128) NOT NULL,
-   env_address    varchar (255) NOT NULL,
-   create_time    timestamp
-);
+
 
 -- ---------------------------
 -- 服务配置
@@ -132,7 +124,34 @@ create table rpy_lead_record(
     create_time timestamp
 );
 
+-- ---------------------------
+-- 定时任务
+-- ----------------------------
+create table rpy_time_task(
+      id            varchar(12) PRIMARY KEY,
+      scan_play_id       varchar (12),
+      task_name          varchar(524),
+      task_type     varchar(32),
+      task_way      int,
+      exec_state     int,
+      create_time   timestamp,
+      update_time  timestamp
+);
 
+-- ---------------------------
+-- 定时任务 的实例
+-- ----------------------------
+create table rpy_time_task_instance(
+       id          varchar(12) PRIMARY KEY,
+       time_task_id varchar (12),
+       exec_object_id varchar(12),
+       task_way      int,
+       cron varchar(255) ,
+       week_day int,
+       exec_state     varchar(32),
+       exec_time  varchar(12),
+       create_time  timestamp
+);
 
 
 

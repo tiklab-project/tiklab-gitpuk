@@ -151,8 +151,11 @@ public class RepositoryServerImpl implements RepositoryServer {
             dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "gittok");
         }
 
-        //发送消息
-        initRepositoryMap(groupEntity,"create",null);
+        //正式仓库才发送消息
+        if (repository.getCategory()==2){
+            //发送消息
+            initRepositoryMap(groupEntity,"create",null);
+        }
         return repositoryId;
     }
 
@@ -166,26 +169,32 @@ public class RepositoryServerImpl implements RepositoryServer {
         RepositoryEntity oneRpy = repositoryDao.findOneRpy(rpyId);
 
         repositoryDao.deleteRpy(rpyId);
-        //删除打开记录
-        recordOpenService.deleteRecordOpenByRecord(rpyId);
-        //删除提交记录
-        recordCommitService.deleteRecordCommitByRepository(rpyId);
-        //删除项目成员
-        dmUserService.deleteDmUserByDomainId(rpyId);
-        //删除导入(如果存在)
-        leadRecordService.deleteLeadRecord("rpyId",rpyId);
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
-        File file = new File(repositoryAddress);
-        if (!file.exists()){
-            return;
-        }
 
-        scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
-        RepositoryFileUtil.deleteFile(file);
+        Thread thread = new Thread() {
+            public void run() {
+                //删除打开记录
+                recordOpenService.deleteRecordOpenByRecord(rpyId);
+                //删除提交记录
+                recordCommitService.deleteRecordCommitByRepository(rpyId);
+                //删除项目成员
+                dmUserService.deleteDmUserByDomainId(rpyId);
+                //删除导入(如果存在)
+                leadRecordService.deleteLeadRecord("rpyId",rpyId);
+                String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+                File file = new File(repositoryAddress);
+                if (!file.exists()){
+                    return;
+                }
 
-        //发送消息
-        initRepositoryMap(oneRpy, "delete",null);
+                scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
 
+                RepositoryFileUtil.deleteFile(file);
+
+                //发送消息
+                initRepositoryMap(oneRpy, "delete",null);
+            }
+        };
+        thread.start();
     }
 
     /**
@@ -728,6 +737,7 @@ public class RepositoryServerImpl implements RepositoryServer {
                     repository.setRpySize(size);
                 }
             }
+
             return PaginationBuilder.build(pagination,repositoryList);
         }
         return PaginationBuilder.build(new Pagination<>(),null);
@@ -769,23 +779,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         return canViewRpyId;
     }
 
-    public void updateRep(){
-        List<RepositoryEntity> allRpyEntity = repositoryDao.findAllRpy();
-        List<Repository> allRpy = BeanMapper.mapList(allRpyEntity, Repository.class);
-
-        for (Repository repository:allRpy){
-            String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
-            File file = new File(repositoryUrl);
-            if (file.exists()){
-                long logBytes = FileUtils.sizeOfDirectory(file);
-                repository.setSize(logBytes);
-
-                RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
-                repositoryDao.updateRpy(groupEntity);
-
-            }
-        }
-    }
 
     /**
      *操作仓库发送消息

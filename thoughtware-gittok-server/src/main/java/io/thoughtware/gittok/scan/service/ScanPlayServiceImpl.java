@@ -79,10 +79,12 @@ public class ScanPlayServiceImpl implements ScanPlayService {
 
     @Override
     public void deleteScanPlayByCondition(String key, String value) {
-        DeleteCondition deleteCondition = DeleteBuilders.createDelete(RecordCommitEntity.class)
-                .eq(key, value)
-                .get();
-        scanPlayDao.deleteScanPlay(deleteCondition);
+        List<ScanPlay> scanPlayList = this.findScanPlayList(new ScanPlayQuery().setRepositoryId(value));
+        if (CollectionUtils.isNotEmpty(scanPlayList)){
+            for (ScanPlay scanPlay:scanPlayList){
+                deleteScanPlay(scanPlay.getId());
+            }
+        }
     }
 
     @Override

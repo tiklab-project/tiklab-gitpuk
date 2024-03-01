@@ -29,6 +29,9 @@ public class DeployEnv implements Serializable {
     @ApiProperty(name="envAddress",desc="环境应用地址")
     private String envAddress;
 
+    @ApiProperty(name="category",desc="1 、默认 ；2、自定义")
+    private Integer category=2;
+
     @ApiProperty(name="createTime",desc="创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
     private Timestamp createTime;
@@ -72,6 +75,14 @@ public class DeployEnv implements Serializable {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 }
 

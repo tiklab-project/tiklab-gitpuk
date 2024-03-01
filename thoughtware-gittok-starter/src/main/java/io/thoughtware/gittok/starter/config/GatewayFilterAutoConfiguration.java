@@ -77,9 +77,6 @@ public class GatewayFilterAutoConfiguration {
                         "/wechatCallback/instruct",
                         "/alterSql/updateId",
                         "/gui",
-
-
-
                 })
                 .ignorePreUrls(new String[]{
                         "/service",
@@ -101,7 +98,8 @@ public class GatewayFilterAutoConfiguration {
                         "/codeScan",
                         "/branch",
                         "/message",
-                        "/repositoryClean"
+                        "/repositoryClean",
+                        "/rpyDown"
                 })
                 .get();
     }

@@ -13,3 +13,4 @@ plugin/
 thoughtware-gittork-starter/embbed
 thoughtware-gittork-starter/plugin
 gittork-log
+.embbed/

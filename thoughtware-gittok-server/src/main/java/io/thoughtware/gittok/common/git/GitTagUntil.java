@@ -37,7 +37,7 @@ public class GitTagUntil {
         RevCommit commit = walk.parseCommit(resolved);
 
          git.tag().setName(tag.getTagName())
-                 .setObjectId(commit)
+                .setObjectId(commit)
                 .setMessage(tag.getDesc())
                 .call();
 

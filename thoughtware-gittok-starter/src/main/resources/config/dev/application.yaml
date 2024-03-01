@@ -1,5 +1,5 @@
 app:
-  name: thoughtware-gittork
+  name: thoughtware-gittok
 
 APP_HOME: ${APP_HOME}
 application: thoughtware

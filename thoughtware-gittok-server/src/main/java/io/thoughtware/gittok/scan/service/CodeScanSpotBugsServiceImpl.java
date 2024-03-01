@@ -80,7 +80,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
         initScanRecord(scanRecord,scanPlay);
 
         //拼接日志
-         joinScanLog(scanRecord, "执行扫描任务：" + scanPlay.getPlayName(),"run");
+        joinScanLog(scanRecord, "执行扫描任务：" + scanPlay.getPlayName(),"run");
 
         Repository repository = scanPlay.getRepository();
 
@@ -312,6 +312,8 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                 }
                 logger.info("SpotBugs扫描->扫描记录实例成功");
 
+
+
                 int allTrouble = severityNum + noticeNum + suggestNum;
                 scanRecord.setSeverityTrouble(severityNum);
                 scanRecord.setNoticeTrouble(noticeNum);
@@ -319,12 +321,23 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
                 scanRecord.setAllTrouble(allTrouble);
                 scanRecord.setScanResult("success");
                 joinScanLog(scanRecord,"扫描结果解析成功","success");
+
+                //计算扫描耗时
+                String time = RepositoryUtil.time(new Date(scanRecord.getCreateTime().getTime()),"scan");
+                scanRecord.setScanTime(time);
+                scanRecord.setExecLog(scanExecLog.get(scanRecord.getScanPlayId()));
+
                 scanRecordService.updateScanRecord(scanRecord);
             }
         }catch (Exception e){
             joinScanLog(scanRecord,"扫描结果解析失败","fail");
             logger.info("SpotBugs扫描->扫描失败");
             scanRecord.setScanResult("fail");
+
+            //计算扫描耗时
+            String time = RepositoryUtil.time(new Date(scanRecord.getCreateTime().getTime()),"scan");
+            scanRecord.setScanTime(time);
+            scanRecord.setExecLog(scanExecLog.get(scanRecord.getScanPlayId()));
             scanRecordService.updateScanRecord(scanRecord);
             throw new SystemException("解析Xml文件失败，path:"+xmlPath+" ，message："+e.getMessage());
         }
@@ -424,8 +437,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
         // mvn 编译日志
         while ((line = reader.readLine()) != null) {
             logger.info("执行命令日志:"+line);
-            joinScanLog(scanRecord,line,"in");
-
+            joinScanLog(scanRecord,line,"run");
         }
 
         //spotBugs日志
@@ -434,7 +446,7 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
         String errorLine;
         while ((errorLine = errorReader.readLine()) != null) {
             logger.info("执行命令日志02:"+errorLine);
-            joinScanLog(scanRecord,errorLine,"in");
+            joinScanLog(scanRecord,errorLine,"run");
         }
 
     }

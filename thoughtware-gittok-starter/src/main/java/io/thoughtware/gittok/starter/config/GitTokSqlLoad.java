@@ -28,14 +28,14 @@ public class GitTokSqlLoad {
                 "oplog_1.0.0",
                 //TodoTaskDsm
                 "todotask_1.0.0",
-                //gittok
+                //xcode
                 "xcode_1.0.0",
+                "scan_1.0.0",
                 "xdprivilege_1.0.0",
                 "backups_1.0.0",
         });
 
         dsmConfig.newVersion("1.0.1", new String[]{
-                "xcode_1.0.1",
                 "oplog_1.0.1",
                 "message_1.0.1",
                 "todotask_1.0.1",
@@ -44,14 +44,11 @@ public class GitTokSqlLoad {
 
         });
         dsmConfig.newVersion("1.0.2", new String[]{
-                "xcode_1.0.2",
                 "message_1.0.2",
                 "oplog_1.0.2",
                 "todotask_1.0.2",
-                "xdprivilege_1.0.2",
         });
         dsmConfig.newVersion("1.0.3", new String[]{
-                "xcode_1.0.3",
                 "message_1.0.3",
                 "oplog_1.0.3",
         });
@@ -63,7 +60,7 @@ public class GitTokSqlLoad {
                 "message_1.0.5",
         });
         dsmConfig.newVersion("1.0.6", new String[]{
-               "message_1.0.6"
+                "message_1.0.6"
         });
         return dsmConfig;
     }

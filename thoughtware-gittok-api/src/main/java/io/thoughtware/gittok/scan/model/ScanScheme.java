@@ -26,6 +26,9 @@ public class ScanScheme implements Serializable {
     @ApiProperty(name="scanWay",desc="扫描方式 sonar、rule")
     private String scanWay;
 
+    @ApiProperty(name="category",desc="1 、默认 ；2、自定义")
+    private Integer category=2;
+
     @ApiProperty(name="describe",desc="描述")
     private String describe;
 
@@ -83,5 +86,11 @@ public class ScanScheme implements Serializable {
         this.scanWay = scanWay;
     }
 
+    public Integer getCategory() {
+        return category;
+    }
 
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
 }

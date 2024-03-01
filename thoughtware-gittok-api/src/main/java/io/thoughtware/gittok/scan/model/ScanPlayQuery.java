@@ -42,8 +42,9 @@ public class ScanPlayQuery {
         return repositoryId;
     }
 
-    public void setRepositoryId(String repositoryId) {
+    public ScanPlayQuery setRepositoryId(String repositoryId) {
         this.repositoryId = repositoryId;
+        return this;
     }
 
     public String getScanSchemeId() {
