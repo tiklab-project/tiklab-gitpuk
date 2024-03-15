@@ -1,5 +1,6 @@
 package io.thoughtware.gittok.repository.service;
 
+import io.thoughtware.gittok.common.GitTokFinal;
 import io.thoughtware.gittok.repository.dao.LeadAuthDao;
 import io.thoughtware.gittok.repository.entity.LeadAuthEntity;
 import io.thoughtware.gittok.repository.model.LeadAuth;
@@ -16,7 +17,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
-* LeadAuthServiceImpl-导入第三方仓库的认证
+* LeadAuthServiceImpl-.gitignore 文件管理
 */
 @Service
 @Exporter
@@ -35,6 +36,8 @@ public class LeadAuthServiceImpl implements LeadAuthService {
 
         LeadAuthEntity openRecordEntity = BeanMapper.map(openRecord, LeadAuthEntity.class);
         openRecordEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+
         String openRecordId= leadAuthDao.createLeadAuth(openRecordEntity);
         return openRecordId;
     }

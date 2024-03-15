@@ -1,6 +1,9 @@
 package io.thoughtware.gittok.repository.controller;
 
+import io.thoughtware.core.page.Pagination;
 import io.thoughtware.gittok.repository.model.LeadTo;
+import io.thoughtware.gittok.repository.model.LeadToQuery;
+import io.thoughtware.gittok.repository.model.LeadToResult;
 import io.thoughtware.gittok.repository.service.LeadToService;
 import io.thoughtware.core.Result;
 import io.thoughtware.postin.annotation.Api;
@@ -29,27 +32,27 @@ public class LeadToController {
     @ApiParam(name = "importAuthId",desc = "importAuthId",required = true)
     public Result<List> findThirdRepositoryList( @NotNull  String importAuthId,String page){
 
-        List repositoryList = toLeadService.findThirdRepositoryList(importAuthId,page);
+        Pagination<LeadTo> thirdRepositoryList = toLeadService.findThirdRepositoryList(importAuthId, page);
 
-        return Result.ok(repositoryList);
+        return Result.ok(thirdRepositoryList);
     }
 
     @RequestMapping(path="/toLeadRepository",method = RequestMethod.POST)
     @ApiMethod(name = "toLeadRepository",desc = " 导入仓库")
     @ApiParam(name = "repositoryAddress",desc = "仓库路径",required = true)
-    public Result<String> toLeadRepository(@RequestBody @NotNull @Valid LeadTo leadTo){
+    public Result<String> toLeadRepository(@RequestBody @NotNull @Valid LeadToQuery leadToQuery){
 
-        String repository = toLeadService.toLeadRepository(leadTo);
+        String repository = toLeadService.toLeadRepository(leadToQuery);
 
         return Result.ok(repository);
     }
 
     @RequestMapping(path="/findToLeadResult",method = RequestMethod.POST)
     @ApiMethod(name = "findToLeadResult",desc = " 查询导入仓库结果")
-    @ApiParam(name = "thirdRepositoryId",desc = "第三方仓库id",required = true)
-    public Result<String> findToLeadResult( @NotNull String  thirdRepositoryId){
+    @ApiParam(name = "key",desc = "key",required = true)
+    public Result<LeadToResult> findToLeadResult( @NotNull String  key){
 
-        String result=toLeadService.findToLeadResult(thirdRepositoryId);
+        LeadToResult result=toLeadService.findToLeadResult(key);
 
         return Result.ok(result);
     }

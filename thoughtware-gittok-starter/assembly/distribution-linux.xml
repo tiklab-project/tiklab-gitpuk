@@ -74,6 +74,11 @@
             <fileMode>755</fileMode>
             <outputDirectory>/file</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/gittignore</directory>
+            <fileMode>755</fileMode>
+            <outputDirectory>/gittignore</outputDirectory>
+        </fileSet>
 
         <fileSet>
             <directory>${basedir}</directory>

@@ -216,8 +216,11 @@ public interface RepositoryServer {
      */
     String findDefaultBranch(String repositoryId);
 
-
-
+    /**
+     *重置仓库
+     * @param  rpyId 仓库id
+     */
+    void resetRepository(String rpyId);
 }
 
 

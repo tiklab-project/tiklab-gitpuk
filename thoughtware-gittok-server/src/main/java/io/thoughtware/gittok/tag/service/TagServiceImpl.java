@@ -1,5 +1,7 @@
 package io.thoughtware.gittok.tag.service;
 
+import io.thoughtware.dal.jpa.criterial.condition.DeleteCondition;
+import io.thoughtware.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
 import io.thoughtware.gittok.common.git.GitTagUntil;

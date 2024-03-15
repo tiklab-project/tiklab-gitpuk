@@ -33,6 +33,10 @@ public class LeadTo {
     @ApiProperty(name="execResult",desc="执行结果")
     private String execResult;
 
+
+    @ApiProperty(name="log",desc="日志")
+    private String log;
+
     public String getRepositoryName() {
         return repositoryName;
     }
@@ -103,5 +107,13 @@ public class LeadTo {
 
     public void setExecResult(String execResult) {
         this.execResult = execResult;
+    }
+
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
     }
 }

@@ -41,6 +41,13 @@ public class LeadRecordServiceImpl implements LeadRecordService {
         return leadRecordId;
     }
 
+    @Override
+    public void updateLeadRecord(LeadRecord leadRecord) {
+        LeadRecordEntity leadRecordEntity = BeanMapper.map(leadRecord, LeadRecordEntity.class);
+
+        importAuthDao.updateLeadRecord(leadRecordEntity);
+    }
+
 
     @Override
     public void deleteLeadRecord(@NotNull String id) {

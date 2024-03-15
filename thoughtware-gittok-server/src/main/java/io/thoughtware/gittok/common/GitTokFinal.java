@@ -37,4 +37,13 @@ public class GitTokFinal {
      * DEFAULT
      */
     public static final String DEFAULT = "default";
+
+    //gitlab 查询仓库API地址
+    public static final String GITLAB_API_URL = "https://gitlab.com/api/v4/projects";
+
+    //github 查询仓库API地址
+    public static final String GITHUB_API_URL = "https://api.github.com/user/repos";
+
+    //gitee 查询仓库API地址
+    public static final String GITEE_API_URL = "https://gitee.com/api/v5/user/repos";
 }

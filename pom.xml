@@ -162,78 +162,13 @@
             <distributionManagement>
                 <snapshotRepository>
                     <id>xpack</id>
-                    <url>http://192.168.10.9:8080/repository/maven-snapshot</url>
+                    <url>http://192.168.10.9:8080/repository/maven-snapshots</url>
                 </snapshotRepository>
                 <repository>
                     <id>xpack</id>
-                    <url>http://192.168.10.9:8080/repository/maven-release</url>
+                    <url>http://192.168.10.9:8080/repository/maven-releases</url>
                 </repository>
             </distributionManagement>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>taip</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <!--    <configuration>
-                                        <useAgent>true</useAgent>
-                                        <keyname>limingliang</keyname>
-                                        <passphraseServerId>limingliang</passphraseServerId>
-                                        <gpgArguments>
-                                            <arg>&#45;&#45;batch</arg>
-                                            <arg>&#45;&#45;pinentry-mode</arg>
-                                            <arg>loopback</arg>
-                                        </gpgArguments>
-                                    </configuration>-->
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!--   <plugin>
-                           <groupId>org.apache.maven.plugins</groupId>
-                           <artifactId>maven-javadoc-plugin</artifactId>
-                           <version>2.9.1</version>
-                           <executions>
-                               <execution>
-                                   <id>attach-javadocs</id>
-                                   <goals>
-                                       <goal>jar</goal>
-                                   </goals>
-                               </execution>
-                           </executions>
-                       </plugin>-->
-                </plugins>
-            </build>
             <properties>
                 <profile.assembly.package.suffix>deploy-xpack</profile.assembly.package.suffix>
             </properties>

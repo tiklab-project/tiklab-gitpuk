@@ -12,10 +12,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.transport.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 
 
@@ -30,7 +27,7 @@ public class GitUntil {
      * @param repositoryAddress 仓库地址
      * @throws ApplicationException 仓库创建失败
      */
-    public static void createRepository(String repositoryAddress, String ignoreFilePath, String mdFilePath, User user) throws ApplicationException {
+    public static Git createRepository(String repositoryAddress) throws ApplicationException {
         File file = new File(repositoryAddress);
         Git git;
         try {
@@ -39,28 +36,26 @@ public class GitUntil {
                     .setBare(true) //裸仓库
                     //.setInitialBranch(Constants.MASTER)
                     .call();
-
-            // Repository repository = git.getRepository();
-            //
-            // if (ignoreFilePath != null || mdFilePath != null){
-            //     addRepositoryInitFile(repository,ignoreFilePath,mdFilePath,user);
-            // }
             git.close();
         } catch (GitAPIException e) {
             throw new ApplicationException("仓库创建失败。" + e);
         }
         git.close();
+        return git;
     }
 
+
     /**
-     * 裸仓库添加文件
-     * @param repository 仓库
-     * @param ignoreFilePath .gitignore文件
-     * @param mdFilePath README.md文件
-     * @param user 用户
+     * 裸仓库初始化添加文件
+     * @param git 裸仓库
+     * @param rpy 创建仓库数据
+     * @param ignoreFilePath gitignore
      */
-    private static void addRepositoryInitFile(Repository repository, String ignoreFilePath, String mdFilePath, User user)
-            throws ApplicationException {
+    public static void addRepositoryInitFile(Git git, io.thoughtware.gittok.repository.model.Repository rpy,String ignoreFilePath) {
+
+        User user = rpy.getUser();
+        Integer isReadme = rpy.getIsReadme();
+        Repository repository = git.getRepository();
 
         try {
 
@@ -70,12 +65,13 @@ public class GitUntil {
             TreeFormatter treeFormatter = new TreeFormatter();
             // 写入.gitignore文件到对象数据库
             if (RepositoryUtil.isNoNull(ignoreFilePath)){
-
                 File ignoreFile = new File(ignoreFilePath);
-                FileInputStream inputStream ;
+                //byte[] bytes = ignoreFileData.getBytes();
+                InputStream inputStream;
                 try {
                     inputStream = new FileInputStream(ignoreFile);
-                } catch (FileNotFoundException e) {
+                    //inputStream = new ByteArrayInputStream(bytes);
+                } catch (Exception e) {
                     throw new ApplicationException("文件.gitignore写入失败：" + e);
                 }
 
@@ -86,17 +82,18 @@ public class GitUntil {
             }
 
             // 写入README.md文件到对象数据库
-            if (RepositoryUtil.isNoNull(mdFilePath)){
-
-                File mdFile = new File(mdFilePath);
-                FileInputStream mdFileInputStream ;
+            if (isReadme==1){
+                InputStream inputStream;
+                String data= rpy.getName();
+                byte[] bytes = data.getBytes();
                 try {
-                    mdFileInputStream = new FileInputStream(mdFile);
-                } catch (FileNotFoundException e) {
+                    // 创建 ByteArrayInputStream 对象
+                     inputStream = new ByteArrayInputStream(bytes);
+                } catch (Exception e) {
                     throw new ApplicationException("文件README.md写入失败：" + e);
                 }
 
-                ObjectId mdObjectId = inserter.insert(Constants.OBJ_BLOB, mdFile.length(), mdFileInputStream);
+                ObjectId mdObjectId = inserter.insert(Constants.OBJ_BLOB, bytes.length, inputStream);
                 inserter.flush();
                 inserter.close();
                 treeFormatter.append("README.md", FileMode.REGULAR_FILE, mdObjectId);
@@ -113,7 +110,7 @@ public class GitUntil {
             PersonIdent ident = new PersonIdent(user.getName(), email);
             commitBuilder.setCommitter(ident);
             commitBuilder.setAuthor(ident);
-
+            commitBuilder.setMessage("Initial Commit");
             // 提交更改
             ObjectInserter objectInserter = repository.newObjectInserter();
             ObjectId objectId1 = objectInserter.insert(commitBuilder);
@@ -293,7 +290,6 @@ public class GitUntil {
             PushCommand pushCommand = git.push();
             pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(remoteInfo.getSecretKey(), ""));
             pushCommand.call();
-            System.out.println("推送成功");
         }
 
 

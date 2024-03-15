@@ -38,6 +38,9 @@ public class LeadRecord   {
     @ApiProperty(name="relevanceId",desc="第三方库的关联id")
     private String relevanceId;
 
+    @ApiProperty(name="log",desc="日志")
+    private String log;
+
     @ApiProperty(name="create_time",desc="创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Timestamp createTime;
@@ -88,6 +91,14 @@ public class LeadRecord   {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
     }
 }
 

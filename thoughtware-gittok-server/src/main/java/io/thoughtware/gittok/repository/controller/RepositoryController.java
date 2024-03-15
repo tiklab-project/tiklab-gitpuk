@@ -344,5 +344,13 @@ public class RepositoryController {
         return Result.ok(repositoryAuth);
     }
 
+    @RequestMapping(path="/resetRepository",method = RequestMethod.POST)
+    @ApiMethod(name = "resetRepository",desc = "重置仓库")
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    public Result<String> resetRepository( @NotNull String rpyId){
 
+        repositoryServer.resetRepository(rpyId);
+
+        return Result.ok();
+    }
 }

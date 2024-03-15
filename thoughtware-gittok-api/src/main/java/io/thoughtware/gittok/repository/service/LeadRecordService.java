@@ -22,6 +22,12 @@ public interface LeadRecordService {
     */
     String createLeadRecord(@NotNull @Valid LeadRecord leadRecord);
 
+    /**
+     * 更新
+     * @param leadRecord
+     * @return
+     */
+    void updateLeadRecord(@NotNull @Valid LeadRecord leadRecord);
 
     /**
     * 删除

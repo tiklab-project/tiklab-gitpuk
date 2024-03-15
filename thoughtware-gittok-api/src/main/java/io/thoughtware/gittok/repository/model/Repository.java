@@ -194,6 +194,11 @@ public class Repository implements Serializable {
      */
     private String role;
 
+    //是否创建README.md   0:false、1:true
+    private Integer isReadme;
+
+    //创建.Gitignore文件
+    private String gitignoreValue;
 
     public String getRpyId() {
         return rpyId;
@@ -363,6 +368,22 @@ public class Repository implements Serializable {
 
     public void setCategory(Integer category) {
         this.category = category;
+    }
+
+    public Integer getIsReadme() {
+        return isReadme;
+    }
+
+    public void setIsReadme(Integer isReadme) {
+        this.isReadme = isReadme;
+    }
+
+    public String getGitignoreValue() {
+        return gitignoreValue;
+    }
+
+    public void setGitignoreValue(String gitignoreValue) {
+        this.gitignoreValue = gitignoreValue;
     }
 }
 

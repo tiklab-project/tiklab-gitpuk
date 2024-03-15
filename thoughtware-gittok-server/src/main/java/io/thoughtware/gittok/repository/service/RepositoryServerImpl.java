@@ -9,11 +9,9 @@ import io.thoughtware.gittok.file.model.FileTree;
 import io.thoughtware.gittok.file.model.FileTreeMessage;
 import io.thoughtware.gittok.repository.dao.RepositoryDao;
 import io.thoughtware.gittok.repository.entity.RepositoryEntity;
-import io.thoughtware.gittok.repository.model.RecordCommit;
-import io.thoughtware.gittok.repository.model.Repository;
-import io.thoughtware.gittok.repository.model.RepositoryCloneAddress;
-import io.thoughtware.gittok.repository.model.RepositoryQuery;
+import io.thoughtware.gittok.repository.model.*;
 import io.thoughtware.gittok.scan.service.ScanPlayService;
+import io.thoughtware.gittok.tag.service.TagService;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.core.context.AppHomeContext;
 import io.thoughtware.core.exception.ApplicationException;
@@ -33,7 +31,6 @@ import io.thoughtware.user.dmUser.service.DmUserService;
 import io.thoughtware.user.user.model.User;
 import io.thoughtware.user.user.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -42,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.io.File;
@@ -101,12 +99,17 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Autowired
     GitTokMessageService gitTorkMessageService;
 
+    @Autowired
+    TagService tagService;
+
+
     /**
      * 创建仓库
      * @param repository 信息
      * @return 仓库id
      */
     @Override
+    @Transactional
     public String createRpyData(Repository repository){
         //判断是否有剩余内存
         boolean resMemory = memoryManService.findResMemory();
@@ -118,10 +121,30 @@ public class RepositoryServerImpl implements RepositoryServer {
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
 
             String appHome = AppHomeContext.getAppHome();
-            String ignoreFilePath = appHome+"/file/.gitignore";
-            String mdFilePath =appHome+"file/README.md";
-            logger.info("创建仓库ignoreFilePath:"+ignoreFilePath);
-            GitUntil.createRepository(repositoryAddress,ignoreFilePath,mdFilePath,repository.getUser());
+
+
+            String ignoreFilePath = null;
+
+            //logger.info("创建仓库README.md:"+mdFilePath);
+           // logger.info("创建仓库ignoreFilePath:"+ignoreFilePath);
+
+            //Gitignore存在
+            if (StringUtils.isNotEmpty(repository.getGitignoreValue())){
+               /* List<GitignoreFile> gitignoreFileList = gitignoreFileService.findGitignoreFileList(new GitignoreFileQuery().setValue(repository.getGitignoreValue()));
+                if (CollectionUtils.isNotEmpty(gitignoreFileList)){
+                     ignoreFileData = gitignoreFileList.get(0).getData();
+                }*/
+                ignoreFilePath= appHome+"/gitignore/"+repository.getGitignoreValue();
+            }
+
+            //创建仓库
+            Git git = GitUntil.createRepository(repositoryAddress);
+
+            //创建初始化README.md、.gitignore文件
+            if (ignoreFilePath != null || repository.getIsReadme()==1){
+                //初始化数据
+                GitUntil.addRepositoryInitFile(git,repository,ignoreFilePath);
+            }
 
             return repositoryId;
 
@@ -180,21 +203,37 @@ public class RepositoryServerImpl implements RepositoryServer {
                 dmUserService.deleteDmUserByDomainId(rpyId);
                 //删除导入(如果存在)
                 leadRecordService.deleteLeadRecord("rpyId",rpyId);
+
+                //删除文件
                 String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
                 File file = new File(repositoryAddress);
                 if (!file.exists()){
                     return;
                 }
-
-                scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
-
                 RepositoryFileUtil.deleteFile(file);
+
+                //删除计划
+                scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
 
                 //发送消息
                 initRepositoryMap(oneRpy, "delete",null);
             }
         };
         thread.start();
+    }
+
+    @Override
+    @Transactional
+    public void resetRepository(String rpyId) {
+        try {
+            deleterRpyRelatedData(rpyId);
+
+            //创建裸仓库
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+            GitUntil.createRepository(repositoryAddress);
+        }catch (Exception e){
+            throw new SystemException(500,"重置失败");
+        }
     }
 
     /**
@@ -289,7 +328,6 @@ public class RepositoryServerImpl implements RepositoryServer {
         if (allRepositories == null || allRepositories.size() == 0){
             return Collections.emptyList();
         }
-
         return allRepositories;
     }
 
@@ -526,9 +564,11 @@ public class RepositoryServerImpl implements RepositoryServer {
             repository.setFullPath(cloneAddress.getHttpAddress());
 
             String fullBranch = findDefaultBranch(repository.getRpyId());
-            repository.setDefaultBranch(fullBranch);
-            repository.setNotNull(fullBranch.isEmpty());
 
+
+            repository.setDefaultBranch(fullBranch);
+
+            repository.setNotNull(fullBranch.isEmpty());
             String size = RepositoryUtil.formatSize(repository.getSize());
             repository.setRpySize(size);
         }
@@ -710,15 +750,23 @@ public class RepositoryServerImpl implements RepositoryServer {
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
             File file = new File(repositoryAddress);
             Git git = Git.open(file);
+
+        /*    List<Branch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress);
+            if (CollectionUtils.isEmpty(allBranch)){
+                return null;
+            }*/
+
             org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
             String fullBranch = repository1.getFullBranch().replace(Constants.R_HEADS,"");
           
             git.close();
             return fullBranch;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new SystemException(9000,"仓库不存在"+e);
         }
     }
+
+
 
     /**
      *查询有权限的仓库
@@ -814,6 +862,24 @@ public class RepositoryServerImpl implements RepositoryServer {
             gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_CREATE);
             gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_CREATE,"repository");
         }
+    }
+
+    /**
+     *重置的时候删除仓库关联数据
+     * @param rpyId 仓库id
+     */
+    public void deleterRpyRelatedData(String rpyId){
+
+        //删除文件
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+        File file = new File(repositoryAddress);
+        if (!file.exists()){
+            return;
+        }
+        RepositoryFileUtil.deleteFile(file);
+
+        //删除计划
+        scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
     }
 
 }
