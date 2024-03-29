@@ -55,6 +55,11 @@ public class Commit {
      */
     private String commitUser;
 
+    /*
+    * 目标分支
+    * */
+    private String targetBranch;
+
 
     public int getBegin() {
         return begin;
@@ -135,6 +140,15 @@ public class Commit {
     public void setCommitUser(String commitUser) {
         this.commitUser = commitUser;
     }
+
+    public String getTargetBranch() {
+        return targetBranch;
+    }
+
+    public void setTargetBranch(String targetBranch) {
+        this.targetBranch = targetBranch;
+    }
+
 }
 
 

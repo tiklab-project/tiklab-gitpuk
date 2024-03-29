@@ -1,9 +1,13 @@
 package io.thoughtware.gittok.authority;
 
+import io.thoughtware.eam.common.context.LoginContext;
 import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.setting.model.Auth;
+import io.thoughtware.gittok.setting.model.AuthSsh;
+import io.thoughtware.gittok.setting.model.AuthSshQuery;
 import io.thoughtware.gittok.setting.service.AuthServer;
+import io.thoughtware.gittok.setting.service.AuthSshServer;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
@@ -26,22 +30,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PucKeyValidServerImpl implements PublickeyAuthenticator {
     private static Logger logger = LoggerFactory.getLogger(PucKeyValidServerImpl.class);
 
-    private final AuthServer authServer;
+    private final AuthSshServer authSshServer;
 
-    public PucKeyValidServerImpl(AuthServer authServer) {
-        this.authServer = authServer;
+    public PucKeyValidServerImpl(AuthSshServer authSshServer) {
+        this.authSshServer = authSshServer;
     }
 
     @Override
     public boolean authenticate(String username, PublicKey key, ServerSession session) throws AsyncAuthException {
-        logger.info("1234");
         String algorithm = key.getAlgorithm();
         if (algorithm.equals(RepositoryFinal.SSH_ENCODER_RSA)){
-            List<Auth> userAuth = authServer.findUserAuth();
-            if (userAuth.isEmpty()){
+            List<AuthSsh> userAuthSsh = authSshServer.findAuthSshList(new AuthSshQuery().setUserId(LoginContext.getLoginId()));
+            if (userAuthSsh.isEmpty()){
                 return false;
             }
-            for (Auth auth : userAuth) {
+            for (AuthSsh auth : userAuthSsh) {
                 String value = auth.getValue();
                 //获取公钥的Base64编码数据
                 String keyBase64 = findKeyBase64(value);
@@ -57,7 +60,7 @@ public class PucKeyValidServerImpl implements PublickeyAuthenticator {
                 if (publicKey.equals(key)){
                     //更新使用时间
                     auth.setUserTime(RepositoryUtil.date(1,new Date()));
-                    authServer.updateAuth(auth);
+                    authSshServer.updateAuthSsh(auth);
                     return true;
                 }
             }

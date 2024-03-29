@@ -109,12 +109,13 @@ public class RepositoryController {
     @RequestMapping(path="/findRepositoryByUser",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryByUser",desc = "通过用户查询有权限的仓库")
     @ApiParam(name = "account",desc = "account",required = true)
-    public Result<List<Repository>> findRepositoryByUser(@NotNull String account, @NotNull String password,@NotNull String dirId){
+    public Result<List<Repository>> findRepositoryByUser(@NotNull String account, @NotNull String password, String dirId){
 
         List<Repository> repositoryList = repositoryServer.findRepositoryByUser(account,password,dirId);
 
         return Result.ok(repositoryList);
     }
+
 
     /**
      * @pi.name:条件查询仓库

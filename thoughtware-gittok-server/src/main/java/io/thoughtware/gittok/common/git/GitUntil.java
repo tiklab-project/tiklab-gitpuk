@@ -260,6 +260,20 @@ public class GitUntil {
         git.close();
     }
 
+    /**
+     * 通过file协议将裸仓库转为普通仓库
+     * @param bareRepositoryPath 裸仓库地址
+     * @param  freeRepositoryPath 普通仓库地址
+     */
+    public static void cloneRepositoryByFile(String bareRepositoryPath,String freeRepositoryPath) throws GitAPIException {
+        Git git = Git.cloneRepository()
+                .setURI("file://" + bareRepositoryPath)
+                .setDirectory(new File(freeRepositoryPath))
+                .setBare(true)
+                .call();
+        git.close();
+    }
+
 
     /**
      * 推送到第三方仓库
@@ -291,29 +305,6 @@ public class GitUntil {
             pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(remoteInfo.getSecretKey(), ""));
             pushCommand.call();
         }
-
-
-           /* //ssh 认证
-            SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
-                @Override
-                protected void configure(OpenSshConfig.Host host, Session session) {
-                    // Set any SSH session configurations if needed
-                }
-
-                @Override
-                protected JSch createDefaultJSch(FS fs) throws JSchException {
-                    JSch jSch = super.createDefaultJSch(fs);
-                    jSch.addIdentity(remoteInfo.getSecretKey());
-                    return jSch;
-                }
-            };
-            git.push().setTransportConfigCallback(transport -> {
-                if (transport instanceof SshTransport) {
-                    SshTransport sshTransport = (SshTransport) transport;
-                    sshTransport.setSshSessionFactory(sshSessionFactory);
-                }
-            }).setPushAll().call();
-        }*/
             git.close();
     }
 
@@ -353,4 +344,6 @@ public class GitUntil {
         }
         return process;
     }
+
+
 }

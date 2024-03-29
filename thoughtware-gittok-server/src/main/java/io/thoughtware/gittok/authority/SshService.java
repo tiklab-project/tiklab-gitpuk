@@ -7,6 +7,7 @@ import io.thoughtware.gittok.repository.service.RepositoryServer;
 import io.thoughtware.gittok.setting.service.AuthServer;
 import io.thoughtware.core.context.AppHomeContext;
 import io.thoughtware.core.exception.ApplicationException;
+import io.thoughtware.gittok.setting.service.AuthSshServer;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
@@ -45,7 +46,7 @@ public class SshService {
     ValidUsrPwdServer validUsrPwdServer;
 
     @Autowired
-    AuthServer authServer;
+    AuthSshServer authSShServer;
 
     @Autowired
     RepositoryServer repositoryServer;
@@ -79,7 +80,7 @@ public class SshService {
 
 
         // 设置公钥认证器
-        PucKeyValidServerImpl publicKeyAuthenticator = new PucKeyValidServerImpl(authServer);
+        PucKeyValidServerImpl publicKeyAuthenticator = new PucKeyValidServerImpl(authSShServer);
         sshServer.setPublickeyAuthenticator(publicKeyAuthenticator);
         try {
             sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer));

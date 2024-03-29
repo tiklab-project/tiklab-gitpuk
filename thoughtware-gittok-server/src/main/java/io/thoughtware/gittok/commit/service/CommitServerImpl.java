@@ -43,6 +43,7 @@ public class CommitServerImpl implements CommitServer {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
             branchCommit = GitCommitUntil.findBranchCommit(repository,commit);
+
             git.close();
         } catch (IOException e) {
             throw new ApplicationException("提交记录获取失败："+e);
@@ -51,6 +52,43 @@ public class CommitServerImpl implements CommitServer {
            return Collections.emptyList();
         }
         return commitSort(branchCommit, new ArrayList<>());
+    }
+
+    @Override
+    public List<CommitMessage> findCommitDiffBranch(Commit commit) {
+        String rpyId = commit.getRpyId();
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+        List<CommitMessage> branchCommit;
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+
+            //查询不同分支提交的差异
+           branchCommit = GitCommitUntil.findDiffBranchCommit(git,commit);
+            git.close();
+        } catch (Exception e) {
+            throw new ApplicationException("提交记录获取失败："+e);
+        }
+        if (branchCommit.isEmpty()){
+            return Collections.emptyList();
+        }
+        return commitSort(branchCommit, new ArrayList<>());
+    }
+
+    @Override
+    public FileDiffEntry findDiffBranchFile(Commit commit) {
+        String rpyId = commit.getRpyId();
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+        FileDiffEntry diffBranchFile;
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+
+            //查询不同分支提交的差异
+            diffBranchFile= GitCommitUntil.findDiffBranchFile(git, commit);
+            git.close();
+        } catch (Exception e) {
+            throw new ApplicationException("提交记录获取失败："+e);
+        }
+        return diffBranchFile;
     }
 
     /**
@@ -232,6 +270,8 @@ public class CommitServerImpl implements CommitServer {
             throw new ApplicationException(e);
         }
     }
+
+
 
     /**
      * 获取指定commitId的新旧树

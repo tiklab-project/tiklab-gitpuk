@@ -103,6 +103,7 @@ public class RepositoryServerImpl implements RepositoryServer {
     TagService tagService;
 
 
+
     /**
      * 创建仓库
      * @param repository 信息
@@ -602,29 +603,30 @@ public class RepositoryServerImpl implements RepositoryServer {
 
     @Override
     public List<Repository> findRepositoryByUser(String account, String password,String DirId) {
-        try {
-            validUsrPwdServer.validUser(account, password, DirId);
+
+            User user = userService.findUserByUsernameByPassWard(account, password);
+            if (ObjectUtils.isEmpty(user)){
+                throw new SystemException(5000,"当前用户:"+account+"不存在");
+            }
             List<RepositoryEntity> repositoryEntityList = repositoryDao.findAllRpy();
             List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
             if (CollectionUtils.isNotEmpty(repositoryList)){
                 String address = this.getAddress();
-                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, LoginContext.getLoginId(),"all");
+                List<String> accessRepositoryId = findHaveAccessRepository(repositoryList, user.getId(),"all");
 
-                List<RepositoryEntity> repositoryEntitys = repositoryDao.findRepositoryListByIds(accessRepositoryId);
-                 repositoryList = BeanMapper.mapList(repositoryEntitys,Repository.class);
+                List<RepositoryEntity> repositoryEntity = repositoryDao.findRepositoryListByIds(accessRepositoryId);
+                 repositoryList = BeanMapper.mapList(repositoryEntity,Repository.class);
                 if (CollectionUtils.isNotEmpty(repositoryList)){
                     for (Repository repository:repositoryList){
                         String path = address + "/" + repository.getAddress() + ".git";
                         repository.setFullPath(path);
+                        repository.setDefaultBranch(findDefaultBranch(repository.getRpyId()));
                     }
                 }
             }
-
             return repositoryList;
-        }catch (Exception e){
-            throw  new SystemException("用户校验失败");
-        }
     }
+
 
     @Override
     public String getAddress() {

@@ -42,7 +42,6 @@ public interface CommitServer {
      */
     List<CommitFileDiff> findCommitFileDiff(Commit commit);
 
-
     /**
      * 读取指定提交下的指定文件的指定行数
      * @param commit 提交信息
@@ -50,6 +49,19 @@ public interface CommitServer {
      */
     List<CommitFileDiff> findCommitLineFile(CommitFile commit);
 
+    /**
+     * 查询仓库不同分支差异的提交
+     * @param commit 提交信息
+     * @return 文件内容
+     */
+    List<CommitMessage> findCommitDiffBranch(Commit commit);
+
+    /**
+     * 查询仓库不同分支差异的文件
+     * @param commit 提交信息
+     * @return 文件内容
+     */
+    FileDiffEntry findDiffBranchFile(Commit commit);
 }
 
 

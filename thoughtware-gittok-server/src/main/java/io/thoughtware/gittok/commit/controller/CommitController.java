@@ -88,6 +88,25 @@ public class CommitController {
     }
 
 
+    @RequestMapping(path="/findCommitDiffBranch",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitNoBranch",desc = "查询仓库不同分支差异提交")
+    @ApiParam(name = "commit",desc = "commit",required = true)
+    public Result<List<CommitMessage>> findCommitDiffBranch(@RequestBody @Valid @NotNull Commit commit){
+
+        List<CommitMessage> allBranch = commitServer.findCommitDiffBranch(commit);
+
+        return Result.ok(allBranch);
+    }
+
+    @RequestMapping(path="/findDiffBranchFile",method = RequestMethod.POST)
+    @ApiMethod(name = "findDiffBranchFile",desc = "查询仓库不同分支的提交差异文件")
+    @ApiParam(name = "commit",desc = "commit",required = true)
+    public Result<FileDiffEntry> findDiffBranchFile(@RequestBody @Valid @NotNull Commit commit){
+
+        FileDiffEntry fileDiffList = commitServer.findDiffBranchFile(commit);
+
+        return Result.ok(fileDiffList);
+    }
 
 }
 

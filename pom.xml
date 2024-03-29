@@ -51,22 +51,24 @@
         <commons-compress.version>1.19</commons-compress.version>
         <commons-io.version>2.11.0</commons-io.version>
         <sshd-core.version>2.9.2</sshd-core.version>
-        <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
-       <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version>-->
-
-        <commons-lang3.version>3.12.0</commons-lang3.version>
-        <quartz.version>2.3.2</quartz.version>
-        <quartz-spring-boot.version>3.1.1</quartz-spring-boot.version>
-    </properties>
-
-    <modules>
-        <module>thoughtware-gittok-api</module>
-        <module>thoughtware-gittok-server</module>
-        <module>thoughtware-gittok-starter</module>
-    </modules>
+         <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
+        <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version> -->
+    <!--   <org-jgit.version>6.8.0.202311291450-r</org-jgit.version>-->
 
 
-    <!-- 许可证信息 -->
+<commons-lang3.version>3.12.0</commons-lang3.version>
+<quartz.version>2.3.2</quartz.version>
+<quartz-spring-boot.version>3.1.1</quartz-spring-boot.version>
+</properties>
+
+<modules>
+<module>thoughtware-gittok-api</module>
+<module>thoughtware-gittok-server</module>
+<module>thoughtware-gittok-starter</module>
+</modules>
+
+
+<!-- 许可证信息 -->
     <licenses>
         <!-- Apache许可证 -->
         <license>

@@ -130,7 +130,8 @@ public class CodeScanSonarServiceImpl implements CodeScanSonarService {
                 FileUtils.deleteDirectory(new File(cloneRepositoryUrl));
             }
             joinScanLog(scanRecord, "开始执行sonar扫描");
-            GitUntil.cloneRepository(repositoryUrl, scanPlay.getBranch(), cloneRepositoryUrl);
+            //GitUntil.cloneRepository(repositoryUrl, scanPlay.getBranch(), cloneRepositoryUrl);
+            GitUntil.cloneRepositoryByFile(repositoryUrl, cloneRepositoryUrl);
             logger.info("sonar扫描->推送sonar");
             Process  process = RepositoryUtil.process(deployEnv.getEnvAddress(), order);
             //读取执行日志

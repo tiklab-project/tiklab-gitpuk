@@ -34,20 +34,6 @@ create table rpy_repository(
     color           int
 );
 -- ---------------------------
--- 密钥表
--- ----------------------------
-create table rpy_auth(
-     auth_id              varchar(12),
-     rpy_id              varchar(12) ,
-     title                varchar(256),
-     create_time          varchar(256),
-     user_id              varchar(12) ,
-     user_time            varchar(256),
-     value                TEXT ,
-     type                 int
-);
-
--- ---------------------------
 -- 打开仓库记录表
 -- ----------------------------
 create table rpy_record_open(

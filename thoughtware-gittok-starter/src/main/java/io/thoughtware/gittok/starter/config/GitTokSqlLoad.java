@@ -36,6 +36,7 @@ public class GitTokSqlLoad {
         });
 
         dsmConfig.newVersion("1.0.1", new String[]{
+                "xcode_1.0.1",
                 "oplog_1.0.1",
                 "message_1.0.1",
                 "todotask_1.0.1",
@@ -47,6 +48,7 @@ public class GitTokSqlLoad {
                 "message_1.0.2",
                 "oplog_1.0.2",
                 "todotask_1.0.2",
+                "apply-auth_1.0.2",
         });
         dsmConfig.newVersion("1.0.3", new String[]{
                 "message_1.0.3",

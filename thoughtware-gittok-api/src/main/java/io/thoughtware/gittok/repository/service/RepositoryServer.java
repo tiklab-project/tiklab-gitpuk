@@ -179,6 +179,7 @@ public interface RepositoryServer {
      */
     List<Repository> findRepositoryByUser(String account,String password,String DirId);
 
+
     /**
      * 获取域名或者ip
      * @return 绝对路径

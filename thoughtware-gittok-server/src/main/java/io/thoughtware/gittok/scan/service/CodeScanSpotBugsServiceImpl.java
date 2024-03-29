@@ -98,8 +98,8 @@ public class CodeScanSpotBugsServiceImpl implements CodeScanSpotBugsService {
             if (file.exists()) {
                 FileUtils.deleteDirectory(new File(cloneUrl));
             }
-            GitUntil.cloneRepository(repositoryUrl, scanPlay.getBranch(), cloneUrl);
-
+            //GitUntil.cloneRepository(repositoryUrl, scanPlay.getBranch(), cloneUrl);
+            GitUntil.cloneRepositoryByFile(repositoryUrl, cloneUrl);
             logger.info("SpotBugs扫描->mvn 开始编译");
             Process  mvnProcess = RepositoryUtil.process(cloneUrl, "mvn clean compile");
 

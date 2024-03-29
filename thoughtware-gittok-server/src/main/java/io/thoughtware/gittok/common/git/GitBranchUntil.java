@@ -4,6 +4,7 @@ import io.thoughtware.gittok.branch.model.Branch;
 import io.thoughtware.gittok.branch.model.BranchQuery;
 import io.thoughtware.gittok.commit.model.CommitMessage;
 import io.thoughtware.core.exception.ApplicationException;
+import io.thoughtware.gittok.commit.model.MergeData;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
@@ -304,24 +305,28 @@ public class GitBranchUntil {
 
     /**
      * 合并分支
-     * @param repository repository
-     * @param branch 源分支
+     * @param mergeData mergeData
+     * @param repositoryPath 仓库地址
      * @throws ApplicationException 切换失败
      */
-    public static void mergeBranch( Repository repository,String branch) {
+    public static String mergeBranch(MergeData mergeData, String repositoryPath) {
 
         try {
+            Repository repository = Git.open(new File(repositoryPath)).getRepository();
+
             Git git = new Git(repository);
+            //源分支
+            String mergeOrigin = mergeData.getMergeOrigin();
+            Ref sourceRef = repository.exactRef("refs/heads/" + mergeOrigin);
 
-            //默认分支
-            String deBranch = git.getRepository().getBranch();
+            //目标分支
+            String mergeTarget = mergeData.getMergeTarget();
+            Ref targetRef = repository.exactRef("refs/heads/" + mergeTarget);
 
-            Ref sourceRef = repository.exactRef("refs/heads/" + deBranch);
-            Ref targetRef = repository.exactRef("refs/heads/" + branch);
 
             // 执行分支合并操作
             MergeCommand mergeCommand = git.merge();
-            mergeCommand.include(sourceRef.getObjectId());
+            mergeCommand.include(sourceRef);
             mergeCommand.setFastForward(MergeCommand.FastForwardMode.FF);
             MergeResult called = mergeCommand.call();
 
@@ -343,6 +348,58 @@ public class GitBranchUntil {
                 *   REJECTED：表示更新引用被拒绝。
                 *   IO_FAILURE：表示在更新引用时遇到了I/O错误。
                 * */
+                /*if (("NEW").equals(name)||("FORCED").equals(name)||("FAST_FORWARD").equals(name)){
+
+                }*/
+             /*   if (("NO_CHANGE").equals(name)){
+                    throw new ApplicationException(5000,"两个分子没有不同的不需要合并");
+                }*/
+                return "ok";
+            } else {
+                throw new ApplicationException(5000,"合并分支失败");
+            }
+
+        } catch (Exception e) {
+            throw new ApplicationException(5000,"合并分支失败："+e.getMessage());
+        }
+    }
+
+
+    /*public static void mergeBranch(Repository repository,String branch) {
+
+        try {
+            Git git = new Git(repository);
+
+            //默认分支
+            String deBranch = git.getRepository().getBranch();
+
+            Ref sourceRef = repository.exactRef("refs/heads/" + deBranch);
+            Ref targetRef = repository.exactRef("refs/heads/" + branch);
+
+            // 执行分支合并操作
+            MergeCommand mergeCommand = git.merge();
+            mergeCommand.include(sourceRef.getObjectId());
+            mergeCommand.setFastForward(MergeCommand.FastForwardMode.NO_FF);
+            MergeResult called = mergeCommand.call();
+
+            if (called.getMergeStatus().isSuccessful()) {
+
+                // 更新目标分支引用
+                RefUpdate refUpdate = repository.updateRef(targetRef.getName());
+                refUpdate.setNewObjectId(called.getNewHead());
+                refUpdate.setForceUpdate(true);
+                RefUpdate.Result updateResult = refUpdate.update();
+                String name = updateResult.name();
+
+                *//*
+                 *   NEW：表示引用是新创建的。
+                 *   FORCED：表示引用已被强制更新。
+                 *   FAST_FORWARD：表示引用是通过快进方式更新的。
+                 *   NO_CHANGE：表示引用没有发生变化，无需更新。
+                 *   LOCK_FAILURE：表示在更新引用时遇到了锁定失败。
+                 *   REJECTED：表示更新引用被拒绝。
+                 *   IO_FAILURE：表示在更新引用时遇到了I/O错误。
+                 * *//*
                 if (("NEW").equals(name)||("FORCED").equals(name)||("FAST_FORWARD").equals(name)){
 
                 }
@@ -357,9 +414,7 @@ public class GitBranchUntil {
         } catch (Exception e) {
             throw new ApplicationException("切换默认分支失败:"+e.getMessage());
         }
-    }
-
-
+    }*/
 }
 
 

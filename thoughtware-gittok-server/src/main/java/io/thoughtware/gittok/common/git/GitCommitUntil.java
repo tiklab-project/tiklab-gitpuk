@@ -12,16 +12,20 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * jgit获取仓库提交信息
@@ -78,8 +82,8 @@ public class GitCommitUntil {
                 return list;
             }
 
-            TreeWalk treeWalk = new TreeWalk(repository);
-            treeWalk.reset(revCommit.getTree());
+         /*   TreeWalk treeWalk = new TreeWalk(repository);
+            treeWalk.reset(revCommit.getTree());*/
 
 
             CommitMessage commitMessage;
@@ -105,7 +109,7 @@ public class GitCommitUntil {
             commitMessage = getCommitMessage(revCommit);
             list.add(commitMessage);
 
-            treeWalk.close();
+            //treeWalk.close();
             revCommit.disposeBody();
             i++;
         }
@@ -116,6 +120,130 @@ public class GitCommitUntil {
     }
 
 
+
+    /**
+     * 获取两个不同分支的差异提交
+     * @param git 仓库
+     * @param commit 提交信息
+     * @return 提交记录
+     * @throws IOException 仓库不存在
+     * @throws ApplicationException 分支不存在
+     */
+    public static List<CommitMessage> findDiffBranchCommit(Git git , Commit commit) throws IOException {
+        List<CommitMessage> diffList = new ArrayList<>();
+
+        //目标分支
+        List<RevCommit> targetList = new ArrayList<>();
+        RevWalk targetRevWalk = new RevWalk(git.getRepository());
+        ObjectId targetObjectId = git.getRepository().resolve(commit.getTargetBranch());
+        targetRevWalk.markStart(targetRevWalk.parseCommit(targetObjectId));
+        for (RevCommit revCommit:targetRevWalk){
+            targetList.add(revCommit);
+        }
+
+        //源分支
+        RevWalk originRevWalk = new RevWalk(git.getRepository());
+        ObjectId originObjectId = git.getRepository().resolve(commit.getBranch());
+        originRevWalk.markStart(originRevWalk.parseCommit(originObjectId));
+
+        for (RevCommit revCommit:originRevWalk){
+            String commitId = revCommit.getId().getName();
+            List<RevCommit> collect = targetList.stream().filter(a -> a.getId().getName().equals(commitId)).collect(Collectors.toList());
+            if (collect.isEmpty()){
+                CommitMessage commitMessage = getCommitMessage(revCommit);
+                diffList.add(commitMessage);
+            }
+        }
+
+        return diffList;
+    }
+
+    /**
+     * 获取两个不同分支的差异的文件
+     * @param git 仓库
+     * @param commit 提交信息
+     * @return 提交记录
+     * @throws IOException 仓库不存在
+     * @throws ApplicationException 分支不存在
+     */
+   public static FileDiffEntry findDiffBranchFile(Git git , Commit commit) throws IOException {
+
+       FileDiffEntry fileDiffEntry = new FileDiffEntry();
+       List<CommitFileDiffList> list = new ArrayList<>();
+
+       Repository repository = git.getRepository();
+       RevWalk revWalk = new RevWalk(git.getRepository());
+
+       //目标分支
+        ObjectId targetObjectId= git.getRepository().resolve(commit.getTargetBranch());
+        RevCommit targetCommit = revWalk.parseCommit(targetObjectId);
+
+        //源分支
+        ObjectId originObjectId = git.getRepository().resolve(commit.getBranch());
+        RevCommit originCommit = revWalk.parseCommit(originObjectId);
+
+        DiffFormatter diffFormatter = new DiffFormatter(System.out);
+        diffFormatter.setRepository(git.getRepository());
+        List<DiffEntry> diffEntries = diffFormatter.scan(targetCommit.getTree(), originCommit.getTree());
+
+        int allAddLine=0;     //总的增加行数
+        int allDeleteLine=0;  //总的减少行数
+
+        // 遍历差异项，处理每个不同的提交
+        for (DiffEntry diffEntry : diffEntries) {
+            CommitFileDiffList commitFileDiffList = new CommitFileDiffList();
+            String name = diffEntry.getChangeType().name();
+            String oldPath = diffEntry.getOldPath();
+            String newPath = diffEntry.getNewPath();
+            FileMode oldMode = diffEntry.getOldMode();
+            FileMode newMode = diffEntry.getNewMode();
+            commitFileDiffList.setType(name);
+            commitFileDiffList.setOldFilePath(oldPath);
+            commitFileDiffList.setOldFileType(oldMode.toString());
+            commitFileDiffList.setNewFilePath(newPath);
+            commitFileDiffList.setNewFileType(newMode.toString());
+
+            String path ;
+            //通过文件的后缀获取类型 java、js...
+            if (!newPath.equals(RepositoryFinal.FILE_PATH_NULL)){
+                path = newPath;
+                commitFileDiffList.setFileType(StringUtils.substringAfterLast(newPath,"/"));
+            }else {
+                path = oldPath;
+                commitFileDiffList.setFileType(StringUtils.substringAfterLast(oldPath,"/"));
+            }
+
+            //获取文件差异详情
+            int deleteLine=0;
+            int addLine=0;
+            String[] diffLines = findFileChangedList(repository,originCommit, targetCommit, path);
+            for (String line : diffLines) {
+                if (line.startsWith("+++") || line.startsWith("---")){
+                    continue;
+                }
+                if (line.startsWith("-")  ){
+                    deleteLine+=1;
+                }
+                if (line.startsWith("+")  ){
+                    addLine+=1;
+                }
+            }
+            commitFileDiffList.setAddLine(addLine);
+            commitFileDiffList.setDeleteLine(deleteLine);
+
+            //获取总的变动行数
+            allAddLine+=addLine;
+            allDeleteLine+=deleteLine;
+
+            list.add(commitFileDiffList);
+        }
+
+       fileDiffEntry.setAddLine(allAddLine);
+       fileDiffEntry.setDeleteLine(allDeleteLine);
+       fileDiffEntry.setDiffList(list);
+
+       return fileDiffEntry;
+    }
 
     /**
      * 获取分支的提交记录
@@ -489,6 +617,9 @@ public class GitCommitUntil {
 
         return commitMessage;
     }
+
+
+
 }
 
 
