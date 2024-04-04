@@ -15,14 +15,19 @@ public class MergeRequestQuery {
     @ApiProperty(name ="orderParams",desc = "排序参数")
     private List<Order> orderParams = OrderBuilders.instance().desc("createTime").get();
     @ApiProperty(name ="RpyId",desc = "仓库id")
-    private String  RpyId;
+    private String  rpyId;
 
-    @ApiProperty(name ="mergeState",desc = "和平请求状态")
+    @ApiProperty(name ="mergeState",desc = "合并请求状态")
     private Integer  mergeState;
 
     @ApiProperty(name ="title",desc = "标题")
     private String  title;
 
+    @ApiProperty(name ="mergeOrigin",desc = "合并源")
+    private String  mergeOrigin;
+
+    @ApiProperty(name ="mergeTarget",desc = "目标源")
+    private String  mergeTarget;
 
     public List<Order> getOrderParams() {
         return orderParams;
@@ -33,11 +38,11 @@ public class MergeRequestQuery {
     }
 
     public String getRpyId() {
-        return RpyId;
+        return rpyId;
     }
 
     public void setRpyId(String rpyId) {
-        RpyId = rpyId;
+        this.rpyId = rpyId;
     }
 
     public Page getPageParam() {
@@ -62,5 +67,21 @@ public class MergeRequestQuery {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getMergeOrigin() {
+        return mergeOrigin;
+    }
+
+    public void setMergeOrigin(String mergeOrigin) {
+        this.mergeOrigin = mergeOrigin;
+    }
+
+    public String getMergeTarget() {
+        return mergeTarget;
+    }
+
+    public void setMergeTarget(String mergeTarget) {
+        this.mergeTarget = mergeTarget;
     }
 }

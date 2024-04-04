@@ -131,10 +131,6 @@ public class RepositoryServerImpl implements RepositoryServer {
 
             //Gitignore存在
             if (StringUtils.isNotEmpty(repository.getGitignoreValue())){
-               /* List<GitignoreFile> gitignoreFileList = gitignoreFileService.findGitignoreFileList(new GitignoreFileQuery().setValue(repository.getGitignoreValue()));
-                if (CollectionUtils.isNotEmpty(gitignoreFileList)){
-                     ignoreFileData = gitignoreFileList.get(0).getData();
-                }*/
                 ignoreFilePath= appHome+"/gitignore/"+repository.getGitignoreValue();
             }
 
@@ -350,17 +346,6 @@ public class RepositoryServerImpl implements RepositoryServer {
     }
 
 
-    @Override
-    public List<Repository> findAllRpyList() {
-        List<RepositoryEntity> groupEntityList = repositoryDao.findAllRpy();
-        List<Repository> list = BeanMapper.mapList(groupEntityList, Repository.class);
-
-        joinTemplate.joinQuery(list);
-
-        return list;
-    }
-
-
     /**
      * 查询所有仓库
      * @return 仓库信息列表
@@ -564,18 +549,55 @@ public class RepositoryServerImpl implements RepositoryServer {
             RepositoryCloneAddress cloneAddress = findCloneAddress(repository.getRpyId());
             repository.setFullPath(cloneAddress.getHttpAddress());
 
+            //查询默认分支
             String fullBranch = findDefaultBranch(repository.getRpyId());
 
+            if (StringUtils.isNotEmpty(fullBranch)){
+                repository.setDefaultBranch(fullBranch);
+                repository.setNotNull(fullBranch.isEmpty());
+            }
 
-            repository.setDefaultBranch(fullBranch);
 
-            repository.setNotNull(fullBranch.isEmpty());
             String size = RepositoryUtil.formatSize(repository.getSize());
             repository.setRpySize(size);
         }
         return repository;
     }
 
+    @Override
+    public Repository findConciseRepositoryByAddress(String address) {
+        List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryByAddress(address);
+
+        List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
+
+        if (CollectionUtils.isEmpty(repositoryList)){
+            return null;
+        }
+
+        try {
+            Repository repository = repositoryList.get(0);
+
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryList.get(0).getRpyId());
+
+            //查询所有分支
+            List<Branch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress);
+            if (CollectionUtils.isEmpty(allBranch)){
+                return null;
+            }
+
+            //获取默认分支
+            List<Branch> defaultBranch = allBranch.stream().filter(a -> a.isDefaultBranch()).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(defaultBranch)){
+                repository.setUniqueBranch(allBranch.get(0).getBranchName());
+            }
+
+            return repository;
+
+        }catch (Exception e){
+            logger.info("查询简洁的仓库获取分支失败："+e.getMessage());
+            throw new SystemException(9000,"查询仓库获取分支失败"+e.getMessage());
+        }
+    }
 
 
     @Override
@@ -746,23 +768,25 @@ public class RepositoryServerImpl implements RepositoryServer {
         return "false";
     }
 
-
+    /**
+     *查询当前仓库的默认分支
+     * @return repositoryId repositoryId
+     */
     public String findDefaultBranch(String repositoryId){
         try {
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
-            File file = new File(repositoryAddress);
-            Git git = Git.open(file);
 
-        /*    List<Branch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress);
+            //查询所有分支
+            List<Branch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress);
             if (CollectionUtils.isEmpty(allBranch)){
                 return null;
-            }*/
+            }
 
-            org.eclipse.jgit.lib.Repository repository1 = git.getRepository();
-            String fullBranch = repository1.getFullBranch().replace(Constants.R_HEADS,"");
-          
-            git.close();
-            return fullBranch;
+            List<Branch> defaultBranch = allBranch.stream().filter(a -> a.isDefaultBranch()).collect(Collectors.toList());
+           if (CollectionUtils.isEmpty(defaultBranch)){
+               return null;
+           }
+            return defaultBranch.get(0).getBranchName();
         } catch (Exception e) {
             throw new SystemException(9000,"仓库不存在"+e);
         }

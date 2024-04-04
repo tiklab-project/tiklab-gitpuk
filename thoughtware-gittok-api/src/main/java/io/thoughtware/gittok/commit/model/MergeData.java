@@ -22,7 +22,7 @@ public class MergeData {
     @ApiProperty(name="mergeType",desc="合并类型 branch、commit")
     private String mergeType;
 
-    @ApiProperty(name="mergeWay",desc="合并方式  normal、squash、fast")
+    @ApiProperty(name="mergeWay",desc="合并方式  createNode、squash、rebase、fast")
     private String mergeWay;
     @ApiProperty(name="deleteOrigin",desc="是否删除源分支")
     private boolean deleteOrigin;

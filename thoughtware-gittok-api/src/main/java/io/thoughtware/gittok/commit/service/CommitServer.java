@@ -36,7 +36,7 @@ public interface CommitServer {
     FileDiffEntry findLikeCommitDiffFileList(Commit commit);
 
     /**
-     * 获取提交的具体文件的文件内容
+     * 查询具体文件两次提交的差异
      * @param commit commitId
      * @return 文件列表
      */
@@ -62,6 +62,13 @@ public interface CommitServer {
      * @return 文件内容
      */
     FileDiffEntry findDiffBranchFile(Commit commit);
+
+    /**
+     * 查询仓库不同分支差异的文件的详情
+     * @param commit 提交信息
+     * @return 文件内容
+     */
+    List<CommitFileDiff> findDiffBranchFileDetails(Commit commit);
 }
 
 

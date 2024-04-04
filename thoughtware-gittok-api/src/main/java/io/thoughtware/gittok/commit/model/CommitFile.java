@@ -18,6 +18,11 @@ public class CommitFile {
     private String commitId;
 
     /**
+     * 分支
+     */
+    private String branch;
+
+    /**
      * 文件地址
      */
     private String path;
@@ -41,6 +46,12 @@ public class CommitFile {
      * 获取类型 up:向上 down:向下获取
      */
     private String direction;
+
+
+    /**
+     *查询类型 通过提交id查询：commit、通过分支查询：branch
+     */
+    private String queryType;
 
     public String getCommitId() {
         return commitId;
@@ -96,5 +107,21 @@ public class CommitFile {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public String getQueryType() {
+        return queryType;
+    }
+
+    public void setQueryType(String queryType) {
+        this.queryType = queryType;
     }
 }

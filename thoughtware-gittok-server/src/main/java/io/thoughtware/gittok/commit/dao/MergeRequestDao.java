@@ -6,6 +6,7 @@ import io.thoughtware.dal.jpa.criterial.condition.DeleteCondition;
 import io.thoughtware.dal.jpa.criterial.condition.QueryCondition;
 import io.thoughtware.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.thoughtware.gittok.commit.entity.MergeRequestEntity;
+import io.thoughtware.gittok.commit.model.MergeRequest;
 import io.thoughtware.gittok.commit.model.MergeRequestQuery;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -94,6 +95,8 @@ public class MergeRequestDao {
         QueryCondition queryCondition = QueryBuilders.createQuery(MergeRequestEntity.class)
                 .eq("rpyId", mergeRequestQuery.getRpyId())
                 .eq("mergeState",mergeRequestQuery.getMergeState())
+                .eq("mergeOrigin", mergeRequestQuery.getMergeOrigin())
+                .eq("mergeTarget",mergeRequestQuery.getMergeTarget())
                 .like("title",mergeRequestQuery.getTitle())
                 .orders(mergeRequestQuery.getOrderParams())
                 .get();
@@ -109,6 +112,8 @@ public class MergeRequestDao {
         QueryCondition queryCondition = QueryBuilders.createQuery(MergeRequestEntity.class)
                 .eq("rpyId", mergeRequestQuery.getRpyId())
                 .eq("mergeState",mergeRequestQuery.getMergeState())
+                .eq("mergeOrigin", mergeRequestQuery.getMergeOrigin())
+                .eq("mergeTarget",mergeRequestQuery.getMergeTarget())
                 .like("title",mergeRequestQuery.getTitle())
                 .orders(mergeRequestQuery.getOrderParams())
                 .pagination(mergeRequestQuery.getPageParam())

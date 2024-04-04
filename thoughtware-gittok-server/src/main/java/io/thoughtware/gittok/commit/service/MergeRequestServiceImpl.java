@@ -158,7 +158,13 @@ public class MergeRequestServiceImpl implements MergeRequestService {
         String rpyId = mergeData.getRpyId();
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
 
-        String result = GitBranchUntil.mergeBranch(mergeData, repositoryAddress);
+        String result;
+        if (("fast").equals(mergeData.getMergeWay())){
+            result  = GitBranchUntil.mergeBranchByFast(mergeData, repositoryAddress);
+        }else {
+            result  = GitBranchUntil.mergeBranch(mergeData, repositoryAddress);
+        }
+
         //合并成功修改合并请求的状态
         if (("ok").equals(result)){
             MergeRequest request = this.findOne(mergeData.getMergeRequestId());

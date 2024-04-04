@@ -40,6 +40,7 @@
         <thoughtware-eam.version>1.0.1-SNAPSHOT</thoughtware-eam.version>
         <thoughtware-postgresql.version>1.0.1-SNAPSHOT</thoughtware-postgresql.version>
         <thoughtware-spotbugs.version>1.0.0</thoughtware-spotbugs.version>
+        <thoughtware-plugin.version>1.0.1-SNAPSHOT</thoughtware-plugin.version>
 
         <thoughtware-postin-doclet-version>1.0.1-SNAPSHOT</thoughtware-postin-doclet-version>
 
@@ -52,8 +53,8 @@
         <commons-io.version>2.11.0</commons-io.version>
         <sshd-core.version>2.9.2</sshd-core.version>
          <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
-        <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version> -->
-    <!--   <org-jgit.version>6.8.0.202311291450-r</org-jgit.version>-->
+       <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version> -->
+    <!-- <org-jgit.version>4.11.9.201909030838-r</org-jgit.version>-->
 
 
 <commons-lang3.version>3.12.0</commons-lang3.version>

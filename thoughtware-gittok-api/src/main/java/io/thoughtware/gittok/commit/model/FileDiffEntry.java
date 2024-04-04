@@ -25,6 +25,11 @@ public class FileDiffEntry {
     private String commitMessage;
 
     /**
+     * 父commitId
+     */
+    private List<String> parentCommitIds;
+
+    /**
      * 添加行
      */
     private int addLine;
@@ -81,5 +86,13 @@ public class FileDiffEntry {
 
     public void setDeleteLine(int deleteLine) {
         this.deleteLine = deleteLine;
+    }
+
+    public List<String> getParentCommitIds() {
+        return parentCommitIds;
+    }
+
+    public void setParentCommitIds(List<String> parentCommitIds) {
+        this.parentCommitIds = parentCommitIds;
     }
 }

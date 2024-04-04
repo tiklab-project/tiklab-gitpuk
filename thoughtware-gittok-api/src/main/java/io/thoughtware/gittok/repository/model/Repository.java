@@ -200,6 +200,10 @@ public class Repository implements Serializable {
     //创建.Gitignore文件
     private String gitignoreValue;
 
+
+    //第一次上传空仓库 不是默认分支且只有一个分支
+    private String uniqueBranch;
+
     public String getRpyId() {
         return rpyId;
     }
@@ -384,6 +388,14 @@ public class Repository implements Serializable {
 
     public void setGitignoreValue(String gitignoreValue) {
         this.gitignoreValue = gitignoreValue;
+    }
+
+    public String getUniqueBranch() {
+        return uniqueBranch;
+    }
+
+    public void setUniqueBranch(String uniqueBranch) {
+        this.uniqueBranch = uniqueBranch;
     }
 }
 

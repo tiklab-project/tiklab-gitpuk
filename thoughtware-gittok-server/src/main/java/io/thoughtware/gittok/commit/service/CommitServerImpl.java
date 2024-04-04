@@ -91,6 +91,23 @@ public class CommitServerImpl implements CommitServer {
         return diffBranchFile;
     }
 
+    @Override
+    public List<CommitFileDiff> findDiffBranchFileDetails(Commit commit) {
+        String rpyId = commit.getRpyId();
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+        List<CommitFileDiff> diffBranchFileDetails;
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+
+            //查询不同分支提交的差异
+            diffBranchFileDetails = GitCommitUntil.findDiffBranchFileDetails(git, commit);
+            git.close();
+        } catch (Exception e) {
+            throw new ApplicationException("提交记录获取失败："+e);
+        }
+        return diffBranchFileDetails;
+    }
+
     /**
      * 获取最近一次的提交记录
      * @param commit 仓库id
@@ -192,16 +209,7 @@ public class CommitServerImpl implements CommitServer {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
 
-            Map<String, RevCommit> newOldTree = findCommitNewOldTree(
-                    repository, commit.getBranch(), commit.isFindCommitId());
-
-            RevCommit revCommit = newOldTree.get("newTree");
-
-            //获取旧树
-            RevCommit oldRevCommit =  newOldTree.get("oldTree");
-
-            List<CommitFileDiff> fileChanged = GitCommitUntil.findFileChanged(repository,
-                    revCommit, oldRevCommit, commit.getFilePath());
+            List<CommitFileDiff> fileChanged = GitCommitUntil.findDiffCommitFileDetails(repository,commit.getCommitId(),commit.getOriginCommitId(),commit.getFilePath());
             git.close();
             return fileChanged;
         } catch (IOException e) {
@@ -221,8 +229,16 @@ public class CommitServerImpl implements CommitServer {
             Git git = Git.open(new File(repositoryAddress));
             org.eclipse.jgit.lib.Repository repository = git.getRepository();
 
-            FileMessage fileMessage = RepositoryFileUtil.readBranchFile(repository,
-                    commit.getCommitId(), commit.getPath(), true);
+            //查询方式通过提交id 或者分查询
+            FileMessage fileMessage;
+            if (("commit").equals(commit.getQueryType())){
+                 fileMessage = RepositoryFileUtil.readBranchFile(repository,
+                        commit.getCommitId(), commit.getPath(), true);
+            }else {
+                fileMessage = RepositoryFileUtil.readBranchFile(repository,
+                        commit.getBranch(), commit.getPath(), false);
+            }
+
             String message = fileMessage.getFileMessage();
             String[] split = message.split("\n");
 

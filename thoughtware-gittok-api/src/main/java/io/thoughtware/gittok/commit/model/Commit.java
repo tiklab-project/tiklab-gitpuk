@@ -15,10 +15,6 @@ public class Commit {
      */
     private String branch;
 
-    /**
-     * 分支是否为commitId  （通过提交界面查询提交代码文件的详情）
-     */
-    private boolean findCommitId;
 
     /**
      * 文件地址
@@ -60,6 +56,21 @@ public class Commit {
     * */
     private String targetBranch;
 
+
+    /**
+     * 查询是否是通过commitId查询  （通过提交界面查询提交代码文件或者查询代码文件的详情）
+     */
+    private boolean findCommitId;
+
+    /**
+     *源commitId （一般都是父级）
+     */
+    private String originCommitId;
+
+    /**
+     *当前的commitId
+     */
+    private String commitId;
 
     public int getBegin() {
         return begin;
@@ -149,6 +160,21 @@ public class Commit {
         this.targetBranch = targetBranch;
     }
 
+    public String getOriginCommitId() {
+        return originCommitId;
+    }
+
+    public void setOriginCommitId(String originCommitId) {
+        this.originCommitId = originCommitId;
+    }
+
+    public String getCommitId() {
+        return commitId;
+    }
+
+    public void setCommitId(String commitId) {
+        this.commitId = commitId;
+    }
 }
 
 

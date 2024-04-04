@@ -56,7 +56,7 @@ public class CommitController {
     }
 
     @RequestMapping(path="/findCommitFileDiff",method = RequestMethod.POST)
-    @ApiMethod(name = "findCommitFileDiff",desc = "文件具体内容信息")
+    @ApiMethod(name = "findCommitFileDiff",desc = "查询具体文件两次提交的差异")
     @ApiParam(name = "commit",desc = "commitId",required = true)
     public Result< List<CommitFileDiff>> findCommitDiffFile(@RequestBody @Valid @NotNull Commit commit){
 
@@ -78,7 +78,7 @@ public class CommitController {
 
 
     @RequestMapping(path="/findCommitLineFile",method = RequestMethod.POST)
-    @ApiMethod(name = "findCommitLineFile",desc = "文件具体内容信息")
+    @ApiMethod(name = "findCommitLineFile",desc = "查询提交文件具体内容信息")
     @ApiParam(name = "commit",desc = "commitId",required = true)
     public Result< List<CommitFileDiff>> findCommitDiffFile( @RequestBody @Valid @NotNull CommitFile commit){
 
@@ -86,6 +86,7 @@ public class CommitController {
 
         return Result.ok(fileDiff);
     }
+
 
 
     @RequestMapping(path="/findCommitDiffBranch",method = RequestMethod.POST)
@@ -108,6 +109,15 @@ public class CommitController {
         return Result.ok(fileDiffList);
     }
 
+    @RequestMapping(path="/findDiffBranchFileDetails",method = RequestMethod.POST)
+    @ApiMethod(name = "findDiffBranchFile",desc = "查询仓库不同分支的提交差异文件详情")
+    @ApiParam(name = "commit",desc = "commit",required = true)
+    public Result<List<CommitFileDiff>> findDiffBranchFileDetails(@RequestBody @Valid @NotNull Commit commit){
+
+        List<CommitFileDiff> fileDiff  = commitServer.findDiffBranchFileDetails(commit);
+
+        return Result.ok(fileDiff);
+    }
 }
 
 

@@ -44,7 +44,7 @@ public class GitTokFileController {
     }
 
     @RequestMapping(path="/writeFile",method = RequestMethod.POST)
-    @ApiMethod(name = "writeFile",desc = "读取文件")
+    @ApiMethod(name = "writeFile",desc = "写入文件")
     @ApiParam(name = "rpyId",desc = "rpyId",required = true)
     public Result<Void> writeFile(@NotNull @RequestBody @Valid FileQuery fileQuery){
 

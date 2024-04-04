@@ -8,6 +8,7 @@ public class CommitFileDiff {
 
     private int index;
 
+    //内容
     private String text;
 
     private int left;

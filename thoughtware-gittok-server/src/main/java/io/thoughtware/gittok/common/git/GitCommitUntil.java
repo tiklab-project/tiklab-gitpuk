@@ -197,6 +197,7 @@ public class GitCommitUntil {
             String newPath = diffEntry.getNewPath();
             FileMode oldMode = diffEntry.getOldMode();
             FileMode newMode = diffEntry.getNewMode();
+
             commitFileDiffList.setType(name);
             commitFileDiffList.setOldFilePath(oldPath);
             commitFileDiffList.setOldFileType(oldMode.toString());
@@ -244,6 +245,41 @@ public class GitCommitUntil {
 
        return fileDiffEntry;
     }
+
+
+    /**
+     * 获取两个不同分支的差异的文件的详情
+     * @param git 仓库
+     * @param commit 提交信息
+     * @return 提交记录
+     * @throws IOException 仓库不存在
+     * @throws ApplicationException 分支不存在
+     */
+    public static List<CommitFileDiff>  findDiffBranchFileDetails(Git git , Commit commit) throws IOException{
+
+        Repository repository = git.getRepository();
+        RevWalk revWalk = new RevWalk(git.getRepository());
+
+        //目标分支
+        ObjectId targetObjectId= git.getRepository().resolve(commit.getTargetBranch());
+        RevCommit targetCommit = revWalk.parseCommit(targetObjectId);
+
+        //源分支
+        ObjectId originObjectId = git.getRepository().resolve(commit.getBranch());
+        RevCommit originCommit = revWalk.parseCommit(originObjectId);
+
+        //旧树对象
+        CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+        oldTreeIter.reset(repository.newObjectReader(), targetCommit.getTree());
+
+        //新树对象
+        CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+        newTreeIter.reset(repository.newObjectReader(), originCommit.getTree());
+
+        return getFileDetailsDiff(repository,oldTreeIter,newTreeIter,commit.getFilePath());
+    }
+
+
 
     /**
      * 获取分支的提交记录
@@ -294,7 +330,17 @@ public class GitCommitUntil {
      */
     public static FileDiffEntry findFileChangedListX(Repository repo, RevCommit newCommit, RevCommit oldCommit,String findState)
             throws IOException {
+        FileDiffEntry fileDiffEntry = new FileDiffEntry();
 
+        // 获取父提交ID
+        RevCommit[] parents = newCommit.getParents();
+        List<String> parentCommitIds = new ArrayList<>();
+        for (RevCommit parent : parents) {
+            parentCommitIds.add(parent.getId().getName());
+            System.out.println("Parent Commit ID: " + parent.getId());
+        }
+
+        fileDiffEntry.setParentCommitIds(parentCommitIds);
         // 获取文件的详细差异
         ObjectReader reader = repo.newObjectReader();
         CanonicalTreeParser oldTreeIter = null;
@@ -318,7 +364,7 @@ public class GitCommitUntil {
             diffEntries =  diffFormatter.scan(oldCommit, newCommit);
         }
 
-        FileDiffEntry fileDiffEntry = new FileDiffEntry();
+
         List<CommitFileDiffList> list = new ArrayList<>();
         int a = 0;
         for (DiffEntry diffEntry : diffEntries) {
@@ -433,6 +479,267 @@ public class GitCommitUntil {
         return diffLines;
     }
 
+
+
+    /**
+     *  查询具体文件两次提交的差异
+     * @param repository 仓库信息
+     * @param commitId 当前的commitId
+     * @param originCommitId 源commitId
+     * @param filePath  文件地址
+     * @return 文件对比信息
+     */
+    public static List<CommitFileDiff> findDiffCommitFileDetails(Repository repository,String commitId,
+                                                                 String originCommitId,String filePath) throws IOException {
+
+        //获取可遍历的仓库对象
+        RevWalk walk = new RevWalk(repository);
+
+        RevCommit revCommit =  walk.parseCommit(ObjectId.fromString(commitId));
+        RevCommit targetRevCommit =  walk.parseCommit(ObjectId.fromString(originCommitId));
+
+        //旧树对象
+        CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+        oldTreeIter.reset(repository.newObjectReader(), targetRevCommit.getTree());
+
+        //新树对象
+        CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+        newTreeIter.reset(repository.newObjectReader(), revCommit.getTree());
+
+       return getFileDetailsDiff(repository,oldTreeIter,newTreeIter,filePath);
+
+       /* //创建两次提交的差异对象
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DiffFormatter diffFormatter = new DiffFormatter(out);
+        diffFormatter.setRepository(repository);
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+        diffFormatter.setDetectRenames(true);
+
+        //过滤其他文件只匹配filePath文件
+        PathFilter pathFilter = PathFilter.create(filePath);
+        diffFormatter.setPathFilter(pathFilter);
+
+        List<DiffEntry> diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
+
+
+        List<CommitFileDiff> list = new ArrayList<>();
+        int left = 0;int right = 0;int number = 0;
+        int oldStart = 0;int oldLines = 0;int newStart = 0;int newLines = 0;
+
+        for (DiffEntry diff : diffs) {
+            diffFormatter.format(diff);
+            String diffText = out.toString();
+            String[] diffLines = diffText.split("\n");
+            for (int i = 3; i < diffLines.length; i++) {
+                String line = diffLines[i];
+
+                if (line.startsWith("+++") || line.startsWith("---")){
+                    continue;
+                }
+                CommitFileDiff fileDiff = new CommitFileDiff();
+                if (line.startsWith("@@") && line.endsWith("@@")){
+                    Pattern pattern = Pattern.compile(RepositoryFinal.DIFF_REGEX);
+                    Matcher matcher = pattern.matcher(line);
+                    //解析文件变更信息
+                    if (matcher.matches()){
+                        oldStart = Integer.parseInt(matcher.group(1));
+                        oldLines = matcher.group(2) != null ? Integer.parseInt(matcher.group(2)) : 0;
+                        newStart = Integer.parseInt(matcher.group(3));
+                        newLines = matcher.group(4) != null ? Integer.parseInt(matcher.group(4)) : 0;
+                    }
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE);
+                    left = 0;right = 0;number = 0;
+                    fileDiff.setText(line);
+                }
+                //文件行号
+                fileDiff.setRight(newStart + number + right);
+                fileDiff.setLeft(oldStart + number + left);
+
+                //文件添加内容
+                boolean addWith = line.startsWith(RepositoryFinal.DIFF_TYPE_ADD);
+                if (addWith){
+                    right++;
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE_ADD);
+                    fileDiff.setText(line.substring(1));
+                }
+                //文件删除内容
+                boolean deleteWith = line.startsWith(RepositoryFinal.DIFF_TYPE_DELETE);
+                if (deleteWith){
+                    left++;
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE_DELETE);
+                    fileDiff.setText(line.substring(1));
+                }
+                //未改变内容
+                boolean b = !line.startsWith("@@") || !line.endsWith("@@");
+                if(b && !addWith && !deleteWith ) {
+                    number++;
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE_TEXT);
+                    fileDiff.setText(line);
+                }
+                fileDiff.setIndex(i-4);
+                list.add(fileDiff);
+            }
+        }
+        return list;*/
+    }
+
+    /**
+     * 获取上一次提交信息
+     * @param commit 提交信息
+     * @param repo 仓库
+     * @return 上一次提交
+     * @throws IOException 仓库不存在
+     */
+    public static RevCommit findPrevHash(RevCommit commit, Repository repo)
+            throws  IOException {
+        RevWalk walk = new RevWalk(repo);
+        walk.markStart(commit);
+        int count = 0;
+        for (RevCommit rev : walk) {
+            if (count == 1) {
+                return rev;
+            }
+            count++;
+        }
+        walk.dispose();
+        return null;
+    }
+
+    /**
+     * 获取单个文件的提交历史
+     * @param git git实例
+     * @param file 文件名称
+     * @return 提交历史
+     * @throws GitAPIException 信息获取失败
+     */
+    public static List<Map<String,String>> gitFileCommitLog(Git git,String commitId,String file)
+            throws GitAPIException, IOException {
+        List<Map<String,String>> list = new ArrayList<>();
+
+        ObjectId objectId = ObjectId.fromString(commitId);
+
+
+        RevCommit revCommits = git.getRepository().parseCommit(objectId);
+
+        Iterable<RevCommit> log = git.log()
+                .add(revCommits)
+                .addPath(file)
+                .call();
+        for (RevCommit revCommit : log) {
+            Map<String,String> map = new HashMap<>();
+            Date date = revCommit.getAuthorIdent().getWhen();
+            String message = revCommit.getShortMessage();
+
+            map.put("message",message);//转换时间
+            map.put("time", RepositoryUtil.time(date,"commit")+"前");
+            map.put("date", String.valueOf(date.getTime()));
+            list.add(map);
+        }
+        return list;
+    }
+
+    /**
+     * 获取CommitMessage对象
+     * @param revCommit revCommit
+     */
+    public static CommitMessage getCommitMessage(RevCommit revCommit ){
+        Date date = revCommit.getAuthorIdent().getWhen();//时间
+        String name = revCommit.getAuthorIdent().getName();//提交人
+
+
+        CommitMessage commitMessage = new CommitMessage();
+        commitMessage.setCommitId(revCommit.getId().getName());//commitId
+        commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
+        commitMessage.setCommitUser(name);
+        commitMessage.setDateTime(date);
+        commitMessage.setCommitTime(RepositoryUtil.time(date,"commit")+"前");//转换时间
+
+        return commitMessage;
+    }
+
+
+    /**
+     * 获取文件详情的不同
+     * @param repository repository
+     */
+    public static  List<CommitFileDiff> getFileDetailsDiff(Repository repository,CanonicalTreeParser oldTreeIter,
+                                          CanonicalTreeParser newTreeIter,String filePath) throws IOException {
+//创建两次提交的差异对象
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DiffFormatter diffFormatter = new DiffFormatter(out);
+        diffFormatter.setRepository(repository);
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+        diffFormatter.setDetectRenames(true);
+
+        //过滤其他文件只匹配filePath文件
+        PathFilter pathFilter = PathFilter.create(filePath);
+        diffFormatter.setPathFilter(pathFilter);
+
+        List<DiffEntry> diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
+
+
+        List<CommitFileDiff> list = new ArrayList<>();
+        int left = 0;int right = 0;int number = 0;
+        int oldStart = 0;int oldLines = 0;int newStart = 0;int newLines = 0;
+
+        for (DiffEntry diff : diffs) {
+            diffFormatter.format(diff);
+            String diffText = out.toString();
+            String[] diffLines = diffText.split("\n");
+            for (int i = 3; i < diffLines.length; i++) {
+                String line = diffLines[i];
+
+                if (line.startsWith("+++") || line.startsWith("---")){
+                    continue;
+                }
+                CommitFileDiff fileDiff = new CommitFileDiff();
+                if (line.startsWith("@@") && line.endsWith("@@")){
+                    Pattern pattern = Pattern.compile(RepositoryFinal.DIFF_REGEX);
+                    Matcher matcher = pattern.matcher(line);
+                    //解析文件变更信息
+                    if (matcher.matches()){
+                        oldStart = Integer.parseInt(matcher.group(1));
+                        oldLines = matcher.group(2) != null ? Integer.parseInt(matcher.group(2)) : 0;
+                        newStart = Integer.parseInt(matcher.group(3));
+                        newLines = matcher.group(4) != null ? Integer.parseInt(matcher.group(4)) : 0;
+                    }
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE);
+                    left = 0;right = 0;number = 0;
+                    fileDiff.setText(line);
+                }
+                //文件行号
+                fileDiff.setRight(newStart + number + right);
+                fileDiff.setLeft(oldStart + number + left);
+
+                //文件添加内容
+                boolean addWith = line.startsWith(RepositoryFinal.DIFF_TYPE_ADD);
+                if (addWith){
+                    right++;
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE_ADD);
+                    fileDiff.setText(line.substring(1));
+                }
+                //文件删除内容
+                boolean deleteWith = line.startsWith(RepositoryFinal.DIFF_TYPE_DELETE);
+                if (deleteWith){
+                    left++;
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE_DELETE);
+                    fileDiff.setText(line.substring(1));
+                }
+                //未改变内容
+                boolean b = !line.startsWith("@@") || !line.endsWith("@@");
+                if(b && !addWith && !deleteWith ) {
+                    number++;
+                    fileDiff.setType(RepositoryFinal.DIFF_TYPE_TEXT);
+                    fileDiff.setText(line);
+                }
+                fileDiff.setIndex(i-4);
+                list.add(fileDiff);
+            }
+        }
+        return list;
+    }
+
+
     /**
      * 对比两棵树中具体文件的提交
      * @param repo 仓库信息
@@ -542,80 +849,6 @@ public class GitCommitUntil {
         }
 
         return list;
-    }
-
-    /**
-     * 获取上一次提交信息
-     * @param commit 提交信息
-     * @param repo 仓库
-     * @return 上一次提交
-     * @throws IOException 仓库不存在
-     */
-    public static RevCommit findPrevHash(RevCommit commit, Repository repo)
-            throws  IOException {
-        RevWalk walk = new RevWalk(repo);
-        walk.markStart(commit);
-        int count = 0;
-        for (RevCommit rev : walk) {
-            if (count == 1) {
-                return rev;
-            }
-            count++;
-        }
-        walk.dispose();
-        return null;
-    }
-
-    /**
-     * 获取单个文件的提交历史
-     * @param git git实例
-     * @param file 文件名称
-     * @return 提交历史
-     * @throws GitAPIException 信息获取失败
-     */
-    public static List<Map<String,String>> gitFileCommitLog(Git git,String commitId,String file)
-            throws GitAPIException, IOException {
-        List<Map<String,String>> list = new ArrayList<>();
-
-        ObjectId objectId = ObjectId.fromString(commitId);
-
-
-        RevCommit revCommits = git.getRepository().parseCommit(objectId);
-
-        Iterable<RevCommit> log = git.log()
-                .add(revCommits)
-                .addPath(file)
-                .call();
-        for (RevCommit revCommit : log) {
-            Map<String,String> map = new HashMap<>();
-            Date date = revCommit.getAuthorIdent().getWhen();
-            String message = revCommit.getShortMessage();
-
-            map.put("message",message);//转换时间
-            map.put("time", RepositoryUtil.time(date,"commit")+"前");
-            map.put("date", String.valueOf(date.getTime()));
-            list.add(map);
-        }
-        return list;
-    }
-
-    /**
-     * 获取CommitMessage对象
-     * @param revCommit revCommit
-     */
-    public static CommitMessage getCommitMessage(RevCommit revCommit ){
-        Date date = revCommit.getAuthorIdent().getWhen();//时间
-        String name = revCommit.getAuthorIdent().getName();//提交人
-
-
-        CommitMessage commitMessage = new CommitMessage();
-        commitMessage.setCommitId(revCommit.getId().getName());//commitId
-        commitMessage.setCommitMessage(revCommit.getShortMessage());//提交信息
-        commitMessage.setCommitUser(name);
-        commitMessage.setDateTime(date);
-        commitMessage.setCommitTime(RepositoryUtil.time(date,"commit")+"前");//转换时间
-
-        return commitMessage;
     }
 
 

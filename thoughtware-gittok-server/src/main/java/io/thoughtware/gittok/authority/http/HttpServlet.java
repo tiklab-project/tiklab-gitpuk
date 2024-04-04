@@ -2,11 +2,14 @@ package io.thoughtware.gittok.authority.http;
 
 import io.thoughtware.gittok.authority.ValidUsrPwdServer;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
+import io.thoughtware.gittok.common.git.GitBranchUntil;
 import io.thoughtware.gittok.repository.model.Repository;
 import io.thoughtware.gittok.repository.service.MemoryManService;
 import io.thoughtware.gittok.repository.service.RecordCommitService;
 import io.thoughtware.gittok.repository.service.RepositoryServer;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.http.server.GitServlet;
 
 import org.slf4j.Logger;
@@ -96,9 +99,9 @@ public class HttpServlet extends GitServlet {
                         }
                 }*/
 
-            if (requestURI.endsWith("git-receive-pack")){
+        /*    if (requestURI.endsWith("git-receive-pack")){
                 addRepositorySize(req,requestURI);
-            }
+            }*/
             super.service(req, res);
 
             //git push提交 （客户端第三次请求发送数据 以git-receive-pack结尾）
@@ -152,7 +155,7 @@ public class HttpServlet extends GitServlet {
      * @param req
      * @param requestURI
      */
-    public void addRepositorySize(ServletRequest req,String requestURI){
+    public void addRepositorySize(ServletRequest req,String requestURI) throws IOException {
 
         String contentLengthHeader = ((HttpServletRequest) req).getHeader("Content-Length");
         if (contentLengthHeader != null) {
@@ -163,12 +166,20 @@ public class HttpServlet extends GitServlet {
 
 
             String name=split[split.length-2].substring(0,split[split.length-2].indexOf(".git"));
-            Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
+            //通过仓库地址查询仓库是否存在
+            Repository repository = repositoryServer.findConciseRepositoryByAddress(groupName + "/" + name);
             if (!ObjectUtils.isEmpty(repository)){
-
-                //修改仓库大小
+                //仓库地址
                 String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
                 File file = new File(repositoryUrl);
+
+                org.eclipse.jgit.lib.Repository gitRpy = Git.open(file).getRepository();
+                //唯一分支不为空，表示没有默认分支，则设置默认分支
+                if (StringUtils.isNotEmpty(repository.getUniqueBranch())){
+                    GitBranchUntil.updateFullBranch(gitRpy, repository.getUniqueBranch());
+                }
+
+                //更新仓库文件大小
                 if (file.exists()){
                     long logBytes = FileUtils.sizeOfDirectory(file);
                     repository.setSize(logBytes);

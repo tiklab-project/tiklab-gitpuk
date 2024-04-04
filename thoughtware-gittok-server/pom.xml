@@ -138,12 +138,7 @@
 			<version>${thoughtware-postin.version}</version>
 			<scope>compile</scope>
 		</dependency>
-        <dependency>
-            <groupId>io.thoughtware</groupId>
-            <artifactId>thoughtware-licence-api</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
 
 		<!-- QuartzConfigration -->
 		<dependency>
@@ -165,8 +160,13 @@
 			<artifactId>quartz-jobs</artifactId>
 			<version>${quartz.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.thoughtware</groupId>
+			<artifactId>thoughtware-plugin-manager</artifactId>
+			<version>${thoughtware-plugin.version}</version>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>

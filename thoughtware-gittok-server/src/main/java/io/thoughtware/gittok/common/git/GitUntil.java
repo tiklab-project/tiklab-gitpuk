@@ -6,6 +6,8 @@ import io.thoughtware.gittok.repository.model.LeadAuth;
 import io.thoughtware.gittok.repository.model.RemoteInfo;
 import io.thoughtware.core.exception.ApplicationException;
 import io.thoughtware.user.user.model.User;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -14,6 +16,8 @@ import org.eclipse.jgit.transport.*;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -34,7 +38,6 @@ public class GitUntil {
             git = Git.init()
                     .setDirectory(file)
                     .setBare(true) //裸仓库
-                    //.setInitialBranch(Constants.MASTER)
                     .call();
             git.close();
         } catch (GitAPIException e) {
@@ -343,6 +346,62 @@ public class GitUntil {
             process = runtime.exec(cmd,null,new File(path));
         }
         return process;
+    }
+
+
+    /**
+     * 克隆仓库所有分支
+     * @param repositoryPath 裸仓库地址
+     * @param  clonePath 普通仓库地址
+     */
+    public static void cloneRepositoryAllBranch(String repositoryPath,String clonePath){
+
+        try {
+            //只会clone 默认分支
+            Git git = Git.cloneRepository()
+                    .setURI("file://"+repositoryPath)
+                    .setDirectory(new File(clonePath))
+                    .call();
+
+            Repository repository = git.getRepository();
+            //普通仓库的分支
+            List<Ref> branchList = git.branchList().call();
+
+            //获取普通仓库的引用和远程引用
+            List<Ref> refs = repository.getRefDatabase().getRefs();
+            String afterLast = StringUtils.substringAfterLast(branchList.get(0).getName(), "/");
+            //获取普通仓库中的远程分支
+            List<Ref> collect = refs.stream().filter(a -> !a.getName().endsWith(afterLast)).collect(Collectors.toList());
+
+            String defultName=null;
+            for (Ref branch : collect) {
+                String branchName = branch.getName();
+                //排除标签
+                if (branchName.contains(Constants.R_TAGS)){
+                    continue;
+                }
+                if (branchName.equals("HEAD")){
+                    defultName = branch.getTarget().getName();
+                }
+
+                if (!branchName.equals("HEAD")&&!branchName.equals(defultName)
+                        && branchName.startsWith("refs/remotes/origin/")) {
+
+                    String after = StringUtils.substringAfterLast(branchName, "/");
+                    git.checkout()
+                            .setName(after)
+                            .setCreateBranch(true)
+                            .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+                            .setStartPoint("refs/remotes/origin/"+after)
+                            .call();
+                }
+            }
+            //切换到最初的默认分支
+            git.checkout().setName(afterLast).call();
+
+        }catch (Exception e){
+            throw new ApplicationException("clone 仓库失败:"+e.getMessage());
+        }
     }
 
 

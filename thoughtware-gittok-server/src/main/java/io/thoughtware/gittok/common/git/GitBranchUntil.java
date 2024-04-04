@@ -5,10 +5,9 @@ import io.thoughtware.gittok.branch.model.BranchQuery;
 import io.thoughtware.gittok.commit.model.CommitMessage;
 import io.thoughtware.core.exception.ApplicationException;
 import io.thoughtware.gittok.commit.model.MergeData;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeCommand;
-import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -102,6 +101,7 @@ public class GitBranchUntil {
         List<Branch> list = new ArrayList<>();
         //分支和标签
         List<Ref> refs = repository.getRefDatabase().getRefs();
+
         String defaultBranch = " ";
         for (Ref ref : refs) {
             Branch branch = new Branch();
@@ -111,6 +111,12 @@ public class GitBranchUntil {
                 continue;
             }
 
+            //排除远程分支
+            if (name.contains(Constants.R_REMOTES)){
+                continue;
+            }
+
+            //默认分支
             if (name.equals("HEAD")){
                 Ref target = ref.getTarget();
                 defaultBranch = target.getName();
@@ -297,7 +303,7 @@ public class GitBranchUntil {
         try {
             RefUpdate  updateRef = repository.updateRef("HEAD");
             updateRef.link(fullBranch);
-            updateRef.update();
+      /*      updateRef.update();*/
         } catch (IOException e) {
             throw new ApplicationException("切换默认分支失败:"+fullBranch);
         }
@@ -306,11 +312,88 @@ public class GitBranchUntil {
     /**
      * 合并分支
      * @param mergeData mergeData
-     * @param repositoryPath 仓库地址
+     * @param repositoryPath 裸仓库地址
      * @throws ApplicationException 切换失败
      */
     public static String mergeBranch(MergeData mergeData, String repositoryPath) {
+        try {
+            String beforeLast = StringUtils.substringBeforeLast(repositoryPath, "/");
+            String afterLast = StringUtils.substringAfterLast(repositoryPath, "/");
+            //仓库存储的id
+            String rpyId = afterLast.substring(0, afterLast.indexOf(".git"));
 
+            //clone 裸仓库为普通仓库
+            String clonePath = beforeLast + "/merge/"+rpyId;
+            File file = new File(clonePath);
+            //合并分支时候裸仓库存在对应的普通仓库 先删除
+            if (file.exists()){
+                FileUtils.deleteDirectory(new File(clonePath));
+            }
+
+            if (!file.exists()){
+                file.mkdirs();
+            }
+
+            //克隆裸仓库的所有分子为普通仓库
+            GitUntil.cloneRepositoryAllBranch(repositoryPath, clonePath);
+
+            //普通仓库git
+            Git git = Git.open(new File(clonePath));
+
+            //切换到目标源
+            git.checkout().setName(mergeData.getMergeTarget()).call();
+
+            //获取源目标对象的id
+            ObjectId mergeBase = git.getRepository().resolve(mergeData.getMergeOrigin());
+
+            //创建和并节点的基本合并方式
+            if (("createNode").equals(mergeData.getMergeWay())){
+                git.merge()
+                        .include(mergeBase)
+                        .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                        .setMessage(mergeData.getMergeMessage())
+                        .setCommit(true)
+                        .call();
+            }
+
+
+            //将合并请求中的提交记录压缩成一条， 然后添加到目标分支。
+            if (("squash").equals(mergeData.getMergeWay())){
+                git.merge()
+                        .include(mergeBase)
+                        .setCommit(false)
+                        .setSquash(true)
+
+                        .call();
+                //创建提交信息
+                git.commit()
+                        .setMessage(mergeData.getMergeMessage())
+                        //.setCommitter()
+                        .call();
+            }
+
+
+            //变基合并  将评审分支提交逐一编辑到目标分支
+            if (("rebase").equals(mergeData.getMergeWay())){
+                 git.rebase()
+                       .setUpstream(mergeData.getMergeOrigin())
+                       .setPreserveMerges(true)
+                       .call();
+            }
+
+            //推送到裸仓库
+            GitUntil. pushAllBranchRepository(clonePath,repositoryPath);
+
+            //执行完成后删除clone 的文件
+            FileUtils.deleteDirectory(new File(clonePath));
+
+        } catch (Exception e) {
+            throw new ApplicationException(5000,"合并分支失败："+e.getMessage());
+        }
+        return "ok";
+    }
+
+    public static String mergeBranchByFast(MergeData mergeData, String repositoryPath) {
         try {
             Repository repository = Git.open(new File(repositoryPath)).getRepository();
 
@@ -327,7 +410,7 @@ public class GitBranchUntil {
             // 执行分支合并操作
             MergeCommand mergeCommand = git.merge();
             mergeCommand.include(sourceRef);
-            mergeCommand.setFastForward(MergeCommand.FastForwardMode.FF);
+            mergeCommand.setFastForward(MergeCommand.FastForwardMode.FF_ONLY);
             MergeResult called = mergeCommand.call();
 
             if (called.getMergeStatus().isSuccessful()) {
@@ -340,58 +423,6 @@ public class GitBranchUntil {
                 String name = updateResult.name();
 
                 /*
-                *   NEW：表示引用是新创建的。
-                *   FORCED：表示引用已被强制更新。
-                *   FAST_FORWARD：表示引用是通过快进方式更新的。
-                *   NO_CHANGE：表示引用没有发生变化，无需更新。
-                *   LOCK_FAILURE：表示在更新引用时遇到了锁定失败。
-                *   REJECTED：表示更新引用被拒绝。
-                *   IO_FAILURE：表示在更新引用时遇到了I/O错误。
-                * */
-                /*if (("NEW").equals(name)||("FORCED").equals(name)||("FAST_FORWARD").equals(name)){
-
-                }*/
-             /*   if (("NO_CHANGE").equals(name)){
-                    throw new ApplicationException(5000,"两个分子没有不同的不需要合并");
-                }*/
-                return "ok";
-            } else {
-                throw new ApplicationException(5000,"合并分支失败");
-            }
-
-        } catch (Exception e) {
-            throw new ApplicationException(5000,"合并分支失败："+e.getMessage());
-        }
-    }
-
-
-    /*public static void mergeBranch(Repository repository,String branch) {
-
-        try {
-            Git git = new Git(repository);
-
-            //默认分支
-            String deBranch = git.getRepository().getBranch();
-
-            Ref sourceRef = repository.exactRef("refs/heads/" + deBranch);
-            Ref targetRef = repository.exactRef("refs/heads/" + branch);
-
-            // 执行分支合并操作
-            MergeCommand mergeCommand = git.merge();
-            mergeCommand.include(sourceRef.getObjectId());
-            mergeCommand.setFastForward(MergeCommand.FastForwardMode.NO_FF);
-            MergeResult called = mergeCommand.call();
-
-            if (called.getMergeStatus().isSuccessful()) {
-
-                // 更新目标分支引用
-                RefUpdate refUpdate = repository.updateRef(targetRef.getName());
-                refUpdate.setNewObjectId(called.getNewHead());
-                refUpdate.setForceUpdate(true);
-                RefUpdate.Result updateResult = refUpdate.update();
-                String name = updateResult.name();
-
-                *//*
                  *   NEW：表示引用是新创建的。
                  *   FORCED：表示引用已被强制更新。
                  *   FAST_FORWARD：表示引用是通过快进方式更新的。
@@ -399,22 +430,54 @@ public class GitBranchUntil {
                  *   LOCK_FAILURE：表示在更新引用时遇到了锁定失败。
                  *   REJECTED：表示更新引用被拒绝。
                  *   IO_FAILURE：表示在更新引用时遇到了I/O错误。
-                 * *//*
-                if (("NEW").equals(name)||("FORCED").equals(name)||("FAST_FORWARD").equals(name)){
+                 * */
+            /*if (("NEW").equals(name)||("FORCED").equals(name)||("FAST_FORWARD").equals(name)){
 
-                }
-                if (("NO_CHANGE").equals(name)){
-
-                }
-
+            }*/
+         /*   if (("NO_CHANGE").equals(name)){
+                throw new ApplicationException(5000,"两个分子没有不同的不需要合并");
+            }*/
+            return  "ok";
             } else {
-                System.out.println("分支合并失败！");
+                throw new ApplicationException(5000, "合并分支失败");
+            }
+        } catch (Exception e) {
+            throw new ApplicationException(5000, "合并分支失败：" + e.getMessage());
+        }
+
+    }
+
+
+    public static void mergeBranch1(MergeData mergeData, String repositoryPath) {
+        String beforeLast = StringUtils.substringBeforeLast(repositoryPath, "/");
+        String afterLast = StringUtils.substringAfterLast(repositoryPath, "/");
+        String rpyId = afterLast.substring(0, afterLast.indexOf(".git"));
+
+        try {
+            //clone 裸仓库为普通仓库
+            String clonePath = beforeLast + "/clone/"+rpyId;
+            File file = new File(clonePath);
+            if (file.exists()){
+                FileUtils.deleteDirectory(file);
             }
 
+            if (!file.exists()){
+                file.mkdirs();
+            }
+            GitUntil.cloneRepositoryAllBranch(repositoryPath, clonePath);
+
+            //普通仓库git
+            Git git = Git.open(new File(clonePath));
+
+
+
+          //  RepositoryCache.close(git.getRepository());
         } catch (Exception e) {
-            throw new ApplicationException("切换默认分支失败:"+e.getMessage());
+
+
         }
-    }*/
+    }
+
 }
 
 

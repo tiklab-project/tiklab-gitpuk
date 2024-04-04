@@ -86,13 +86,13 @@ message:
 #    address: http://192.168.10.14:3003
 
 base:
-  url: http://192.168.10.17:8090
+  url: http://192.168.10.9:8090
 
 
 
 #homes
 homes:
-  address: http://192.168.10.7:8080
+  address: https://homes.thoughtware.cn
 
 #license
 
