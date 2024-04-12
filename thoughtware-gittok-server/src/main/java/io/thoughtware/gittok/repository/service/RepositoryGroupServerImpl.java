@@ -69,7 +69,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         groupEntity.setColor(randomNum);
         groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
         String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
-        dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), "gittok");
+        dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), 1);
 
         //发送消息
         initRepositoryMap(groupEntity,"create",null);

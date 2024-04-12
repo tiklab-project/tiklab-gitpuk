@@ -40,6 +40,8 @@ public class FileDiffEntry {
     private  int deleteLine;
 
 
+
+
     public String getCommitMessage() {
         return commitMessage;
     }
@@ -95,4 +97,5 @@ public class FileDiffEntry {
     public void setParentCommitIds(List<String> parentCommitIds) {
         this.parentCommitIds = parentCommitIds;
     }
+
 }

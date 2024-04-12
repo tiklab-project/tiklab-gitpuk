@@ -77,7 +77,10 @@ public class GatewayFilterAutoConfiguration {
                         "/wechatCallback/instruct",
                         "/alterSql/updateId",
                         "/gui",
-                        "/gitignoreFile/createGitignoreFile"
+                        "/gitignoreFile/createGitignoreFile",
+
+                        "/message/messageItem/syncUpdateMessage",
+                        "/message/messageItem/syncDeleteMessage",
                 })
                 .ignorePreUrls(new String[]{
                         "/service",

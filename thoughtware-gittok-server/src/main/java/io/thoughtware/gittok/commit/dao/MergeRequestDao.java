@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * MergeRequestDao-扫描漏洞数据库访问
+ * MergeRequestDao-合并请求数据库访问
  */
 @Repository
 public class MergeRequestDao {
@@ -53,7 +53,7 @@ public class MergeRequestDao {
     }
 
     /**
-     * 条件删除漏洞
+     * 条件删除合并请求
      * @param deleteCondition
      */
     public void deleteMergeRequest(DeleteCondition deleteCondition){
@@ -87,7 +87,7 @@ public class MergeRequestDao {
     }
 
     /**
-     * 条件查询漏洞
+     * 条件查询合并请求
      * @param mergeRequestQuery
      * @return List <MergeRequestEntity>
      */
@@ -104,7 +104,7 @@ public class MergeRequestDao {
     }
 
     /**
-     * 条件分页查询漏洞
+     * 条件分页查询合并请求
      * @param mergeRequestQuery
      * @return Pagination <MergeRequestEntity>
      */

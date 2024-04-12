@@ -46,4 +46,33 @@ public class GitTokFinal {
 
     //gitee 查询仓库API地址
     public static final String GITEE_API_URL = "https://gitee.com/api/v5/user/repos";
+
+
+
+    /*
+    * 合并请求的动态
+    * */
+
+    // 创建和并请求
+    public static final String MERGE_CREATE = "create";
+    public static final String MERGE_CREATE_DESC = "创建了合并请求";
+
+
+    // 打开和并请求
+    public static final String MERGE_OPEN = "open";
+    public static final String MERGE_OPEN_DESC = "打开了合并请求";
+
+    // 关闭和并请求
+    public static final String MERGE_CLOSE = "close";
+    public static final String MERGE_CLOSE_DESC = "关闭了合并请求";
+
+    //创建评论
+    public static final String MERGE_COMMENT = "comment";
+    public static final String MERGE_COMMENT_DESC = "发布了评论";
+
+    //完成合并
+    public static final String MERGE_COMPLETE = "complete";
+    public static final String MERGE_COMPLETE_DESC = "合并分支";
+
+
 }

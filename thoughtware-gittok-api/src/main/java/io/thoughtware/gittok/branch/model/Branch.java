@@ -24,6 +24,15 @@ public class Branch implements Serializable {
      */
     private String branchName;
 
+
+    /**
+     * @pi.name: updateUser
+     * @pi.dataType:string
+     * @pi.desc: 创建人
+     * @pi.value: updateUser
+     */
+    private String createUser;
+
     /**
      * @pi.name: updateUser
      * @pi.dataType:string
@@ -124,5 +133,13 @@ public class Branch implements Serializable {
 
     public void setUpdateUser(String updateUser) {
         this.updateUser = updateUser;
+    }
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
     }
 }

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.thoughtware.gittok.commit.model.Commit;
 import io.thoughtware.gittok.commit.model.CommitFileDiff;
+import io.thoughtware.gittok.commit.model.MergeData;
 import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.common.git.GitBranchUntil;
 import io.thoughtware.gittok.common.git.GitCommitUntil;
@@ -22,6 +23,7 @@ import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.internal.storage.file.PackFile;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.merge.ThreeWayMerger;
 import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.PushResult;
@@ -55,107 +57,36 @@ import java.util.stream.Collectors;
 public class test {
 
     public static void main(String[] args) throws Exception {
-        String bareRepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/e35b85357fcb.git"; // 裸仓库路径
+        String bareRepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/585456fc2e3f.git"; // 裸仓库路径
+        String RepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/clone/e35b85357fcb"; // 裸仓库路径
 
-        Git git = Git.open(new File(bareRepositoryPath));
-        String a="44fb1a681a3129b3736f29a0d4bfa8c324b42fe7";
-        String b="9c74d3932994e9b18848b7e3b49c596b9e63f474";
-        String path="thoughtware-hadess-server/src/main/java/io/thoughtware/hadess/repository/controller/RepositoryController.java";
+        MergeData mergeData = new MergeData();
+        mergeData.setMergeOrigin("a1");
+        mergeData.setMergeTarget("b1");
 
-        Commit commit = new Commit();
-        commit.setBranch("a");
-        commit.setTargetBranch("source");
-        commit.setFilePath(path);
-        List<CommitFileDiff> diffBranchFileDetails = GitCommitUntil.findDiffBranchFileDetails(git, commit);
+        GitBranchUntil.getMergeClashFile(mergeData,bareRepositoryPath);
+
+       /* List<String> a = new ArrayList<>();
+        a.add("1");
+        a.add("2");
+        a.add("3");
+
+        List<String> b = new ArrayList<>();
+        b.add("4");
+
+
+        boolean hasSameObject = a.stream().anyMatch(b::contains);
+
+
+        ThreeWayMerger merger = MergeStrategy.RECURSIVE.newMerger(repository,true);*/
+
+
         System.out.println("");
 
 
-        //merge();
-        //push();
+
     }
 
-    public static void push() throws Exception {
-        String normalRepoDir = "/Users/limingliang/tiklab/thoughtware-gittok/repository/clone/e35b85357fcb"; // 裸仓库路径
-        String bareRepoDir = "/Users/limingliang/tiklab/thoughtware-gittok/repository/a15874a0a5c4.git"; // 裸仓库路径
-        GitUntil. pushAllBranchRepository(normalRepoDir,bareRepoDir);
-    }
-
-    public static void merge() throws IOException, GitAPIException {
-        String bareRepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/e35b85357fcb.git"; // 裸仓库路径
-
-        GitBranchUntil.mergeBranch1(null,bareRepositoryPath);
-
-        String beforeLast = StringUtils.substringBeforeLast(bareRepositoryPath, "/");
-        String afterLast = StringUtils.substringAfterLast(bareRepositoryPath, "/");
-        String rpyId = afterLast.substring(0, afterLast.indexOf(".git"));
-
-        String clonePath = beforeLast + "/clone/"+rpyId;
-
-        Git git = Git.open(new File(clonePath));
-
-        //切换到目标分支
-        git.checkout().setName("source").call();
-
-        // 检查差异
-        List<DiffEntry> diffEntries = diffEntry(git, "source", "a");
-
-
-        //获取目标对象的id
-        ObjectId mergeBase = git.getRepository().resolve("a");
-
-        String mergeMessage = "Merge b into source";
-        for (DiffEntry entry : diffEntries) {
-            git.add().addFilepattern(entry.getNewPath()).call();
-        }
- /*       git.merge()
-                .include(mergeBase)
-                .setCommit(false)
-                .setSquash(true)
-                //.setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                .setMessage(mergeMessage)
-                .call();*/
-        //git.add().addFilepattern("*").call();
-
-        git.merge().
-                include(mergeBase).
-                setCommit(true)
-                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                .setMessage(mergeMessage).
-                call();
-
-
-        //git.add().addFilepattern("*").call();
-
- /*       //创建提交信息
-        git.commit()
-                .setMessage(mergeMessage)
-                //.setCommitter()
-                .call();
-*/
-    }
-
-    private static List<DiffEntry> diffEntry(Git git, String targetBranch,String branch) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        DiffFormatter diffFormatter = new DiffFormatter(out);
-        diffFormatter.setRepository(git.getRepository());
-        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-        diffFormatter.setDetectRenames(true);
-
-
-        Repository repository = git.getRepository();
-        RevWalk revWalk = new RevWalk(git.getRepository());
-
-        //目标分支
-        ObjectId targetObjectId= git.getRepository().resolve(targetBranch);
-        RevCommit targetCommit = revWalk.parseCommit(targetObjectId);
-
-        //源分支
-        ObjectId originObjectId = git.getRepository().resolve(branch);
-        RevCommit originCommit = revWalk.parseCommit(originObjectId);
-
-        List<DiffEntry> scan = diffFormatter.scan(targetCommit.getTree(), originCommit.getTree());
-        return scan;
-    }
 
 }
 

@@ -2,6 +2,7 @@ package io.thoughtware.gittok.commit.controller;
 
 import io.thoughtware.core.Result;
 import io.thoughtware.core.page.Pagination;
+import io.thoughtware.gittok.commit.model.MergeClashFile;
 import io.thoughtware.gittok.commit.model.MergeData;
 import io.thoughtware.gittok.commit.model.MergeRequest;
 import io.thoughtware.gittok.commit.model.MergeRequestQuery;
@@ -115,5 +116,24 @@ public class MergeRequestController {
 
         return Result.ok(s);
     }
+
+    @RequestMapping(path = "/findMergeClashFile",method = RequestMethod.POST)
+    @ApiMethod(name = "findMergeClashFile",desc = "执行合并查询冲突文件")
+    @ApiParam(name = "mergeRequestQuery",desc = "mergeRequestQuery",required = true)
+    public Result<List<MergeClashFile>> findMergeClashFile(@RequestBody @Valid @NotNull MergeData mergeData){
+        List<MergeClashFile> mergeClashFile = mergeRequestService.findMergeClashFile(mergeData);
+
+        return Result.ok(mergeClashFile);
+    }
+
+    @RequestMapping(path = "/findClashFileData",method = RequestMethod.POST)
+    @ApiMethod(name = "findClashFileData",desc = "查询冲突详情")
+    @ApiParam(name = "filePath",desc = "filePath",required = true)
+    public Result<String> findClashFileData(@NotNull String repositoryId ,@NotNull String filePath){
+        String mergeClashFile = mergeRequestService.findClashFileData(repositoryId,filePath);
+
+        return Result.ok(mergeClashFile);
+    }
+
 
 }

@@ -83,6 +83,9 @@ public class RepositoryFinal {
     public final static String Key_TYPE_SSH_RSA = "-----BEGIN ";
 
 
+    //存放合并分支的冲突普通仓库
+    public final static String MERGE_REPOSITORY = "mergeClash";
+
 
 }
 

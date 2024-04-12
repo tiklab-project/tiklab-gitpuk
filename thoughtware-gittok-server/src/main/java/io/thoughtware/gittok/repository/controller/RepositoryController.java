@@ -280,6 +280,7 @@ public class RepositoryController {
      * @pi.request-type:formdata
      * @pi.param:  name=userId;dataType=string;value=userId;
      */
+
     @RequestMapping(path="/findCommitRepository",method = RequestMethod.POST)
     @ApiMethod(name = "findCommitRepository",desc = "查询用户推送过的仓库")
     @ApiParam(name = "userId",desc = "用户id",required = true)

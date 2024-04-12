@@ -26,7 +26,6 @@ create table rpy_merge_request(
      is_clash           integer,
      value               TEXT,
      create_time         timestamp
-
 );
 
 

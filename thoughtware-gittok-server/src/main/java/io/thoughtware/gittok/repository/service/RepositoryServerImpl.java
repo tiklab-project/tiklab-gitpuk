@@ -165,10 +165,10 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         if (!ObjectUtils.isEmpty(repository.getUser())&&StringUtils.isNotEmpty(repository.getUser().getId())){
             //创建仓库 给创建人设置管理员权限
-            dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), "gittok");
+            dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), 1);
         }else {
             //创建仓库 给创建人设置管理员权限
-            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), "gittok");
+            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), 1);
         }
 
         //正式仓库才发送消息

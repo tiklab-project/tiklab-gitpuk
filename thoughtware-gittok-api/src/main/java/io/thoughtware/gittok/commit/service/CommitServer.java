@@ -22,7 +22,7 @@ public interface CommitServer {
     CommitMessage findLatelyBranchCommit(Commit commit);
 
     /**
-     * 获取提交的文件信息
+     * 通过当前commitId和父级commitId查询文件提交对比 (获取两个commitId的提交差异文件对比  )
      * @param commit commitId
      * @return 文件列表
      */
@@ -69,6 +69,13 @@ public interface CommitServer {
      * @return 文件内容
      */
     List<CommitFileDiff> findDiffBranchFileDetails(Commit commit);
+
+    /**
+     * 查询不同分支或者不同commitId的提交差异的统计
+     * @param commit 提交信息
+     * @return 文件内容
+     */
+    CommitDiffData findDiffCommitStatistics(Commit commit);
 }
 
 

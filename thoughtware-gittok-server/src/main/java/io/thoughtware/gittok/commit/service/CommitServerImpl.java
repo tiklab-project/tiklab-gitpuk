@@ -13,6 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class CommitServerImpl implements CommitServer {
             Git git = Git.open(new File(repositoryAddress));
 
             //查询不同分支提交的差异
-           branchCommit = GitCommitUntil.findDiffBranchCommit(git,commit);
+           branchCommit = GitCommitUntil.findDiffBranchCommit(git,commit.getBranch(),commit.getTargetBranch());
             git.close();
         } catch (Exception e) {
             throw new ApplicationException("提交记录获取失败："+e);
@@ -108,6 +109,17 @@ public class CommitServerImpl implements CommitServer {
         return diffBranchFileDetails;
     }
 
+    @Override
+    public CommitDiffData findDiffCommitStatistics(Commit commit) {
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+             return   GitCommitUntil.getDiffStatistics(git,commit);
+        }catch (Exception e){
+            throw new ApplicationException(e);
+        }
+    }
+
     /**
      * 获取最近一次的提交记录
      * @param commit 仓库id
@@ -122,39 +134,18 @@ public class CommitServerImpl implements CommitServer {
         return branchCommit.get(0).getCommitMessageList().get(0);
     }
 
-    /**
-     * 获取提交的文件信息
-     * @param commit commitId
-     * @return 文件列表
-     */
+
     @Override
     public FileDiffEntry findCommitDiffFileList(Commit commit) {
 
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
-            org.eclipse.jgit.lib.Repository repository = git.getRepository();
 
-            Map<String, RevCommit> newOldTree = findCommitNewOldTree(
-                    repository, commit.getBranch(), commit.isFindCommitId());
+            //获取两个提交差异文件
+            FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffCommit(git, commit);
 
-            RevCommit oldRevCommit =  newOldTree.get("oldTree");
-            RevCommit revCommit = newOldTree.get("newTree");
-
-            FileDiffEntry changedList = GitCommitUntil.findFileChangedListX(repository, revCommit,
-                    oldRevCommit,commit.getNumber());
-            List<CommitFileDiffList> diffList = changedList.getDiffList();
-            int allAddLine = 0;
-            int allDeleteLine = 0;
-            for (CommitFileDiffList list : diffList) {
-                int addLine = list.getAddLine();
-                int deleteLine = list.getDeleteLine();
-                allAddLine = allAddLine + addLine;
-                allDeleteLine = allDeleteLine + deleteLine;
-            }
-            changedList.setDeleteLine(allDeleteLine);
-            changedList.setAddLine(allAddLine);
-            return changedList;
+            return fileDiffEntry;
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
@@ -169,29 +160,19 @@ public class CommitServerImpl implements CommitServer {
     public FileDiffEntry findLikeCommitDiffFileList(Commit commit) {
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
+
             Git git = Git.open(new File(repositoryAddress));
-            org.eclipse.jgit.lib.Repository repository = git.getRepository();
-            Map<String, RevCommit> newOldTree = findCommitNewOldTree(
-                    repository, commit.getBranch(), commit.isFindCommitId());
-            RevCommit oldRevCommit =  newOldTree.get("oldTree");
-            RevCommit revCommit = newOldTree.get("newTree");
 
-            FileDiffEntry changedList = GitCommitUntil.findFileChangedListX(repository, revCommit,
-                    oldRevCommit,null);
-            List<CommitFileDiffList> diffList = changedList.getDiffList();
-            List<CommitFileDiffList> lists = new ArrayList<>();
+            //获取两个提交差异文件
+            FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffCommit(git, commit);
+            List<CommitFileDiffList> diffList = fileDiffEntry.getDiffList();
+
+            //配置模糊查询
             String likePath = commit.getLikePath();
-            for (CommitFileDiffList list : diffList) {
-                String newFilePath = list.getNewFilePath();
-                String oldFilePath = list.getOldFilePath();
-                if (!newFilePath.contains(likePath) && !oldFilePath.contains(likePath)){
-                    continue;
-                }
-                lists.add(list);
-            }
-            changedList.setDiffList(lists);
+            List<CommitFileDiffList> collected = diffList.stream().filter(a -> a.getNewFilePath().contains(likePath) || a.getOldFilePath().contains(likePath)).collect(Collectors.toList());
+            fileDiffEntry.setDiffList(collected);
 
-            return changedList;
+            return fileDiffEntry;
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
@@ -345,6 +326,10 @@ public class CommitServerImpl implements CommitServer {
         }
         return list;
     }
+
+
+
+
 }
 
 

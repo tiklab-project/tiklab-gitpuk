@@ -2,6 +2,7 @@ package io.thoughtware.gittok.commit.service;
 
 
 import io.thoughtware.core.page.Pagination;
+import io.thoughtware.gittok.commit.model.MergeClashFile;
 import io.thoughtware.gittok.commit.model.MergeData;
 import io.thoughtware.gittok.commit.model.MergeRequest;
 import io.thoughtware.gittok.commit.model.MergeRequestQuery;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* MergeRequestService-扫描漏洞
+* MergeRequestService-合并请求提交
 */
 @JoinProvider(model = MergeRequest.class)
 public interface MergeRequestService {
@@ -41,7 +42,7 @@ public interface MergeRequestService {
     void deleteMergeRequest(@NotNull String id);
 
     /**
-     * 条件删除扫描结果
+     * 条件删除合并请求
      * @param  key  删除条件字段
      * @param value
      */
@@ -96,4 +97,18 @@ public interface MergeRequestService {
      * @return
      */
     Map findMergeStateNum(MergeRequestQuery mergeRequestQuery);
+
+
+    /**
+     * 查询合并冲突文件
+     * @param mergeData
+     * @return
+     */
+    List<MergeClashFile> findMergeClashFile(MergeData mergeData);
+
+    /**
+     * 查询合并冲突文件详情
+     * @return
+     */
+    String findClashFileData(String repositoryId ,String filePath);
 }

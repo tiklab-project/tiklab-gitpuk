@@ -46,7 +46,7 @@ public class CommitController {
 
 
     @RequestMapping(path="/findCommitFileDiffList",method = RequestMethod.POST)
-    @ApiMethod(name = "findCommitDiffFileList",desc = "文件提交对比")
+    @ApiMethod(name = "findCommitDiffFileList",desc = "获取两个commitId的提交差异文件对比")
     @ApiParam(name = "commit",desc = "commitId",required = true)
     public Result<FileDiffEntry> findCommitDiffFileList(@RequestBody @Valid @NotNull Commit commit){
 
@@ -54,6 +54,17 @@ public class CommitController {
 
         return Result.ok(commitFileDiffList);
     }
+
+    @RequestMapping(path="/findLikeCommitDiffFileList",method = RequestMethod.POST)
+    @ApiMethod(name = "findLikeCommitDiffFileList",desc = "模糊查询两个提交之前的差异文件")
+    @ApiParam(name = "commit",desc = "commitId",required = true)
+    public Result<FileDiffEntry> findLikeCommitDiffFileList(@RequestBody @Valid @NotNull Commit commit){
+
+        FileDiffEntry commitFileDiffList = commitServer.findLikeCommitDiffFileList(commit);
+
+        return Result.ok(commitFileDiffList);
+    }
+
 
     @RequestMapping(path="/findCommitFileDiff",method = RequestMethod.POST)
     @ApiMethod(name = "findCommitFileDiff",desc = "查询具体文件两次提交的差异")
@@ -66,15 +77,6 @@ public class CommitController {
     }
 
 
-    @RequestMapping(path="/findLikeCommitDiffFileList",method = RequestMethod.POST)
-    @ApiMethod(name = "findCommitFileDiff",desc = "文件具体内容信息")
-    @ApiParam(name = "commit",desc = "commitId",required = true)
-    public Result<FileDiffEntry> findLikeCommitDiffFileList(@RequestBody @Valid @NotNull Commit commit){
-
-        FileDiffEntry commitFileDiffList = commitServer.findLikeCommitDiffFileList(commit);
-
-        return Result.ok(commitFileDiffList);
-    }
 
 
     @RequestMapping(path="/findCommitLineFile",method = RequestMethod.POST)
@@ -118,6 +120,17 @@ public class CommitController {
 
         return Result.ok(fileDiff);
     }
+
+    @RequestMapping(path="/findDiffCommitStatistics",method = RequestMethod.POST)
+    @ApiMethod(name = "findDiffCommitStatistics",desc = "查询不同分支或者不同commitId的提交差异的统计")
+    @ApiParam(name = "commit",desc = "commit",required = true)
+    public Result<CommitDiffData> findDiffCommitStatistics(@RequestBody @Valid @NotNull Commit commit){
+
+        CommitDiffData commitDiffData  = commitServer.findDiffCommitStatistics(commit);
+
+        return Result.ok(commitDiffData);
+    }
+
 }
 
 

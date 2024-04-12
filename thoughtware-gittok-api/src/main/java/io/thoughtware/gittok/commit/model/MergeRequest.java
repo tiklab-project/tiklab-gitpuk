@@ -47,6 +47,12 @@ public class MergeRequest {
     @ApiProperty(name="value",desc="内容")
     private String value;
 
+    @ApiProperty(name="parentCommit",desc="合并分支的父commitId")
+    private String parentCommit;
+
+    @ApiProperty(name="currentCommit",desc="合并后当前commitId")
+    private String currentCommit;
+
     @ApiProperty(name="createUser",desc="用户")
     @Mappings({
             @Mapping(source = "user.id",target = "createUser")
@@ -57,6 +63,11 @@ public class MergeRequest {
     @ApiProperty(name="createTime",desc="创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private java.sql.Timestamp createTime;
+
+    /*-----其他字段-----*/
+
+    @ApiProperty(name="execType",desc="操作类型 close、open、create、comment、complete")
+    private String execType;
 
     public String getId() {
         return id;
@@ -137,5 +148,29 @@ public class MergeRequest {
 
     public void setIsClash(Integer isClash) {
         this.isClash = isClash;
+    }
+
+    public String getExecType() {
+        return execType;
+    }
+
+    public void setExecType(String execType) {
+        this.execType = execType;
+    }
+
+    public String getParentCommit() {
+        return parentCommit;
+    }
+
+    public void setParentCommit(String parentCommit) {
+        this.parentCommit = parentCommit;
+    }
+
+    public String getCurrentCommit() {
+        return currentCommit;
+    }
+
+    public void setCurrentCommit(String currentCommit) {
+        this.currentCommit = currentCommit;
     }
 }
