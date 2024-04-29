@@ -1,9 +1,13 @@
 package io.thoughtware.gittok.branch.model;
 
+import io.thoughtware.gittok.commit.model.MergeRequest;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  *  @pi.model: io.thoughtware.gittok.branch.model.Branch
+ *  裸仓库中的分支
  */
 public class Branch implements Serializable {
 
@@ -75,8 +79,24 @@ public class Branch implements Serializable {
      */
     private boolean defaultBranch;
 
+    /**
+     * @pi.name: lagNum
+     * @pi.dataType:int
+     * @pi.desc: 滞后数量
+     * @pi.value: lagNum
+     */
+    private int lagNum;
 
 
+    /**
+     * @pi.name: advanceNum
+     * @pi.dataType:int
+     * @pi.desc: 超前数量
+     * @pi.value: advanceNum
+     */
+    private int advanceNum;
+
+    MergeRequest mergeRequest;
 
 
     public String getBranchId() {
@@ -141,5 +161,30 @@ public class Branch implements Serializable {
 
     public void setCreateUser(String createUser) {
         this.createUser = createUser;
+    }
+
+    public int getLagNum() {
+        return lagNum;
+    }
+
+    public void setLagNum(int lagNum) {
+        this.lagNum = lagNum;
+    }
+
+    public int getAdvanceNum() {
+        return advanceNum;
+    }
+
+    public void setAdvanceNum(int advanceNum) {
+        this.advanceNum = advanceNum;
+    }
+
+
+    public MergeRequest getMergeRequest() {
+        return mergeRequest;
+    }
+
+    public void setMergeRequest(MergeRequest mergeRequest) {
+        this.mergeRequest = mergeRequest;
     }
 }

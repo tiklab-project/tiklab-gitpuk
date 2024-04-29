@@ -2,6 +2,8 @@ package io.thoughtware.gittok.setting.entity;
 
 import io.thoughtware.dal.jpa.annotation.*;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name="rpy_auth_ssh")
 public class AuthSshEntity {
@@ -18,8 +20,6 @@ public class AuthSshEntity {
     @Column(name = "title",notNull = true)
     private String title;
 
-    @Column(name = "create_time")
-    private String createTime;
 
     @Column(name = "user_id",notNull = true)
     private String userId;
@@ -27,14 +27,26 @@ public class AuthSshEntity {
     @Column(name = "value",notNull = true)
     private String value;
 
+
+    @Column(name = "fingerprint")
+    private String fingerprint;
+
     /**
      * 类型 public,全局 private,项目私有
      */
     @Column(name = "type")
     private String type;
 
+
+    @Column(name = "expire_time")
+    private String expireTime;
+
+
+    @Column(name = "create_time")
+    private Timestamp createTime;
+
     @Column(name = "user_time",notNull = true)
-    private String userTime;
+    private Timestamp userTime;
 
 
     public String getId() {
@@ -61,11 +73,11 @@ public class AuthSshEntity {
         this.title = title;
     }
 
-    public String getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
@@ -93,12 +105,28 @@ public class AuthSshEntity {
         this.type = type;
     }
 
-    public String getUserTime() {
+    public Timestamp getUserTime() {
         return userTime;
     }
 
-    public void setUserTime(String userTime) {
+    public void setUserTime(Timestamp userTime) {
         this.userTime = userTime;
+    }
+
+    public String getFingerprint() {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint) {
+        this.fingerprint = fingerprint;
+    }
+
+    public String getExpireTime() {
+        return expireTime;
+    }
+
+    public void setExpireTime(String expireTime) {
+        this.expireTime = expireTime;
     }
 }
 

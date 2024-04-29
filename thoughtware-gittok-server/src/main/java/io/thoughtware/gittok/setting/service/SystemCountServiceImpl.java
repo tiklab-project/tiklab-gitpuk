@@ -1,5 +1,8 @@
 package io.thoughtware.gittok.setting.service;
 
+import io.thoughtware.gittok.scan.model.ScanScheme;
+import io.thoughtware.gittok.scan.service.ScanSchemeService;
+import io.thoughtware.gittok.scan.service.ScanSchemeSonarService;
 import io.thoughtware.gittok.setting.model.SystemCount;
 import io.thoughtware.licence.appauth.service.ApplyAuthService;
 import io.thoughtware.licence.licence.model.Version;
@@ -13,8 +16,12 @@ import io.thoughtware.user.directory.service.UserDirService;
 import io.thoughtware.user.orga.service.OrgaService;
 import io.thoughtware.user.user.service.UserService;
 import io.thoughtware.user.usergroup.service.UserGroupService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class SystemCountServiceImpl implements SystemCountService{
@@ -52,6 +59,9 @@ public class SystemCountServiceImpl implements SystemCountService{
     @Autowired
     BackupsDbService backupsDbService;
 
+    @Autowired
+    ScanSchemeService scanSchemeService;
+
 
 
 
@@ -71,7 +81,10 @@ public class SystemCountServiceImpl implements SystemCountService{
         Version version = versionService.getVersion();
         Integer applyAuthNumber = applyAuthService.findApplyAuthNumber();
         String lastBackupsTime = backupsDbService.findLastBackupsTime();
+        List<ScanScheme> allScanScheme = scanSchemeService.findAllScanScheme();
+        int schemeNum = CollectionUtils.isNotEmpty(allScanScheme) ? allScanScheme.size() : 0;
 
+        systemCount.setScanSchemeNum(schemeNum);
         systemCount.setUserNum(userNumber);
         systemCount.setOrgaNum(orgaNumber);
         systemCount.setUserGroupNum(userGroupNumber);

@@ -52,7 +52,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
     private UserService userService;
 
     @Autowired
-    private RepositoryServer repositoryServer;
+    private RepositoryService repositoryServer;
 
     @Autowired
     CommitServer commitServer;

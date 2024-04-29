@@ -15,7 +15,7 @@ public interface CommitServer {
 
 
     /**
-     * 获取最近一次的提交记录
+     * 获取分支最近一次的提交记录
      * @param commit 仓库id
      * @return 提交记录
      */
@@ -26,7 +26,7 @@ public interface CommitServer {
      * @param commit commitId
      * @return 文件列表
      */
-    FileDiffEntry findCommitDiffFileList(Commit commit);
+    FileDiffEntry findDiffFileByCommitId(Commit commit);
 
     /**
      * 提交文件模糊查询
@@ -61,7 +61,7 @@ public interface CommitServer {
      * @param commit 提交信息
      * @return 文件内容
      */
-    FileDiffEntry findDiffBranchFile(Commit commit);
+    FileDiffEntry findDiffFileByBranchs(Commit commit);
 
     /**
      * 查询仓库不同分支差异的文件的详情
@@ -75,7 +75,26 @@ public interface CommitServer {
      * @param commit 提交信息
      * @return 文件内容
      */
-    CommitDiffData findDiffCommitStatistics(Commit commit);
+    CommitDiffData findStatisticsByBranchs(Commit commit);
+
+
+    /**
+     * 根据合并请求ID 查询差异提交
+     * @param mergeId 合并请求ID
+     */
+    List<CommitMessage> findDiffCommitByMergeId(String mergeId);
+
+    /**
+     * 根据合并请求ID 查询差异文件
+     * @param mergeId 合并请求ID
+     */
+    FileDiffEntry findDiffFileByMergeId(String mergeId);
+
+    /**
+     * 根据合并请求ID 查询统计
+     * @param mergeId 合并请求ID
+     */
+    CommitDiffData findStatisticsByMergeId(String mergeId);
 }
 
 

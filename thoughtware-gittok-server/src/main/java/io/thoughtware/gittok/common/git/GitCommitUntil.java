@@ -18,6 +18,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -37,35 +38,6 @@ import java.util.stream.Stream;
  * jgit获取仓库提交信息
  */
 public class GitCommitUntil {
-
-
-    /**
-     * 获取分支最新提交
-     * @param repository 仓库
-     * @param branch 分支
-     * @return 提交记录
-     * @throws IOException 仓库不存在
-     */
-    public static CommitMessage findBranchLastCommit(Repository repository , String branch)
-            throws IOException {
-
-
-        ObjectId objectId = repository.findRef(branch).getObjectId();
-        RevWalk revWalk = new RevWalk(repository);
-        //通过提交时间倒叙
-        revWalk.sort(RevSort.COMMIT_TIME_DESC);
-        revWalk.markStart(revWalk.parseCommit(objectId));
-
-        CommitMessage commitMessage=null;
-        for (RevCommit revCommit : revWalk) {
-            //只执行一次 获取最新提交
-            commitMessage = getCommitMessage(revCommit);
-            break;
-        }
-        revWalk.close();
-
-        return commitMessage;
-    }
 
 
     /**
@@ -89,7 +61,7 @@ public class GitCommitUntil {
                 branch = repository.getBranch();
             }*/
             //分支是否存在
-            Ref head = repository.findRef(branch);
+            Ref head = repository.findRef(Constants.R_HEADS +branch);
             if (head == null) {
                 return Collections.emptyList();
             }
@@ -234,7 +206,7 @@ public class GitCommitUntil {
         ObjectId originObjectId = git.getRepository().resolve(Constants.R_HEADS + commit.getBranch());
         RevCommit originCommit = revWalk.parseCommit(originObjectId);
 
-       FileDiffEntry diffEntry = getDiffFileEntry(repository,originCommit, targetCommit);
+       FileDiffEntry diffEntry = getDiffFileEntry(repository,targetCommit,originCommit);
 
        return diffEntry;
     }
@@ -274,36 +246,56 @@ public class GitCommitUntil {
 
 
 
+
     /**
-     * 获取提交信息
+     * 通过commitIdList 查询信息
+     * @param git git
+     * @param commitIdList 提交的commitId集合
+     */
+    public static List<CommitMessage>   findMessByCommitIdList(Git git,List<String> commitIdList) throws IOException {
+        List<CommitMessage> arrayList = new ArrayList<>();
+        Repository repository = git.getRepository();
+        for (String commitId:commitIdList){
+            ObjectId objId = repository.resolve(commitId);
+            RevWalk revWalk = new RevWalk(repository);
+            RevCommit commit = revWalk.parseCommit(objId);
+            revWalk.dispose();
+
+            CommitMessage commitMessage = getCommitMessage(commit);
+
+            arrayList.add(commitMessage);
+        }
+        return arrayList;
+    }
+
+
+    /**
+     * 查询最新提交
      * @param repository 仓库
      * @param branch 分支、commitId
-     * @param findCommitState  查询的是分支、commitId true、false
+     * @param type  类型  commitId、branch
      * @return 提交记录
      * @throws IOException 仓库不存在
      * @throws ApplicationException 分支不存在
      */
-    public static CommitMessage findOneBranchCommit(Repository repository, String branch,boolean findCommitState)
+    public static CommitMessage findNewestCommit(Repository repository, String branch,String type)
             throws IOException , ApplicationException {
 
         ObjectId objectId;
-        if (findCommitState){
-            //提交
+        if (("commitId").equals(type)){
+            //提交commitId
              objectId = ObjectId.fromString(branch);
         }else {
             //分支
-            objectId=  repository.findRef(branch).getObjectId();
+            objectId=  repository.findRef(Constants.R_HEADS +branch).getObjectId();
         }
 
+        //创建提交遍历对象
         RevWalk revWalk = new RevWalk(repository);
+        revWalk.sort(RevSort.COMMIT_TIME_DESC);
         revWalk.markStart(revWalk.parseCommit(objectId));
         for (RevCommit revCommit : revWalk) {
-            TreeWalk treeWalk = new TreeWalk(repository);
-            treeWalk.reset(revCommit.getTree());
-
             CommitMessage commitMessage = getCommitMessage(revCommit);
-
-            treeWalk.close();
             revCommit.disposeBody();
             revWalk.close();
             return commitMessage;
@@ -313,24 +305,26 @@ public class GitCommitUntil {
 
 
     /**
-     * 两个commit提交对比
+     * 查询当前commitId和父级的commitId 差异文件
      * @param git git
-     * @param commit 提交信息
+     * @param commitId 提交信息
      * @return 文件对比信息
      * @throws IOException 扫描失败
      */
-    public static FileDiffEntry findDiffCommit(Git git,  Commit commit) throws IOException {
+    public static FileDiffEntry findDiffFileByCommitId(Git git,  String commitId) throws IOException {
         Repository repository = git.getRepository();
         RevWalk walk = new RevWalk(git.getRepository());
         //当前commitId查询提交树
-        RevCommit newCommit =  walk.parseCommit(ObjectId.fromString(commit.getCommitId()));
+        RevCommit newCommit =  walk.parseCommit(ObjectId.fromString(commitId));
         RevCommit oldCommit=null;
 
         // 获取父提交ID 当前提交为合并分支时存在两个父级提交
         RevCommit[] parents = newCommit.getParents();
         List<String> parentCommitIds = new ArrayList<>();
-        for (RevCommit parent : parents) {
-            parentCommitIds.add(parent.getId().getName());
+        if (!ObjectUtils.isEmpty(parents)){
+            for (RevCommit parent : parents) {
+                parentCommitIds.add(parent.getId().getName());
+            }
         }
 
         if (parents.length!=0){
@@ -347,7 +341,7 @@ public class GitCommitUntil {
         fileDiffEntry.setParentCommitIds(parentCommitIds);
 
         //查询提交的信息
-        CommitMessage branchCommit = GitCommitUntil.findOneBranchCommit(repository, newCommit.getId().getName(),true);
+        CommitMessage branchCommit = GitCommitUntil.findNewestCommit(repository,newCommit.getId().getName(),"commitId");
         if (branchCommit != null){
             fileDiffEntry.setCommitMessage(branchCommit.getCommitMessage());
             fileDiffEntry.setCommitTime(branchCommit.getCommitTime());
@@ -928,4 +922,62 @@ public class GitCommitUntil {
         return diffEntries;
     }
 
+
+    /**
+     * 获取两个分支的滞后或者领先提交数量
+     * @param  repository
+     */
+    /**
+     * 获取两个分支的滞后或者领先提交数量
+     * @param  repository
+     */
+    public static Map<String, Integer> getBranchCommitNum(Repository repository,String branch) throws IOException {
+        Map<String, Integer> resultMap = new HashMap<>();
+
+        // 获取默认分支
+        Ref defaultRef = repository.getRefDatabase().getRef("HEAD");
+        // 获取默认分支的最新提交
+        ObjectId defaultHead = defaultRef.getObjectId();
+        RevCommit defaultCommit = repository.parseCommit(defaultHead);
+
+
+        // 获取当前分支的最新提交
+        Ref currentRef = repository.findRef( branch);
+        ObjectId  currentHead = currentRef.getObjectId();
+        RevCommit currentCommit = repository.parseCommit(currentHead);
+
+        //实例遍历提交历史对象
+        RevWalk revWalk = new RevWalk(repository);
+        RevCommit commit1 = revWalk.parseCommit(defaultCommit);
+        RevCommit commit2 = revWalk.parseCommit(currentCommit);
+        //获取两个分支公共提交commitId
+        revWalk.setRevFilter(RevFilter.MERGE_BASE);
+        revWalk.markStart(commit1);
+        revWalk.markStart(commit2);
+        RevCommit mergeBase = revWalk.next();
+        String mergeBaseCommitId = mergeBase.getId().getName();
+
+        RevWalk revWalk1 = new RevWalk(repository);
+        ObjectId targetCommit = repository.resolve(mergeBaseCommitId);
+        revWalk1.markUninteresting(revWalk1.parseCommit(targetCommit));
+
+        //当前分支相对与默认分支的滞后提交数
+        revWalk1.markStart(revWalk1.parseCommit(defaultHead));
+        int lagNum = 0;
+        for (RevCommit commit : revWalk1) {
+            lagNum++;
+        }
+
+        //当前分支相对与默认分支的超前提交数
+        revWalk1.markStart(revWalk1.parseCommit(currentCommit));
+        int advanceNum = 0;
+        for (RevCommit commit : revWalk1) {
+            advanceNum++;
+        }
+
+        resultMap.put("lagNum", lagNum);
+        resultMap.put("advanceNum",advanceNum);
+        return resultMap;
+
+    }
 }

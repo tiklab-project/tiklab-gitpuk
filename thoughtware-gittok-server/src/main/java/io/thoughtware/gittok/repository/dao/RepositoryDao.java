@@ -1,5 +1,6 @@
 package io.thoughtware.gittok.repository.dao;
 
+import io.thoughtware.gittok.repository.entity.RepositoryCollectEntity;
 import io.thoughtware.gittok.repository.model.RepositoryQuery;
 import io.thoughtware.core.order.OrderBuilders;
 import io.thoughtware.core.page.Pagination;
@@ -161,7 +162,9 @@ public class RepositoryDao {
         if (("oneself").equals(repositoryQuery.getFindType())){
             queryBuilders.eq("userId", repositoryQuery.getUserId());
         }
+
         QueryCondition queryCondition = queryBuilders.get();
+
         return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }
 }

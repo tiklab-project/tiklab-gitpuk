@@ -5,30 +5,39 @@ import io.thoughtware.core.page.Pagination;
 import io.thoughtware.core.page.PaginationBuilder;
 import io.thoughtware.dal.jpa.criterial.condition.DeleteCondition;
 import io.thoughtware.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
+import io.thoughtware.gittok.branch.model.Branch;
+import io.thoughtware.gittok.branch.service.BranchServer;
 import io.thoughtware.gittok.commit.dao.MergeRequestDao;
 import io.thoughtware.gittok.commit.entity.MergeRequestEntity;
 import io.thoughtware.gittok.commit.model.*;
-import io.thoughtware.gittok.common.GitTokFinal;
-import io.thoughtware.gittok.common.GitTokYamlDataMaService;
-import io.thoughtware.gittok.common.RepositoryFinal;
-import io.thoughtware.gittok.common.RepositoryUtil;
+import io.thoughtware.gittok.common.*;
 import io.thoughtware.gittok.common.git.GitBranchUntil;
+import io.thoughtware.gittok.common.git.GitCommitUntil;
+import io.thoughtware.gittok.repository.model.Repository;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.toolkit.join.JoinTemplate;
-import io.thoughtware.user.user.model.User;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,6 +47,7 @@ import java.util.stream.Collectors;
 */
 @Service
 public class MergeRequestServiceImpl implements MergeRequestService {
+    private static Logger logger = LoggerFactory.getLogger(MergeRequestServiceImpl.class);
 
     @Autowired
     MergeRequestDao mergeRequestDao;
@@ -51,6 +61,22 @@ public class MergeRequestServiceImpl implements MergeRequestService {
     @Autowired
     MergeConditionService mergeConditionService;
 
+    @Autowired
+    MergeCommitService mergeCommitService;
+
+    @Autowired
+    GittokTodoTaskService todoTaskService;
+
+    @Autowired
+    MergeAuditorService auditorService;;
+
+    @Autowired
+    GitTokMessageService gitTokMessageService;
+
+    @Autowired
+    RepositoryService repoService;
+
+
 
     @Override
     @Transactional
@@ -62,7 +88,8 @@ public class MergeRequestServiceImpl implements MergeRequestService {
         mergeRequest.setId(mergeRequestId);
         //添加合并请求动态
         createCondition(mergeRequest);
-
+        //添加消息和日志
+        sendMessLog(mergeRequest);
         return mergeRequestId;
     }
 
@@ -112,6 +139,24 @@ public class MergeRequestServiceImpl implements MergeRequestService {
 
         joinTemplate.joinQuery(mergeRequest);
 
+        //当前合并请求已关闭查询分支合并分支是否删除
+        if (ObjectUtils.isNotEmpty(mergeRequest)&&mergeRequest.getMergeState()==3){
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),mergeRequest.getRepository().getRpyId());
+            try {
+                List<Branch> allBranch = GitBranchUntil.findAllBranch(repositoryAddress);
+                List<Branch> targetBranch = allBranch.stream().filter(a -> mergeRequest.getMergeTarget().equals(a.getBranchName())).collect(Collectors.toList());
+                List<Branch> originBranch = allBranch.stream().filter(a -> mergeRequest.getMergeOrigin().equals(a.getBranchName())).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(targetBranch)&&CollectionUtils.isNotEmpty(originBranch)){
+                    mergeRequest.setBranchExist(true);
+                }else {
+                    mergeRequest.setBranchExist(false);
+                }
+            } catch (Exception e) {
+                logger.info("查询关闭状态的合并分支请求详情，获取仓库所有分支失败"+e );
+                throw new ApplicationException("查询关闭状态的合并分支请求详情，获取仓库所有分支失败");
+            }
+        }
+
         return mergeRequest;
     }
 
@@ -145,6 +190,17 @@ public class MergeRequestServiceImpl implements MergeRequestService {
         List<MergeRequest> mergeRequestList = BeanMapper.mapList(pagination.getDataList(),MergeRequest.class);
 
         joinTemplate.joinQuery(mergeRequestList);
+
+        if (CollectionUtils.isNotEmpty(mergeRequestList)){
+            //查询合并请求是否有冲突
+            for (MergeRequest mergeRequest:mergeRequestList){
+                if (  mergeRequest.getMergeState()==1){
+                    CommitDiffData diffData  = getIsCash(mergeRequest);
+                    int clash = ObjectUtils.isNotEmpty(diffData) ? diffData.getClash() : mergeRequest.getIsClash();
+                    mergeRequest.setIsClash(clash);
+                }
+            }
+        }
 
         return PaginationBuilder.build(pagination,mergeRequestList);
     }
@@ -194,13 +250,25 @@ public class MergeRequestServiceImpl implements MergeRequestService {
             request.setMergeState(2);
             this.updateMergeRequest(request);
 
-
             //添加动态
             MergeRequest mergeRequest = this.findMergeRequest(mergeData.getMergeRequestId());
             mergeRequest.setExecType("complete");
             createCondition(mergeRequest);
+
+            //添加差异提交记录
+            addDiffCommit(mergeData );
+
+            //添加代办
+            Thread thread = new Thread() {
+                public void run() {
+                      LinkedHashMap<String, Object> content = new LinkedHashMap<>();
+                      content.put("mergeId", mergeData.getMergeRequestId());
+                      todoTaskService.updateBacklog(content,"merge",null);
+                }
+            };
+            thread.start();
         }
-        return result;
+        return null;
     }
 
     @Override
@@ -224,6 +292,53 @@ public class MergeRequestServiceImpl implements MergeRequestService {
             throw new ApplicationException(5000,"文件不存在");
         }
     }
+
+
+
+    /**
+     * 合并分支后创建差异的commitId
+     * @param mergeData
+     * @return
+     */
+    public  void addDiffCommit(MergeData mergeData){
+        //合并提交list
+        List<CommitMessage> commitMessageList = mergeData.getCommitMessageList();
+        List<CommitMessage> messageList = commitMessageList.stream()
+                .flatMap(map -> map.getCommitMessageList().stream())
+                .collect(Collectors.toList());
+
+        //创建和的提交记录
+        MergeCommit mergeCommit = new MergeCommit();
+        mergeCommit.setRepositoryId(mergeData.getRpyId());
+        mergeCommit.setMergeRequestId(mergeData.getMergeRequestId());
+        if (CollectionUtils.isNotEmpty(messageList)){
+            for (CommitMessage commitMessage :messageList){
+                mergeCommit.setCommitId(commitMessage.getCommitId());
+                mergeCommit.setCommitTime(new Timestamp(commitMessage.getDateTime().getTime()));
+                mergeCommitService.createMergeCommit(mergeCommit);
+            }
+        }
+    }
+
+    /**
+     * 获取两个分支是否有冲突
+     * @param mergeRequest
+     */
+    public CommitDiffData getIsCash(MergeRequest mergeRequest){
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),mergeRequest.getRepository().getRpyId());
+        try {
+            Git  git = Git.open(new File(repositoryAddress));
+            Commit commit = new Commit();
+            commit.setFindCommitId(false);
+            commit.setTargetBranch(mergeRequest.getMergeTarget());
+            commit.setBranch(mergeRequest.getMergeOrigin());
+            return   GitCommitUntil.getDiffStatistics(git,commit);
+        } catch (IOException|GitAPIException e) {
+            logger.error("查询合并请求中的源和目标是否有冲突失败："+e);
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * 创建合并请求的动态
@@ -262,7 +377,31 @@ public class MergeRequestServiceImpl implements MergeRequestService {
         if (StringUtils.isNotEmpty(mergeCondition.getType())){
             mergeConditionService.createMergeCondition(mergeCondition);
         }
-
     }
+
+
+    /**
+     *创建分支添加消息和日志
+     * @param mergeRequest 合并请求
+     */
+    public void sendMessLog(MergeRequest mergeRequest){
+
+        Repository repository = repoService.findOneRpy(mergeRequest.getRepository().getRpyId());
+
+        HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
+
+        map.put("mergeId",mergeRequest.getId());
+        map.put("action",mergeRequest.getTitle());
+        //创建合并请求
+        if (("create").equals(mergeRequest.getExecType())){
+            map.put("message", "在仓库"+repository.getName()+"中创建了合并请求"+mergeRequest.getTitle());
+            map.put("link",GitTokFinal.MERGE_DATA_PATH);
+            map.put("repositoryPath",repository.getAddress());
+            map.put("mergeId",mergeRequest.getId());
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_MERGE_CRATE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_MERGE_CRATE,"merge");
+        }
+    }
+
 
 }

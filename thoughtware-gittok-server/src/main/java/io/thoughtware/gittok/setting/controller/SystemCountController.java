@@ -1,21 +1,15 @@
 package io.thoughtware.gittok.setting.controller;
 
 import io.thoughtware.core.Result;
-import io.thoughtware.gittok.setting.model.Auth;
 import io.thoughtware.gittok.setting.model.SystemCount;
-import io.thoughtware.gittok.setting.service.AuthServer;
 import io.thoughtware.gittok.setting.service.SystemCountService;
 import io.thoughtware.postin.annotation.Api;
 import io.thoughtware.postin.annotation.ApiMethod;
 import io.thoughtware.postin.annotation.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/systemCount")

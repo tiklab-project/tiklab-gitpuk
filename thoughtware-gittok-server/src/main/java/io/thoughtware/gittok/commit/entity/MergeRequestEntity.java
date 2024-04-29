@@ -39,11 +39,6 @@ public class MergeRequestEntity {
     @Column(name = "value")
     private String value;
 
-    @Column(name = "parent_commit")
-    private String parentCommit;
-
-    @Column(name = "current_commit")
-    private String currentCommit;
 
     @Column(name = "create_time")
     private Timestamp createTime;
@@ -128,19 +123,4 @@ public class MergeRequestEntity {
         this.isClash = isClash;
     }
 
-    public String getParentCommit() {
-        return parentCommit;
-    }
-
-    public void setParentCommit(String parentCommit) {
-        this.parentCommit = parentCommit;
-    }
-
-    public String getCurrentCommit() {
-        return currentCommit;
-    }
-
-    public void setCurrentCommit(String currentCommit) {
-        this.currentCommit = currentCommit;
-    }
 }

@@ -41,8 +41,9 @@ public class MergeRequestQuery {
         return rpyId;
     }
 
-    public void setRpyId(String rpyId) {
+    public MergeRequestQuery setRpyId(String rpyId) {
         this.rpyId = rpyId;
+        return this;
     }
 
     public Page getPageParam() {
@@ -57,8 +58,9 @@ public class MergeRequestQuery {
         return mergeState;
     }
 
-    public void setMergeState(Integer mergeState) {
+    public MergeRequestQuery setMergeState(Integer mergeState) {
         this.mergeState = mergeState;
+        return this;
     }
 
     public String getTitle() {

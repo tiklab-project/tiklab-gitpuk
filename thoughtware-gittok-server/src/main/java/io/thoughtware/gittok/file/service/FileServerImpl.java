@@ -5,7 +5,7 @@ import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
 import io.thoughtware.gittok.file.model.FileMessage;
 import io.thoughtware.gittok.file.model.FileQuery;
-import io.thoughtware.gittok.repository.service.RepositoryServer;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import org.eclipse.jgit.api.Git;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.io.IOException;
 public class FileServerImpl implements FileServer {
 
     @Autowired
-    RepositoryServer repositoryServer;
+    RepositoryService repositoryServer;
 
     @Autowired
     GitTokYamlDataMaService yamlDataMaService;

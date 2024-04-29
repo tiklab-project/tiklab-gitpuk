@@ -9,6 +9,7 @@ import io.thoughtware.core.exception.ApplicationException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
@@ -184,7 +185,6 @@ public class RepositoryFileUtil {
 
         List<FileTree> list = new ArrayList<>();
         String commitId = message.getBranch();
-        //RevTree tree =GitBranchUntil.findBarthCommitRevTree(repository,commitId,message.isFindCommitId());
         RevTree tree =GitBranchUntil.findBarthCommitRevTree(repository,commitId,message.getFindType());
 
         TreeWalk treeWalk = new TreeWalk(repository);
@@ -253,7 +253,6 @@ public class RepositoryFileUtil {
             String fileAddress = fileName;
 
             String branch = message.getBranch();
-
 
             ObjectId objectId = GitBranchUntil.findObjectId(repository, branch, message.getFindType());
             List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),pathString);

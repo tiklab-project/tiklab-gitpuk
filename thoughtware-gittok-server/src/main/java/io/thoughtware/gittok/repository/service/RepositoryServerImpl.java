@@ -2,6 +2,9 @@ package io.thoughtware.gittok.repository.service;
 
 import io.thoughtware.gittok.authority.ValidUsrPwdServer;
 import io.thoughtware.gittok.branch.model.Branch;
+import io.thoughtware.gittok.branch.model.RepositoryBranch;
+import io.thoughtware.gittok.branch.model.RepositoryBranchQuery;
+import io.thoughtware.gittok.branch.service.RepositoryBranchService;
 import io.thoughtware.gittok.common.*;
 import io.thoughtware.gittok.common.git.GitBranchUntil;
 import io.thoughtware.gittok.common.git.GitUntil;
@@ -12,6 +15,9 @@ import io.thoughtware.gittok.repository.entity.RepositoryEntity;
 import io.thoughtware.gittok.repository.model.*;
 import io.thoughtware.gittok.scan.service.ScanPlayService;
 import io.thoughtware.gittok.tag.service.TagService;
+import io.thoughtware.privilege.role.model.PatchUser;
+import io.thoughtware.privilege.role.model.RoleUser;
+import io.thoughtware.privilege.role.service.RoleUserService;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.core.context.AppHomeContext;
 import io.thoughtware.core.exception.ApplicationException;
@@ -31,6 +37,7 @@ import io.thoughtware.user.dmUser.service.DmUserService;
 import io.thoughtware.user.user.model.User;
 import io.thoughtware.user.user.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -52,7 +59,7 @@ import java.util.stream.Stream;
 
 @Service
 @Exporter
-public class RepositoryServerImpl implements RepositoryServer {
+public class RepositoryServerImpl implements RepositoryService {
 
     private static Logger logger = LoggerFactory.getLogger(RepositoryServerImpl.class);
 
@@ -97,10 +104,19 @@ public class RepositoryServerImpl implements RepositoryServer {
     ScanPlayService scanPlayService;
 
     @Autowired
-    GitTokMessageService gitTorkMessageService;
+    GitTokMessageService gitTokMessageService;
 
     @Autowired
     TagService tagService;
+
+    @Autowired
+    RepositoryCollectService repositoryCollectService;
+
+    @Autowired
+    RoleUserService roleUserService;
+
+    @Autowired
+    RepositoryBranchService branchService;
 
 
 
@@ -158,23 +174,42 @@ public class RepositoryServerImpl implements RepositoryServer {
         // 生成0到4之间的随机数
         int randomNum = random.nextInt(5);
         repository.setColor(randomNum);
-        RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
+        RepositoryEntity repositoryEntity = BeanMapper.map(repository, RepositoryEntity.class);
 
 
-        String repositoryId = repositoryDao.createRpy(groupEntity);
+        String repositoryId = repositoryDao.createRpy(repositoryEntity);
 
+        String userId;
+       //初始化示例仓库用户id 取Repository里面用户
         if (!ObjectUtils.isEmpty(repository.getUser())&&StringUtils.isNotEmpty(repository.getUser().getId())){
-            //创建仓库 给创建人设置管理员权限
-            dmRoleService.initDmRoles(repositoryId, repository.getUser().getId(), 1);
+             userId = repository.getUser().getId();
         }else {
-            //创建仓库 给创建人设置管理员权限
-            dmRoleService.initDmRoles(repositoryId, LoginContext.getLoginId(), 1);
+            userId =LoginContext.getLoginId();
         }
+
+
+        List<PatchUser> List = new ArrayList<>();
+        PatchUser patchUser = new PatchUser();
+        RoleUser userRoleAdmin = roleUserService.findUserRoleAdmin();
+        //给系统超级管理员设置成项目超级管理员
+        patchUser.setUserId(userRoleAdmin.getUser().getId());
+        patchUser.setRoleType(2);
+        List.add(patchUser);
+
+        //超级管理员和创建者不同 ，给创建者设置为管理员角色
+        if (!(userId).equals(userRoleAdmin.getUser().getId())){
+            PatchUser patchUser1 = new PatchUser();
+            patchUser1.setUserId(userId);
+            patchUser1.setRoleType(1);
+            List.add(patchUser1);
+        }
+        dmRoleService.initPatchDmRole(repositoryId, List);
+
 
         //正式仓库才发送消息
         if (repository.getCategory()==2){
-            //发送消息
-            initRepositoryMap(groupEntity,"create",null);
+            //发送消息日志
+            sendMessLog(repositoryEntity,"create",null);
         }
         return repositoryId;
     }
@@ -186,7 +221,7 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     @Override
     public void deleteRpy(String rpyId) {
-        RepositoryEntity oneRpy = repositoryDao.findOneRpy(rpyId);
+        RepositoryEntity repositoryEntity =  repositoryDao.findOneRpy(rpyId);
 
         repositoryDao.deleteRpy(rpyId);
 
@@ -212,8 +247,8 @@ public class RepositoryServerImpl implements RepositoryServer {
                 //删除计划
                 scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
 
-                //发送消息
-                initRepositoryMap(oneRpy, "delete",null);
+                //发送消息日志
+                sendMessLog(repositoryEntity,"delete",null);
             }
         };
         thread.start();
@@ -223,13 +258,28 @@ public class RepositoryServerImpl implements RepositoryServer {
     @Transactional
     public void resetRepository(String rpyId) {
         try {
-            deleterRpyRelatedData(rpyId);
+            RepositoryEntity repositoryEntity =  repositoryDao.findOneRpy(rpyId);
+
+            //重置仓库 删除仓库数据相关联数据
+            deleteRpyRelatedData(rpyId);
 
             //创建裸仓库
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
             GitUntil.createRepository(repositoryAddress);
+
+            Repository repository = this.findOne(rpyId);
+            repository.setSize(0L);
+            this.updateRepository(repository);
+
+            //删除数据库分支记录
+            branchService.deleteRepositoryBranch(rpyId,null);
+
+            //重置后发送消息
+            sendMessLog(repositoryEntity,"reset",null);
+
         }catch (Exception e){
-            throw new SystemException(500,"重置失败");
+            logger.info("重置仓库失败"+e.getMessage());
+            throw new SystemException(e);
         }
     }
 
@@ -242,8 +292,8 @@ public class RepositoryServerImpl implements RepositoryServer {
         //更新名称
         RepositoryEntity oneRpy = repositoryDao.findOneRpy(repository.getRpyId());
 
-        RepositoryEntity groupEntity = BeanMapper.map(repository, RepositoryEntity.class);
-        groupEntity.setUpdateTime(RepositoryUtil.date(1,new Date()));
+        RepositoryEntity repositoryEntity = BeanMapper.map(repository, RepositoryEntity.class);
+        repositoryEntity.setUpdateTime(RepositoryUtil.date(1,new Date()));
 
 
         //校验修改的仓库名字是否重复
@@ -264,11 +314,11 @@ public class RepositoryServerImpl implements RepositoryServer {
                 throw  new SystemException(9001,"仓库地址重复");
             }
         }
-        repositoryDao.updateRpy(groupEntity);
+        repositoryDao.updateRpy(repositoryEntity);
 
         //更新名字后发送消息
         if (!oneRpy.getName().equals(repository.getName())){
-            initRepositoryMap(oneRpy,"update",repository.getName());
+            sendMessLog(repositoryEntity,"update",repository.getName());
         }
     }
 
@@ -799,8 +849,19 @@ public class RepositoryServerImpl implements RepositoryServer {
      */
     public Pagination<Repository> findViewRepository(RepositoryQuery repositoryQuery,List<Repository> AllRepository){
         List<String> accessRepositoryId = findHaveAccessRepository(AllRepository, repositoryQuery.getUserId(),"all");
-        String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
+        String[] canViewRpyIdList;
 
+        //查询我的收藏时
+        List<RepositoryCollect> repositoryCollectList = repositoryCollectService.findRepositoryCollectList(new RepositoryCollectQuery().setUserId(repositoryQuery.getUserId()));
+        if (("collect").equals(repositoryQuery.getFindType())){
+            if (CollectionUtils.isEmpty(repositoryCollectList)){
+                return null;
+            }
+            List<String> stringList = repositoryCollectList.stream().map(RepositoryCollect::getRepositoryId).collect(Collectors.toList());
+            canViewRpyIdList = stringList.toArray(new String[stringList.size()]);
+        }else {
+             canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
+        }
         if (canViewRpyIdList.length>0){
             Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
             List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
@@ -854,47 +915,13 @@ public class RepositoryServerImpl implements RepositoryServer {
     }
 
 
-    /**
-     *操作仓库发送消息
-     * @param oldRepository 操作的仓库
-     * @param type  操作类型
-     * @param  updateName 更新名字
-     */
-    public void initRepositoryMap(RepositoryEntity oldRepository,String type,String updateName){
 
-        HashMap<String, Object> map = gitTorkMessageService.initMap();
-
-        map.put("repositoryId",oldRepository.getRpyId());
-        map.put("action",oldRepository.getName());
-        if (("delete").equals(type)){
-            map.put("message", "删除了仓库"+oldRepository.getName());
-            map.put("link",GitTokFinal.LOG_RPY_DELETE);
-            gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_DELETE);
-            gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_DELETE,"repository");
-        }
-
-        if (("update").equals(type)){
-            map.put("message", oldRepository.getName()+"更改为"+updateName);
-            map.put("link",GitTokFinal.LOG_RPY_UPDATE);
-            map.put("repositoryPath",oldRepository.getAddress());
-            gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_UPDATE);
-            gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_UPDATE,"repository");
-        }
-
-        if (("create").equals(type)){
-            map.put("message", "创建了仓库"+oldRepository.getName());
-            map.put("link",GitTokFinal.LOG_RPY_CREATE);
-            map.put("repositoryPath",oldRepository.getAddress());
-            gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_CREATE);
-            gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_CREATE,"repository");
-        }
-    }
 
     /**
      *重置的时候删除仓库关联数据
      * @param rpyId 仓库id
      */
-    public void deleterRpyRelatedData(String rpyId){
+    public void deleteRpyRelatedData(String rpyId){
 
         //删除文件
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
@@ -906,6 +933,104 @@ public class RepositoryServerImpl implements RepositoryServer {
 
         //删除计划
         scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
+    }
+
+    /**
+     * push 仓库数据后编辑仓库信息
+     * @param repositoryPath
+     */
+    public void compileRepository(String repositoryPath) throws IOException {
+
+        //通过仓库地址查询仓库是否存在
+        Repository repository = this.findConciseRepositoryByAddress(repositoryPath);
+        if (!ObjectUtils.isEmpty(repository)){
+            //仓库地址
+            String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
+            File file = new File(repositoryUrl);
+
+            org.eclipse.jgit.lib.Repository gitRpy = Git.open(file).getRepository();
+            //唯一分支不为空，表示没有默认分支，则设置默认分支
+            if (StringUtils.isNotEmpty(repository.getUniqueBranch())){
+                GitBranchUntil.updateFullBranch(gitRpy, repository.getUniqueBranch());
+            }
+
+            //更新仓库文件大小
+            if (file.exists()){
+                long logBytes = FileUtils.sizeOfDirectory(file);
+                repository.setSize(logBytes);
+                this.updateRepository(repository);
+            }
+
+
+            //通过提交创建数据库分支记录
+            try {
+                //查询提交后裸仓库中的所有分支
+                List<Branch>  allBranch = GitBranchUntil.findAllBranch(repositoryUrl);
+                List<RepositoryBranch> branchList = branchService.findRepositoryBranchList(new RepositoryBranchQuery().setRepositoryId(repository.getRpyId()));
+                for (Branch branch:allBranch){
+                    List<RepositoryBranch> branches = branchList.stream().filter(a -> (branch.getBranchName()).equals(a.getBranchName())).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(branches)){
+                        continue;
+                    }
+                    //数据库中分支记录和裸仓库中的分支有不同的 创建分支记录
+                    RepositoryBranch repositoryBranch = new RepositoryBranch();
+                    repositoryBranch.setBranchName(branch.getBranchName());
+                    repositoryBranch.setBranchId(branch.getBranchId());
+                    repositoryBranch.setRepositoryId(repository.getRpyId());
+                    repositoryBranch.setCreateUser(LoginContext.getLoginId());
+                    branchService.createRepositoryBranch(repositoryBranch);
+                }
+            } catch (GitAPIException e) {
+                logger.error("提交"+repositoryPath+"代码后获取仓库分支失败："+e.getMessage() );
+                throw new SystemException(e);
+            }
+
+        }
+    }
+
+
+    /**
+     *操作仓库发送消息
+     * @param repository 操作的仓库
+     * @param type  操作类型
+     * @param  updateName 更新名字
+     */
+    public void sendMessLog(RepositoryEntity repository,String type,String updateName){
+        
+        HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
+
+        map.put("repositoryId",repository.getRpyId());
+        map.put("action",repository.getName());
+        if (("delete").equals(type)){
+            map.put("message", repository.getName());
+            map.put("link",GitTokFinal.LOG_RPY_DELETE);
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_DELETE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_DELETE,"repository");
+        }
+
+        if (("update").equals(type)){
+            map.put("message", repository.getName()+"更改为"+updateName);
+            map.put("link",GitTokFinal.LOG_RPY_UPDATE);
+            map.put("repositoryPath",repository.getAddress());
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_UPDATE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_UPDATE,"repository");
+        }
+
+        if (("create").equals(type)){
+            map.put("message", repository.getName());
+            map.put("link",GitTokFinal.LOG_RPY_CREATE);
+            map.put("repositoryPath",repository.getAddress());
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_CREATE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_CREATE,"repository");
+        }
+
+        if (("reset").equals(type)){
+            map.put("message", repository.getName());
+            map.put("link",GitTokFinal.LOG_RPY_RESET);
+            map.put("repositoryPath",repository.getAddress());
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_RESET);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_RESET,"repository");
+        }
     }
 
 }

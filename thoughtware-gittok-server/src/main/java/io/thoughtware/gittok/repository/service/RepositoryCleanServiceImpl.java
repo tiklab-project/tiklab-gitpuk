@@ -55,7 +55,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
     GitTokYamlDataMaService gitTorkYamlDataMaService;
 
     @Autowired
-    RepositoryServer repositoryServer;
+    RepositoryService repositoryServer;
 
 
     //文件

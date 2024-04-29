@@ -3,7 +3,7 @@ package io.thoughtware.gittok.scan.service;
 import com.alibaba.fastjson.JSONObject;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
 import io.thoughtware.gittok.repository.model.Repository;
-import io.thoughtware.gittok.repository.service.RepositoryServer;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.gittok.scan.model.*;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.core.exception.ApplicationException;
@@ -43,7 +43,7 @@ public class CodeScanServiceImpl implements CodeScanService {
     @Autowired
     DeployEnvService deployEnvService;
     @Autowired
-    RepositoryServer repositoryServer;
+    RepositoryService repositoryServer;
 
     @Autowired
     JoinTemplate joinTemplate;

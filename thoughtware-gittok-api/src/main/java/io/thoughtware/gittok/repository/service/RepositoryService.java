@@ -11,10 +11,11 @@ import io.thoughtware.toolkit.join.annotation.FindList;
 import io.thoughtware.toolkit.join.annotation.FindOne;
 import io.thoughtware.toolkit.join.annotation.JoinProvider;
 
+import java.io.IOException;
 import java.util.List;
 
 @JoinProvider(model = Repository.class)
-public interface RepositoryServer {
+public interface RepositoryService {
 
     /**
      * 创建代码库以及相关数据
@@ -219,6 +220,12 @@ public interface RepositoryServer {
      * @param  rpyId 仓库id
      */
     void resetRepository(String rpyId);
+
+    /**
+     * push 仓库数据后编辑仓库信息
+     * @param  repositoryPath
+     */
+    void compileRepository(String repositoryPath) throws IOException;
 }
 
 

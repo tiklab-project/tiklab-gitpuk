@@ -1,10 +1,14 @@
 package io.thoughtware.gittok.commit.model;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.thoughtware.postin.annotation.ApiProperty;
+
+import java.util.List;
 
 public class MergeData {
 
-    @ApiProperty(name="mergeRequestId",desc="合并请求的状态")
+    @ApiProperty(name="mergeRequestId",desc="合并请求的id")
     private String mergeRequestId;
 
     @ApiProperty(name="rpyId",desc="仓库id")
@@ -26,6 +30,11 @@ public class MergeData {
     private String mergeWay;
     @ApiProperty(name="deleteOrigin",desc="是否删除源分支")
     private boolean deleteOrigin;
+
+    /*-------不同分支差异commitId--------*/
+
+    @ApiProperty(name="execType",desc="提交信息list")
+    private List<CommitMessage> commitMessageList;
 
 
 
@@ -91,5 +100,13 @@ public class MergeData {
 
     public void setMergeRequestId(String mergeRequestId) {
         this.mergeRequestId = mergeRequestId;
+    }
+
+    public List<CommitMessage> getCommitMessageList() {
+        return commitMessageList;
+    }
+
+    public void setCommitMessageList(List<CommitMessage> commitMessageList) {
+        this.commitMessageList = commitMessageList;
     }
 }

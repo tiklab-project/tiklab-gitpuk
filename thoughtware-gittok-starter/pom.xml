@@ -96,11 +96,12 @@
 
 
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-		<!--<dependency>
+<!--		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.5</version>
 		</dependency>-->
+
 		<dependency>
 			<groupId>io.thoughtware</groupId>
 			<artifactId>thoughtware-dsm-spring-boot-starter</artifactId>
@@ -136,15 +137,15 @@
 				</dependency>
 				<dependency>
 					<groupId>io.thoughtware</groupId>
-					<artifactId>thoughtware-spotbugs</artifactId>
-					<version>${thoughtware-spotbugs.version}</version>
+					<artifactId>thoughtware-postgresql-linux</artifactId>
+					<version>${thoughtware-postgresql.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>io.thoughtware</groupId>
-					<artifactId>thoughtware-postgresql-linux</artifactId>
-					<version>${thoughtware-postgresql.version}</version>
+					<artifactId>thoughtware-spotbugs</artifactId>
+					<version>${thoughtware-spotbugs.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -211,6 +212,13 @@
 				</dependency>
 				<dependency>
 					<groupId>io.thoughtware</groupId>
+					<artifactId>thoughtware-postgresql-windows</artifactId>
+					<version>${thoughtware-postgresql.version}</version>
+					<type>zip</type>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>io.thoughtware</groupId>
 					<artifactId>thoughtware-spotbugs</artifactId>
 					<version>${thoughtware-spotbugs.version}</version>
 					<type>zip</type>
@@ -245,7 +253,7 @@
 										</artifactItem>
 										<artifactItem>
 											<groupId>io.thoughtware</groupId>
-											<artifactId>thoughtware-postgresql-linux</artifactId>
+											<artifactId>thoughtware-postgresql-windows</artifactId>
 											<version>${thoughtware-postgresql.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
@@ -278,6 +286,13 @@
 				</dependency>
 				<dependency>
 					<groupId>io.thoughtware</groupId>
+					<artifactId>thoughtware-postgresql-mac</artifactId>
+					<version>${thoughtware-postgresql.version}</version>
+					<type>zip</type>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>io.thoughtware</groupId>
 					<artifactId>thoughtware-spotbugs</artifactId>
 					<version>${thoughtware-spotbugs.version}</version>
 					<type>zip</type>
@@ -303,6 +318,13 @@
 								</goals>
 								<configuration>
 									<artifactItems>
+										<artifactItem>
+											<groupId>io.thoughtware</groupId>
+											<artifactId>thoughtware-postgresql-mac</artifactId>
+											<version>${thoughtware-postgresql.version}</version>
+											<type>zip</type>
+											<outputDirectory>embbed</outputDirectory>
+										</artifactItem>
 										<artifactItem>
 											<groupId>io.thoughtware</groupId>
 											<artifactId>thoughtware-jdk-mac</artifactId>

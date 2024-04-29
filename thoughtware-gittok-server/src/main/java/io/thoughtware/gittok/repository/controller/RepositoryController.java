@@ -6,7 +6,7 @@ import io.thoughtware.gittok.file.model.FileTreeMessage;
 import io.thoughtware.gittok.repository.model.Repository;
 import io.thoughtware.gittok.repository.model.RepositoryCloneAddress;
 import io.thoughtware.gittok.repository.model.RepositoryQuery;
-import io.thoughtware.gittok.repository.service.RepositoryServer;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.core.Result;
 import io.thoughtware.core.page.Pagination;
 import io.thoughtware.postin.annotation.Api;
@@ -35,7 +35,7 @@ import java.util.List;
 public class RepositoryController {
     
     @Autowired
-    private RepositoryServer repositoryServer;
+    private RepositoryService repositoryServer;
 
     /**
      * @pi.name: create repository

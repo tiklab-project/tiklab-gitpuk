@@ -48,7 +48,7 @@ public class LeadToServiceImpl implements LeadToService {
     RepositoryGroupServer groupServer;
 
     @Autowired
-    RepositoryServer repositoryServer;
+    RepositoryService repositoryServer;
 
     @Autowired
     GitTokYamlDataMaService yamlDataMaService;

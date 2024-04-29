@@ -44,6 +44,7 @@ public class GitTokSqlLoad {
                 "xdprivilege_1.0.1",
                 "apply-auth_1.0.1",
                 "privilege_1.0.1",
+                "privilege-gittok_1.0.1",
         });
         dsmConfig.newVersion("1.0.2", new String[]{
                 "message_1.0.2",
@@ -57,11 +58,14 @@ public class GitTokSqlLoad {
                 "message_1.0.3",
                 "oplog_1.0.3",
                 "apply-auth_1.0.3",
+                "xcode_1.0.3",
+                "privilege_1.0.3",
         });
         dsmConfig.newVersion("1.0.4", new String[]{
                 "message_1.0.4",
                 "oplog_1.0.4",
                 "apply-auth_1.0.4",
+                "xcode_1.0.4"
         });
         dsmConfig.newVersion("1.0.5", new String[]{
                 "message_1.0.5",
@@ -71,6 +75,9 @@ public class GitTokSqlLoad {
         });
         dsmConfig.newVersion("1.0.7", new String[]{
                 "message_1.0.7"
+        });
+        dsmConfig.newVersion("1.0.8", new String[]{
+                "message_1.0.8"
         });
         return dsmConfig;
     }

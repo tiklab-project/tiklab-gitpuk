@@ -1,5 +1,7 @@
 package io.thoughtware.gittok.setting.service;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.KeyPair;
 import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.setting.dao.AuthSshDao;
 import io.thoughtware.gittok.setting.entity.AuthSshEntity;
@@ -10,7 +12,12 @@ import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.toolkit.join.JoinTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.sql.Timestamp;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +39,12 @@ public class AuthSshServerImpl implements AuthSshServer {
      */
     @Override
     public String createAuthSsh(AuthSsh authSsh) {
-        authSsh.setCreateTime(RepositoryUtil.date(1,new Date()));
+        authSsh.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+        //公钥指纹
+        String publicKeyFinger = RepositoryUtil.getPublicKeyFinger(authSsh.getValue());
+        authSsh.setFingerprint(publicKeyFinger);
+
         AuthSshEntity groupEntity = BeanMapper.map(authSsh, AuthSshEntity.class);
         return authSshDao.createAuthSsh(groupEntity);
     }
@@ -52,6 +64,9 @@ public class AuthSshServerImpl implements AuthSshServer {
      */
     @Override
     public void updateAuthSsh(AuthSsh authSsh) {
+        if (ObjectUtils.isEmpty(authSsh.getExpireTime())){
+            authSsh.setExpireTime("0");
+        }
         AuthSshEntity groupEntity = BeanMapper.map(authSsh, AuthSshEntity.class);
         authSshDao.updateAuthSsh(groupEntity);
     }

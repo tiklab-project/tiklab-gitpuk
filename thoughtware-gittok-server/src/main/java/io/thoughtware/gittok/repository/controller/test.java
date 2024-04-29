@@ -15,6 +15,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -44,7 +45,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -57,14 +57,19 @@ import java.util.stream.Collectors;
 public class test {
 
     public static void main(String[] args) throws Exception {
-        String bareRepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/585456fc2e3f.git"; // 裸仓库路径
+/*        String bareRepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/585456fc2e3f.git"; // 裸仓库路径
         String RepositoryPath = "/Users/limingliang/tiklab/thoughtware-gittok/repository/clone/e35b85357fcb"; // 裸仓库路径
 
         MergeData mergeData = new MergeData();
         mergeData.setMergeOrigin("a1");
         mergeData.setMergeTarget("b1");
 
-        GitBranchUntil.getMergeClashFile(mergeData,bareRepositoryPath);
+        GitBranchUntil.getMergeClashFile(mergeData,bareRepositoryPath);*/
+
+
+        Date date = new Date();
+        Date days = DateUtils.addDays(date, 30);
+        System.out.println(days);
 
        /* List<String> a = new ArrayList<>();
         a.add("1");

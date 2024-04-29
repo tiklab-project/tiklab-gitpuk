@@ -1,6 +1,10 @@
 package io.thoughtware.gittok.common;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.KeyPair;
 import io.thoughtware.core.exception.ApplicationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -12,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class RepositoryUtil {
-
+    private static Logger logger = LoggerFactory.getLogger(RepositoryUtil.class);
     /**
      * 判断字符串是否为空
      * @param s 字符串
@@ -391,6 +395,25 @@ public class RepositoryUtil {
         decimalL = decimalL.setScale(2, RoundingMode.HALF_UP);
 
         return decimalL.floatValue();
+    }
+
+    /*
+     * 获取公钥指纹
+     * */
+    public static String getPublicKeyFinger(String data){
+        try {
+            // 获取公钥指纹
+            byte[] publicKeyBytes = data.getBytes("UTF-8");
+            JSch jsch = new JSch();
+            KeyPair publicKey = KeyPair.load(jsch, null, publicKeyBytes);
+            String fingerprint = publicKey.getFingerPrint();
+            // 清理资源
+            publicKey.dispose();
+            return fingerprint;
+        } catch (Exception e) {
+            logger.error("获取公钥指纹报错:"+e.getMessage());
+            throw  new ApplicationException("公钥的格式不正确");
+        }
     }
 }
 

@@ -5,9 +5,9 @@ create table rpy_auth_ssh(
      id                 varchar(12),
      rpy_id              varchar(12) ,
      title                varchar(256),
-     create_time          varchar(256),
+     create_time          timestamp,
      user_id              varchar(12) ,
-     user_time            varchar(256),
+     user_time            timestamp,
      value                TEXT ,
      type                 varchar(12)
 );
@@ -27,64 +27,3 @@ create table rpy_merge_request(
      value               TEXT,
      create_time         timestamp
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

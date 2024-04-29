@@ -18,7 +18,7 @@ import java.util.zip.ZipOutputStream;
 public class RepositoryDownServiceImpl implements RepositoryDownService{
 
     @Autowired
-    RepositoryServer repositoryServer;
+    RepositoryService repositoryServer;
 
     @Autowired
     GitTokYamlDataMaService dataMaService;

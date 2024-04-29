@@ -1,17 +1,23 @@
 package io.thoughtware.gittok.authority.http;
 
 import io.thoughtware.gittok.authority.ValidUsrPwdServer;
+import io.thoughtware.gittok.branch.model.Branch;
+import io.thoughtware.gittok.branch.model.BranchQuery;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
 import io.thoughtware.gittok.common.git.GitBranchUntil;
 import io.thoughtware.gittok.repository.model.Repository;
 import io.thoughtware.gittok.repository.service.MemoryManService;
 import io.thoughtware.gittok.repository.service.RecordCommitService;
-import io.thoughtware.gittok.repository.service.RepositoryServer;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.http.server.GitServlet;
 
+import org.eclipse.jgit.transport.ReceivePack;
+import org.eclipse.jgit.transport.resolver.RepositoryResolver;
+import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
+import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +32,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
+import java.util.Enumeration;
+import java.util.List;
 
 /**
  * 拦截git http请求
@@ -51,7 +60,7 @@ public class HttpServlet extends GitServlet {
         private RecordCommitService commitService;
 
         @Autowired
-        private RepositoryServer repositoryServer;
+        private RepositoryService repositoryServer;
 
         @Resource
         MemoryManService memoryManService;
@@ -62,6 +71,10 @@ public class HttpServlet extends GitServlet {
         //拦截请求效验数据
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+            // 将ServletRequest对象转换为HttpServletRequest对象
+            HttpServletRequest request = (HttpServletRequest) req;
+            // 获取上传的分支名
+            String branch = request.getParameter("branch");
 
             HttpServletResponse res1 = (HttpServletResponse) res;
             boolean authorized = isAuthorized((HttpServletRequest) req);
@@ -98,15 +111,16 @@ public class HttpServlet extends GitServlet {
                                 return;
                         }
                 }*/
-
-        /*    if (requestURI.endsWith("git-receive-pack")){
-                addRepositorySize(req,requestURI);
-            }*/
             super.service(req, res);
 
+            // 获取请求的方法
+            String method = ((HttpServletRequest) req).getMethod();
+
             //git push提交 （客户端第三次请求发送数据 以git-receive-pack结尾）
-            if (requestURI.endsWith("git-receive-pack")){
-                addRepositorySize(req,requestURI);
+            if (("POST").equals(method)&&requestURI.endsWith("git-receive-pack")){
+                String beforeLast = StringUtils.substringBeforeLast(requestURI, "/");
+                String repositoryPath = StringUtils.substringAfterLast(beforeLast, "xcode/").replace(".git", "");
+                repositoryServer.compileRepository(repositoryPath);
             }
         }
 
@@ -148,45 +162,6 @@ public class HttpServlet extends GitServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         System.out.println("执行了dopost");
         super.doPost(req, resp);
-    }
-
-    /**
-     * 推送仓库后执行操作
-     * @param req
-     * @param requestURI
-     */
-    public void addRepositorySize(ServletRequest req,String requestURI) throws IOException {
-
-        String contentLengthHeader = ((HttpServletRequest) req).getHeader("Content-Length");
-        if (contentLengthHeader != null) {
-            //long contentLength = Long.parseLong(contentLengthHeader);
-
-            String[] split = requestURI.split("/");
-            String groupName=split[split.length-3];
-
-
-            String name=split[split.length-2].substring(0,split[split.length-2].indexOf(".git"));
-            //通过仓库地址查询仓库是否存在
-            Repository repository = repositoryServer.findConciseRepositoryByAddress(groupName + "/" + name);
-            if (!ObjectUtils.isEmpty(repository)){
-                //仓库地址
-                String repositoryUrl = yamlDataMaService.repositoryAddress() +"/"+ repository.getRpyId() + ".git";
-                File file = new File(repositoryUrl);
-
-                org.eclipse.jgit.lib.Repository gitRpy = Git.open(file).getRepository();
-                //唯一分支不为空，表示没有默认分支，则设置默认分支
-                if (StringUtils.isNotEmpty(repository.getUniqueBranch())){
-                    GitBranchUntil.updateFullBranch(gitRpy, repository.getUniqueBranch());
-                }
-
-                //更新仓库文件大小
-                if (file.exists()){
-                    long logBytes = FileUtils.sizeOfDirectory(file);
-                    repository.setSize(logBytes);
-                    repositoryServer.updateRepository(repository);
-                }
-            }
-        }
     }
 }
 

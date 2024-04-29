@@ -38,7 +38,7 @@
         <thoughtware-message.version>1.0.1-SNAPSHOT</thoughtware-message.version>
         <thoughtware-todotask.version>1.0.1-SNAPSHOT</thoughtware-todotask.version>
         <thoughtware-eam.version>1.0.1-SNAPSHOT</thoughtware-eam.version>
-        <thoughtware-postgresql.version>1.0.1-SNAPSHOT</thoughtware-postgresql.version>
+        <thoughtware-postgresql.version>1.0.2-SNAPSHOT</thoughtware-postgresql.version>
         <thoughtware-spotbugs.version>1.0.0</thoughtware-spotbugs.version>
         <thoughtware-plugin.version>1.0.1-SNAPSHOT</thoughtware-plugin.version>
 
@@ -46,13 +46,15 @@
 
         <thoughtware-upgrade.version>1.0.0</thoughtware-upgrade.version>
         <thoughtware-postin.version>1.0.1-SNAPSHOT</thoughtware-postin.version>
-        <thoughtware-jdk.version>1.0.0</thoughtware-jdk.version>
+        <thoughtware-jdk.version>1.0.1-SNAPSHOT</thoughtware-jdk.version>
 
         <!--other-->
         <commons-compress.version>1.19</commons-compress.version>
         <commons-io.version>2.11.0</commons-io.version>
         <sshd-core.version>2.9.2</sshd-core.version>
+        <come-jsch.version>0.1.55</come-jsch.version>
          <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
+
        <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version> -->
     <!-- <org-jgit.version>4.11.9.201909030838-r</org-jgit.version>-->
 

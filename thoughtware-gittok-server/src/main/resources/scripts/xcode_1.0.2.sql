@@ -6,7 +6,7 @@ create table rpy_merge_condition(
      user_id            varchar(12) NOT NULL,
      merge_request_id   varchar(12) NOT NULL,
      repository_id      varchar(12),
-     type  varchar(18) not null,
+     type  varchar(32) not null,
      data  varchar(128),
      create_time timestamp
 );
@@ -24,63 +24,14 @@ create table rpy_merge_comment(
     data  text,
     create_time timestamp
 );
-
-ALTER TABLE rpy_merge_request ADD  parent_commit varchar(64);
-ALTER TABLE rpy_merge_request ADD  current_commit varchar(64);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- ---------------------------
+-- 合并完成后的差异commitId
+-- ----------------------------
+create table rpy_merge_commit(
+     id                 varchar(12),
+     merge_request_id   varchar(12) NOT NULL,
+     repository_id      varchar(12),
+     commit_time      timestamp(32),
+     commit_id   varchar(128) NOT NULL,
+     create_time timestamp
+);

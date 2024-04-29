@@ -1,6 +1,6 @@
 package io.thoughtware.gittok.authority.http;
 
-import io.thoughtware.gittok.repository.service.RepositoryServer;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.core.exception.ApplicationException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
@@ -20,9 +20,9 @@ import java.io.IOException;
  */
 public  class HttpRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
-   private RepositoryServer repositoryServer;
+   private RepositoryService repositoryServer;
 
-    public HttpRepositoryResolver(RepositoryServer repositoryServer){
+    public HttpRepositoryResolver(RepositoryService repositoryServer){
         this.repositoryServer= repositoryServer;
     }
 

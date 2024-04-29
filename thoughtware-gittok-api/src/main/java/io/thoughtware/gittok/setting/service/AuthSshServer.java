@@ -57,6 +57,7 @@ public interface AuthSshServer {
      * @return 认证集合
      */
     List<AuthSsh> findAuthSshList(AuthSshQuery authSshQuery);
+
 }
 
 

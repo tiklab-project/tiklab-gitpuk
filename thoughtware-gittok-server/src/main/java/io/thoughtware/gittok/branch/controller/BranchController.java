@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/branch")
-@Api(name = "BranchController",desc = "分支")
+@Api(name = "BranchController",desc = "裸仓库中的分支管理")
 public class BranchController {
 
     @Autowired
@@ -42,7 +43,7 @@ public class BranchController {
     @ApiParam(name = "rpyId",desc = "rpyId",required = true)
     public Result<List<Branch>> findAllBranch(@NotNull String rpyId){
 
-        List<Branch> allBranch = branchServer.findAllBranch(rpyId);
+        List<Branch> allBranch = branchServer.findAllBranchByRpyId(rpyId);
 
         return Result.ok(allBranch);
     }
@@ -55,11 +56,12 @@ public class BranchController {
      * @pi.param: model=BranchQuery ;
      */
     @RequestMapping(path="/findBranchList",method = RequestMethod.POST)
-    @ApiMethod(name = "findAllBranch",desc = "条件查询分支")
+    @ApiMethod(name = "findBranchList",desc = "条件查询分支")
     @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
     public Result<List<Branch>> findBranchList(@RequestBody @Valid @NotNull BranchQuery branchQuery){
 
         List<Branch> allBranch = branchServer.findBranchList(branchQuery);
+
 
         return Result.ok(allBranch);
     }

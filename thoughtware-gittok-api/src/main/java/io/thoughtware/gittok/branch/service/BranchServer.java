@@ -19,11 +19,11 @@ public interface BranchServer {
 
 
     /**
-     * 查询所有分支
+     * 查询仓库所有分支
      * @param rpyId 仓库id
      * @return 分支信息列表
      */
-    List<Branch> findAllBranch(String rpyId);
+    List<Branch> findAllBranchByRpyId(String rpyId);
 
     /**
      * 创建分支

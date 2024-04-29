@@ -98,7 +98,7 @@ public class GitTagUntil {
             tag.setCommitId(commitID);
 
             //提交描述
-            tag.setCommitDesc(revCommit.getFullMessage());
+            tag.setCommitDesc(revCommit.getShortMessage());
             arrayList.add(tag);
 
         }

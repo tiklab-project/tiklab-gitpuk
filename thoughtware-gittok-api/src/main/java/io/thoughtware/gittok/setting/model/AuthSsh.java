@@ -1,5 +1,6 @@
 package io.thoughtware.gittok.setting.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.thoughtware.gittok.repository.model.Repository;
 import io.thoughtware.postin.annotation.ApiModel;
 import io.thoughtware.postin.annotation.ApiProperty;
@@ -9,6 +10,8 @@ import io.thoughtware.toolkit.beans.annotation.Mappings;
 import io.thoughtware.toolkit.join.annotation.Join;
 import io.thoughtware.toolkit.join.annotation.JoinQuery;
 import io.thoughtware.user.user.model.User;
+
+import java.sql.Timestamp;
 
 /*
 * ssh 认证
@@ -31,8 +34,7 @@ public class AuthSsh {
     @ApiProperty(name="title",desc="标题")
     private String title;
 
-    @ApiProperty(name="createTime",desc="创建时间")
-    private String createTime;
+
 
     @Mappings({
             @Mapping(source = "user.id",target = "userId")
@@ -44,14 +46,27 @@ public class AuthSsh {
     @ApiProperty(name="value",desc="公钥")
     private String value;
 
+    @ApiProperty(name="fingerprint",desc="公钥指纹")
+    private String fingerprint;
+
+
     /**
      * 类型 public,全局 private,项目私有
      */
     @ApiProperty(name="type",desc="类型 public:全局、private:项目私有")
     private String type;
 
+    @ApiProperty(name="createTime",desc="创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+    private Timestamp createTime;
+
+    @ApiProperty(name="expireTime",desc="失效时间")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+    private String expireTime;
+
     @ApiProperty(name="userTime",desc="上次使用时间")
-    private String userTime;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
+    private Timestamp userTime;
 
 
     public String getId() {
@@ -78,11 +93,11 @@ public class AuthSsh {
         this.title = title;
     }
 
-    public String getCreateTime() {
+    public Timestamp getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
 
@@ -110,12 +125,28 @@ public class AuthSsh {
         this.type = type;
     }
 
-    public String getUserTime() {
+    public Timestamp getUserTime() {
         return userTime;
     }
 
-    public void setUserTime(String userTime) {
+    public void setUserTime(Timestamp userTime) {
         this.userTime = userTime;
+    }
+
+    public String getFingerprint() {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint) {
+        this.fingerprint = fingerprint;
+    }
+
+    public String getExpireTime() {
+        return expireTime;
+    }
+
+    public void setExpireTime(String expireTime) {
+        this.expireTime = expireTime;
     }
 }
 

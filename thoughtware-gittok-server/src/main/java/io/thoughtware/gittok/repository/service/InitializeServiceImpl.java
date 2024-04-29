@@ -20,7 +20,7 @@ import java.util.List;
 public class InitializeServiceImpl implements InitializeService {
 
     @Autowired
-    RepositoryServer  repositoryServer;
+    RepositoryService  repositoryServer;
 
     @Autowired
     GitTokYamlDataMaServiceImpl yamlDataMaService;

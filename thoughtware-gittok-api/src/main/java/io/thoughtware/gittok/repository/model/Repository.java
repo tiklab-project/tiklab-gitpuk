@@ -204,6 +204,7 @@ public class Repository implements Serializable {
     //第一次上传空仓库 不是默认分支且只有一个分支
     private String uniqueBranch;
 
+
     public String getRpyId() {
         return rpyId;
     }
@@ -397,6 +398,7 @@ public class Repository implements Serializable {
     public void setUniqueBranch(String uniqueBranch) {
         this.uniqueBranch = uniqueBranch;
     }
+
 }
 
 

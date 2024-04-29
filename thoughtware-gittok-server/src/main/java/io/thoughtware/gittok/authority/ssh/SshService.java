@@ -1,10 +1,10 @@
-package io.thoughtware.gittok.authority;
+package io.thoughtware.gittok.authority.ssh;
 
 
+import io.thoughtware.gittok.authority.ValidUsrPwdServer;
 import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
-import io.thoughtware.gittok.repository.service.RepositoryServer;
-import io.thoughtware.gittok.setting.service.AuthServer;
+import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.core.context.AppHomeContext;
 import io.thoughtware.core.exception.ApplicationException;
 import io.thoughtware.gittok.setting.service.AuthSshServer;
@@ -13,6 +13,7 @@ import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.command.CommandFactory;
@@ -49,14 +50,11 @@ public class SshService {
     AuthSshServer authSShServer;
 
     @Autowired
-    RepositoryServer repositoryServer;
+    RepositoryService repositoryServer;
 
 
     @Value("${gittok.ssh.port:10000}")
     private int sshPort;
-
-    @Value("${gittok.ssh.key:/conf/id_rsa}")
-    private String sshKey;
 
     @Autowired
     GitTokYamlDataMaService GitTokYamlDataMaService;
@@ -65,8 +63,10 @@ public class SshService {
 
     @Bean
     public  void sshAuthority()  {
+
         SshServer sshServer = SshServer.setUpDefaultServer();
         sshServer.setPort(sshPort);
+
         sshServer.setHost (RepositoryFinal.SSH_HOST);
         String property = System.getProperty("user.dir");
       /*  if (!property.endsWith(RepositoryFinal.APP_NAME)){
@@ -85,15 +85,14 @@ public class SshService {
         try {
             sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer));
             sshServer.start();
-
+            int port = sshServer.getPort();
+            System.out.println("ssh端口："+port);
         } catch (Exception e) {
             throw new ApplicationException(e);
         }
 
-
-
-      /*  //效验账户名密码
-        PasswordAuthenticator passwordAuthenticator =
+        //效验账户名密码
+   /*     PasswordAuthenticator passwordAuthenticator =
                 (username, password, session) -> validUsrPwdServer.validUserNamePassword(username,password,"1");
         sshServer.setPasswordAuthenticator(passwordAuthenticator);*/
     }
@@ -107,9 +106,9 @@ public class SshService {
 
         private final GitTokYamlDataMaService yamlDataMaService;
 
-        private final RepositoryServer repositoryServer;
+        private final RepositoryService repositoryServer;
 
-        public GitTokSshCommandFactory(GitTokYamlDataMaService yamlDataMaService, RepositoryServer repositoryServer) {
+        public GitTokSshCommandFactory(GitTokYamlDataMaService yamlDataMaService, RepositoryService repositoryServer) {
             this.yamlDataMaService = yamlDataMaService;
             this.repositoryServer=repositoryServer;
         }
@@ -119,15 +118,15 @@ public class SshService {
         public Command createCommand(ChannelSession channelSession, String command) {
 
             String cmd = command.replace("'", "");
-            String s = cmd.split(" ")[1];
-           /* File file = new File(yamlDataMaService.repositoryAddress() + s);
-            String repositoryPath = file.getAbsolutePath();*/
-           if (s.startsWith("/")){
-                s = s.substring(1).replace(".git","");
+            String rpyPath = cmd.split(" ")[1];
+           if (rpyPath.startsWith("/")){
+               rpyPath = rpyPath.substring(1).replace(".git","");
+           }else {
+               rpyPath = rpyPath.replace(".git","");
            }
-            io.thoughtware.gittok.repository.model.Repository repositoryByAddress = repositoryServer.findRepositoryByAddress(s);
-            if (ObjectUtils.isNotEmpty(repositoryByAddress)){
-                String rpyId = repositoryByAddress.getRpyId();
+            io.thoughtware.gittok.repository.model.Repository repository = repositoryServer.findRepositoryByAddress(rpyPath);
+            if (ObjectUtils.isNotEmpty(repository)){
+                String rpyId = repository.getRpyId();
                 String repositoryPath = yamlDataMaService.repositoryAddress() +"/"+ rpyId+".git";
                 try {
                     File file1 = new File(repositoryPath);
@@ -138,13 +137,15 @@ public class SshService {
                     Repository repo = Git.open(file1).getRepository();
 
                     if (command.startsWith("git-upload-pack")) {
+                        //ssh 拉取
                         UploadPack uploadPack = new UploadPack(repo);
                         repo.close();
                         return new UploadPackCommand(uploadPack);
                     } else if (command.startsWith("git-receive-pack")) {
+                        //ssh 上传
                         ReceivePack receivePack = new ReceivePack(repo);
                         repo.close();
-                        return new ReceivePackCommand(receivePack);
+                        return new ReceivePackCommand(receivePack,repositoryServer,rpyPath);
                     }
                 } catch (Exception | Error e) {
                     throw new ApplicationException("仓库不存在");
@@ -153,7 +154,6 @@ public class SshService {
             logger.info("仓库不存在");
             return null;
         }
-
     }
 
     /**
@@ -216,6 +216,8 @@ public class SshService {
 
     }
 
+
+
     /**
      * 实现git-receive-pack钩子
      */
@@ -227,8 +229,14 @@ public class SshService {
 
         private ExitCallback exit;
 
-        public ReceivePackCommand(ReceivePack receivePack) {
+        private RepositoryService repositoryServer;
+
+        private String rpyPath;
+
+        public ReceivePackCommand(ReceivePack receivePack,RepositoryService repositoryServer,String rpyPath) {
             this.receivePack = receivePack;
+            this.repositoryServer=repositoryServer;
+            this.rpyPath=rpyPath;
         }
 
         @Override
@@ -251,6 +259,9 @@ public class SshService {
             try {
                 receivePack.receive(in, out, err);
                 this.exit.onExit(0);
+
+                //push 推送后编辑仓库数据
+                repositoryServer.compileRepository(rpyPath);
             } catch (Exception e) {
                 try {
                     throw new IOException(e);

@@ -2,7 +2,8 @@
 #-------------------------------------------------------------------------------------------------------------
 DIRS=$(dirname "$PWD")
 
-APP_MAIN="io.thoughtware.gittok.starter.GitTokApplication"
+APP_MAIN="io.thoughtware.gittok.starter.GittokEeApplication"
+JAVA_HOME="/usr/local/jdk-16.0.2"
 
 JDK_VERSION=jdk-16.0.2
 if [ -d "${DIRS}/embbed/${JDK_VERSION}" ]; then
@@ -55,7 +56,7 @@ echo "APP_MAIN="$APP_MAIN
 #   程序开始
 #-------------------------------------------------------------------------------------------------------------
 
-APPLY=gittok-ce
+APPLY=gittok-ee
 
 enableApply(){
 
@@ -68,7 +69,7 @@ enableApply(){
       if [ ! -e "${applyserver}" ]; then
 cat << EOF >  ${applyserver}
 [Unit]
-Description=Start thoughtware Apply
+Description=Start Tiklab Apply
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
@@ -91,7 +92,7 @@ EOF
   else
 cat << EOF >  ${applyserver}
 [Unit]
-Description=Start thoughtware Apply
+Description=Start Tiklab Apply
 After=network.target remote-fs.target nss-lookup.target
 
 [Service]
@@ -110,8 +111,6 @@ fi
 }
 
 enableApply
-
-
 
 PID=0
 
@@ -136,7 +135,7 @@ startup(){
             mkdir "$APP_LOG"
         fi
 
-        nohup $JAVA_HOME/bin/java -Duser.timezone=Asia/Shanghai $JAVA_OPTS $CLASSPATH $APP_MAIN  > /dev//null 2>&1 &
+        nohup $JAVA_HOME/bin/java -Duser.timezone=Asia/Shanghai $JAVA_OPTS $CLASSPATH $APP_MAIN  > /dev/null 2>&1 &
 
         for i in $(seq 5)
         do

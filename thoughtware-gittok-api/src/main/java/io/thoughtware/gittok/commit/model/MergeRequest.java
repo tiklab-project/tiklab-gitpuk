@@ -12,6 +12,7 @@ import io.thoughtware.toolkit.join.annotation.JoinQuery;
 import io.thoughtware.user.user.model.User;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @ApiModel
 @Join
@@ -40,7 +41,7 @@ public class MergeRequest {
     @ApiProperty(name="mergeState",desc="合并状态 1.已开启、2.已合并、3.已关闭 ")
     private Integer mergeState=1;
 
-    @ApiProperty(name="isClash",desc="是否有冲突 1、没有 2、有 ")
+    @ApiProperty(name="isClash",desc="是否有冲突 0、没有 1、有 ")
     private Integer isClash;
 
 
@@ -68,6 +69,11 @@ public class MergeRequest {
 
     @ApiProperty(name="execType",desc="操作类型 close、open、create、comment、complete")
     private String execType;
+
+    @ApiProperty(name="branchExist",desc="分子是否存在")
+    private boolean branchExist;
+
+
 
     public String getId() {
         return id;
@@ -172,5 +178,13 @@ public class MergeRequest {
 
     public void setCurrentCommit(String currentCommit) {
         this.currentCommit = currentCommit;
+    }
+
+    public boolean isBranchExist() {
+        return branchExist;
+    }
+
+    public void setBranchExist(boolean branchExist) {
+        this.branchExist = branchExist;
     }
 }

@@ -1,8 +1,9 @@
 app:
-  name: thoughtware-gittork
+  name: thoughtware-gittok
+  version: ee
 
 APP_HOME: ${APP_HOME}
-application: gittork
+application: gittok
 
 spring:
   config:
@@ -11,45 +12,50 @@ spring:
     allow-bean-definition-overriding: true
 
 server:
-  port: 8080
+  port: 8090
 
-xcode:
+gittok:
   ssh:
-    port: 10000
-    key: thoughtware-gittork-starter\src\main\resources\file\id_rsa
-  file: thoughtware-gittork-starter\src\main\resources\file
+    port: 10001
+    key: thoughtware-gittok-starter/file/id_rsa
+  file: thoughtware-gittok-starter/file
 
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://172.13.1.13:5432/tiklab_xcode?stringtype=unspecified
+  url: jdbc:postgresql://localhost:5431/gittok_ce?stringtype=unspecified
   username: postgres
   password: darth2020
 
 
+#plugin config
+DATA_HOME: /opt/thoughtware/gittok_ce
 
-DATA_HOME: /opt/tiklab/xcode
 
 plugin:
   path: ${DATA_HOME}/plugin
 
 postgresql:
   embbed:
-    enable: false
-  database: tiklab_xcode
-
+    enable: true
+  database: gittok_ce
+  db:
+    port: 5431
+    username: postgres
+    password: darth2020
+    address: ${DATA_HOME}/postgresql
 
 eas:
   embbed:
-    enable: false
-  address: http://e.eas.tiklab.net
+    enable: true
+
 
 #dfs config
 dfs:
   server:
-    enabled: false
+    enabled: true
     mode: server
-    port: 4000
+    port: 4001
     datapath: ${DATA_HOME}/files
   client:
     url: 127.0.0.1:4000
@@ -58,23 +64,23 @@ dfs:
 #dcs config
 dcs:
   server:
-    enabled: false
+    enabled: true
     mode: server
-    port: 5000
+    port: 5001
     datapath: ${DATA_HOME}/caches
   client:
-    url: 127.0.0.1:5000
+    url: 127.0.0.1:5001
     bucket: ${app.name}
 
 #dcs config
 dss:
   server:
-    enabled: false
+    enabled: true
     mode: server
-    port: 6000
+    port: 6001
     datapath: ${DATA_HOME}/index
   client:
-    url: 127.0.0.1:6000
+    url: 127.0.0.1:6001
     bucket: ${app.name}
 
 datapath: ${DATA_HOME}/caches
@@ -86,8 +92,12 @@ message:
     enabled: true
 
 base:
-  url: http://e.eas.tiklab.net
+  url: http://e.eas.thoughtware.net
 
+
+#homes
+homes:
+  address: http://homes.thoughtware.cn
 
 #license
 licences:
@@ -97,22 +107,18 @@ licences:
 file:
   path: http://file.tiklab.net
 
+
+
 repository:
   address: ${DATA_HOME}/repository
 
 
-backups:
-  dir: /data/xcode
-  time: 0 0 2 * * ?
 
 visit:
-  address: ""
+  address: http://e.gittok.thoughtware.cn
 
-
-
-
-
-
-
-
-
+backups:
+  time: 0 0 2 * * ?
+  dir: /data
+  xcode:
+    dir: ${DATA_HOME}/repository

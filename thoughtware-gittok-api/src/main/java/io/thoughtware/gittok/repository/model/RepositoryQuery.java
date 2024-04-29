@@ -33,7 +33,7 @@ public class RepositoryQuery implements Serializable {
     @ApiProperty(name ="address",desc = "仓库地址")
     private String  address;
 
-    @ApiProperty(name ="findType",desc = "查询类型 自己创建的：oneself、有权限看的：viewable")
+    @ApiProperty(name ="findType",desc = "查询类型 自己创建的：oneself、有权限看的：viewable、收藏的：collect")
     private String  findType;
 
 

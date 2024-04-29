@@ -11,6 +11,7 @@ import io.thoughtware.gittok.file.model.FileMessage;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -48,13 +49,15 @@ public class GitBranchUntil {
      * @throws IOException 仓库不存在
      * @throws GitAPIException 创建失败
      */
-    public static void createRepositoryBranch(String repositoryAddress,String branchName, String point) throws IOException, GitAPIException {
+    public static String createRepositoryBranch(String repositoryAddress,String branchName, String point) throws IOException, GitAPIException {
         Git git = Git.open(new File(repositoryAddress));
-        git.branchCreate()
+        Ref call = git.branchCreate()
                 .setName(branchName)
                 .setStartPoint(point) //起点
                 .call();
+        String commitId = call.getObjectId().getName();
         git.close();
+        return  commitId;
     }
 
 
@@ -101,7 +104,7 @@ public class GitBranchUntil {
     }
 
     /**
-     * 获取仓库所有分支以及标签
+     * 获取仓库所有分支
      * @param repositoryAddress 仓库地址
      * @return 分支集合
      * @throws IOException 仓库不存在
@@ -180,6 +183,7 @@ public class GitBranchUntil {
         for (Ref ref : refs) {
             Branch branch = new Branch();
             String name = ref.getName();
+
             //排除标签
             if (name.contains(Constants.R_TAGS)){
                 continue;
@@ -196,34 +200,44 @@ public class GitBranchUntil {
                 branch.setDefaultBranch(true);
             }
 
-            String Id = ref.getObjectId().getName();
-            String s = name.replace(Constants.R_HEADS, "");
+            //获取当前分支较默认分支超前和滞后提交数量
+            Map<String, Integer> branchCommitNum = GitCommitUntil.getBranchCommitNum(repository, name);
+            branch.setLagNum(branchCommitNum.get("lagNum"));
+            branch.setAdvanceNum(branchCommitNum.get("advanceNum"));
 
-            //查询分支提交
-            CommitMessage oneBranchCommit = GitCommitUntil.findOneBranchCommit(repository, s,false);
+            String branchId = ref.getObjectId().getName();
+            String branchName = name.replace(Constants.R_HEADS, "");
 
+            //查询分支最新的提交
+            CommitMessage oneBranchCommit = GitCommitUntil.findNewestCommit(repository,branchName,"branch");
             branch.setUpdateUser(oneBranchCommit.getCommitUser());
             branch.setUpdateTime(oneBranchCommit.getCommitTime());
-            //根据活跃状态查询
-            if (StringUtils.isNotEmpty(branchQuery.getState())){
-                if (("active").equals(branchQuery.getState())){
-                    branch.setBranchId(Id);
-                    branch.setBranchName(s);
+
+            Date dateTime = oneBranchCommit.getDateTime();
+            Date days = DateUtils.addDays(dateTime, 30);
+            //查询活跃的分支 分支最后提交时间在一个月内为活跃、否则为非活跃状态
+            if (("active").equals(branchQuery.getState())){
+                if (System.currentTimeMillis()<=days.getTime()){
+                    branch.setBranchId(branchId);
+                    branch.setBranchName(branchName);
                     list.add(branch);
-                    continue;
                 }
-                if (("noActive").equals(branchQuery.getState())){
-                    continue;
-                }
+                continue;
             }
-
-            branch.setBranchId(Id);
-
-            branch.setBranchName(s);
+            //查询非活跃的分支
+            if (("noActive").equals(branchQuery.getState())){
+                if (System.currentTimeMillis()>days.getTime()){
+                    branch.setBranchId(branchId);
+                    branch.setBranchName(branchName);
+                    list.add(branch);
+                }
+                continue;
+            }
+            //查询所有的分支
+            branch.setBranchId(branchId);
+            branch.setBranchName(branchName);
             list.add(branch);
         }
-
-        // repository.close();
         git.close();
 
         if (list.isEmpty()){
@@ -418,14 +432,14 @@ public class GitBranchUntil {
 
             //源分支
             String mergeOrigin = mergeData.getMergeOrigin();
-            Ref sourceRef = repository.exactRef("refs/heads/" + mergeOrigin);
+            Ref sourceRef = repository.exactRef(   Constants.R_HEADS + mergeOrigin);
 
             //目标分支
             String mergeTarget = mergeData.getMergeTarget();
-            Ref targetRef = repository.exactRef("refs/heads/" + mergeTarget);
+            Ref targetRef = repository.exactRef(Constants.R_HEADS+ mergeTarget);
 
             //查询目标分支的最后一次提交
-            CommitMessage branchLastCommit = GitCommitUntil.findBranchLastCommit(repository, mergeTarget);
+            CommitMessage branchLastCommit = GitCommitUntil.findNewestCommit(repository, mergeTarget,"branch");
 
             //查询目标分支最后一次提交是否存在源分支里面
             RevWalk revWalk = new RevWalk(repository);
@@ -533,6 +547,8 @@ public class GitBranchUntil {
             throw new ApplicationException(5000,"合并分支失败："+e.getMessage());
         }
     }
+
+
 }
 
 

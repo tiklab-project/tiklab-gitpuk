@@ -46,7 +46,7 @@ postgresql:
 eas:
   embbed:
     enable: false
-  address: http://e.eas.tiklab.cn
+  address: http://e.eas.thoughtware.cn
 
 #dfs config
 dfs:
@@ -90,7 +90,7 @@ message:
     enabled: true
 
 base:
-  url: http://e.gittok.thoughtware.cn
+  address: http://e.eas.thoughtware.cn
 
   #homes
 homes:
@@ -103,7 +103,7 @@ licences:
 
 #file
 file:
-  path: http://file.tiklab.net
+  path: http://file.thoughtware.net
 
 repository:
   address: ${DATA_HOME}/repository

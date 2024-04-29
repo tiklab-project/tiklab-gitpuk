@@ -35,6 +35,16 @@ public class AuthSshController {
         return Result.ok(Id);
     }
 
+    @RequestMapping(path="/updateAuthSsh",method = RequestMethod.POST)
+    @ApiMethod(name = "updateAuthSsh",desc = "更新认证")
+    @ApiParam(name = "authSsh",desc = "authSsh",required = true)
+    public Result<String> updateAuthSsh(@RequestBody @NotNull @Valid AuthSsh authSsh){
+
+        authSshServer.updateAuthSsh(authSsh);
+
+        return Result.ok();
+    }
+
 
     @RequestMapping(path="/deleteAuthSsh",method = RequestMethod.POST)
     @ApiMethod(name = "deleteAuthSsh",desc = "删除认证")

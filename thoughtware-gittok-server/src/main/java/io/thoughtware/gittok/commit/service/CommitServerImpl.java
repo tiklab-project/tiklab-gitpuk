@@ -3,6 +3,7 @@ package io.thoughtware.gittok.commit.service;
 
 import io.thoughtware.gittok.commit.model.*;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
+import io.thoughtware.gittok.common.git.GitBranchUntil;
 import io.thoughtware.gittok.common.git.GitCommitUntil;
 import io.thoughtware.gittok.file.model.FileMessage;
 import io.thoughtware.core.exception.ApplicationException;
@@ -11,6 +12,7 @@ import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.RepositoryUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -18,6 +20,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,11 +33,10 @@ public class CommitServerImpl implements CommitServer {
     @Autowired
     private GitTokYamlDataMaService yamlDataMaService;
 
-    /**
-     * 获取分支提交记录
-     * @param commit 信息
-     * @return 提交记录
-     */
+    @Autowired
+    MergeCommitService mergeCommitService;
+
+
     @Override
     public List<CommitMessage> findBranchCommit(Commit commit) {
         String rpyId = commit.getRpyId();
@@ -52,8 +54,12 @@ public class CommitServerImpl implements CommitServer {
         if (branchCommit.isEmpty()){
            return Collections.emptyList();
         }
-        return commitSort(branchCommit, new ArrayList<>());
+
+        return groupCommit(branchCommit, new ArrayList<>());
     }
+
+
+
 
     @Override
     public List<CommitMessage> findCommitDiffBranch(Commit commit) {
@@ -72,11 +78,11 @@ public class CommitServerImpl implements CommitServer {
         if (branchCommit.isEmpty()){
             return Collections.emptyList();
         }
-        return commitSort(branchCommit, new ArrayList<>());
+        return groupCommit(branchCommit, new ArrayList<>());
     }
 
     @Override
-    public FileDiffEntry findDiffBranchFile(Commit commit) {
+    public FileDiffEntry findDiffFileByBranchs(Commit commit) {
         String rpyId = commit.getRpyId();
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         FileDiffEntry diffBranchFile;
@@ -110,7 +116,7 @@ public class CommitServerImpl implements CommitServer {
     }
 
     @Override
-    public CommitDiffData findDiffCommitStatistics(Commit commit) {
+    public CommitDiffData findStatisticsByBranchs(Commit commit) {
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
@@ -119,6 +125,94 @@ public class CommitServerImpl implements CommitServer {
             throw new ApplicationException(e);
         }
     }
+
+    @Override
+    public List<CommitMessage> findDiffCommitByMergeId(String mergeId) {
+        List<MergeCommit> mergeCommitList = mergeCommitService.findMergeCommitList(new MergeCommitQuery().setMergeRequestId(mergeId));
+        if (CollectionUtils.isNotEmpty(mergeCommitList)){
+            MergeCommit mergeCommit = mergeCommitList.get(0);
+            List<String> commitIdList = mergeCommitList.stream().map(MergeCommit::getCommitId).collect(Collectors.toList());
+
+            try {
+                String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),mergeCommit.getRepositoryId());
+                Git git = Git.open(new File(repositoryAddress));
+                //通过commitIdList 查询信息
+                List<CommitMessage> commitMessageList = GitCommitUntil.findMessByCommitIdList(git, commitIdList);
+
+                //分组
+                Map<String, List<CommitMessage>> listMap = commitMessageList.stream().collect(Collectors.groupingBy(a -> RepositoryUtil.date(2, a.getDateTime())));
+                List<CommitMessage> commitMessages = new ArrayList<>();
+                CommitMessage commitMessage = new CommitMessage();
+                for (String key:listMap.keySet()){
+                    commitMessage.setCommitTime(key);
+                    commitMessage.setCommitMessageList(listMap.get(key));
+                    commitMessages.add(commitMessage);
+                }
+                return commitMessages;
+            }catch (Exception e){
+                throw new ApplicationException("合并请求的差异提交获取失败："+e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public FileDiffEntry findDiffFileByMergeId(String mergeId) {
+        List<MergeCommit> mergeCommitList = mergeCommitService.findMergeCommitList(new MergeCommitQuery().setMergeRequestId(mergeId));
+        if (CollectionUtils.isNotEmpty(mergeCommitList)) {
+            List<MergeCommit> mergeCommits = mergeCommitList.stream().sorted(Comparator.comparing(MergeCommit::getCommitTime)).collect(Collectors.toList());
+            try {
+                MergeCommit mergeCommit = mergeCommitList.get(0);
+                String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),mergeCommit.getRepositoryId());
+                Git git = Git.open(new File(repositoryAddress));
+
+                Map<String, RevCommit> revCommit = getRevCommit(git,mergeCommits);
+                RevCommit oldCommit = revCommit.get("oldRevCommit");
+                RevCommit newCommit = revCommit.get("newRevCommit");
+                FileDiffEntry diffFileEntry = GitCommitUntil.getDiffFileEntry(git.getRepository(), oldCommit, newCommit);
+                return diffFileEntry;
+            }catch (Exception e){
+                throw new ApplicationException("合并请求的差异文件获取失败："+e);
+            }
+        }
+            return null;
+    }
+
+    @Override
+    public CommitDiffData findStatisticsByMergeId(String mergeId) {
+        CommitDiffData commitDiffData = new CommitDiffData();
+
+        List<MergeCommit> mergeCommitList = mergeCommitService.findMergeCommitList(new MergeCommitQuery().setMergeRequestId(mergeId));
+        if (CollectionUtils.isNotEmpty(mergeCommitList)){
+
+            //差异提交数量
+            commitDiffData.setCommitNum(mergeCommitList.size());
+
+
+            try {
+                List<MergeCommit> mergeCommits = mergeCommitList.stream().sorted(Comparator.comparing(MergeCommit::getCommitTime)).collect(Collectors.toList());
+                MergeCommit mergeCommit = mergeCommitList.get(0);
+                String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),mergeCommit.getRepositoryId());
+
+                Git git = Git.open(new File(repositoryAddress));
+
+                Map<String, RevCommit> revCommit = getRevCommit(git,mergeCommits);
+                RevCommit oldCommit = revCommit.get("oldRevCommit");
+                RevCommit newCommit = revCommit.get("newRevCommit");
+
+                List<DiffEntry> diffEntries = GitCommitUntil.getDiffEntry(git.getRepository(), oldCommit, newCommit);
+                //差异文件数量
+                commitDiffData.setFileNum(diffEntries.size());
+
+                commitDiffData.setClash(0);
+
+            }catch (Exception e){
+                throw new ApplicationException("合并请求的统计失败："+e);
+            }
+        }
+        return commitDiffData;
+    }
+
 
     /**
      * 获取最近一次的提交记录
@@ -131,19 +225,32 @@ public class CommitServerImpl implements CommitServer {
         if (branchCommit.isEmpty()){
             return null;
         }
-        return branchCommit.get(0).getCommitMessageList().get(0);
+
+        String rpyId = commit.getRpyId();
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+            org.eclipse.jgit.lib.Repository repository = git.getRepository();
+
+            CommitMessage commitMessage = GitCommitUntil.findNewestCommit(repository, commit.getBranch(),"branch");
+            return commitMessage;
+        }catch (Exception e){
+            throw new ApplicationException("最后提交记录获取失败："+e);
+        }
+        /*return branchCommit.get(0).getCommitMessageList().get(0);*/
     }
 
 
     @Override
-    public FileDiffEntry findCommitDiffFileList(Commit commit) {
+    public FileDiffEntry findDiffFileByCommitId(Commit commit) {
 
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
 
             //获取两个提交差异文件
-            FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffCommit(git, commit);
+            FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffFileByCommitId(git, commit.getCommitId());
 
             return fileDiffEntry;
         } catch (IOException e) {
@@ -164,7 +271,7 @@ public class CommitServerImpl implements CommitServer {
             Git git = Git.open(new File(repositoryAddress));
 
             //获取两个提交差异文件
-            FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffCommit(git, commit);
+            FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffFileByCommitId(git, commit.getCommitId());
             List<CommitFileDiffList> diffList = fileDiffEntry.getDiffList();
 
             //配置模糊查询
@@ -305,7 +412,7 @@ public class CommitServerImpl implements CommitServer {
      * @param list 每天的提交记录
      * @return 提交记录
      */
-    private List<CommitMessage> commitSort(List<CommitMessage> branchCommit, List<CommitMessage> list){
+    private List<CommitMessage> groupCommit(List<CommitMessage> branchCommit, List<CommitMessage> list){
         List<CommitMessage> removeList = new ArrayList<>();
         CommitMessage commitMessage = new CommitMessage();
         Date date = branchCommit.get(0).getDateTime();
@@ -322,53 +429,39 @@ public class CommitServerImpl implements CommitServer {
         list.add(commitMessage);
         branchCommit.removeAll(removeList);
         if (branchCommit.size() != 0){
-            commitSort(branchCommit,list);
+            groupCommit(branchCommit,list);
         }
         return list;
     }
 
+    /**
+     * 通过合并提交的差异commitId  获取新旧revCommit
+     * @param mergeCommitList mergeCommitList
+     * @param git
+     * @return 提交记录
+     */
+    public Map<String, RevCommit> getRevCommit(Git git,List<MergeCommit> mergeCommitList) throws IOException {
+        Map<String, RevCommit> revCommitMap = new HashMap<>();
+        MergeCommit mergeCommit = mergeCommitList.get(0);
 
+        //获取父级的commit
+        RevWalk walk = new RevWalk(git.getRepository());
+        RevCommit commit =  walk.parseCommit(ObjectId.fromString(mergeCommit.getCommitId()));
+        RevCommit[] parents = commit.getParents();
+        RevCommit oldCommit=null;
+        if (!ObjectUtils.isEmpty(parents)){
+            String parentCommitId = parents[0].getId().getName();
+            ObjectId oldObjectId = ObjectId.fromString(parentCommitId);
+            oldCommit = walk.parseCommit(oldObjectId);
+        }
 
+        //最新的提交commit
+        MergeCommit newMergeCommit = mergeCommitList.get(mergeCommitList.size() - 1);
+        RevCommit newCommit =  walk.parseCommit(ObjectId.fromString(newMergeCommit.getCommitId()));
+
+        revCommitMap.put("oldRevCommit",oldCommit);
+        revCommitMap.put("newRevCommit",newCommit);
+        return revCommitMap;
+    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

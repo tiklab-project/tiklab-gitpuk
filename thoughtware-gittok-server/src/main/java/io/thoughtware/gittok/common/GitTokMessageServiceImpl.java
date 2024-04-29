@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.thoughtware.eam.common.context.LoginContext;
 import io.thoughtware.message.message.model.SendMessageNotice;
 import io.thoughtware.message.message.service.SendMessageNoticeService;
+import io.thoughtware.privilege.role.service.RoleUserService;
 import io.thoughtware.security.logging.logging.model.Logging;
 import io.thoughtware.security.logging.logging.model.LoggingType;
 import io.thoughtware.security.logging.logging.service.LoggingByTempService;
@@ -33,8 +34,10 @@ public class GitTokMessageServiceImpl implements GitTokMessageService{
     @Autowired
     UserService userService;
 
+
+
     @Override
-    public void settingMessage(Map<String, Object> map,String templateId ) {
+    public void deployMessage(Map<String, Object> map,String templateId ) {
         SendMessageNotice dispatchNotice = new SendMessageNotice();
 
         String jsonString = JSONObject.toJSONString(map);
@@ -53,7 +56,7 @@ public class GitTokMessageServiceImpl implements GitTokMessageService{
     }
 
     @Override
-    public void settingLog(Map<String, Object> map,String logType,String model) {
+    public void deployLog(Map<String, Object> map,String logType,String model) {
         Logging log = new Logging();
         //消息类型
         LoggingType opLogType = new LoggingType();
@@ -78,7 +81,7 @@ public class GitTokMessageServiceImpl implements GitTokMessageService{
     }
 
     @Override
-    public HashMap<String,Object> initMap() {
+    public HashMap<String,Object> initMessageAndLogMap() {
         HashMap<String,Object> map = new HashMap<>();
         String userId = LoginContext.getLoginId();
         User user = userService.findOne(userId);

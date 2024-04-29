@@ -50,10 +50,10 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     private DmRoleService dmRoleService;
 
     @Autowired
-    private RepositoryServer repositoryServer;
+    private RepositoryService repositoryServer;
 
     @Autowired
-    GitTokMessageService gitTorkMessageService;
+    GitTokMessageService gitTokMessageService;
 
     /**
      * 创建仓库组
@@ -69,10 +69,13 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         groupEntity.setColor(randomNum);
         groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
         String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
-        dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), 1);
+
+
+
+        dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), 2);
 
         //发送消息
-        initRepositoryMap(groupEntity,"create",null);
+        sendMessLog(groupEntity,"create",null);
         return codeGroupId;
     }
 
@@ -86,7 +89,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         repositoryGroupDao.deleteCodeGroup(codeGroupId);
 
         //发送消息
-        initRepositoryMap(repositoryGroup,"delete",null);
+        sendMessLog(repositoryGroup,"delete",null);
     }
 
     /**
@@ -121,7 +124,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
 
         //发送消息
         if (!group.getName().equals(repositoryGroup.getName())){
-            initRepositoryMap(group,"update",repositoryGroup.getName());
+            sendMessLog(group,"update",repositoryGroup.getName());
         }
     }
 
@@ -234,37 +237,37 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
 
     /**
      *操作仓库组发送消息
-     * @param oldGroupRepository 操作的仓库组
+     * @param groupRepository 操作的仓库组
      * @param type  操作类型
      * @param  updateName 更新名字
      */
-    public void initRepositoryMap(RepositoryGroupEntity oldGroupRepository, String type, String updateName){
+    public void sendMessLog(RepositoryGroupEntity groupRepository, String type, String updateName){
 
-        HashMap<String, Object> map = gitTorkMessageService.initMap();
+        HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
 
-        map.put("groupId",oldGroupRepository.getGroupId());
-        map.put("action",oldGroupRepository.getName());
+        map.put("groupId",groupRepository.getGroupId());
+        map.put("action",groupRepository.getName());
         if (("delete").equals(type)){
-            map.put("message", "删除了仓库组"+oldGroupRepository.getName());
+            map.put("message", groupRepository.getName());
             map.put("link", GitTokFinal.GROUP_RPY_DELETE);
-            gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_GROUP_DELETE);
-            gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_GROUP_DELETE,"repositoryGroup");
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_GROUP_DELETE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_GROUP_DELETE,"repositoryGroup");
         }
 
         if (("update").equals(type)){
-            map.put("message", oldGroupRepository.getName()+"更改为"+updateName);
+            map.put("message", groupRepository.getName()+"更改为"+updateName);
             map.put("link",GitTokFinal.GROUP_RPY_UPDATE);
-            map.put("groupName",oldGroupRepository.getName());
-            gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_GROUP_UPDATE);
-            gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_GROUP_UPDATE,"repositoryGroup");
+            map.put("groupName",groupRepository.getName());
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_GROUP_UPDATE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_GROUP_UPDATE,"repositoryGroup");
         }
 
         if (("create").equals(type)){
-            map.put("message", "创建了仓库组"+oldGroupRepository.getName());
+            map.put("message", groupRepository.getName());
             map.put("link",GitTokFinal.GROUP_RPY_CREATE);
-            map.put("groupName",oldGroupRepository.getName());
-            gitTorkMessageService.settingMessage(map,GitTokFinal.LOG_TYPE_GROUP_CREATE);
-            gitTorkMessageService.settingLog(map,GitTokFinal.LOG_TYPE_GROUP_CREATE,"repositoryGroup");
+            map.put("groupName",groupRepository.getName());
+            gitTokMessageService.deployMessage(map,GitTokFinal.LOG_TYPE_GROUP_CREATE);
+            gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_GROUP_CREATE,"repositoryGroup");
         }
     }
 

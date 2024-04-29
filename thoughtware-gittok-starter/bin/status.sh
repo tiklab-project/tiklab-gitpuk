@@ -8,7 +8,7 @@ if [ -e "${DIRS}/${JDK_VERSION}" ]; then
       JAVA_HOME="${DIRS}/${JDK_VERSION}"
 fi
 
-APP_MAIN="io.thoughtware.gittok.starter.GitTokApplication"
+APP_MAIN="io.thoughtware.gittok.starter.GittokEeApplication"
 
 PID=0
 getPID(){

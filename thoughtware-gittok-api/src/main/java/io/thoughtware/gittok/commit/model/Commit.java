@@ -72,6 +72,7 @@ public class Commit {
      */
     private String commitId;
 
+
     public int getBegin() {
         return begin;
     }
@@ -175,6 +176,7 @@ public class Commit {
     public void setCommitId(String commitId) {
         this.commitId = commitId;
     }
+
 }
 
 
