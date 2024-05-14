@@ -194,8 +194,8 @@ public class Repository implements Serializable {
      */
     private String role;
 
-    //是否创建README.md   0:false、1:true
-    private Integer isReadme;
+    //是否创建README.md   0:false、1:true  默认不创建
+    private Integer isReadme=0;
 
     //创建.Gitignore文件
     private String gitignoreValue;

@@ -8,11 +8,13 @@ import io.thoughtware.core.page.PaginationBuilder;
 import io.thoughtware.eam.common.context.LoginContext;
 import io.thoughtware.gittok.common.GitTokFinal;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
+import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.common.git.GitUntil;
 import io.thoughtware.gittok.repository.model.*;
 import io.thoughtware.core.exception.SystemException;
 import io.thoughtware.user.user.model.User;
 import okhttp3.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -317,7 +320,7 @@ public class LeadToServiceImpl implements LeadToService {
                     addExecResult(leadRecord,leadTo,"run,开始导入仓库");
                     try {
                         User user = new User();
-                        user.setId(leadTo.getUserId());
+                        user.setId(leadToQuery.getUserId());
 
 
                         //创建仓库组
@@ -344,7 +347,7 @@ public class LeadToServiceImpl implements LeadToService {
                         }
                         //创建仓库
                         Repository repository = new Repository();
-                        repository.setName(leadTo.getRepositoryName());
+                        repository.setName(leadTo.getRepositoryName().trim());
                         repository.setAddress(leadTo.getRepositoryUrl());
                         RepositoryGroup repositoryGroup = new RepositoryGroup();
                         repositoryGroup.setGroupId(groupId);
@@ -355,7 +358,7 @@ public class LeadToServiceImpl implements LeadToService {
                         repository.setRpyId(rpyId);
 
                         //导入认证
-                        LeadAuth importAuth = authService.findLeadAuth(leadTo.getImportAuthId());
+                        LeadAuth importAuth = authService.findLeadAuth(leadToQuery.getImportAuthId());
 
                         //创建导入记录
                         leadRecord.setRepository(repository);
@@ -372,12 +375,20 @@ public class LeadToServiceImpl implements LeadToService {
                         logger.info(leadTo.getRepositoryUrl()+"success，推送成功");
                         addExecResult(leadRecord,leadTo,"success，推送成功");
 
-
+                        //更新导入记录
                         leadRecordService.updateLeadRecord(leadRecord);
+
+                        //修改仓库大小
+                        String address = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(), rpyId);
+                        File file = new File(address);
+                        long logBytes = FileUtils.sizeOfDirectory(file);
+                        repository.setSize(logBytes);
+                        repositoryServer.updateRepository(repository);
+
                     } catch (Exception e) {
                         //添加返回结果
-                        logger.info(leadTo.getRepositoryUrl()+"，推送失败："+e.getMessage());
-                        addExecResult(leadRecord,leadTo,"fail,推送失败："+e.getMessage());
+                        logger.info(leadTo.getRepositoryUrl()+"，导入仓库失败："+e.getMessage());
+                        addExecResult(leadRecord,leadTo,"fail,导入仓库失败："+e.getMessage());
                         putResult(leadToList,"fail");
 
                         leadRecordService.updateLeadRecord(leadRecord);

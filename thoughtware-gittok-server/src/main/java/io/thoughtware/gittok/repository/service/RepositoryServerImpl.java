@@ -15,8 +15,12 @@ import io.thoughtware.gittok.repository.entity.RepositoryEntity;
 import io.thoughtware.gittok.repository.model.*;
 import io.thoughtware.gittok.scan.service.ScanPlayService;
 import io.thoughtware.gittok.tag.service.TagService;
+import io.thoughtware.privilege.dmRole.model.DmRole;
+import io.thoughtware.privilege.dmRole.model.DmRoleQuery;
 import io.thoughtware.privilege.role.model.PatchUser;
+import io.thoughtware.privilege.role.model.RoleFunction;
 import io.thoughtware.privilege.role.model.RoleUser;
+import io.thoughtware.privilege.role.service.RoleFunctionService;
 import io.thoughtware.privilege.role.service.RoleUserService;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.core.context.AppHomeContext;
@@ -118,6 +122,8 @@ public class RepositoryServerImpl implements RepositoryService {
     @Autowired
     RepositoryBranchService branchService;
 
+    @Autowired
+    RoleFunctionService roleFunService;
 
 
     /**
@@ -989,6 +995,8 @@ public class RepositoryServerImpl implements RepositoryService {
     }
 
 
+
+
     /**
      *操作仓库发送消息
      * @param repository 操作的仓库
@@ -1032,47 +1040,5 @@ public class RepositoryServerImpl implements RepositoryService {
             gitTokMessageService.deployLog(map,GitTokFinal.LOG_TYPE_RESET,"repository");
         }
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

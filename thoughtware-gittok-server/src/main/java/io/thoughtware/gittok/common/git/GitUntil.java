@@ -272,7 +272,7 @@ public class GitUntil {
         Git git = Git.cloneRepository()
                 .setURI("file://" + bareRepositoryPath)
                 .setDirectory(new File(freeRepositoryPath))
-                .setBare(true)
+               /* .setBare(true)*/
                 .call();
         git.close();
     }

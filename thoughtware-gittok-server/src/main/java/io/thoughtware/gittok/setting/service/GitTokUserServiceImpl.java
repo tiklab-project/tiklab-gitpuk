@@ -45,7 +45,7 @@ public class GitTokUserServiceImpl implements GitTokUserService {
             List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
             List<String> stringList = dmUserList.stream().map(a -> a.getDomainId()).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(rpyList)){
-                List<String> rpyIds = rpyList.stream().filter(a -> ("private").equals(a.getRules())).map(Repository::getRpyId).collect(Collectors.toList());
+                List<String> rpyIds = rpyList.stream()/*.filter(a -> ("private").equals(a.getRules()))*/.map(Repository::getRpyId).collect(Collectors.toList());
                 //获取两个list 相同的数据
                 List<String> commonList = stringList.stream()
                         .filter(rpyIds::contains)
@@ -54,7 +54,7 @@ public class GitTokUserServiceImpl implements GitTokUserService {
             }
             gitTorkUser.setUserId(user.getId());
             gitTorkUser.setUserName(user.getName());
-
+            gitTorkUser.setNickName(user.getNickname());
             arrayList.add(gitTorkUser);
         }
         return arrayList;

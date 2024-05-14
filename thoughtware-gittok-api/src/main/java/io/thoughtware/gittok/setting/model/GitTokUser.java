@@ -11,6 +11,9 @@ public class GitTokUser implements Serializable {
     @ApiProperty(name="userId",desc="用户id")
     private  String userId;
 
+    @ApiProperty(name="nickName",desc="用户昵称")
+    private  String nickName;
+
     @ApiProperty(name="userName",desc="用户名字")
     private  String userName;
 
@@ -24,8 +27,6 @@ public class GitTokUser implements Serializable {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-
-
 
     public Integer getRepositoryNum() {
         return repositoryNum;
@@ -41,5 +42,13 @@ public class GitTokUser implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 }

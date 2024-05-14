@@ -9,11 +9,11 @@ INSERT INTO pcs_prc_role VALUES ('4', '项目成员', NULL, 'system', '2', 0, 1,
 INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES
 ('gauthority','权限', 'gittok_authority',null ,1, 1),
 ('gnewsscheme','消息通知方案', 'gittok_news_scheme',null ,1, 1),
-('gnewsway','消息通知方式', 'gittok_news_way',null ,1, 1),
+('gnewsway','消息发送方式', 'gittok_news_way',null ,1, 1),
 ('gplugin','插件', 'gittok_plugin',null ,1, 1),
 ('gresource','资源监控', 'gittok_resource',null ,1, 1),
 ('gssh','ssh密钥', 'gittok_ssh',null ,1, 1),
-('gscan','代码扫描', 'gittok_scan',null ,1, 1),
+('gscan','扫描配置', 'gittok_scan',null ,1, 1),
 ('glog','操作日志', 'gittok_log',null ,1, 1),
 ('gbackups','备份与恢复项目', 'gittok_backups',null ,1, 1),
 

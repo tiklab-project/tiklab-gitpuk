@@ -274,6 +274,7 @@
 			</build>
 		</profile>
 
+		<!--mac-->
 		<profile>
 			<id>system-mac</id>
 			<dependencies>
@@ -422,9 +423,10 @@
 						<id>make-assembly</id>
 						<configuration>
 							<descriptors>
-								<descriptor>assembly/distribution-${assembly}.xml</descriptor>
+								<descriptor>assembly/distribution.xml</descriptor>
 							</descriptors>
-							<finalName>thoughtware-gittok-${version}-${timestamp}</finalName>
+						<!--	<finalName>thoughtware-gittok-${version}-${timestamp}</finalName>-->
+							<finalName>thoughtware-gittok-1.0.0</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 						<phase>package</phase>
