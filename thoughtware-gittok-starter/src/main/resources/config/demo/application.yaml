@@ -23,21 +23,21 @@ gittok:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/thoughtware_gittok?stringtype=unspecified
+  url: jdbc:postgresql://localhost:5432/gittok_ce?stringtype=unspecified
   username: postgres
   password: darth2020
 
 
 
 #plugin config
-DATA_HOME: /opt/tiklab/thoughtware_gittok
+DATA_HOME: /opt/thoughtware/gittok_ce
 plugin:
   path: ${DATA_HOME}/plugin
 
 postgresql:
   embbed:
     enable: true
-  database: thoughtware_gittok
+  database: gittok_ce
   db:
     port: 5432
     username: postgres
