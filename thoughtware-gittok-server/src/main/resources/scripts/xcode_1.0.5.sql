@@ -1,0 +1,1 @@
+ALTER TABLE rpy_auth_ssh add modulus text;

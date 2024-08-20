@@ -13,6 +13,9 @@ import io.thoughtware.core.page.Pagination;
 import io.thoughtware.core.page.PaginationBuilder;
 import io.thoughtware.eam.common.context.LoginContext;
 import io.thoughtware.privilege.dmRole.service.DmRoleService;
+import io.thoughtware.privilege.role.model.PatchUser;
+import io.thoughtware.privilege.role.model.RoleUser;
+import io.thoughtware.privilege.role.service.RoleUserService;
 import io.thoughtware.rpc.annotation.Exporter;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.toolkit.join.JoinTemplate;
@@ -26,10 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,6 +55,9 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Autowired
     GitTokMessageService gitTokMessageService;
 
+    @Autowired
+    RoleUserService roleUserService;
+
     /**
      * 创建仓库组
      * @param repositoryGroup 信息
@@ -70,9 +73,24 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
         String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
 
+        String userId = LoginContext.getLoginId();
+        List<PatchUser> List = new ArrayList<>();
+        PatchUser patchUser = new PatchUser();
+        RoleUser userRoleAdmin = roleUserService.findUserRoleAdmin();
+        //给系统超级管理员设置成项目超级管理员
+        patchUser.setUserId(userRoleAdmin.getUser().getId());
+        patchUser.setRoleType(2);
+        List.add(patchUser);
 
+        //超级管理员和创建者不同 ，给创建者设置为管理员角色
+        if (!(userId).equals(userRoleAdmin.getUser().getId())){
+            PatchUser patchUser1 = new PatchUser();
+            patchUser1.setUserId(userId);
+            patchUser1.setRoleType(1);
+            List.add(patchUser1);
+        }
+        dmRoleService.initPatchDmRole(codeGroupId, List);
 
-        dmRoleService.initDmRoles(codeGroupId, LoginContext.getLoginId(), 2);
 
         //发送消息
         sendMessLog(groupEntity,"create",null);

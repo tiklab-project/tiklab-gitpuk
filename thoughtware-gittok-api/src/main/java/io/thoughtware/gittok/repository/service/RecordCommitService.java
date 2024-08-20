@@ -93,8 +93,15 @@ public interface RecordCommitService {
     /**
      * 修改提交记录
      * @param requestURI 提交地址
-     * @param userName 提交永华
-     * @return
+     * @param userName 提交用户
+     * @param commitType 推送类型
      */
-    void updateCommitRecord(String requestURI,String userName);
+    void updateCommitRecord(String requestURI,String userName,String commitType);
+
+    /**
+     * 查询时间段内的提交
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     */
+    List<RecordCommit> findTimeRecordCommitList(String startTime, String endTime,String rpyId);
 }

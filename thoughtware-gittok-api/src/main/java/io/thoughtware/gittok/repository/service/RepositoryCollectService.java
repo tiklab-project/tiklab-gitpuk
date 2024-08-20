@@ -75,6 +75,13 @@ public interface RepositoryCollectService {
     */
     List<RepositoryCollect> findRepositoryCollectList(RepositoryCollectQuery repositoryCollectQuery);
 
+    /**
+     * 通过仓库的ids查询收藏
+     * @param repositoryIds
+     * @param  userId 用户
+     * @return
+     */
+    List<RepositoryCollect> findRepositoryCollectList(String[] repositoryIds,String userId);
 
     /**
     * 按分页查询

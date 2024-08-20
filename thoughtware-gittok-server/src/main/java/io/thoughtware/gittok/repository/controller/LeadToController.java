@@ -30,9 +30,9 @@ public class LeadToController {
     @RequestMapping(path="/findThirdRepositoryList",method = RequestMethod.POST)
     @ApiMethod(name = "findThirdRepositoryList",desc = "查询第三方仓库应用的仓库")
     @ApiParam(name = "importAuthId",desc = "importAuthId",required = true)
-    public Result<List> findThirdRepositoryList( @NotNull  String importAuthId,String page){
+    public Result<List> findThirdRepositoryList(@RequestBody @NotNull @Valid LeadToQuery leadToQuery){
 
-        Pagination<LeadTo> thirdRepositoryList = toLeadService.findThirdRepositoryList(importAuthId, page);
+        Pagination<LeadTo> thirdRepositoryList = toLeadService.findThirdRepositoryList(leadToQuery);
 
         return Result.ok(thirdRepositoryList);
     }

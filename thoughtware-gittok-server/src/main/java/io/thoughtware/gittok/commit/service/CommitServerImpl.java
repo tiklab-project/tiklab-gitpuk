@@ -1,9 +1,9 @@
 package io.thoughtware.gittok.commit.service;
 
 
+import io.thoughtware.core.exception.SystemException;
 import io.thoughtware.gittok.commit.model.*;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
-import io.thoughtware.gittok.common.git.GitBranchUntil;
 import io.thoughtware.gittok.common.git.GitCommitUntil;
 import io.thoughtware.gittok.file.model.FileMessage;
 import io.thoughtware.core.exception.ApplicationException;
@@ -15,9 +15,10 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CommitServerImpl implements CommitServer {
+    private static Logger logger = LoggerFactory.getLogger(CommitServerImpl.class);
 
     @Autowired
     private GitTokYamlDataMaService yamlDataMaService;
@@ -211,6 +213,31 @@ public class CommitServerImpl implements CommitServer {
             }
         }
         return commitDiffData;
+    }
+
+    @Override
+    public List<String> findCommitUserList(String repositoryId) {
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
+
+        try {
+            List<String> commitUserList = GitCommitUntil.getCommitUserList(repositoryAddress);
+            return commitUserList;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<CommitMessage> findLatelyCommit(String repositoryId, Integer number) {
+        try {
+            //获取仓库提交
+            String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
+            List<CommitMessage> latelyCommit = GitCommitUntil.getLatelyCommit(repositoryAddress, number);
+            return latelyCommit;
+        }catch (Exception e){
+            logger.info("最近仓库最近提交失败："+e.getMessage());
+            throw new SystemException(e);
+        }
     }
 
 

@@ -12,8 +12,6 @@ import io.thoughtware.gittok.repository.dao.RepositoryCollectDao;
 import io.thoughtware.gittok.repository.entity.RepositoryCollectEntity;
 import io.thoughtware.gittok.repository.model.RepositoryCollect;
 import io.thoughtware.gittok.repository.model.RepositoryCollectQuery;
-import io.thoughtware.gittok.repository.model.Repository;
-import io.thoughtware.gittok.scan.entity.DeployEnvEntity;
 import io.thoughtware.rpc.annotation.Exporter;
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.toolkit.join.JoinTemplate;
@@ -145,6 +143,14 @@ public class RepositoryCollectServiceImpl implements RepositoryCollectService {
     public List<RepositoryCollect> findRepositoryCollectList(RepositoryCollectQuery RepositoryCollectQuery) {
         List<RepositoryCollectEntity> openRecordEntityList = repositoryCollectDao.findRepositoryCollectList(RepositoryCollectQuery);
 
+        List<RepositoryCollect> openRecordList = BeanMapper.mapList(openRecordEntityList, RepositoryCollect.class);
+
+        return openRecordList;
+    }
+
+    @Override
+    public List<RepositoryCollect> findRepositoryCollectList(String[] repositoryIds,String userId) {
+        List<RepositoryCollectEntity> openRecordEntityList = repositoryCollectDao.findRepositoryCollectList(repositoryIds,userId);
         List<RepositoryCollect> openRecordList = BeanMapper.mapList(openRecordEntityList, RepositoryCollect.class);
 
         return openRecordList;

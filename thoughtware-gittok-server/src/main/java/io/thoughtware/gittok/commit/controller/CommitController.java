@@ -167,46 +167,24 @@ public class CommitController {
         return Result.ok(fileDiffList);
     }
 
+    @RequestMapping(path="/findCommitUserList",method = RequestMethod.POST)
+    @ApiMethod(name = "findCommitUserList",desc = "通过仓库id查询提交的用户")
+    @ApiParam(name = "repositoryId",desc = "repositoryId",required = true)
+    public Result<String> findCommitUserList(@Valid @NotNull String repositoryId){
+
+        List<String> commitUserList = commitServer.findCommitUserList(repositoryId);
+
+        return Result.ok(commitUserList);
+    }
+
+
+    @RequestMapping(path="/findLatelyCommit",method = RequestMethod.POST)
+    @ApiMethod(name = "findLatelyCommit",desc = "查询仓库最近提交")
+    @ApiParam(name = "RepositoryId",desc = "RepositoryId、time",required = true)
+    public Result<List<CommitMessage>> findLatelyCommit(@Valid @NotNull String repositoryId,Integer number){
+
+        List<CommitMessage> commitMessageList = commitServer.findLatelyCommit(repositoryId,number);
+
+        return Result.ok(commitMessageList);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

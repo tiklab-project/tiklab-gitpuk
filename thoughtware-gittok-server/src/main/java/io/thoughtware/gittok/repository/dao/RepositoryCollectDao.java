@@ -106,4 +106,19 @@ public class RepositoryCollectDao {
         return jpaTemplate.findPage(queryCondition, RepositoryCollectEntity.class);
     }
 
+
+    /**
+     * 通过repositoryIds查询
+     * @param repositoryIds
+     * @return
+     */
+    public List<RepositoryCollectEntity> findRepositoryCollectList(String[] repositoryIds,String userId) {
+        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryCollectEntity.class)
+                .in("repositoryId", repositoryIds)
+                .eq("userId", userId)
+                .get();
+        return jpaTemplate.findList(queryCondition, RepositoryCollectEntity.class);
+    }
+
+
 }

@@ -50,8 +50,6 @@ public class GitTokFinal {
 
 
 
-
-
     /**
      * DEFAULT
      */
@@ -66,7 +64,14 @@ public class GitTokFinal {
     //gitee 查询仓库API地址
     public static final String GITEE_API_URL = "https://gitee.com/api/v5/user/repos";
 
+    //gitee 查询仓库用户信息API
+    public static final String GITEE_USER_URL = "https://gitee.com/api/v5/user";
 
+
+    //bitbucket 查询仓库API地址
+    public static final String BITBUCKET_API_URL = "https://api.bitbucket.org/2.0/repositories";
+    //bitbucket 查询仓库用户信息API
+    public static final String BITBUCKET_USER_URL = "https://api.bitbucket.org/2.0/repositories";
 
     /*
     * 合并请求的动态
@@ -113,6 +118,8 @@ public class GitTokFinal {
     public static final String MERGE_COMPLETE_DESC = "合并分支";
 
 
-
+    // 代码扫描应用类型
+    public static final String SCAN_SONAR = "sonar";
+    public static final String SCAN_SPOTBUGS = "spotbugs";
 
 }

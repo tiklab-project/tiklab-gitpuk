@@ -9,12 +9,17 @@ import io.thoughtware.gittok.commit.entity.MergeRequestEntity;
 import io.thoughtware.gittok.commit.model.MergeRequest;
 import io.thoughtware.gittok.commit.model.MergeRequestQuery;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * MergeRequestDao-合并请求数据库访问
@@ -122,5 +127,21 @@ public class MergeRequestDao {
 
         return jpaTemplate.findPage(queryCondition,MergeRequestEntity.class);
     }
+    public List<MergeRequestEntity> findTimeMergeRequestList(MergeRequestQuery mergeRequestQuery) {
+        String sql =  " SELECT * FROM rpy_merge_request WHERE create_time BETWEEN '"+mergeRequestQuery.getStartTime()+"' AND '"+mergeRequestQuery.getEndTime()+"' ";
+
+        if (!StringUtils.isEmpty(mergeRequestQuery.getRpyId())){
+            sql=sql+" and rpy_id= '"+mergeRequestQuery.getRpyId()+"'";
+        }
+
+        NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(jpaTemplate.getJdbcTemplate());
+
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        List<MergeRequestEntity> list = jdbc.query(sql, paramMap, new BeanPropertyRowMapper(MergeRequestEntity.class));
+
+        return list;
+
+    }
+
 
 }

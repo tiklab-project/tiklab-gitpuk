@@ -27,6 +27,8 @@ public class AuthSshEntity {
     @Column(name = "value",notNull = true)
     private String value;
 
+    @Column(name = "modulus")
+    private String modulus;
 
     @Column(name = "fingerprint")
     private String fingerprint;
@@ -128,56 +130,12 @@ public class AuthSshEntity {
     public void setExpireTime(String expireTime) {
         this.expireTime = expireTime;
     }
+
+    public String getModulus() {
+        return modulus;
+    }
+
+    public void setModulus(String modulus) {
+        this.modulus = modulus;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

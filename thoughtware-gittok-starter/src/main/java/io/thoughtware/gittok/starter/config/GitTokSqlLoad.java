@@ -67,10 +67,12 @@ public class GitTokSqlLoad {
                 "message_1.0.4",
                 "oplog_1.0.4",
                 "apply-auth_1.0.4",
-                "xcode_1.0.4"
+                "xcode_1.0.4",
+                "privilege_1.0.4",
         });
         dsmConfig.newVersion("1.0.5", new String[]{
                 "message_1.0.5",
+                "xcode_1.0.5",
         });
         dsmConfig.newVersion("1.0.6", new String[]{
                 "message_1.0.6"
@@ -80,6 +82,9 @@ public class GitTokSqlLoad {
         });
         dsmConfig.newVersion("1.0.8", new String[]{
                 "message_1.0.8"
+        });
+        dsmConfig.newVersion("1.1.1", new String[]{
+                "user_1.1.1"
         });
         return dsmConfig;
     }

@@ -17,6 +17,13 @@ public class LeadToQuery {
     @ApiProperty(name="userId",desc="userId")
     private String userId;
 
+    @ApiProperty(name="page",desc="page")
+    private Integer page ;
+
+
+    @ApiProperty(name="nextPageStart",desc="bitbucket 的下一页查询")
+    private Integer nextPageStart ;
+
     public List<LeadTo> getLeadToList() {
         return leadToList;
     }
@@ -39,5 +46,21 @@ public class LeadToQuery {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getNextPageStart() {
+        return nextPageStart;
+    }
+
+    public void setNextPageStart(Integer nextPageStart) {
+        this.nextPageStart = nextPageStart;
     }
 }

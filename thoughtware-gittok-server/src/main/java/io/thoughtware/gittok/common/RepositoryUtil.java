@@ -3,17 +3,23 @@ package io.thoughtware.gittok.common;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
 import io.thoughtware.core.exception.ApplicationException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.RSAPublicKeySpec;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RepositoryUtil {
     private static Logger logger = LoggerFactory.getLogger(RepositoryUtil.class);
@@ -85,6 +91,21 @@ public class RepositoryUtil {
         }
         return process;
     }
+
+
+    /**
+     * 执行命令
+     * @param path 执行文件夹
+     * @param order 执行命令
+     * @return 执行信息
+     * @throws IOException 调取命令行失败
+     */
+    public static Process execOrder(String order,String path) throws IOException {
+        Runtime runtime=Runtime.getRuntime();
+        Process process = runtime.exec(order.toString());
+        return process;
+    }
+
 
     /**
      * 默认路径 gittok
@@ -168,6 +189,18 @@ public class RepositoryUtil {
      */
     public static String findRepositoryAddress(String InitialPath, String repositoryId){
         String s = InitialPath + "/" + repositoryId+ ".git";
+        File file = new File(s);
+        return file.getAbsolutePath();
+    }
+
+    /**
+     * 仓库的临时文件夹
+     * @param InitialPath 仓库存储初始路径
+     * @param repositoryId 服务内存以仓库ID 存储仓库
+     * @return 仓库详细地址
+     */
+    public static String getRpyTemporaryPath(String InitialPath, String repositoryId){
+        String s = InitialPath + "/temporary/" + repositoryId;
         File file = new File(s);
         return file.getAbsolutePath();
     }
@@ -415,6 +448,125 @@ public class RepositoryUtil {
             throw  new ApplicationException("公钥的格式不正确");
         }
     }
+
+
+    /**
+     *执行maven编译
+     * @param mavenPath maven地址
+     * @param  repositoryPath 编译项目地址
+     * @return
+     */
+    public static Process mavenBuild(String mavenPath,String repositoryPath) throws IOException {
+        String path = mavenPath+"/mvn";
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                path,
+                "clean",
+                "compile"
+        );
+        processBuilder.directory(new File(repositoryPath));
+        return processBuilder.start();
+    }
+
+    /*
+     * maven编译错误信息
+     * */
+    public static Map<String,String> mavenBuildError(){
+        Map<String,String> map = new HashMap<>();
+        map.put("svn: E170000:","");
+        map.put("invalid option;","");
+        map.put("BUILD FAILURE","构建失败！");
+        return map;
+    }
+
+
+
+    /**
+     * 获取公钥的Base64编码数据
+     * @param key 公钥
+     * @return 公钥
+     */
+    public static String findKeyBase64(String key){
+        try {
+            if (key.startsWith(RepositoryFinal.Key_TYPE_OPENSSH_RSA)){
+                //截取ssh-rsa中的Base64编码数据
+                int i = key.indexOf(" ");
+                int i1 = key.lastIndexOf(" ");
+                return key.substring(i+1,i1);
+            }else if (key.startsWith(RepositoryFinal.Key_TYPE_SSH_RSA)){
+                return null;
+            }
+        }catch (Exception e){
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * 保存的key
+     * @param key 服务器存储的key
+     * @return PublicKey对象
+     */
+    public static PublicKey ValidRsaKey(String key){
+        try {
+            byte[] decoded = Base64.getDecoder().decode(key);
+
+            // 将字节数组包装到缓冲区中
+            ByteBuffer byteBuffer = ByteBuffer.wrap(decoded);
+            //自动更新的SIZEOF_INT的值
+            AtomicInteger position = new AtomicInteger();
+
+            String algorithm = readString(byteBuffer, position);
+            //判断是否为 Key_TYPE_OPENSSH_RSA格式的公钥
+            if (!RepositoryFinal.Key_TYPE_OPENSSH_RSA.equals(algorithm)){
+                return null;
+            }
+
+            // 字符串转换成字节
+            BigInteger publicExponent = readMpint(byteBuffer, position);
+            BigInteger modulus = readMpint(byteBuffer, position);
+            String string = modulus.toString();
+            //字节转换成PublicKey公钥
+            RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, publicExponent);
+            KeyFactory kf = KeyFactory.getInstance(RepositoryFinal.SSH_ENCODER_RSA);
+            return kf.generatePublic(keySpec);
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+
+    //字节转换成大数
+    public static BigInteger readMpint(ByteBuffer buffer, AtomicInteger pos){
+        byte[] bytes = readBytes(buffer, pos);
+        if(bytes.length == 0){
+            return BigInteger.ZERO;
+        }
+        return new BigInteger(bytes);
+    }
+
+    //字节转换成字符
+    public static String readString(ByteBuffer buffer, AtomicInteger pos){
+        byte[] bytes = readBytes(buffer, pos);
+        if(bytes.length == 0){
+            return "";
+        }
+        return new String(bytes, StandardCharsets.US_ASCII);
+    }
+
+    //转换成字节
+    public static byte[] readBytes(ByteBuffer buffer, AtomicInteger pos){
+        int len = buffer.getInt(pos.get());
+        byte[] buff = new byte[len];
+        int SIZEOF_INT = 4;
+        for(int i = 0; i < len; i++) {
+            buff[i] = buffer.get(i + pos.get() + SIZEOF_INT);
+        }
+        pos.set(pos.get() + SIZEOF_INT + len);
+        return buff;
+    }
+
 }
 
 

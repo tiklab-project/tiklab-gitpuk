@@ -1,5 +1,6 @@
 package io.thoughtware.gittok.repository.dao;
 
+import io.thoughtware.gittok.commit.entity.MergeRequestEntity;
 import io.thoughtware.gittok.repository.model.RecordCommitQuery;
 import io.thoughtware.core.page.Pagination;
 import io.thoughtware.dal.jpa.JpaTemplate;
@@ -7,12 +8,17 @@ import io.thoughtware.dal.jpa.criterial.condition.DeleteCondition;
 import io.thoughtware.dal.jpa.criterial.condition.QueryCondition;
 import io.thoughtware.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.thoughtware.gittok.repository.entity.RecordCommitEntity;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * RecordCommitDao-插件数据访问
@@ -106,4 +112,21 @@ public class RecordCommitDao {
         return jpaTemplate.findPage(queryCondition, RecordCommitEntity.class);
     }
 
+    /**
+     * 查询时间段内的提交
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     */
+    public List<RecordCommitEntity> findTimeRecordCommitList(String startTime, String endTime,String rpyId) {
+        String sql = "SELECT * FROM  rpy_record_commit WHERE  commit_time BETWEEN '"+startTime+"' AND '"+endTime+"'" ;
+
+        if (!StringUtils.isEmpty(rpyId)){
+            sql=sql+" and repository_id= '"+rpyId+"'";
+        }
+
+        NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(jpaTemplate.getJdbcTemplate());
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        List<RecordCommitEntity> list = jdbc.query(sql, paramMap, new BeanPropertyRowMapper(RecordCommitEntity.class));
+        return list;
+    }
 }

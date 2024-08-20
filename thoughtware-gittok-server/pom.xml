@@ -115,6 +115,12 @@
 			<version>${org-jgit.version}</version>
 		</dependency>
 
+		<!--<dependency>
+			<groupId>external.atlassian.jgitflow</groupId>
+			<artifactId>jgitflow-maven-plugin</artifactId>
+			<version>1.0-m5.1</version>
+		</dependency>-->
+
 		<!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-core -->
 		<dependency>
 			<groupId>org.apache.sshd</groupId>
@@ -173,11 +179,12 @@
 			<version>${come-jsch.version}</version>
 		</dependency>
 
-	<!--	<dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.32</version>
-		</dependency>-->
+			<version>1.7.25</version>
+		</dependency>
+
 
 		<!-- SLF4J 日志实现，例如 logback -->
 		<dependency>

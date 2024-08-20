@@ -13,12 +13,8 @@ import io.thoughtware.gittok.file.model.FileTreeMessage;
 import io.thoughtware.gittok.repository.dao.RepositoryDao;
 import io.thoughtware.gittok.repository.entity.RepositoryEntity;
 import io.thoughtware.gittok.repository.model.*;
-import io.thoughtware.gittok.scan.service.ScanPlayService;
 import io.thoughtware.gittok.tag.service.TagService;
-import io.thoughtware.privilege.dmRole.model.DmRole;
-import io.thoughtware.privilege.dmRole.model.DmRoleQuery;
 import io.thoughtware.privilege.role.model.PatchUser;
-import io.thoughtware.privilege.role.model.RoleFunction;
 import io.thoughtware.privilege.role.model.RoleUser;
 import io.thoughtware.privilege.role.service.RoleFunctionService;
 import io.thoughtware.privilege.role.service.RoleUserService;
@@ -105,9 +101,6 @@ public class RepositoryServerImpl implements RepositoryService {
 
 
     @Autowired
-    ScanPlayService scanPlayService;
-
-    @Autowired
     GitTokMessageService gitTokMessageService;
 
     @Autowired
@@ -185,6 +178,8 @@ public class RepositoryServerImpl implements RepositoryService {
 
         String repositoryId = repositoryDao.createRpy(repositoryEntity);
 
+        repositoryEntity.setRpyId(repositoryId);
+
         String userId;
        //初始化示例仓库用户id 取Repository里面用户
         if (!ObjectUtils.isEmpty(repository.getUser())&&StringUtils.isNotEmpty(repository.getUser().getId())){
@@ -250,8 +245,8 @@ public class RepositoryServerImpl implements RepositoryService {
                 }
                 RepositoryFileUtil.deleteFile(file);
 
-                //删除计划
-                scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
+             /*   //删除计划
+                scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);*/
 
                 //发送消息日志
                 sendMessLog(repositoryEntity,"delete",null);
@@ -303,9 +298,9 @@ public class RepositoryServerImpl implements RepositoryService {
 
 
         //校验修改的仓库名字是否重复
-        String namespace = repository.getAddress().substring(0, repository.getAddress().indexOf("/", 1));
+      //  String namespace = repository.getAddress().substring(0, repository.getAddress().indexOf("/", 1));
         //存在仓库组
-        List<RepositoryEntity>  repositoryEntityList = repositoryDao.findRepositoryByNamespace(namespace);
+        List<RepositoryEntity>  repositoryEntityList = repositoryDao.findRepositoryByNamespace(repository.getAddress());
 
         if (CollectionUtils.isNotEmpty(repositoryEntityList)){
             List<RepositoryEntity> entities = repositoryEntityList.stream().filter(a -> a.getName().equals(repository.getName())&&
@@ -324,7 +319,7 @@ public class RepositoryServerImpl implements RepositoryService {
 
         //更新名字后发送消息
         if (!oneRpy.getName().equals(repository.getName())){
-            sendMessLog(repositoryEntity,"update",repository.getName());
+            sendMessLog(oneRpy,"update",repository.getName());
         }
     }
 
@@ -543,6 +538,7 @@ public class RepositoryServerImpl implements RepositoryService {
         List<RepositoryEntity> groupEntityList = repositoryDao.findRepositoryListLike(repositoryQuery);
         List<Repository> allRpy = BeanMapper.mapList(groupEntityList, Repository.class);
 
+        //查询有权限的仓库
         if (CollectionUtils.isNotEmpty(allRpy)) {
             return findViewRepository(repositoryQuery,allRpy);
         }
@@ -662,19 +658,14 @@ public class RepositoryServerImpl implements RepositoryService {
 
         List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
         this.deleteRpy(repositoryList.get(0).getRpyId());
-     /*   if(CollectionUtils.isNotEmpty(repositoryList)){
-            if (repositoryList.size()==1){
-                this.deleteRpy(repositoryList.get(0).getRpyId());
-            }else {
-                throw new SystemException(9000,"出现相同路径");
-            }
-        }*/
-
     }
 
     @Override
     public String findRepositoryAp(String address) {
         Repository repository = this.findRepositoryByAddress(address);
+        if (ObjectUtils.isEmpty(repository)){
+            return null;
+        }
         String absolutePath = yamlDataMaService.repositoryAddress() + "/" + repository.getRpyId()+ ".git";
         return absolutePath;
     }
@@ -778,7 +769,7 @@ public class RepositoryServerImpl implements RepositoryService {
         List<RepositoryEntity> allRpyEntity = repositoryDao.findAllRpy();
         List<Repository> allRpy = BeanMapper.mapList(allRpyEntity, Repository.class);
 
-        List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId(),"private");
+        List<String> accessRepositoryId = findHaveAccessRepository(allRpy, repositoryQuery.getUserId(),"all");
 
         if (!ObjectUtils.isEmpty(accessRepositoryId)&&accessRepositoryId.size()>0){
             String[] canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
@@ -855,19 +846,27 @@ public class RepositoryServerImpl implements RepositoryService {
      */
     public Pagination<Repository> findViewRepository(RepositoryQuery repositoryQuery,List<Repository> AllRepository){
         List<String> accessRepositoryId = findHaveAccessRepository(AllRepository, repositoryQuery.getUserId(),"all");
+
         String[] canViewRpyIdList;
 
-        //查询我的收藏时
-        List<RepositoryCollect> repositoryCollectList = repositoryCollectService.findRepositoryCollectList(new RepositoryCollectQuery().setUserId(repositoryQuery.getUserId()));
-        if (("collect").equals(repositoryQuery.getFindType())){
-            if (CollectionUtils.isEmpty(repositoryCollectList)){
+        //查询我的收藏
+       if (("collect").equals(repositoryQuery.getFindType())){
+           List<String> rpyIds = AllRepository.stream().map(Repository::getRpyId).collect(Collectors.toList());
+           String[] rpyIdsArray = rpyIds.toArray(new String[rpyIds.size()]);
+           List<RepositoryCollect> repositoryCollectList = repositoryCollectService.findRepositoryCollectList(rpyIdsArray,repositoryQuery.getUserId());
+           if (CollectionUtils.isEmpty(repositoryCollectList)){
                 return null;
             }
-            List<String> stringList = repositoryCollectList.stream().map(RepositoryCollect::getRepositoryId).collect(Collectors.toList());
-            canViewRpyIdList = stringList.toArray(new String[stringList.size()]);
-        }else {
-             canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
-        }
+           List<String> stringList = repositoryCollectList.stream()
+                   .map(RepositoryCollect::getRepositoryId).collect(Collectors.toList());
+
+           //获取重复的
+           accessRepositoryId=accessRepositoryId.stream()
+                   .filter(stringList::contains)
+                   .collect(Collectors.toList());
+       }
+
+        canViewRpyIdList = accessRepositoryId.toArray(new String[accessRepositoryId.size()]);
         if (canViewRpyIdList.length>0){
             Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
             List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
@@ -936,9 +935,6 @@ public class RepositoryServerImpl implements RepositoryService {
             return;
         }
         RepositoryFileUtil.deleteFile(file);
-
-        //删除计划
-        scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);
     }
 
     /**

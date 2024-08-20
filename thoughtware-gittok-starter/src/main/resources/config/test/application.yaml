@@ -90,7 +90,7 @@ homes:
 
 #license
 licences:
-  path: ${APP_HOME}/licences
+  path: ${DATA_HOME}/licences
 
 #file
 file:

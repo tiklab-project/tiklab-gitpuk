@@ -49,6 +49,10 @@ public class AuthSsh {
     @ApiProperty(name="fingerprint",desc="公钥指纹")
     private String fingerprint;
 
+    @ApiProperty(name="modulus",desc="modulus")
+    private String modulus;
+
+
 
     /**
      * 类型 public,全局 private,项目私有
@@ -147,6 +151,14 @@ public class AuthSsh {
 
     public void setExpireTime(String expireTime) {
         this.expireTime = expireTime;
+    }
+
+    public String getModulus() {
+        return modulus;
+    }
+
+    public void setModulus(String modulus) {
+        this.modulus = modulus;
     }
 }
 

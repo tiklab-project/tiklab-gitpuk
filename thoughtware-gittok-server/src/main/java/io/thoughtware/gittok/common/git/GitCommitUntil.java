@@ -1,5 +1,6 @@
 package io.thoughtware.gittok.common.git;
 
+import io.thoughtware.core.exception.SystemException;
 import io.thoughtware.gittok.commit.model.*;
 import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.RepositoryUtil;
@@ -7,6 +8,7 @@ import io.thoughtware.core.exception.ApplicationException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -27,7 +29,11 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -303,6 +309,41 @@ public class GitCommitUntil {
         return null;
     }
 
+    /**
+     * 查询仓库分支的第一次提交信息
+     * @param repository 仓库
+     * @param branch 分支、commitId
+     * @param type  类型  commitId、branch
+     * @return 提交记录
+     * @throws IOException 仓库不存在
+     * @throws ApplicationException 分支不存在
+     */
+    public static CommitMessage findFistCommit(Repository repository, String branch,String type)
+            throws IOException , ApplicationException {
+
+        ObjectId objectId;
+        if (("commitId").equals(type)){
+            //提交commitId
+            objectId = ObjectId.fromString(branch);
+        }else {
+            //分支
+            objectId=  repository.findRef(Constants.R_HEADS +branch).getObjectId();
+        }
+
+        //创建提交遍历对象
+        RevWalk revWalk = new RevWalk(repository);
+        revWalk.sort(RevSort.COMMIT_TIME_DESC);
+        revWalk.sort(RevSort.REVERSE);
+        revWalk.markStart(revWalk.parseCommit(objectId));
+        for (RevCommit revCommit : revWalk) {
+            CommitMessage commitMessage = getCommitMessage(revCommit);
+            revCommit.disposeBody();
+            revWalk.close();
+            return commitMessage;
+        }
+        return null;
+    }
+
 
     /**
      * 查询当前commitId和父级的commitId 差异文件
@@ -381,8 +422,10 @@ public class GitCommitUntil {
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
         diffFormatter.setDetectRenames(true);
         //过滤指定文件
-        PathFilter pathFilter = PathFilter.create(filePath);
-        diffFormatter.setPathFilter(pathFilter);
+        if (StringUtils.isNotEmpty(filePath)){
+            PathFilter pathFilter = PathFilter.create(filePath);
+            diffFormatter.setPathFilter(pathFilter);
+        }
         List<DiffEntry> diffs;
         if (oldTreeIter != null){
             diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
@@ -519,12 +562,11 @@ public class GitCommitUntil {
         diffFormatter.setDetectRenames(true);
 
         //过滤其他文件只匹配filePath文件
-        PathFilter pathFilter = PathFilter.create(filePath);
-        diffFormatter.setPathFilter(pathFilter);
-
+        if(!ObjectUtils.isEmpty(filePath)){
+            PathFilter pathFilter = PathFilter.create(filePath);
+            diffFormatter.setPathFilter(pathFilter);
+        }
         List<DiffEntry> diffs =  diffFormatter.scan(oldTreeIter, newTreeIter);
-
-
         List<CommitFileDiff> list = new ArrayList<>();
         int left = 0;int right = 0;int number = 0;
         int oldStart = 0;int oldLines = 0;int newStart = 0;int newLines = 0;
@@ -923,10 +965,7 @@ public class GitCommitUntil {
     }
 
 
-    /**
-     * 获取两个分支的滞后或者领先提交数量
-     * @param  repository
-     */
+
     /**
      * 获取两个分支的滞后或者领先提交数量
      * @param  repository
@@ -978,6 +1017,60 @@ public class GitCommitUntil {
         resultMap.put("lagNum", lagNum);
         resultMap.put("advanceNum",advanceNum);
         return resultMap;
-
     }
+
+    /**
+     * 获取仓库提交的用户
+     * @param  repositoryAddress 仓库地址
+     */
+    public static List getCommitUserList(String repositoryAddress) throws IOException, GitAPIException {
+        List<String> arrayList = new ArrayList<>();
+        Git git = Git.open(new File(repositoryAddress));
+        LogCommand log = git.log();
+        // 检查是否有可用的分支
+        List<Ref> head = git.getRepository().getRefDatabase().getRefs();
+        if (CollectionUtils.isEmpty(head) ) {
+            return null;
+        }
+        Iterable<RevCommit> commits = git.log().call();
+        for (RevCommit commit : commits) {
+            PersonIdent authorIdent = commit.getAuthorIdent();
+            arrayList.add(commit.getAuthorIdent().getName());
+        }
+        List<String> stringList = arrayList.stream().distinct().collect(Collectors.toList());
+        return stringList;
+    }
+
+
+    /**
+     * 查询仓库所有分支最近 提交数量
+     * @param repositoryAddress 仓库地址
+     * @param  number 查询条数
+     */
+    public static List<CommitMessage> getLatelyCommit(String repositoryAddress,int number) throws IOException, GitAPIException {
+        List<CommitMessage> list = new ArrayList<>();
+
+        Git git = Git.open(new File(repositoryAddress));
+        Repository repository = git.getRepository();
+        RevWalk revWalk = new RevWalk(repository);
+
+        //所有分支
+        List<Ref> refs = git.branchList().call();
+        for (Ref ref : refs) {
+            revWalk.markStart(revWalk.parseCommit(ref.getObjectId()));
+        }
+
+        int findNum=0;
+        //所有分支的提交  重复的提交只会算一个
+        for (RevCommit commit : revWalk) {
+            if (findNum>number){
+                break;
+            }
+            CommitMessage commitMessage = getCommitMessage(commit);
+            list.add(commitMessage);
+            findNum+=1;
+        }
+        return list;
+    }
+
 }

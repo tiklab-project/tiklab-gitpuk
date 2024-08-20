@@ -41,7 +41,7 @@
         <thoughtware-postgresql.version>1.0.2-SNAPSHOT</thoughtware-postgresql.version>
         <thoughtware-spotbugs.version>1.0.0</thoughtware-spotbugs.version>
         <thoughtware-plugin.version>1.0.1-SNAPSHOT</thoughtware-plugin.version>
-
+        <thoughtware-install.version>1.0.1-SNAPSHOT</thoughtware-install.version>
         <thoughtware-postin-doclet-version>1.0.1-SNAPSHOT</thoughtware-postin-doclet-version>
 
         <thoughtware-upgrade.version>1.0.0</thoughtware-upgrade.version>

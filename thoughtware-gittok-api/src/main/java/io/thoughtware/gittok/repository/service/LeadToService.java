@@ -11,14 +11,13 @@ public interface LeadToService {
 
     /**
      * 查询第三方 的仓库列表
-     * @param importAuthId 第三方仓库认证信息
-     * @param page 分页参数
+     * @param leadToQuery leadToQuery
      */
-    Pagination<LeadTo> findThirdRepositoryList(String importAuthId, String page);
+    Pagination<LeadTo> findThirdRepositoryList(LeadToQuery leadToQuery);
 
     /**
      * 导入仓库
-     * @param leadTo leadTo
+     * @param leadToQuery leadTo
      */
     String toLeadRepository( LeadToQuery leadToQuery);
 

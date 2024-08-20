@@ -31,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -63,29 +64,33 @@ public class LeadToServiceImpl implements LeadToService {
     public static Map<String , LeadToResult> toLeadResult = new HashMap<>();
 
     @Override
-    public Pagination<LeadTo> findThirdRepositoryList(String importAuthId,String page) {
+    public Pagination<LeadTo> findThirdRepositoryList(LeadToQuery leadToQuery) {
         //返回结果
         Pagination<LeadTo> resultPagination = new Pagination<>();
 
         try {
             //第三方的认证信息
-            LeadAuth importAuth = authService.findLeadAuth(importAuthId);
+            LeadAuth importAuth = authService.findLeadAuth(leadToQuery.getImportAuthId());
             switch (importAuth.getType()){
                 case "priGitlab":
-                     resultPagination = findGitlabRpy(importAuth, resultPagination, page);
+                     resultPagination = findGitlabRpy(importAuth, resultPagination, leadToQuery);
                     break;
                 case "gitlab":
-                    resultPagination= findGitlabRpy(importAuth,resultPagination, page);
+                    resultPagination= findGitlabRpy(importAuth,resultPagination, leadToQuery);
                     break;
                 case "github":
-                    resultPagination= findGithubRpy(importAuth,resultPagination,page);
+                    resultPagination= findGithubRpy(importAuth,resultPagination,leadToQuery);
                     break;
                 case "gitee":
-                    resultPagination=findGiteeRpy(importAuth,resultPagination,page);
+                    resultPagination=findGiteeRpy(importAuth,resultPagination,leadToQuery);
+                    break;
+                case "priBitbucket":
+                    resultPagination=findBitbucketRpy(importAuth,resultPagination,leadToQuery);
                     break;
             }
             return resultPagination;
         }catch (Exception e){
+            logger.info("查询仓库失败"+e.getMessage());
             throw new SystemException(e);
         }
     }
@@ -95,17 +100,22 @@ public class LeadToServiceImpl implements LeadToService {
      *  findGitlabRpy 获取gitlab 仓库
      * @param leadAuth 认证信息
      * @param resultPagination 返回结果
-     * @param  page 分页数
+     * @param  leadToQuery leadToQuery
      */
-    public Pagination<LeadTo> findGitlabRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,String page){
+    public Pagination<LeadTo> findGitlabRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,LeadToQuery leadToQuery){
         List<LeadTo> resultList = new ArrayList();
 
         String address= GitTokFinal.GITLAB_API_URL;
         if (("priGitlab").equals(leadAuth.getType())){
-            address=leadAuth.getAddress()+"/api/v4/projects";
+            String authAddress = leadAuth.getAddress();
+            if (authAddress.endsWith("/")){
+                authAddress=StringUtils.substringBeforeLast(authAddress,"/");
+            }
+
+            address=authAddress+"/api/v4/projects";
         }
        // owned=true 自己创建的; simple=true 获取简化的数据
-       String path=  address+"?owned=true&page="+page+"&private_token="+leadAuth.getAccessToken();
+       String path=  address+"?min_access_level=10&page="+leadToQuery.getPage()+"&private_token="+leadAuth.getAccessToken();
 
         //RestTemplate 调用接口
         ResponseEntity<List> restTemplate = getRestTemplate(path);
@@ -117,7 +127,7 @@ public class LeadToServiceImpl implements LeadToService {
 
             resultPagination.setTotalRecord(Integer.valueOf(total));
             resultPagination.setTotalPage(Integer.valueOf(totalPage));
-            resultPagination.setCurrentPage(Integer.valueOf(page));
+            resultPagination.setCurrentPage(Integer.valueOf(leadToQuery.getPage()));
 
             //仓库列表数据
             List body = restTemplate.getBody();
@@ -164,22 +174,45 @@ public class LeadToServiceImpl implements LeadToService {
      *  findGithubRpy 获取github 仓库
      * @param leadAuth 认证信息
      * @param resultPagination 返回结果
-     * @param  page 分页数
+     * @param  leadToQuery leadToQuery
      */
-    public Pagination<LeadTo> findGithubRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,String page) throws IOException {
+    public Pagination<LeadTo> findGithubRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,LeadToQuery leadToQuery) throws IOException {
         List<LeadTo> resultList = new ArrayList();
 
        // postRestTemplate(GitTokFinal.GITHUB_API_URL + "?owned=true&simple=true&per_page=20&page="+page,leadAuth);
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url(GitTokFinal.GITHUB_API_URL + "?owned=true&simple=true&per_page=20&page="+page)
+                .url(GitTokFinal.GITHUB_API_URL + "?per_page=20&page="+leadToQuery.getPage())
                 .header("Authorization", "token "+leadAuth.getAccessToken()) //认证accToken
-                .header("accept","application/vnd.github+json")
+                .header("accept","application/vnd.github.v3+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
                 .build();
         Response response = client.newCall(request).execute();
         if (response.isSuccessful()) {
+            resultPagination.setCurrentPage(Integer.valueOf(leadToQuery.getPage()));
+           //获取总页数
             Headers headers = response.headers();
+            String link = headers.get("link");
+            List<String> stringList = Arrays.asList(link.split(","));
+            if (link.contains("last")){
+                for (String data:stringList){
+                    if (data.contains("last")){
+                        String[] split = data.split(";");
+                        String totalPage = split[0].substring(split[0].lastIndexOf("page=")+5,split[0].length()-1);
+                        resultPagination.setTotalPage(Integer.valueOf(totalPage));
+                    }
+                }
+            }else {
+                for (String data:stringList){
+                    if (data.contains("prev")){
+                        String[] split = data.split(";");
+                        String totalPage = split[0].substring(split[0].lastIndexOf("page=")+5,split[0].length()-1);
+                        resultPagination.setTotalPage(Integer.valueOf(totalPage)+1);
+                    }
+                }
+            }
+
             String responseBody = response.body().string();
             Object parse = JSONArray.parse(responseBody);
             List<Object> jsonObjects = (List<Object>) parse;
@@ -226,11 +259,11 @@ public class LeadToServiceImpl implements LeadToService {
      *  findGiteeRpy 获取gitee 仓库
      * @param leadAuth 认证信息
      * @param resultPagination 返回结果
-     * @param  page 分页数
+     * @param  leadToQuery leadToQuery
      */
-    public Pagination<LeadTo> findGiteeRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,String page){
+    public Pagination<LeadTo> findGiteeRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,LeadToQuery leadToQuery){
         String path=  GitTokFinal.GITEE_API_URL+"?access_token="+leadAuth.getAccessToken()+
-                "&sort=full_name&per_page=20&page="+page;
+                "&sort=full_name&per_page=20&page="+leadToQuery.getPage();
 
         List<LeadTo> resultList = new ArrayList<>();
 
@@ -244,7 +277,7 @@ public class LeadToServiceImpl implements LeadToService {
 
             resultPagination.setTotalRecord(Integer.valueOf(total));
             resultPagination.setTotalPage(Integer.valueOf(totalPage));
-            resultPagination.setCurrentPage(Integer.valueOf(page));
+            resultPagination.setCurrentPage(Integer.valueOf(leadToQuery.getPage()));
 
             //仓库列表数据
             List body = restTemplate.getBody();
@@ -295,9 +328,118 @@ public class LeadToServiceImpl implements LeadToService {
         return null;
     }
 
+
+    /**
+     *  findBitbucketRpy 获取bucket 仓库
+     * @param leadAuth 认证信息
+     * @param resultPagination 返回结果
+     * @param  leadToQuery leadToQuery
+     */
+    public Pagination<LeadTo> findBitbucketRpy(LeadAuth leadAuth,Pagination<LeadTo> resultPagination,LeadToQuery leadToQuery) throws IOException {
+        List<LeadTo> resultList = new ArrayList<>();
+
+        String authAddress = leadAuth.getAddress();
+        if (leadAuth.getAddress().endsWith("/")){
+            authAddress=StringUtils.substringBeforeLast(authAddress,"/");
+        }
+
+        List<Integer> pageStartList = new ArrayList<>();
+        Integer limit=25;
+        //查询总数据
+        Integer totalPage=0;
+        Integer totalRecord=0;
+        Boolean isLastPage=false;
+        Integer nextPageStart=0;
+        while (!isLastPage){
+            String address =authAddress+"/rest/api/1.0/repos?start=" + nextPageStart + "&limit=" + limit;
+            ResponseEntity<JSONObject> restTemplate = getRestTemplate(address, leadAuth.getAccessToken());
+            if (restTemplate.getStatusCode().value()==200){
+                JSONObject body = restTemplate.getBody();
+                pageStartList.add(nextPageStart);
+
+                //是否是最后页
+                isLastPage = (Boolean) body.get("isLastPage");
+                if (!isLastPage){
+                    nextPageStart=Integer.valueOf(body.get("nextPageStart").toString());
+                }
+
+                //数量
+                totalRecord+=Integer.valueOf(body.get("size").toString());
+                totalPage+=1;
+            }
+        }
+        resultPagination.setTotalRecord(totalRecord);
+        resultPagination.setTotalPage(totalPage);
+        resultPagination.setCurrentPage(leadToQuery.getPage());
+
+        //查询当前页 仓库列表
+        String address =authAddress+"/rest/api/1.0/repos?start=" + leadToQuery.getNextPageStart() + "&limit=" + limit;
+        ResponseEntity<JSONObject> restTemplate = getRestTemplate(address, leadAuth.getAccessToken());
+        if (restTemplate.getStatusCode().value()==200){
+            JSONObject body = restTemplate.getBody();
+            //是否是最后页
+            Boolean isLast = (Boolean) body.get("isLastPage");
+            Integer pageStart=0;
+            if (!isLast){
+                 pageStart = Integer.valueOf(body.get("nextPageStart").toString());
+            }
+
+            //仓库内容
+            List<Object> values = (List<Object>) body.get("values");
+            List<LeadRecord> leadRecordList = leadRecordService.findLeadRecordList(new LeadRecordQuery().setLeadWay(leadAuth.getType()));
+            for (Object value:values ){
+                LeadTo leadTo = new LeadTo();
+                JSONObject jsonObject = (JSONObject) JSON.toJSON(value);
+                //项目
+                JSONObject project = (JSONObject) JSON.toJSON(jsonObject.get("project"));
+                String projectName = project.get("name").toString();
+                leadTo.setGroupName(projectName);
+
+                //存储库
+                String repositoriesName = jsonObject.get("name").toString();
+                leadTo.setRepositoryName(repositoriesName);
+                leadTo.setRepositoryUrl(projectName+"/"+repositoriesName);
+
+                //存储库地址
+                JSONObject links = (JSONObject) JSON.toJSON(jsonObject.get("links"));
+                List<JSONObject> self = (List<JSONObject>) links.get("clone");
+                List<JSONObject> collect = self.stream().filter(a -> ("http").equals(a.get("name"))).collect(Collectors.toList());
+
+                String href = collect.get(0).get("href").toString();
+                leadTo.setHttpRepositoryUrl(href);
+
+                String id = jsonObject.get("id").toString();
+                leadTo.setThirdRepositoryId(id);
+
+                String rule = jsonObject.get("public").toString();
+                String s = rule.equals("false") ? "private" : "public";
+                leadTo.setRule(s);
+
+                leadTo.setPageStartList(pageStartList);
+                leadTo.setNextPageStart(pageStart);
+                leadTo.setCurrentPageStart(leadToQuery.getNextPageStart());
+
+                if (!CollectionUtils.isEmpty(leadRecordList)){
+                    List<LeadRecord> records = leadRecordList.stream().filter(a -> a.getRelevanceId().equals(id)).collect(Collectors.toList());
+                    if (!CollectionUtils.isEmpty(records)) {
+                        //执行结果
+                        leadTo.setExecResult(records.get(0).getLeadState());
+                        //权限
+                        leadTo.setRule(records.get(0).getRepository().getRules());
+                    }
+                }
+                resultList.add(leadTo);
+
+            }
+        }
+        return PaginationBuilder.build(resultPagination,resultList);
+    }
+
+
     @Override
     public String toLeadRepository(LeadToQuery leadToQuery) {
         String loginId = LoginContext.getLoginId();
+
         List<LeadTo> leadToList = leadToQuery.getLeadToList();
         toLeadResult.remove(loginId);
    /*     if (StringUtils.isNotEmpty(result)){
@@ -306,7 +448,7 @@ public class LeadToServiceImpl implements LeadToService {
 
 
         //添加执行结果
-        putResult(leadToList,"run");
+        putResult(leadToList,"run",null);
 
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.submit(new Runnable(){
@@ -318,6 +460,7 @@ public class LeadToServiceImpl implements LeadToService {
                     leadRecord.setLeadState("run");
 
                     addExecResult(leadRecord,leadTo,"run,开始导入仓库");
+                    String rpyId=null;
                     try {
                         User user = new User();
                         user.setId(leadToQuery.getUserId());
@@ -336,14 +479,15 @@ public class LeadToServiceImpl implements LeadToService {
                             groupId = group.getGroupId();
                         }
 
-                        //创建仓库
+                        //查询仓库
                         List<Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery()
                                 .setGroupId(groupId).setName(leadTo.getRepositoryName()));
                         if (!CollectionUtils.isEmpty(repositoryList)){
                             //返回结果
-                            logger.info(leadTo.getRepositoryUrl()+"，推送失败，仓库已经导入");
+                            logger.info(leadTo.getRepositoryUrl()+"，导入仓库失败失败，仓库已经导入");
                             addExecResult(leadRecord,leadTo,"fail,仓库已经导入");
-                            putResult(leadToList,"fail");
+                            putResult(leadToList,"fail","已存在相同仓库");
+                            return;
                         }
                         //创建仓库
                         Repository repository = new Repository();
@@ -354,26 +498,28 @@ public class LeadToServiceImpl implements LeadToService {
                         repository.setGroup(repositoryGroup);
                         repository.setUser(user);
                         repository.setRules(leadTo.getRule());
-                        String rpyId = repositoryServer.createRpy(repository);
+                         rpyId = repositoryServer.createRpy(repository);
                         repository.setRpyId(rpyId);
 
                         //导入认证
                         LeadAuth importAuth = authService.findLeadAuth(leadToQuery.getImportAuthId());
-
                         //创建导入记录
                         leadRecord.setRepository(repository);
                         leadRecord.setLeadWay(importAuth.getType());
                         String leadRecordId = leadRecordService.createLeadRecord(leadRecord);
                         leadRecord.setId(leadRecordId);
 
+                        //获取用户信息
+                        String userAccount = getThreeUserInfo(importAuth);
+
 
                         String repositoryAddress = yamlDataMaService.repositoryAddress()+"/"+rpyId+".git";
                         //从第三方复制裸仓库
-                        GitUntil.copyRepository(repositoryAddress,leadTo.getHttpRepositoryUrl(),importAuth);
+                        GitUntil.copyRepository(repositoryAddress,leadTo.getHttpRepositoryUrl(),importAuth,userAccount );
 
                         //添加返回结果
-                        logger.info(leadTo.getRepositoryUrl()+"success，推送成功");
-                        addExecResult(leadRecord,leadTo,"success，推送成功");
+                        logger.info(leadTo.getRepositoryUrl()+"success，导入成功");
+                        addExecResult(leadRecord,leadTo,"success，导入成功");
 
                         //更新导入记录
                         leadRecordService.updateLeadRecord(leadRecord);
@@ -389,13 +535,14 @@ public class LeadToServiceImpl implements LeadToService {
                         //添加返回结果
                         logger.info(leadTo.getRepositoryUrl()+"，导入仓库失败："+e.getMessage());
                         addExecResult(leadRecord,leadTo,"fail,导入仓库失败："+e.getMessage());
-                        putResult(leadToList,"fail");
-
+                        putResult(leadToList,"fail","导入仓库失败:"+e.getMessage());
+                        repositoryServer.deleteRpy(rpyId);
                         leadRecordService.updateLeadRecord(leadRecord);
+
                         throw new SystemException(e);
                     }
                 }
-                putResult(leadToList,"success");
+                putResult(leadToList,"success",null);
             }});
         return "OK";
     }
@@ -403,12 +550,36 @@ public class LeadToServiceImpl implements LeadToService {
     @Override
     public LeadToResult findToLeadResult(String key) {
         LeadToResult leadToResult = toLeadResult.get(key);
-   /*     if (StringUtils.isNotEmpty(result)&&result.contains("OK")&&result.contains("fail")){
-            toLeadResult.remove(thirdRepositoryId);
-        }*/
         return leadToResult;
     }
 
+
+    /**
+     *  getThreeUserInfo 获取第三方用户信息
+     * @param importAuth importAuth
+     */
+    public String getThreeUserInfo(LeadAuth importAuth){
+        if (("gitee").equals(importAuth.getType())){
+            String userPath = GitTokFinal.GITEE_USER_URL + "?access_token=" + importAuth.getAccessToken();
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<JSONObject> forEntity = restTemplate.getForEntity(userPath, JSONObject.class);
+
+            JSONObject body = forEntity.getBody();
+            String account = String.valueOf(body.get("login"));
+            return account;
+        }
+        if (("priBitbucket").equals(importAuth.getType())){
+            String authAddress = importAuth.getAddress();
+            if (authAddress.endsWith("/")){
+                authAddress=StringUtils.substringBeforeLast(authAddress,"/");
+            }
+            String address = authAddress + "/rest/api/1.0/users";
+            ResponseEntity<JSONObject> restTemplate = getRestTemplate(address, importAuth.getAccessToken());
+            JSONObject body = restTemplate.getBody();
+            System.out.println("");
+        }
+        return null;
+    }
 
     /**
      *  getRestTemplate 通过RestTemplate 查询
@@ -420,6 +591,27 @@ public class LeadToServiceImpl implements LeadToService {
         ResponseEntity<List> response = restTemplate.getForEntity(path, List.class);
         return response;
     }
+
+
+    /**
+     *  getRestTemplate 添加head头信息 通过RestTemplate 查询
+     * @param path 查询路径
+     * @param authorize 认证信息
+     */
+    public ResponseEntity<JSONObject>  getRestTemplate(String path,String authorize){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization","Bearer " + authorize);
+        // 请求
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().set(1,new StringHttpMessageConverter(StandardCharsets.UTF_8));
+
+        ResponseEntity<JSONObject> exchange = restTemplate.exchange(path, HttpMethod.GET, request, JSONObject.class);
+
+        return exchange;
+    }
+
 
 
 
@@ -441,11 +633,13 @@ public class LeadToServiceImpl implements LeadToService {
      *  getResult 获取结果
      * @param leadToList leadToList
      * @param grossResult 总结果
+     * @param  msg 消息
      */
-    public void putResult(List<LeadTo> leadToList,String grossResult){
+    public void putResult(List<LeadTo> leadToList,String grossResult,String msg){
         LeadToResult leadToResult = new LeadToResult();
         leadToResult.setLeadToList(leadToList);
         leadToResult.setGrossResult(grossResult);
+        leadToResult.setMsg(msg);
         String loginId = LoginContext.getLoginId();
 
         toLeadResult.put(loginId,leadToResult);

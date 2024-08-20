@@ -29,6 +29,13 @@ public class MergeRequestQuery {
     @ApiProperty(name ="mergeTarget",desc = "目标源")
     private String  mergeTarget;
 
+
+    @ApiProperty(name ="startTime",desc = "查询开始时间")
+    private String  startTime;
+
+    @ApiProperty(name ="endTime",desc = "查询结束时间")
+    private String  endTime;
+
     public List<Order> getOrderParams() {
         return orderParams;
     }
@@ -85,5 +92,21 @@ public class MergeRequestQuery {
 
     public void setMergeTarget(String mergeTarget) {
         this.mergeTarget = mergeTarget;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 }

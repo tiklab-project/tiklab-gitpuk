@@ -1,7 +1,5 @@
 package io.thoughtware.gittok.timedtask.util;
 
-import io.thoughtware.eam.common.context.LoginContext;
-import io.thoughtware.gittok.scan.service.CodeScanService;
 import io.thoughtware.gittok.timedtask.service.TimeTaskService;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -17,7 +15,7 @@ public  class RunJob implements org.quartz.Job {
 
 
     public static TimeTaskService taskService;
-    public static CodeScanService scanService;
+
 
     public static JobManager jobManager;
 
@@ -29,11 +27,6 @@ public  class RunJob implements org.quartz.Job {
     @Autowired
     public void setJobManager(JobManager jobManager) {
         this.jobManager = jobManager;
-    }
-
-    @Autowired
-    public void setScanService(CodeScanService scanService) {
-        this.scanService = scanService;
     }
 
     @Override
@@ -52,12 +45,6 @@ public  class RunJob implements org.quartz.Job {
         logger.info("定时任务group:"+group);
 
 
-        //执行扫描计划
-        scanService.codeScanExec(execObjectId);
-        taskService.updateTimeTask(taskInstanceId);
-
-        logger.warn("定时任务触发完成:"+jobName);
-        jobManager.removeJob(group,jobName);
     }
 
 }

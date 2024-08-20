@@ -31,6 +31,8 @@ postgresql:
   type: local
   database: thoughtware-gittork
 
+
+
 eas:
   embbed:
     enable: true
@@ -51,6 +53,7 @@ dfs:
     url: 127.0.0.1:4000
     bucket: ${app.name}
 
+
 #dcs config
 dcs:
   server:
@@ -61,7 +64,7 @@ dcs:
     url: 127.0.0.1:5001
     group: g1
     database: dcs1
-    expire: 600
+    expire: 7200
 
 #dcs config
 dss:

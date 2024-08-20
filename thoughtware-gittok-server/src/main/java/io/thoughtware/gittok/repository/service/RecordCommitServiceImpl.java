@@ -223,23 +223,36 @@ public class RecordCommitServiceImpl implements RecordCommitService {
     }
 
     @Override
-    public void updateCommitRecord(String requestURI,String userName) {
+    public void updateCommitRecord(String requestURI,String userName,String commitType) {
         User user = userService.findUserByUsername(userName,null);
 
-        String[] split = requestURI.split("/");
-        String groupName=split[2];
-        String name=split[3].substring(0,split[3].indexOf(".git"));
-        Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
-        //更新仓库提交时间
-        repositoryServer.updateRepository(repository);
+        String groupName;
+        String rpyName;
+        if (("http").equals(commitType)){
+            String[] split = requestURI.split("/");
+             groupName=split[2];
+             rpyName=split[3].substring(0,split[3].indexOf(".git"));
+        }else {
+            String[] split = requestURI.split("/");
+            groupName=split[0];
+            rpyName=split[1];
+        }
 
 
+        Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + rpyName);
         RecordCommit recordCommit = new RecordCommit();
         recordCommit.setRepository(repository);
         recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
         recordCommit.setUserId(user.getId());
         this.createRecordCommit(recordCommit);
         }
+
+    @Override
+    public List<RecordCommit> findTimeRecordCommitList(String startTime, String endTime,String rpyId) {
+        List<RecordCommitEntity> recordEntityList =recordCommitDao.findTimeRecordCommitList(startTime,endTime,rpyId);
+        List<RecordCommit> recordCommits = BeanMapper.mapList(recordEntityList, RecordCommit.class);
+        return recordCommits;
+    }
 
 
 }

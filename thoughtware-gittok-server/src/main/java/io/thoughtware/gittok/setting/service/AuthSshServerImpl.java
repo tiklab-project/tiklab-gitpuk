@@ -2,6 +2,7 @@ package io.thoughtware.gittok.setting.service;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
+import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.RepositoryUtil;
 import io.thoughtware.gittok.setting.dao.AuthSshDao;
 import io.thoughtware.gittok.setting.entity.AuthSshEntity;
@@ -16,6 +17,9 @@ import org.springframework.util.ObjectUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.sql.Timestamp;
 import java.util.Base64;
 import java.util.Collections;
@@ -45,6 +49,15 @@ public class AuthSshServerImpl implements AuthSshServer {
         String publicKeyFinger = RepositoryUtil.getPublicKeyFinger(authSsh.getValue());
         authSsh.setFingerprint(publicKeyFinger);
 
+        //RSA类型的
+        String keyBase64 = RepositoryUtil.findKeyBase64(authSsh.getValue());
+        PublicKey publicKey =RepositoryUtil.ValidRsaKey(keyBase64);
+        String algorithm = publicKey.getAlgorithm();
+        if(algorithm.equals(RepositoryFinal.SSH_ENCODER_RSA)){
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            BigInteger modulus = rsaPublicKey.getModulus();
+            authSsh.setModulus(modulus.toString());
+        }
         AuthSshEntity groupEntity = BeanMapper.map(authSsh, AuthSshEntity.class);
         return authSshDao.createAuthSsh(groupEntity);
     }

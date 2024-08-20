@@ -35,7 +35,6 @@ public class GitTokUserServiceImpl implements GitTokUserService {
         List<GitTokUser> arrayList = new ArrayList<>();
         List<Repository> rpyList = repositoryServer.findRpyList();
 
-
         List<User> allUser = userService.findAllUser();
         for (User user:allUser){
             GitTokUser gitTorkUser = new GitTokUser();
@@ -45,12 +44,20 @@ public class GitTokUserServiceImpl implements GitTokUserService {
             List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
             List<String> stringList = dmUserList.stream().map(a -> a.getDomainId()).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(rpyList)){
+                List<Repository> publicRpy = rpyList.stream().filter(a -> ("public").equals(a.getRules())).collect(Collectors.toList());
                 List<String> rpyIds = rpyList.stream()/*.filter(a -> ("private").equals(a.getRules()))*/.map(Repository::getRpyId).collect(Collectors.toList());
                 //获取两个list 相同的数据
                 List<String> commonList = stringList.stream()
                         .filter(rpyIds::contains)
                         .toList();
-                gitTorkUser.setRepositoryNum(commonList.size());
+                int publicNUm=0;
+                if (CollectionUtils.isNotEmpty(publicRpy)){
+                    publicNUm = publicRpy.size();
+                }
+                if (CollectionUtils.isNotEmpty(commonList)){
+                     publicNUm = commonList.size()+publicNUm;
+                }
+                gitTorkUser.setRepositoryNum(publicNUm);
             }
             gitTorkUser.setUserId(user.getId());
             gitTorkUser.setUserName(user.getName());

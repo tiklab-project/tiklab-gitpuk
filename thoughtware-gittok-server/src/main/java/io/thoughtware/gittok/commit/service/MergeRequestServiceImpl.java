@@ -172,6 +172,14 @@ public class MergeRequestServiceImpl implements MergeRequestService {
     }
 
     @Override
+    public List<MergeRequest> findTimeMergeRequestList(MergeRequestQuery mergeRequestQuery) {
+        List<MergeRequestEntity> timeMergeRequestList = mergeRequestDao.findTimeMergeRequestList(mergeRequestQuery);
+        List<MergeRequest> mergeRequestList =  BeanMapper.mapList(timeMergeRequestList,MergeRequest.class);
+
+        return mergeRequestList;
+    }
+
+    @Override
     public List<MergeRequest> findMergeRequestList(MergeRequestQuery mergeRequestQuery) {
         List<MergeRequestEntity> mergeRequestEntityList = mergeRequestDao.findMergeRequestList(mergeRequestQuery);
 
@@ -292,6 +300,7 @@ public class MergeRequestServiceImpl implements MergeRequestService {
             throw new ApplicationException(5000,"文件不存在");
         }
     }
+
 
 
 

@@ -7,9 +7,7 @@ import io.thoughtware.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.thoughtware.gittok.commit.dao.MergeConditionDao;
 import io.thoughtware.gittok.commit.entity.MergeConditionEntity;
 import io.thoughtware.gittok.commit.model.*;
-import io.thoughtware.gittok.common.GitTokYamlDataMaService;
-import io.thoughtware.gittok.common.RepositoryUtil;
-import io.thoughtware.gittok.common.git.GitBranchUntil;
+
 import io.thoughtware.toolkit.beans.BeanMapper;
 import io.thoughtware.toolkit.join.JoinTemplate;
 import org.apache.commons.collections.CollectionUtils;

@@ -2,6 +2,7 @@ package io.thoughtware.gittok.authority.http;
 
 import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.core.exception.ApplicationException;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
@@ -34,17 +35,21 @@ public  class HttpRepositoryResolver implements RepositoryResolver<HttpServletRe
         String address = name.substring(0, name.indexOf(".git"));
 
         String absolutePath = repositoryServer.findRepositoryAp(address);
+        if (StringUtils.isEmpty(absolutePath)){
 
+            throw new RepositoryNotFoundException(address + new IOException("The requested repository does not exist, or you do not have permission to\n" +
+                    "access it"));
+        }
         File file = new File(absolutePath);
         if (!file.exists()){
-            throw new ApplicationException("仓库不存在！");
+            throw new RepositoryNotFoundException("Error Not repository: " + name);
         }
 
         Repository repository;
         try {
             repository = Git.open(file).getRepository();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RepositoryNotFoundException("Error open repository: " + name);
         }
         return repository;
     }

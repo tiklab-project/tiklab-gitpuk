@@ -12,7 +12,13 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.transport.http.HttpConnection;
+import org.eclipse.jgit.transport.http.HttpConnectionFactory;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -135,6 +141,72 @@ public class GitUntil {
     }
 
     /**
+     * 裸仓库添加文件
+     * @param git 裸仓库
+     * @param rpy 创建仓库数据
+     * @param ignoreFilePath gitignore
+     */
+    public static void addRepositoryFile(String repositoryPath,String file){
+
+            String user = "limingliang";
+            Integer isReadme = 1;
+           String fileName = "new-file.txt";
+
+            try {
+                Git git = Git.open(new File(repositoryPath));
+                Repository repository = git.getRepository();
+
+                // 创建文件路径和内容
+                String filePath = "path/to/your/file.txt";
+                String fileContent = "This is the content of the file.";
+                ObjectInserter inserter = git.getRepository().newObjectInserter();
+                ObjectId blobId = inserter.insert(Constants.OBJ_BLOB, fileContent.getBytes());
+
+
+                // 获取当前分支的树对象
+                ObjectId headId = repository.resolve(Constants.HEAD);
+                RevWalk revWalk = new RevWalk(repository);
+                RevCommit commit = revWalk.parseCommit(headId);
+                RevTree tree = commit.getTree();
+
+                // 创建新的树对象，并添加文件到树中
+                TreeFormatter treeFormatter = new TreeFormatter();
+                treeFormatter.append(filePath, FileMode.REGULAR_FILE, blobId);
+                ObjectId newTreeId = inserter.insert(treeFormatter);
+
+                // 更新新的树对象，将之前分支的树合并进来
+                if (tree != null) {
+                    treeFormatter.append(tree.getName(), FileMode.TREE, tree.getId());
+                }
+
+                // 提交新的树对象到对象数据库
+                 newTreeId = inserter.insert(treeFormatter);
+                inserter.flush();
+
+                // 创建新的提交对象，并提交到当前分支
+                PersonIdent personIdent = new PersonIdent("Your Name", "your.email@example.com");
+                CommitBuilder commitBuilder = new CommitBuilder();
+                commitBuilder.setTreeId(newTreeId);
+                commitBuilder.setParentIds(new ObjectId[] { headId });
+                commitBuilder.setAuthor(personIdent);
+                commitBuilder.setCommitter(personIdent);
+                commitBuilder.setMessage("Added a new file");
+
+
+
+                ObjectId newCommitId = git.getRepository().newObjectInserter().insert(commitBuilder);
+                git.getRepository().newObjectInserter().flush();
+
+                // 更新引用，将新的提交设置为当前分支的头部
+                RefUpdate refUpdate = git.getRepository().updateRef(Constants.HEAD);
+                refUpdate.setNewObjectId(newCommitId);
+                refUpdate.update();
+        }catch (Exception e){
+
+        }
+
+    }
+    /**
      * 克隆仓库
      * @param repositoryAddress 仓库地址
      * @param branch 分支
@@ -203,7 +275,6 @@ public class GitUntil {
         // 关闭仓库
         normalRepository.close();
         bareRepository.close();
-
     }
 
 
@@ -267,11 +338,13 @@ public class GitUntil {
      * 通过file协议将裸仓库转为普通仓库
      * @param bareRepositoryPath 裸仓库地址
      * @param  freeRepositoryPath 普通仓库地址
+     * @param branch 分支
      */
-    public static void cloneRepositoryByFile(String bareRepositoryPath,String freeRepositoryPath) throws GitAPIException {
+    public static void cloneRepositoryByFile(String bareRepositoryPath,String freeRepositoryPath,String branch) throws GitAPIException {
         Git git = Git.cloneRepository()
                 .setURI("file://" + bareRepositoryPath)
                 .setDirectory(new File(freeRepositoryPath))
+                .setBranch(branch)
                /* .setBare(true)*/
                 .call();
         git.close();
@@ -295,7 +368,6 @@ public class GitUntil {
                 .call();
 
         if (("password").equals(remoteInfo.getAuthWay())) {
-
             //账号密码认证
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(remoteInfo.getAccount(), remoteInfo.getPassword());
             git.push().setCredentialsProvider(credentialsProvider)
@@ -317,10 +389,19 @@ public class GitUntil {
      * @param remoteAddress 远程仓库地址
      *
      */
-    public static void copyRepository(String localAddress,String remoteAddress, LeadAuth importAuth ) throws GitAPIException {
-        File localPath = new File(localAddress);
-        UsernamePasswordCredentialsProvider credentialsProvider =
-                new UsernamePasswordCredentialsProvider("access_token", importAuth.getAccessToken());
+    public static void copyRepository(String localAddress,String remoteAddress, LeadAuth importAuth,String userAccount ) throws GitAPIException {
+       File localPath = new File(localAddress);
+        UsernamePasswordCredentialsProvider credentialsProvider;
+       if(("priGitlab").equals(importAuth.getType())||("gitlab").equals(importAuth.getType())||("github").equals(importAuth.getType())){
+           credentialsProvider= new UsernamePasswordCredentialsProvider("access_token", importAuth.getAccessToken());
+       }else if(("gitee").equals(importAuth.getType())) {
+           credentialsProvider= new UsernamePasswordCredentialsProvider(userAccount,importAuth.getAccessToken());
+       }else {
+           credentialsProvider= new UsernamePasswordCredentialsProvider("limingliang",importAuth.getAccessToken());
+       }
+
+        /*UsernamePasswordCredentialsProvider credentialsProvider =
+                new UsernamePasswordCredentialsProvider("admin", importAuth.getAccessToken());*/
         Git.cloneRepository()
                 .setURI(remoteAddress)
                 .setDirectory(localPath)

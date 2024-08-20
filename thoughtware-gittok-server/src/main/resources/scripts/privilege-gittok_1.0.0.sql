@@ -29,7 +29,6 @@ INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('fbef
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('e84ec3061b00', '111111', 'gssh');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('f78b90b8c3ad', '111111', 'gscan');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('88ae23cb35f8', '111111', 'gbackups');
-INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('1e01d9c339e6', '111111', 'gplugin');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('e97d758d1017', '111111', 'glog');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('6e84fa690d07', '111111', 'gauthority');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('4d3f0ca0a484', '111111', 'gnewsway');

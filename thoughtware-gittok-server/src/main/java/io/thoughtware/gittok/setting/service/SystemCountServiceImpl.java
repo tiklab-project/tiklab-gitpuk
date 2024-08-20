@@ -1,8 +1,5 @@
 package io.thoughtware.gittok.setting.service;
 
-import io.thoughtware.gittok.scan.model.ScanScheme;
-import io.thoughtware.gittok.scan.service.ScanSchemeService;
-import io.thoughtware.gittok.scan.service.ScanSchemeSonarService;
 import io.thoughtware.gittok.setting.model.SystemCount;
 import io.thoughtware.licence.appauth.service.ApplyAuthService;
 import io.thoughtware.licence.licence.model.Version;
@@ -47,8 +44,6 @@ public class SystemCountServiceImpl implements SystemCountService{
     @Autowired
     MessageSendTypeService messageSendTypeService;
 
-    @Autowired
-    PluginManagerService pluginManagerService;
 
     @Autowired
     VersionService versionService;
@@ -59,8 +54,10 @@ public class SystemCountServiceImpl implements SystemCountService{
     @Autowired
     BackupsDbService backupsDbService;
 
+/*
     @Autowired
     ScanSchemeService scanSchemeService;
+*/
 
 
 
@@ -76,15 +73,14 @@ public class SystemCountServiceImpl implements SystemCountService{
         Integer userDirNumber = userDirService.findUserDirNumber();
         Integer noticeNumber = messageNoticeService.findNoticeNumber("gittok");
         Integer sendTypeNumber = messageSendTypeService.findSendTypeNumber();
-        Integer installPluginNumber = pluginManagerService.findInstallPluginNumber();
-        Integer shopPluginNumber = pluginManagerService.findShopPluginNumber();
         Version version = versionService.getVersion();
         Integer applyAuthNumber = applyAuthService.findApplyAuthNumber();
         String lastBackupsTime = backupsDbService.findLastBackupsTime();
-        List<ScanScheme> allScanScheme = scanSchemeService.findAllScanScheme();
-        int schemeNum = CollectionUtils.isNotEmpty(allScanScheme) ? allScanScheme.size() : 0;
 
-        systemCount.setScanSchemeNum(schemeNum);
+      /*  List<ScanScheme> allScanScheme = scanSchemeService.findAllScanScheme();
+        int schemeNum = CollectionUtils.isNotEmpty(allScanScheme) ? allScanScheme.size() : 0;
+        systemCount.setScanSchemeNum(schemeNum);*/
+
         systemCount.setUserNum(userNumber);
         systemCount.setOrgaNum(orgaNumber);
         systemCount.setUserGroupNum(userGroupNumber);
@@ -92,8 +88,6 @@ public class SystemCountServiceImpl implements SystemCountService{
         systemCount.setUserDirNum(userDirNumber);
         systemCount.setMessageNoticeNum(noticeNumber);
         systemCount.setMessageSendTypeNum(sendTypeNumber);
-        systemCount.setInstallPluginNum(installPluginNumber);
-        systemCount.setPluginNum(shopPluginNumber);
         systemCount.setVersion(version);
         systemCount.setAuthUserNum(applyAuthNumber);
         systemCount.setBackupsTime(lastBackupsTime);

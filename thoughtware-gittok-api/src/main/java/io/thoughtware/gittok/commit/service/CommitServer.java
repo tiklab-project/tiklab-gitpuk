@@ -95,6 +95,19 @@ public interface CommitServer {
      * @param mergeId 合并请求ID
      */
     CommitDiffData findStatisticsByMergeId(String mergeId);
+
+    /**
+     * 查询仓库的提交用户
+     * @param repositoryId 仓库id
+     */
+    List<String> findCommitUserList(String repositoryId);
+
+    /**
+     * 查询仓库最近提交
+     * @param repositoryId 仓库id
+     * @param number 最近提交条数
+     */
+    List<CommitMessage> findLatelyCommit(String repositoryId, Integer number);
 }
 
 

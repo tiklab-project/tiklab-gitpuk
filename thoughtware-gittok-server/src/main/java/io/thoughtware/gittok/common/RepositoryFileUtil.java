@@ -268,7 +268,7 @@ public class RepositoryFileUtil {
             if (("tag").equals(message.getFindType())){
                 branch = branch + RepositoryFinal.TAG;
             }
-
+            type =type.equals("tree")?"code":type;
             if (!RepositoryUtil.isNoNull(file)){
                 path = "/" + type + "/" + branch + "/" + fileName;
             }else {
@@ -454,40 +454,4 @@ public class RepositoryFileUtil {
         // 关闭zip文件输入流
         zipInputStream.close();
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

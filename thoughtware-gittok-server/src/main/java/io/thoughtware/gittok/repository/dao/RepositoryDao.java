@@ -130,7 +130,7 @@ public class RepositoryDao {
 
     public List<RepositoryEntity> findRepositoryByNamespace(String  namespace) {
         QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryEntity.class)
-                .like("address", namespace)
+                .eq("address", namespace)
                 .get();
         return jpaTemplate.findList(queryCondition, RepositoryEntity.class);
     }

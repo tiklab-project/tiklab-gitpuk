@@ -41,7 +41,6 @@ INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('8e9c
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('731148c74848', '2', 'gssh');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('458c1f193b78', '2', 'a701ee276b0f');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('6bbd478481a7', '2', '97127a0a4efe');
-INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('96c4ef027996', '2', 'gplugin');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('cad7e80edb3f', '2', 'glog');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('9de44b35e97d', '2', 'gnewsway');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('3c4bbadd0c67', '2', 'gnewsscheme');

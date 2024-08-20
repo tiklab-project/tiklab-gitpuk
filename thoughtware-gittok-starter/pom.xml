@@ -117,6 +117,17 @@
 			<artifactId>thoughtware-postin-doclet</artifactId>
 			<version>${thoughtware-postin-doclet-version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>io.thoughtware</groupId>
+			<artifactId>thoughtware-install-starter</artifactId>
+			<version>${thoughtware-install.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>

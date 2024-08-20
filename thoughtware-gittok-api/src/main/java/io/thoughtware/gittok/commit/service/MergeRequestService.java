@@ -112,4 +112,10 @@ public interface MergeRequestService {
      */
     String findClashFileData(String repositoryId ,String filePath);
 
+    /**
+     * 查询时间段内的合并请求
+     * @return
+     */
+    List<MergeRequest> findTimeMergeRequestList(MergeRequestQuery mergeRequestQuery);
+
 }

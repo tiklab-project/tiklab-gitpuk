@@ -2,8 +2,10 @@ package io.thoughtware.gittok.authority.ssh;
 
 
 import io.thoughtware.gittok.authority.ValidUsrPwdServer;
+import io.thoughtware.gittok.commit.service.CommitServer;
 import io.thoughtware.gittok.common.RepositoryFinal;
 import io.thoughtware.gittok.common.GitTokYamlDataMaService;
+import io.thoughtware.gittok.repository.service.RecordCommitService;
 import io.thoughtware.gittok.repository.service.RepositoryService;
 import io.thoughtware.core.context.AppHomeContext;
 import io.thoughtware.core.exception.ApplicationException;
@@ -13,13 +15,19 @@ import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.password.PasswordAuthenticator;
+import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.command.CommandFactory;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.apache.sshd.server.session.ServerSession;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.ReceiveCommand;
 import org.eclipse.jgit.transport.ReceivePack;
+import org.eclipse.jgit.transport.UnpackErrorHandler;
 import org.eclipse.jgit.transport.UploadPack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +36,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 
 /**
@@ -42,7 +51,7 @@ import java.nio.file.Paths;
 
 @Configuration
 public class SshService {
-    private static Logger logger = LoggerFactory.getLogger(SshService.class);
+    private static Logger logger = LoggerFactory.getLogger(Logger.class);
     @Autowired
     ValidUsrPwdServer validUsrPwdServer;
 
@@ -51,6 +60,12 @@ public class SshService {
 
     @Autowired
     RepositoryService repositoryServer;
+
+    @Autowired
+    RecordCommitService recordCommitService;
+
+    @Autowired
+    AuthInstance authInstance;
 
 
     @Value("${gittok.ssh.port:10000}")
@@ -65,34 +80,34 @@ public class SshService {
     public  void sshAuthority()  {
 
         SshServer sshServer = SshServer.setUpDefaultServer();
-        sshServer.setPort(sshPort);
 
+        sshServer.setPort(sshPort);
         sshServer.setHost (RepositoryFinal.SSH_HOST);
         String property = System.getProperty("user.dir");
       /*  if (!property.endsWith(RepositoryFinal.APP_NAME)){
             File file = new File(property);
             property= file.getParent();
         }*/
+        // 设置主机密钥提供者
         String appHome = AppHomeContext.getAppHome();
         Path ssh_key = Paths.get(appHome+"/file/id_rsa");
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
 
-
         // 设置公钥认证器
-        PucKeyValidServerImpl publicKeyAuthenticator = new PucKeyValidServerImpl(authSShServer);
-        sshServer.setPublickeyAuthenticator(publicKeyAuthenticator);
+        PublickeyAuthenticator publicKeyValid = authInstance.getPublicKeyValid(authSShServer);
+        sshServer.setPublickeyAuthenticator(publicKeyValid);
         try {
-            sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer));
+            sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer,recordCommitService));
             sshServer.start();
             int port = sshServer.getPort();
-            System.out.println("ssh端口："+port);
+            logger.info("ssh端口："+port);
         } catch (Exception e) {
             throw new ApplicationException(e);
         }
 
-        //效验账户名密码
-   /*     PasswordAuthenticator passwordAuthenticator =
+        //提交时 需要输入账号密码进行校验
+/*        PasswordAuthenticator passwordAuthenticator =
                 (username, password, session) -> validUsrPwdServer.validUserNamePassword(username,password,"1");
         sshServer.setPasswordAuthenticator(passwordAuthenticator);*/
     }
@@ -108,14 +123,19 @@ public class SshService {
 
         private final RepositoryService repositoryServer;
 
-        public GitTokSshCommandFactory(GitTokYamlDataMaService yamlDataMaService, RepositoryService repositoryServer) {
+        private final RecordCommitService recordCommitService;
+
+        public GitTokSshCommandFactory(GitTokYamlDataMaService yamlDataMaService, RepositoryService repositoryServer,RecordCommitService recordCommitService) {
             this.yamlDataMaService = yamlDataMaService;
             this.repositoryServer=repositoryServer;
+            this.recordCommitService=recordCommitService;
         }
 
 
         @Override
         public Command createCommand(ChannelSession channelSession, String command) {
+            ServerSession session = channelSession.getSession();
+            String username = session.getUsername();
 
             String cmd = command.replace("'", "");
             String rpyPath = cmd.split(" ")[1];
@@ -145,7 +165,10 @@ public class SshService {
                         //ssh 上传
                         ReceivePack receivePack = new ReceivePack(repo);
                         repo.close();
-                        return new ReceivePackCommand(receivePack,repositoryServer,rpyPath);
+                        ReceivePackCommand receivePackCommand = new ReceivePackCommand(receivePack, repositoryServer, recordCommitService,
+                                rpyPath, username);
+
+                        return receivePackCommand;
                     }
                 } catch (Exception | Error e) {
                     throw new ApplicationException("仓库不存在");
@@ -233,10 +256,16 @@ public class SshService {
 
         private String rpyPath;
 
-        public ReceivePackCommand(ReceivePack receivePack,RepositoryService repositoryServer,String rpyPath) {
+        private RecordCommitService recordCommitService;
+
+        private String userName;
+
+        public ReceivePackCommand(ReceivePack receivePack,RepositoryService repositoryServer,RecordCommitService recordCommitService,String rpyPath,String userName) {
             this.receivePack = receivePack;
             this.repositoryServer=repositoryServer;
             this.rpyPath=rpyPath;
+            this.recordCommitService=recordCommitService;
+            this.userName=userName;
         }
 
         @Override
@@ -257,11 +286,16 @@ public class SshService {
         @Override
         public void run() {
             try {
+                int available = in.available();
+
                 receivePack.receive(in, out, err);
+
                 this.exit.onExit(0);
 
                 //push 推送后编辑仓库数据
                 repositoryServer.compileRepository(rpyPath);
+
+                recordCommitService.updateCommitRecord(rpyPath,userName,"ssh");
             } catch (Exception e) {
                 try {
                     throw new IOException(e);

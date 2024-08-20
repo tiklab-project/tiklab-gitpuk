@@ -3,6 +3,8 @@ package io.thoughtware.gittok.repository.model;
 import io.thoughtware.postin.annotation.ApiModel;
 import io.thoughtware.postin.annotation.ApiProperty;
 
+import java.util.List;
+
 @ApiModel
 public class LeadTo {
 
@@ -36,6 +38,15 @@ public class LeadTo {
 
     @ApiProperty(name="log",desc="日志")
     private String log;
+
+    @ApiProperty(name="pageStartList",desc="pageStartList")
+    private List<Integer> pageStartList;
+
+    @ApiProperty(name="currentPageStart",desc="bitbucket 当前的start")
+    private Integer currentPageStart;
+
+    @ApiProperty(name="nextPageStart",desc="bitbucket 的下一页查询")
+    private Integer nextPageStart;
 
     public String getRepositoryName() {
         return repositoryName;
@@ -115,5 +126,29 @@ public class LeadTo {
 
     public void setLog(String log) {
         this.log = log;
+    }
+
+    public Integer getNextPageStart() {
+        return nextPageStart;
+    }
+
+    public void setNextPageStart(Integer nextPageStart) {
+        this.nextPageStart = nextPageStart;
+    }
+
+    public List<Integer> getPageStartList() {
+        return pageStartList;
+    }
+
+    public void setPageStartList(List<Integer> pageStartList) {
+        this.pageStartList = pageStartList;
+    }
+
+    public Integer getCurrentPageStart() {
+        return currentPageStart;
+    }
+
+    public void setCurrentPageStart(Integer currentPageStart) {
+        this.currentPageStart = currentPageStart;
     }
 }

@@ -10,7 +10,6 @@ INSERT INTO pcs_prc_function (id,name,code,parent_function_id,sort,type) VALUES
 ('gauthority','权限', 'gittok_authority',null ,1, 1),
 ('gnewsscheme','消息通知方案', 'gittok_news_scheme',null ,1, 1),
 ('gnewsway','消息发送方式', 'gittok_news_way',null ,1, 1),
-('gplugin','插件', 'gittok_plugin',null ,1, 1),
 ('gresource','资源监控', 'gittok_resource',null ,1, 1),
 ('gssh','ssh密钥', 'gittok_ssh',null ,1, 1),
 ('gscan','扫描配置', 'gittok_scan',null ,1, 1),
@@ -44,7 +43,6 @@ INSERT INTO pcs_prc_role_function (id, role_id, function_id) VALUES
 ('4155cd684d3e', '1', 'wqre9998fc00'),('e1bdf38322c8', '1', '64bdf62686a4'),
 
 ('00e840ea5302', '1', 'gauthority'),('05d66918b2dd', '1', 'gnewsscheme'),
-('064d1a5ddbc5', '1', 'gnewsway'),('0fd56de07eaf', '1', 'gplugin'),
 ('1134dbdbb6d0', '1', 'gresource'),('143e6010ba4b', '1', 'gssh'),
 ('256bca68cd16', '1', 'gscan'),('39f06b018e83', '1', 'glog'),
 ('7464415279eb', '1', 'gbackups'),('74217ab2e9bb', '3', 'rpyauthority'),
