@@ -54,12 +54,6 @@ public class SystemCountServiceImpl implements SystemCountService{
     @Autowired
     BackupsDbService backupsDbService;
 
-/*
-    @Autowired
-    ScanSchemeService scanSchemeService;
-*/
-
-
 
 
     @Override
@@ -73,13 +67,10 @@ public class SystemCountServiceImpl implements SystemCountService{
         Integer userDirNumber = userDirService.findUserDirNumber();
         Integer noticeNumber = messageNoticeService.findNoticeNumber("gittok");
         Integer sendTypeNumber = messageSendTypeService.findSendTypeNumber();
-        Version version = versionService.getVersion();
-        Integer applyAuthNumber = applyAuthService.findApplyAuthNumber();
+
         String lastBackupsTime = backupsDbService.findLastBackupsTime();
 
-      /*  List<ScanScheme> allScanScheme = scanSchemeService.findAllScanScheme();
-        int schemeNum = CollectionUtils.isNotEmpty(allScanScheme) ? allScanScheme.size() : 0;
-        systemCount.setScanSchemeNum(schemeNum);*/
+
 
         systemCount.setUserNum(userNumber);
         systemCount.setOrgaNum(orgaNumber);
@@ -88,10 +79,20 @@ public class SystemCountServiceImpl implements SystemCountService{
         systemCount.setUserDirNum(userDirNumber);
         systemCount.setMessageNoticeNum(noticeNumber);
         systemCount.setMessageSendTypeNum(sendTypeNumber);
-        systemCount.setVersion(version);
-        systemCount.setAuthUserNum(applyAuthNumber);
+
+
         systemCount.setBackupsTime(lastBackupsTime);
 
+        findProductInfo(systemCount);
         return systemCount;
+    }
+
+
+
+    public void findProductInfo(SystemCount systemCount){
+        Version version = versionService.getVersion();
+        Integer applyAuthNumber = applyAuthService.findApplyAuthNumber();
+        systemCount.setAuthUserNum(applyAuthNumber);
+        systemCount.setVersion(version);
     }
 }
