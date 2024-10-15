@@ -1,0 +1,119 @@
+app:
+  name: thoughtware-gitpuk
+  version: ce
+
+APP_HOME: ${APP_HOME}
+application: gitpuk
+
+server:
+  port: 8080
+
+gitPuk:
+  ssh:
+    port: 10000
+    key: thoughtware-gitpuk-starter/file/id_rsa
+  file: thoughtware-gitpuk-starter/file
+
+
+jdbc:
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/thoughtware_gitpuk?stringtype=unspecified
+  username: postgres
+  password: darth2020
+
+postgresql:
+  embbed:
+    enable: true
+  database: thoughtware_gitpuk
+  db:
+    port: 5432
+    username: postgres
+    password: darth2020
+    address: ${DATA_HOME}/postgresql
+
+eas:
+  embbed:
+    enable: true
+
+#plugin config
+DATA_HOME: /opt/thoughtware/gitpuk
+plugin:
+  path: ${DATA_HOME}/plugin
+
+#dfs config
+dfs:
+  server:
+    enabled: false
+    mode: server
+    port: 4000
+    datapath: ${DATA_HOME}/files
+  client:
+    url: 127.0.0.1:4000
+    bucket: ${app.name}
+
+#dcs config
+dcs:
+  server:
+    enabled: true
+    port: 5000
+    datapath: ${DATA_HOME}/caches
+  client:
+    url: 127.0.0.1:5000
+    group: g1
+    database: dcs1
+    expire: 7200
+#dcs config
+dss:
+  server:
+    enabled: false
+    mode: server
+    port: 6000
+    datapath: ${DATA_HOME}/index
+  client:
+    url: 127.0.0.1:6000
+    bucket: ${app.name}
+
+datapath: ${DATA_HOME}/caches
+
+
+
+base:
+  url: http://eas-ce.test.tiklab.net
+
+message:
+  sms:
+    enabled: true
+
+#homes
+homes:
+  address: http://homes.tiklab.net
+
+#license
+licences:
+  path: ${DATA_HOME}/licences
+
+#file
+file:
+  path: http://file.dev.tiklab.net
+
+
+repository:
+  address: ${DATA_HOME}/repository
+  code: xcode
+
+backups:
+  time: 0 0 2 * * ?
+  dir: /data
+  xcode:
+    dir: ${DATA_HOME}/repository
+
+visit:
+  address: http://172.11.1.19:8080
+
+
+
+
+
+
+
+

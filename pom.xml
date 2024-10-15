@@ -5,58 +5,55 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.thoughtware</groupId>
-        <artifactId>thoughtware-dependencies</artifactId>
-        <version>1.0.0</version>
+        <groupId>io.tiklab</groupId>
+        <artifactId>tiklab-dependencies</artifactId>
+        <version>1.0.2</version>
     </parent>
-
-    <groupId>io.thoughtware</groupId>
-    <artifactId>thoughtware-gittok</artifactId>
+    <groupId>io.tiklab</groupId>
+    <artifactId>tiklab-gitpuk</artifactId>
     <name>${project.artifactId}</name>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <properties>
-        <thoughtware-toolkit.version>1.0.0</thoughtware-toolkit.version>
-        <thoughtware-plugin.version>1.0.1-SNAPSHOT</thoughtware-plugin.version>
-        <thoughtware-gateway.version>1.0.1-SNAPSHOT</thoughtware-gateway.version>
-        <thoughtware-rpc.version>1.0.0</thoughtware-rpc.version>
-        <thoughtware-dss.version>1.0.0</thoughtware-dss.version>
-        <thoughtware-dfs.version>1.0.0</thoughtware-dfs.version>
-        <thoughtware-dcs.version>1.0.0</thoughtware-dcs.version>
-        <thoughtware-integration.version>1.0.0</thoughtware-integration.version>
-        <thoughtware-join.version>1.0.0</thoughtware-join.version>
-        <thoughtware-dal.version>1.0.0</thoughtware-dal.version>
-        <thoughtware-dsm.version>1.0.0</thoughtware-dsm.version>
-        <thoughtware-openapi-version>1.0.0-SNAPSHOT</thoughtware-openapi-version>
+        <tiklab-toolkit.version>1.0.2</tiklab-toolkit.version>
+        <tiklab-gateway.version>1.0.2</tiklab-gateway.version>
+        <tiklab-rpc.version>1.0.2</tiklab-rpc.version>
+        <tiklab-dss.version>1.0.2</tiklab-dss.version>
+        <tiklab-dfs.version>1.0.2</tiklab-dfs.version>
+        <tiklab-dcs.version>1.0.2</tiklab-dcs.version>
+        <tiklab-integration.version>1.0.2</tiklab-integration.version>
+        <tiklab-join.version>1.0.2</tiklab-join.version>
+        <tiklab-dal.version>1.0.2</tiklab-dal.version>
+        <tiklab-dsm.version>1.0.2</tiklab-dsm.version>
+        <tiklab-openapi-version>1.0.2</tiklab-openapi-version>
 
         <!--平台组件-->
-        <thoughtware-privilege.version>1.0.1-SNAPSHOT</thoughtware-privilege.version>
-        <thoughtware-licence.version>1.0.1-SNAPSHOT</thoughtware-licence.version>
-        <thoughtware-user.version>1.0.1-SNAPSHOT</thoughtware-user.version>
-        <thoughtware-security.version>1.0.1-SNAPSHOT</thoughtware-security.version>
-        <thoughtware-message.version>1.0.1-SNAPSHOT</thoughtware-message.version>
-        <thoughtware-todotask.version>1.0.1-SNAPSHOT</thoughtware-todotask.version>
-        <thoughtware-eam.version>1.0.1-SNAPSHOT</thoughtware-eam.version>
-        <thoughtware-postgresql.version>1.0.3-SNAPSHOT</thoughtware-postgresql.version>
-        <thoughtware-spotbugs.version>1.0.0</thoughtware-spotbugs.version>
-        <thoughtware-plugin.version>1.0.1-SNAPSHOT</thoughtware-plugin.version>
-        <thoughtware-install.version>1.0.1-SNAPSHOT</thoughtware-install.version>
-        <thoughtware-postin-doclet-version>1.0.1-SNAPSHOT</thoughtware-postin-doclet-version>
+        <tiklab-privilege.version>1.0.2</tiklab-privilege.version>
+        <tiklab-licence.version>1.0.2</tiklab-licence.version>
+        <tiklab-user.version>1.0.2</tiklab-user.version>
+        <tiklab-security.version>1.0.2</tiklab-security.version>
+        <tiklab-message.version>1.0.2</tiklab-message.version>
+        <tiklab-todotask.version>1.0.2</tiklab-todotask.version>
+        <tiklab-eam.version>1.0.2</tiklab-eam.version>
+        <tiklab-postgresql.version>1.0.2</tiklab-postgresql.version>
+        <tiklab-spotbugs.version>1.0.2</tiklab-spotbugs.version>
+        <tiklab-install.version>1.0.2</tiklab-install.version>
+        <tiklab-postin-doclet-version>1.0.0</tiklab-postin-doclet-version>
 
-        <thoughtware-upgrade.version>1.0.0</thoughtware-upgrade.version>
-        <thoughtware-postin.version>1.0.1-SNAPSHOT</thoughtware-postin.version>
-        <thoughtware-jdk.version>1.0.1-SNAPSHOT</thoughtware-jdk.version>
+    <!--    <tiklab-upgrade.version>1.0.2</tiklab-upgrade.version>-->
+        <tiklab-postin.version>1.0.0</tiklab-postin.version>
+        <tiklab-jdk.version>1.0.2</tiklab-jdk.version>
 
         <!--other-->
         <commons-compress.version>1.19</commons-compress.version>
         <commons-io.version>2.11.0</commons-io.version>
         <sshd-core.version>2.9.2</sshd-core.version>
         <come-jsch.version>0.1.55</come-jsch.version>
-         <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
+        <org-jgit.version>6.4.0.202211300538-r</org-jgit.version>
 
-       <!-- <org-jgit.version> 6.7.0.202309050840-r</org-jgit.version> -->
-    <!-- <org-jgit.version>4.11.9.201909030838-r</org-jgit.version>-->
+        <!--  <org-jgit.version>6.7.0.202309050840-r</org-jgit.version> -->
+      <!-- <org-jgit.version>4.11.9.201909030838-r</org-jgit.version>-->
 
 
 <commons-lang3.version>3.12.0</commons-lang3.version>
@@ -65,9 +62,9 @@
 </properties>
 
 <modules>
-<module>thoughtware-gittok-api</module>
-<module>thoughtware-gittok-server</module>
-<module>thoughtware-gittok-starter</module>
+<module>tiklab-gitpuk-api</module>
+<module>tiklab-gitpuk-server</module>
+<module>tiklab-gitpuk-starter</module>
 </modules>
 
 
@@ -163,15 +160,15 @@
         </profile>
 
         <profile>
-            <id>deploy-xpack</id>
+            <id>deploy-hadess</id>
             <distributionManagement>
                 <snapshotRepository>
                     <id>xpack</id>
-                    <url>http://192.168.10.9:8080/repository/maven-snapshots</url>
+                    <url>http://192.168.10.10:8080/repository/maven-snapshot</url>
                 </snapshotRepository>
                 <repository>
                     <id>xpack</id>
-                    <url>http://192.168.10.9:8080/repository/maven-releases</url>
+                    <url>http://192.168.10.10:8080/repository/maven-releases</url>
                 </repository>
             </distributionManagement>
             <properties>

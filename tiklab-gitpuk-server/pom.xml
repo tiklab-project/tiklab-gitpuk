@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>io.tiklab</groupId>
+		<artifactId>tiklab-gitpuk</artifactId>
+		<version>1.0.2</version>
+	</parent>
+
+
+	<artifactId>tiklab-gitpuk-server</artifactId>
+	<name>${project.artifactId}</name>
+
+	<dependencies>
+		<!--common-->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+
+
+		<!--tiklab-->
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-gitpuk-api</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>tiklab-postin-annotation</artifactId>
+					<groupId>io.tiklab</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-dal-jpa</artifactId>
+			<version>${tiklab-dal.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-message-smssdk</artifactId>
+			<version>${tiklab-message.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-eam-server</artifactId>
+			<version>${tiklab-eam.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-rpc-common</artifactId>
+			<version>${tiklab-rpc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-privilege-spring-boot-starter</artifactId>
+			<version>${tiklab-privilege.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-toolkit-spring-boot-starter</artifactId>
+			<version>${tiklab-toolkit.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-rpc-annotation</artifactId>
+			<version>${tiklab-rpc.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-toolkit-annotation</artifactId>
+			<version>${tiklab-toolkit.version}</version>
+		</dependency>
+
+		<!--other-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>${org-jgit.version}</version>
+		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.http.server -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.http.server</artifactId>
+			<version>${org-jgit.version}</version>
+		</dependency>
+
+		<!--<dependency>
+			<groupId>external.atlassian.jgitflow</groupId>
+			<artifactId>jgitflow-maven-plugin</artifactId>
+			<version>1.0-m5.1</version>
+		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/org.apache.sshd/sshd-core -->
+		<dependency>
+			<groupId>org.apache.sshd</groupId>
+			<artifactId>sshd-core</artifactId>
+			<!--<version>2.4.0</version>-->
+			<version>${sshd-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>${commons-compress.version}</version>
+		</dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+            <scope>compile</scope>
+        </dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-postin-annotation</artifactId>
+			<version>${tiklab-postin.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+
+		<!-- QuartzConfigration -->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>${quartz.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-quartz -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+			<version>${quartz-spring-boot.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz-jobs -->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jobs</artifactId>
+			<version>${quartz.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>${come-jsch.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+
+
+		<!-- SLF4J 日志实现，例如 logback -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+
+<!--		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.70</version>
+		</dependency>-->
+		<!-- 根据文件的内容（而不是文件名）来推断文件的 MIME 类型 -->
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>
