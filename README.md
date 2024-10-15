@@ -27,7 +27,7 @@ GitPuk是一款开源、免费的代码管理工具，提供了代码库、分�
 * Java 16+
 * Maven 3.4+
 ### 克隆仓库
-git clone http://e.gitpuk.tiklab.net/devops-itdd/tiklab-gitpuk.git
+git clone https://gitee.com/tiklab/tiklab-gitpuk.git
 
 cd tiklab-gitpuk
 ### 构建项目
