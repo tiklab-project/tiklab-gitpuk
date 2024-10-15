@@ -28,6 +28,7 @@ GitPuk是一款开源、免费的代码管理工具，提供了代码库、分�
 * Maven 3.4+
 ### 克隆仓库
 git clone http://e.gitpuk.tiklab.net/devops-itdd/tiklab-gitpuk.git
+
 cd tiklab-gitpuk
 ### 构建项目
 * MAC系统：mvn clean package -P system-mac,env-dev
@@ -55,4 +56,5 @@ cd tiklab-gitpuk
 # 进阶使用
 
 文档地址：https://doc.tiklab.net/document/78aa45b76d4c
+
 演示地址：https://demo.tiklab.net/gitpuk
