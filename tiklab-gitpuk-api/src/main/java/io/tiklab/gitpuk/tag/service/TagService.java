@@ -1,6 +1,7 @@
 package io.tiklab.gitpuk.tag.service;
 
 import io.tiklab.gitpuk.tag.model.Tag;
+import io.tiklab.gitpuk.tag.model.TagQuery;
 
 import java.util.List;
 
@@ -14,9 +15,9 @@ public interface TagService {
 
     /**
      * 查询标签
-     * @param rpyId
+     * @param tagQuery tagQuery
      */
-    List<Tag> findTag(String rpyId);
+    List<Tag> findTagList(TagQuery tagQuery);
 
     /**
      * 删除标签
@@ -24,10 +25,4 @@ public interface TagService {
      */
     void deleteTag(Tag tag);
 
-
-    /**
-     * 查询标签
-     * @param rpyId
-     */
-    Tag findTagByName(String rpyId, String tagName);
 }

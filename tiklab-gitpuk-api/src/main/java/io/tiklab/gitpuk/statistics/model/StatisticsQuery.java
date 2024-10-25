@@ -26,6 +26,9 @@ public class StatisticsQuery {
     @ApiProperty(name ="findTime",desc = "查询时间  今天 1、昨天 2、前天 3、7天内 7")
     private int findTime;
 
+    @ApiProperty(name ="commitType",desc = "查询提交类型 commit:查询git中的提交、push:查询用户push次数")
+    private String commitType;
+
     public String getRepositoryId() {
         return repositoryId;
     }
@@ -81,5 +84,13 @@ public class StatisticsQuery {
 
     public void setFindTime(int findTime) {
         this.findTime = findTime;
+    }
+
+    public String getCommitType() {
+        return commitType;
+    }
+
+    public void setCommitType(String commitType) {
+        this.commitType = commitType;
     }
 }

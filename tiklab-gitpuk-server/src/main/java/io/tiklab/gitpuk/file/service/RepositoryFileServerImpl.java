@@ -19,6 +19,7 @@ import org.eclipse.jgit.lib.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.List;
@@ -147,9 +148,20 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
     public void downLoadBareRepo(HttpServletResponse response,String queryString) {
         JSONObject downLoadQuery = this.getDownLoadQuery(queryString);
 
+        String headName;
+        String headType;
+
         String rpyName = downLoadQuery.get("rpyName").toString();
         String type = downLoadQuery.get("type").toString();
-        String branch = downLoadQuery.get("branch").toString();
+        Object branchObj = downLoadQuery.get("branch");
+        if (ObjectUtils.isNotEmpty(branchObj)){
+            headName=branchObj.toString();
+            headType="branch";
+        }else {
+            headName = downLoadQuery.get("tag").toString();
+            headType="tag";
+        }
+
         String rpyPath = yamlDataMaService.repositoryAddress();
 
         //裸仓库地址
@@ -159,14 +171,14 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
             response.setContentType("application/zip");
             response.setHeader("Content-Disposition", "attachment; filename="+rpyName+"."+type);
             //下载裸仓库文件
-            GitFileUtil.downLoadBareRepoZip(bareAddress,branch,response);
+            GitFileUtil.downLoadBareRepoZip(bareAddress,headName,headType,response);
         }
         //下载裸仓库为tar
         if (("tar").equals(type)){
             response.setContentType("application/x-tar");
             response.setHeader("Content-Disposition", "attachment; filename="+rpyName+"."+type);
             //下载裸仓库文件
-            GitFileUtil.downLoadBareRepoTar(bareAddress,branch,response);
+            GitFileUtil.downLoadBareRepoTar(bareAddress,headName,headType,response);
         }
 
     }
@@ -227,16 +239,6 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
             FileInputStream fileInputStream = new FileInputStream(file);
             byte[] bytes = IOUtils.toByteArray(fileInputStream);
 
-       /*     ByteArrayOutputStream bos = new ByteArrayOutputStream((int) file.length());
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-            int buf_size = 1024;
-            byte[] buffer = new byte[buf_size];
-            int len = 0;
-            while (-1 != (len = in.read(buffer, 0, buf_size))) {
-                bos.write(buffer, 0, len);
-            }
-            byte[] bytes = bos.toByteArray();*/
-
        /*     String s = new String(byteArray, "UTF-8");
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(bytes);
@@ -244,6 +246,36 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
             String fileName = new BigInteger(1, digest).toString(16).toUpperCase();*/
 
             return bytes;
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    @Override
+    public void downloadLfsFile(JSONObject downLoadQuery, HttpServletResponse response) {
+        Object oid = downLoadQuery.get("oid");
+
+        String filePath = downLoadQuery.get("filePath").toString();
+        String fileName =  filePath.substring( filePath.lastIndexOf("/")+1);
+        response.setHeader("Content-Disposition", "attachment; filename="+fileName);
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            File file=null;
+            //下载lfs 文件
+            if (ObjectUtils.isNotEmpty(oid)){
+                //仓库lfs文件路径
+                String rpyLfsPath = RepositoryUtil.getRpyLfsPath(yamlDataMaService.repositoryAddress(), downLoadQuery.get("rpyId").toString());
+                file = new File(rpyLfsPath, oid.toString());
+            }else {
+                throw new SystemException("没有传入下载的oid");
+            }
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+            int buf_size = 1024;
+            byte[] buffer = new byte[buf_size];
+            int len = 0;
+            while (-1 != (len = in.read(buffer, 0, buf_size))) {
+                outputStream.write(buffer);
+            }
         } catch (Exception e) {
             throw new SystemException(e);
         }

@@ -235,7 +235,7 @@ public class RepositoryServerImpl implements RepositoryService {
             public void run() {
 
                 //删除关联的数据
-                deleteRelevancy(rpyId);
+                deleteRelevancy(rpyId,"delete");
 
             /*    //删除计划
                 scanPlayService.deleteScanPlayByCondition("repositoryId",rpyId);*/
@@ -254,7 +254,7 @@ public class RepositoryServerImpl implements RepositoryService {
             RepositoryEntity repositoryEntity =  repositoryDao.findOneRpy(rpyId);
 
             //删除关联的数据
-            deleteRelevancy(rpyId);
+            deleteRelevancy(rpyId,"reset");
 
             //创建裸仓库
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
@@ -894,14 +894,18 @@ public class RepositoryServerImpl implements RepositoryService {
     /**
      *删除关联的仓库数据
      * @param rpyId 仓库id
+     * @param type 类型 delete、reset
      */
-    public void deleteRelevancy(String rpyId){
+    public void deleteRelevancy(String rpyId,String type){
         //删除打开记录
         recordOpenService.deleteRecordOpenByRecord(rpyId);
         //删除提交记录
         recordCommitService.deleteRecordCommitByRepository(rpyId);
+
         //删除项目成员
-        dmUserService.deleteDmUserByDomainId(rpyId);
+        if (("delete").equals(type)){
+            dmUserService.deleteDmUserByDomainId(rpyId);
+        }
         //删除导入(如果存在)
         leadRecordService.deleteLeadRecord("rpyId",rpyId);
         //删除数据库分支记录

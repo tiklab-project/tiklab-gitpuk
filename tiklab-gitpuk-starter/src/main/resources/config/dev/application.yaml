@@ -1,5 +1,5 @@
 app:
-  name: thoughtware-gittok
+  name: tiklab-gitpuk
   version: ce
 
 APP_HOME: ${APP_HOME}
@@ -20,7 +20,8 @@ gitPuk:
 
 jdbc:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://172.10.1.10:5432/thoughtware-gittork?stringtype=unspecified
+  url: jdbc:postgresql://172.10.1.10:5432/tiklab-gitpuk?stringtype=unspecified
+  #url: jdbc:postgresql://172.10.1.10:5432/thoughtware-gittork?stringtype=unspecified
   #url: jdbc:postgresql://172.13.1.23:5432/xcode_ee?stringtype=unspecified
   username: postgres
   password: darth2020
@@ -29,7 +30,7 @@ postgresql:
   embbed:
     enable: false
   type: local
-  database: thoughtware-gittork
+  database: tiklab-gitpuk
 
 
 

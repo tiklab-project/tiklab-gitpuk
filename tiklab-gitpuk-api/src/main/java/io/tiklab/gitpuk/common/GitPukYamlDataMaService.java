@@ -39,4 +39,11 @@ public interface GitPukYamlDataMaService {
      * 扫描文件存放地址
      */
     String scanFileAddress();
+
+    /**
+     * lfs 回调用地址
+     * @param visitAddress 地址前缀
+     * @param rpyPath 仓库路径  仓库组/仓库名字
+     */
+    String lfsCallBackPath(String visitAddress,String rpyPath);
 }

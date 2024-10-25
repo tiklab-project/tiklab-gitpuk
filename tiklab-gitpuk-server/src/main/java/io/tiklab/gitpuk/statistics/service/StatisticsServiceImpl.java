@@ -96,34 +96,45 @@ public class StatisticsServiceImpl implements StatisticsService{
             Statistics statistics = new Statistics();
             List<Integer> numList = new ArrayList<>();
 
-            //通过仓库id 查询提交数量
-            List<RecordCommit> commitList = recordCommitService.findRecordCommits(new RecordCommitQuery().setRepositoryId(statisticsQuery.getRepositoryId()));
-            List<RecordCommit> collect = commitList.stream().sorted(Comparator.comparing(RecordCommit::getCommitTime)).collect(Collectors.toList());
-            String commitStartDay=null;
-            if (CollectionUtils.isNotEmpty(collect)){
-                commitStartDay = collect.get(0).getCommitTime().toString();
-            }
-         /*   //提交数量
-            List<Map.Entry<String, Integer>> commitCountByDay = getCommitCountByDay(statisticsQuery);
-            String commitStartDay=null;
-            if (CollectionUtils.isNotEmpty(commitCountByDay)){
-                 commitStartDay = commitCountByDay.get(0).getKey();
-            }*/
-            //获取时间
-            List<String> dayList = getDayList(statisticsQuery, commitStartDay);
-
             int count=0;
-            for (String data:dayList){
-                List<RecordCommit> entryList = commitList.stream().filter(a -> a.getCommitTime().toString().startsWith(data)).collect(Collectors.toList());
-                //List<Map.Entry<String, Integer>> entryList = commitCountByDay.stream().filter(a -> (data).equals(a.getKey())).collect(Collectors.toList());
-                if (CollectionUtils.isNotEmpty(entryList)){
-                    //numList.add(entryList.get(0).getValue());
-                    //count+=entryList.get(0).getValue();
+            List<String> dayList=null;
+            if (("push").equals(statisticsQuery.getCommitType())){
+                //通过仓库id 查询提交数量
+                List<RecordCommit> commitList = recordCommitService.findRecordCommits(new RecordCommitQuery().setRepositoryId(statisticsQuery.getRepositoryId()));
+                List<RecordCommit> collect = commitList.stream().sorted(Comparator.comparing(RecordCommit::getCommitTime)).collect(Collectors.toList());
+                String commitStartDay=null;
+                if (CollectionUtils.isNotEmpty(collect)){
+                    commitStartDay = collect.get(0).getCommitTime().toString();
+                }
+                //获取时间
+                dayList = getDayList(statisticsQuery, commitStartDay);
+                for (String data:dayList){
+                    List<RecordCommit> entryList = commitList.stream().filter(a -> a.getCommitTime().toString().startsWith(data)).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(entryList)){
+                        numList.add(entryList.size());
+                        count+=entryList.size();
+                    }else {
+                        numList.add(0);
+                    }
+                }
+            }else {
+                //提交数量
+                List<Map.Entry<String, Integer>> commitCountByDay = getCommitCountByDay(statisticsQuery);
+                String commitStartDay=null;
+                if (CollectionUtils.isNotEmpty(commitCountByDay)){
+                    commitStartDay = commitCountByDay.get(0).getKey();
+                }
+                //获取时间
+                dayList = getDayList(statisticsQuery, commitStartDay);
 
-                    numList.add(entryList.size());
-                    count+=entryList.size();
-                }else {
-                    numList.add(0);
+                for (String data:dayList){
+                    List<Map.Entry<String, Integer>> entryList = commitCountByDay.stream().filter(a -> (data).equals(a.getKey())).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(entryList)){
+                        numList.add(entryList.get(0).getValue());
+                        count+=entryList.get(0).getValue();
+                    }else {
+                        numList.add(0);
+                    }
                 }
             }
             statistics.setCount(count);
@@ -290,7 +301,18 @@ public class StatisticsServiceImpl implements StatisticsService{
         List<UserStatistics> statisticsArrayList = new ArrayList<>();
         //查询时间段内的提交
         List<String> dayList = getDayList(statisticsQuery,null);
-        List<RecordCommit> commitList = recordCommitService.findTimeRecordCommitList(dayList.get(0), dayList.get(dayList.size() - 1),statisticsQuery.getRepositoryId());
+
+        //sql通过时间查询的时候是前闭后开的，所以向后加一天
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // 将字符串转换为 LocalDate 对象
+        LocalDate date = LocalDate.parse(dayList.get(dayList.size() - 1), formatter);
+        // 向后加一天
+        LocalDate newDate = date.plusDays(1);
+        // 将新日期转换回字符串
+        String newDateString = newDate.format(formatter);
+
+        //通过时间和仓库id查询提交
+        List<RecordCommit> commitList = recordCommitService.findTimeRecordCommitList(dayList.get(0), newDateString,statisticsQuery.getRepositoryId());
         if (CollectionUtils.isEmpty(commitList)){
             //查询时间段内没有提交的合并请求
             List<DmUser> users = findDmUserList(dmUserList, findNum);
@@ -834,22 +856,14 @@ public class StatisticsServiceImpl implements StatisticsService{
                             List<DiffEntry> diffEntries = diffFormatter.scan(commit.getParent(0).getTree(), commit.getTree());
                             if (CollectionUtils.isNotEmpty(diffEntries)){
                                 for (DiffEntry diffEntry :diffEntries) {
-                                    DiffEntry.ChangeType changeType = diffEntry.getChangeType();
+                              /*      DiffEntry.ChangeType changeType = diffEntry.getChangeType();
 
                                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                                     diffFormatter.format(diffEntry);
                                     String diffContent = out.toString("UTF-8");
 
                                     // 获取差异的文本
-                                    String diffText = formatter.toString();
-
-                                   /* if (changeType.equals(DiffEntry.ChangeType.ADD)){
-                                        addLine+=1;
-                                    }
-                                    if (changeType.equals(DiffEntry.ChangeType.DELETE)){
-                                        deleteLine+=1;
-                                    }*/
-
+                                    String diffText = formatter.toString();*/
 
                                     String newPath = diffEntry.getNewPath();
                                     String path ;
@@ -1055,6 +1069,7 @@ public class StatisticsServiceImpl implements StatisticsService{
         }
         return dmUsers;
     }
+
 
     public Map<String, Integer> getTodoStatistics(LinkedHashMap data){
         Map<String, Integer> todoCount = new HashMap<>();

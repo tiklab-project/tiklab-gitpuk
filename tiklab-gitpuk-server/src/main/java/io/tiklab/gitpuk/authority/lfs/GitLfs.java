@@ -2,6 +2,7 @@ package io.tiklab.gitpuk.authority.lfs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.tiklab.core.Result;
+import io.tiklab.gitpuk.authority.GitLfsAuthService;
 import io.tiklab.gitpuk.authority.request.LfsBatchRequest;
 import io.tiklab.gitpuk.authority.request.LfsData;
 import io.tiklab.gitpuk.authority.utils.ReturnResponse;
@@ -16,6 +17,8 @@ import io.tiklab.postin.annotation.ApiMethod;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tika.Tika;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +34,7 @@ import java.nio.file.Files;
 @RestController
 @RequestMapping("/lfs/**")
 public class GitLfs {
-
+    private static final Logger logger = LoggerFactory.getLogger(GitLfs.class);
     @Autowired
     RepositoryService repositoryService;
 
@@ -43,6 +46,9 @@ public class GitLfs {
 
     @Autowired
     MemoryManService memoryManService;
+
+    @Autowired
+    private GitLfsAuthService gitLfsAuthService;
 
     @RequestMapping(path="/{type}",method = RequestMethod.POST)
     @ApiMethod(name = "uploadDataSsh",desc = "ssh客户端传入lfs文件信息（不是文件内容）")
@@ -74,8 +80,8 @@ public class GitLfs {
                 lfsData.setResponse(response);
                 lfsData.setLfsBatchRequest(lfsBatchRequest);
                 lfsData.setType("ssh");
-
-                GitLfsAuth.HandleLfsBatch(lfsData);
+                lfsData.setDomainNamePath(yamlDataMaService.visitAddress());
+                gitLfsAuthService.HandleLfsBatch(lfsData);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -86,6 +92,7 @@ public class GitLfs {
     @RequestMapping(path="/{oid}",method = RequestMethod.PUT)
     @ApiMethod(name = "upload",desc = "写入fls文件")
     public Result<Void> upload(@PathVariable String oid,HttpServletRequest request){
+        logger.info("lfs执行了上传："+oid);
         //获取lfs文件存储位置
         String requestURI = request.getRequestURI();
         String address = requestURI.substring(requestURI.indexOf("lfs/")+4, requestURI.indexOf("/"+oid));

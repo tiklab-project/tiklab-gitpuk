@@ -173,7 +173,7 @@ public class GitMergeUtil {
                    // merger.setBase(commonAncestor);
                     boolean mergedSuccessfully = merger.merge(targetCommit, commit);
                     if (!mergedSuccessfully){
-                        throw new SystemException("合并失败");
+                        throw new SystemException("不支持该合并方式,请换一个合并方式");
                     }
                     // 获取合并后的树对象
                     ObjectId mergedTreeId = merger.getResultTreeId();
@@ -394,7 +394,6 @@ public class GitMergeUtil {
             logger.info("查询冲突文件详情失败："+e.getMessage());
             throw new SystemException("查询冲突文件详情失败："+e.getMessage());
         }
-
     }
 
 
@@ -556,7 +555,7 @@ public class GitMergeUtil {
                     .append(baseContent)
                     .append("=======\n")
                     .append(targetContent)
-                    .append(">>>>>>> "+mergeData.getMergeOrigin()+"\n");
+                    .append(">>>>>>> "+mergeData.getMergeOrigin());
             clashNum+=1;
         }
         mergeClashFile.setClashNum(clashNum);

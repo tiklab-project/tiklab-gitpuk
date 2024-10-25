@@ -121,7 +121,7 @@ public class RepositoryFileController {
 
     }
 
-    @RequestMapping(path="/downloadLfsFile/**",method = RequestMethod.GET)
+    @RequestMapping(path="/downLoadLfsFile/**",method = RequestMethod.GET)
     @ApiMethod(name = "downloadLfsFile",desc = "下载lfs文件")
     @ApiParam(name = "fileDownload",desc = "fileDownload",required = true)
     public void downloadLfsFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -129,12 +129,7 @@ public class RepositoryFileController {
 
         JSONObject downLoadQuery = repositoryFileServer.getDownLoadQuery(queryString);
 
-        byte[] bytes = repositoryFileServer.downloadLfsFile(downLoadQuery);
-        String filePath = downLoadQuery.get("filePath").toString();
-        String fileName =  filePath.substring( filePath.lastIndexOf("/")+1);
-        response.setHeader("Content-Disposition", "attachment; filename="+fileName);
-        ServletOutputStream outputStream = response.getOutputStream();
-        outputStream.write(bytes);
+        repositoryFileServer.downloadLfsFile(downLoadQuery,response);
     }
 }
 

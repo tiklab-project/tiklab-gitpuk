@@ -17,6 +17,7 @@ import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -420,6 +421,11 @@ public class GitBranchUntil {
                     return true;
                 }
                 if (("MODIFY").equals(name)){
+                    //判断目标分支最后一个提交是否在源分支里面
+                    boolean branchExistsInBranch = findBranchExistsInBranch(repository, originObjectId, targetObjectId);
+                    if (branchExistsInBranch){
+                        return false;
+                    }
                     diffFormatter.format(fileHeader);
                     String diffOutput = fileOut.toString("UTF-8");
                     boolean deleteLine=false;
@@ -441,7 +447,6 @@ public class GitBranchUntil {
                     }
                 }
             }
-
             return false;
         }catch (Exception e){
             throw new SystemException("获取分支"+branchA+"-"+branchB+"的冲突文件失败:"+e.getMessage());
@@ -449,6 +454,28 @@ public class GitBranchUntil {
 
     }
 
+    /**
+     * 判断目标分支最后一个提交是否在源分支里面
+     * @param repository repository
+     * @param originObjectId originObjectId
+     * @param targetObjectId targetObjectId
+     */
+    public static boolean  findBranchExistsInBranch(Repository repository,ObjectId originObjectId,ObjectId targetObjectId) throws IOException {
+        RevWalk revWalk = new RevWalk(repository);
+
+        // 获取 a 分支的最后一个提交
+        RevCommit commitA = revWalk.parseCommit(targetObjectId);
+
+
+        revWalk.sort(RevSort.COMMIT_TIME_DESC);
+        revWalk.markStart(revWalk.parseCommit(originObjectId));
+        for (RevCommit revCommit : revWalk) {
+            if (revCommit.equals(commitA)) {
+                return true; // a 分支的最后一个提交在 b 分支中
+            }
+        }
+        return false;
+    }
 }
 
 

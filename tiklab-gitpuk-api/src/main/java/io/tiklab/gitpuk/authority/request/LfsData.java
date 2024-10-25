@@ -20,6 +20,10 @@ public class LfsData {
     //lfs地址
     private String lfsPath;
 
+    //域名地址
+    private String domainNamePath;
+
+
 
     public HttpServletRequest getRequest() {
         return request;
@@ -59,5 +63,13 @@ public class LfsData {
 
     public void setLfsPath(String lfsPath) {
         this.lfsPath = lfsPath;
+    }
+
+    public String getDomainNamePath() {
+        return domainNamePath;
+    }
+
+    public void setDomainNamePath(String domainNamePath) {
+        this.domainNamePath = domainNamePath;
     }
 }

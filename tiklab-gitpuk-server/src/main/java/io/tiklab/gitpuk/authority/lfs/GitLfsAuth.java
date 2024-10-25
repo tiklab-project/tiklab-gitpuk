@@ -1,13 +1,20 @@
 package io.tiklab.gitpuk.authority.lfs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.tiklab.gitpuk.authority.GitLfsAuthService;
 import io.tiklab.gitpuk.authority.request.LfsBatchRequest;
 import io.tiklab.gitpuk.authority.request.LfsData;
 import io.tiklab.gitpuk.authority.request.LfsObject;
 import io.tiklab.gitpuk.authority.response.LfsAction;
 import io.tiklab.gitpuk.authority.response.LfsActionDetails;
 import io.tiklab.gitpuk.authority.response.LfsBatchResponse;
+import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -22,13 +29,15 @@ import java.util.*;
 *        2. 客户单根据返回的文件信息的路径上传文件信息，解析lfs文件信息，并将客户端上传、下载文件内容的路径一并返回给客户端。
 *        3. 客户端根据返回的路径执行上传、下载操作
 * */
-public class GitLfsAuth {
-
+@Service
+public class GitLfsAuth implements GitLfsAuthService {
+    private static final Logger logger = LoggerFactory.getLogger(GitLfsAuth.class);
     /**
      * 解析客户端上传的数据、拼接后返回给客户端
      * @param lfsData lfsData
      */
-    public static void HandleLfsBatch(LfsData lfsData) throws IOException {
+    @Override
+    public  void HandleLfsBatch(LfsData lfsData) throws IOException {
         LfsBatchRequest lfsBatchRequest = lfsData.getLfsBatchRequest();
         HttpServletResponse resp = lfsData.getResponse();
 
@@ -82,17 +91,18 @@ public class GitLfsAuth {
      * 添加推送（拉取） lfs文件的地址
      * @param lfsObject lfsObject
      * @param requestURL 请求全路径
+     * @param type http、ssh
      */
-    private static LfsActionDetails generateUploadAction(LfsObject lfsObject,String requestURL,String type) {
+    public  LfsActionDetails generateUploadAction(LfsObject lfsObject,String requestURL,String type) {
         String path;
         if (("http").equals(type)){
             //替换 lfs请求的路径
             String replace = requestURL.replace("xcode", "lfs");
-            path= replace.substring(0, replace.indexOf(".git"));
+            path= replace.substring(0, replace.lastIndexOf(".git"));
         }else {
              path = StringUtils.substringBefore(requestURL, "/objects");
         }
-
+        logger.info("lfs回调地址："+path);
         // 创建上传动作的详细信息
         LfsActionDetails uploadAction = new LfsActionDetails();
         //返回给客户端 上传或者下载lfs文件内容的地址，客户端会根据该地址再次发起请求

@@ -1,6 +1,7 @@
 package io.tiklab.gitpuk.tag.controller;
 
 import io.tiklab.gitpuk.tag.model.Tag;
+import io.tiklab.gitpuk.tag.model.TagQuery;
 import io.tiklab.gitpuk.tag.service.TagService;
 import io.tiklab.core.Result;
 import io.tiklab.postin.annotation.Api;
@@ -44,24 +45,13 @@ public class TagController {
         return Result.ok();
     }
 
-    @RequestMapping(path="/findTag",method = RequestMethod.POST)
-    @ApiMethod(name = "findTag",desc = "查询标签")
+    @RequestMapping(path="/findTagList",method = RequestMethod.POST)
+    @ApiMethod(name = "findTagList",desc = "查询标签")
     @ApiParam(name = "rpyId",desc = "rpyId",required = true)
-    public Result<List<Tag>> findTag(@NotNull String rpyId){
+    public Result<List<Tag>> findTagList(@RequestBody @NotNull @Valid TagQuery tagQuery){
 
-       List<Tag> tagList= tagService.findTag(rpyId);
+       List<Tag> tagList= tagService.findTagList(tagQuery);
 
         return Result.ok(tagList);
     }
-
-    @RequestMapping(path="/findTagByName",method = RequestMethod.POST)
-    @ApiMethod(name = "findTagByName",desc = "通过名字查询标签")
-    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
-    public Result<Tag> findTagByName(@NotNull String rpyId,@NotNull String tagName){
-
-     Tag tag= tagService.findTagByName(rpyId,tagName);
-
-        return Result.ok(tag);
-    }
-
 }

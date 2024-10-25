@@ -44,6 +44,9 @@ public class GitPukYamlDataMaServiceImpl implements GitPukYamlDataMaService {
 
     @Override
     public String visitAddress() {
+        if (("null".equals(visitAddress))){
+            return null;
+        }
         return visitAddress;
     }
 
@@ -61,6 +64,12 @@ public class GitPukYamlDataMaServiceImpl implements GitPukYamlDataMaService {
     @Override
     public String scanFileAddress() {
         return DATA_HOME+"/scan";
+    }
+
+    @Override
+    public String lfsCallBackPath(String visitAddress,String rpyPath) {
+        String returnPath= visitAddress+"/lfs/"+rpyPath;
+        return returnPath;
     }
 
     @Override

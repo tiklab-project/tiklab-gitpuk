@@ -73,7 +73,7 @@ public class GitLfsCommand  implements Command,Runnable {
             String path = ip + ":" + yamlDataMaService.serverPort();
             visitAddress=  "http://"+path;
         }
-        String returnPath= visitAddress+"/lfs/"+rpyAddress;
+        String returnPath = yamlDataMaService.lfsCallBackPath(visitAddress, rpyAddress);
         try {
             String jsonResponse = "{\n" +
                     "  \"href\": \""+returnPath+"\",\n" +

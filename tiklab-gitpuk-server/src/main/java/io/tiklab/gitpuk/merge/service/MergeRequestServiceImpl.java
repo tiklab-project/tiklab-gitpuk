@@ -179,7 +179,6 @@ public class MergeRequestServiceImpl implements MergeRequestService {
 
         GitMergeUtil.conflictResolutionFile(mergeClashFileSet,repositoryAddress);
 
-        System.out.println("");
     }
 
     @Override

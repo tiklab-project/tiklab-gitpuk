@@ -55,6 +55,11 @@ public interface RepositoryFileServer {
      */
     byte[] downloadLfsFile(JSONObject jsonObject);
 
+    /**
+     * lfs文件下载文件
+     * @param jsonObject jsonObject
+     */
+    void downloadLfsFile(JSONObject jsonObject,HttpServletResponse response);
 
     /**
      * 获取下载的 loadQuery

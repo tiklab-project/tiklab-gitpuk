@@ -1059,6 +1059,7 @@ public class GitCommitUntil {
         //所有分支
         List<Ref> refs = git.branchList().call();
         for (Ref ref : refs) {
+            String name = ref.getName();
             revWalk.markStart(revWalk.parseCommit(ref.getObjectId()));
         }
 

@@ -37,6 +37,7 @@ public class MemoryManServiceImpl implements MemoryManService {
     public boolean isLfsStorage( HttpServletRequest req,LfsBatchRequest lfsBatchRequest) throws IOException {
         String requestURI = req.getRequestURI();
         String[] split = requestURI.split("/");
+        // "/xcode/0hz1pjbp/18783894551/gitpuk.git/info/lfs/objects/batch"
 
         //仓库path
         String rpyName = split[3];

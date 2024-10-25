@@ -5,7 +5,9 @@ import io.tiklab.gitpuk.tag.model.Tag;
 import io.tiklab.gitpuk.common.RepositoryUtil;
 import io.tiklab.gitpuk.common.git.GitTagUntil;
 import io.tiklab.core.exception.SystemException;
+import io.tiklab.gitpuk.tag.model.TagQuery;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,16 +36,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<Tag> findTag(String rpyId) {
+    public List<Tag> findTagList(TagQuery tagQuery) {
 
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),tagQuery.getRpyId());
         try {
-
-
             List<Tag> tag = GitTagUntil.findTag(repositoryAddress);
+            if (StringUtils.isNotEmpty(tagQuery.getTagName())){
+                tag=tag.stream().filter(a->a.getTagName().contains(tagQuery.getTagName())).collect(Collectors.toList());
+            }
             return tag;
         } catch (Exception e) {
-            throw new SystemException("查询失败"+e);
+            throw new SystemException("查询tag失败"+e);
         }
     }
 
@@ -56,17 +59,4 @@ public class TagServiceImpl implements TagService {
             throw new SystemException("删除失败"+e);
         }
     }
-
-    @Override
-    public Tag findTagByName(String rpyId, String tagName) {
-        List<Tag> tagList = findTag(rpyId);
-        if (CollectionUtils.isNotEmpty(tagList)){
-            List<Tag> tags = tagList.stream().filter(a -> tagName.equals(a.getTagName())).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(tags)){
-                return tags.get(0);
-            }
-        }
-        return null;
-    }
-
 }

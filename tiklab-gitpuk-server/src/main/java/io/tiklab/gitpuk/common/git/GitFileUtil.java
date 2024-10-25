@@ -18,6 +18,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,7 @@ import java.util.zip.ZipOutputStream;
 
 public class GitFileUtil {
 
-    public static void createBareRepoFolder(RepositoryFile repositoryFile,String rpyPath){
+    public static void createBareRepoFolder1(RepositoryFile repositoryFile,String rpyPath){
         String filePath = repositoryFile.getFilePath();
         String branch = repositoryFile.getBranch();
 
@@ -41,7 +42,12 @@ public class GitFileUtil {
 
 
             ObjectInserter inserter = repository.newObjectInserter();
+            // 获取TreeWalk
             TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
+
+            // 初始化DirCache，用来更新索引
+            DirCache dirCache = DirCache.newInCore();
+            DirCacheBuilder builder = dirCache.builder();
 
             // 读取已有的树结构，创建新的树结构，保留已有的文件夹和文件
             TreeFormatter newTreeFormatter = new TreeFormatter();
@@ -55,19 +61,37 @@ public class GitFileUtil {
                 ObjectId objectId = treeWalk.getObjectId(0);
                 FileMode fileMode = treeWalk.getFileMode(0);
                 newTreeFormatter.append(path, fileMode, objectId);
+
+                // 也添加到DirCache（索引）中，确保索引同步
+                DirCacheEntry entry = new DirCacheEntry(path);
+                entry.setObjectId(objectId);
+                entry.setFileMode(fileMode);
+                builder.add(entry);
             }
 
             //创建的文件内容
-            byte[] fileBytes = repositoryFile.getFileData().getBytes();
+            byte[] fileBytes =  repositoryFile.getFileData().getBytes(StandardCharsets.UTF_8);
             ObjectId newBlobId = inserter.insert(Constants.OBJ_BLOB,fileBytes);
-
 
             // 将新文件添加到文件夹中
             newTreeFormatter.append(filePath, FileMode.REGULAR_FILE, newBlobId);
+
+            // 同时将新文件添加到索引
+            DirCacheEntry newEntry = new DirCacheEntry(filePath);
+            newEntry.setObjectId(newBlobId);
+            newEntry.setFileMode(FileMode.REGULAR_FILE);
+            builder.add(newEntry);
+
+            // 完成DirCache构建
+            builder.finish();
             ObjectId newTreeId = inserter.insert(newTreeFormatter);
 
-            //提交commit
+            //推送commit
             pushCommit(repositoryFile,inserter, repository,newTreeId);
+
+            // 确保索引写入（在裸仓库中这一步尤为重要）
+            dirCache.write();
+            dirCache.commit();
 
             // 关闭仓库
             repository.close();
@@ -77,6 +101,145 @@ public class GitFileUtil {
             throw new SystemException("报错："+e.getMessage());
         }
     }
+
+    /**
+     * 更新裸仓库的文件
+     * @param repositoryFile  repositoryFile
+     * @param rpyPath 裸仓库地址
+     */
+    public static void createBareRepoFolder(RepositoryFile repositoryFile,String rpyPath){
+        String filePath = repositoryFile.getFilePath();
+        String branch = repositoryFile.getBranch();
+        String newFileData = repositoryFile.getFileData();
+        try {
+            File bareRepoDir = new File(rpyPath);
+            // 加载裸仓库
+            Repository repository = new FileRepositoryBuilder()
+                    .setGitDir(bareRepoDir)
+                    .build();
+
+            //获取裸仓库的TreeWalk
+            TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
+
+            // 初始化 DirCache
+            DirCache dirCache = DirCache.newInCore();
+            DirCacheBuilder builder = dirCache.builder();
+
+            // 创建新的树对象
+            ObjectDatabase objectDatabase = repository.getObjectDatabase();
+            ObjectInserter inserter = objectDatabase.newInserter();
+            ObjectId newBlobId = null;
+
+            // 读取已有的树结构，创建新的树结构，保留已有的文件夹和文件
+            TreeFormatter newTreeFormatter = new TreeFormatter();
+
+            while (treeWalk.next()) {
+                String path = treeWalk.getPathString();
+
+                //创建相同路径下的文件
+                if (path.equals(filePath)){
+                    throw new SystemException("同路径下存在相同的文件");
+                }
+                ObjectId objectId = treeWalk.getObjectId(0);
+                FileMode fileMode = treeWalk.getFileMode(0);
+
+                newTreeFormatter.append(path, fileMode, objectId);
+                DirCacheEntry entry = new DirCacheEntry(path);
+                entry.setObjectId(objectId);
+                entry.setFileMode(fileMode);
+                builder.add(entry);
+
+            }
+            //写入文件内容
+            byte[] bytes = newFileData.getBytes(StandardCharsets.UTF_8);
+            newBlobId = inserter.insert(Constants.OBJ_BLOB, bytes.length, new ByteArrayInputStream(bytes));
+
+
+            // 将新文件添加到文件夹中
+            newTreeFormatter.append(filePath, FileMode.REGULAR_FILE, newBlobId);
+
+            // 完成DirCache构建
+            builder.finish();
+            ObjectId newTreeIds = inserter.insert(newTreeFormatter);
+
+            // 创建新的树对象
+            ObjectId newTreeId = dirCache.writeTree(inserter);
+            inserter.flush();
+
+
+            //推送commit
+            pushCommit(repositoryFile,inserter, repository,newTreeIds);
+
+            // 关闭仓库
+            repository.close();
+        }catch (Exception e){
+            throw new SystemException("报错："+e.getMessage());
+        }
+    }
+
+    /**
+     * 更新裸仓库的文件
+     * @param repositoryFile  repositoryFile
+     * @param rpyPath 裸仓库地址
+     */
+    public static void updateBareRepoFile(RepositoryFile repositoryFile,String rpyPath){
+        String branch = repositoryFile.getBranch();
+        String newFileData = repositoryFile.getFileData();
+        try {
+            File bareRepoDir = new File(rpyPath);
+            // 加载裸仓库
+            Repository repository = new FileRepositoryBuilder()
+                    .setGitDir(bareRepoDir)
+                    .build();
+
+            //获取裸仓库的TreeWalk
+            TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
+
+            // 初始化 DirCache
+            DirCache dirCache = DirCache.newInCore();
+            DirCacheBuilder builder = dirCache.builder();
+
+            // 创建新的树对象
+            ObjectInserter inserter = repository.newObjectInserter();
+            ObjectId newBlobId = null;
+            while (treeWalk.next()) {
+                String path = treeWalk.getPathString();
+
+                if (path.equals(repositoryFile.getFilePath())) {
+                   /* ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
+                    String oldFileData = new String(loader.getBytes(), StandardCharsets.UTF_8);*/
+                    ObjectId objectId = treeWalk.getObjectId(0);
+                    // 创建新的 Blob 对象，包含新的文件内容
+                    newBlobId = inserter.insert(Constants.OBJ_BLOB, newFileData.getBytes(StandardCharsets.UTF_8));
+                    // 创建 DirCacheEntry
+                    DirCacheEntry entry = new DirCacheEntry(path);
+                    entry.setObjectId(newBlobId);
+                    entry.setFileMode(treeWalk.getFileMode(0));
+                    builder.add(entry);
+                } else {
+                    // 保持其他文件不变
+                    DirCacheEntry entry = new DirCacheEntry(path);
+                    entry.setObjectId(treeWalk.getObjectId(0));
+                    entry.setFileMode(treeWalk.getFileMode(0));
+                    builder.add(entry);
+                }
+            }
+            // 完成构建新的索引
+            builder.finish();
+
+            // 创建新的树对象
+            ObjectId newTreeId = dirCache.writeTree(inserter);
+            inserter.flush();
+            //推送commit
+            pushCommit(repositoryFile,inserter, repository,newTreeId);
+
+            // 关闭仓库
+            repository.close();
+        }catch (Exception e){
+            throw new SystemException("报错："+e.getMessage());
+        }
+    }
+
 
     /**
      * 删除裸仓库的文件
@@ -128,67 +291,6 @@ public class GitFileUtil {
             // 关闭仓库
             repository.close();
 
-        }catch (Exception e){
-            throw new SystemException("报错："+e.getMessage());
-        }
-    }
-
-    /**
-     * 更新裸仓库的文件
-     * @param repositoryFile  repositoryFile
-     * @param rpyPath 裸仓库地址
-     */
-    public static void updateBareRepoFile(RepositoryFile repositoryFile,String rpyPath){
-        String branch = repositoryFile.getBranch();
-        String newFileData = repositoryFile.getFileData();
-        try {
-            File bareRepoDir = new File(rpyPath);
-            // 加载裸仓库
-            Repository repository = new FileRepositoryBuilder()
-                    .setGitDir(bareRepoDir)
-                    .build();
-
-            //获取裸仓库的TreeWalk
-            TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
-
-            // 初始化 DirCache
-            DirCache dirCache = DirCache.newInCore();
-            DirCacheBuilder builder = dirCache.builder();
-
-            // 创建新的树对象
-            ObjectInserter inserter = repository.newObjectInserter();
-            ObjectId newBlobId = null;
-            while (treeWalk.next()) {
-                String path = treeWalk.getPathString();
-
-                if (path.equals(repositoryFile.getFilePath())) {
-                    // 创建新的 Blob 对象，包含新的文件内容
-                    newBlobId = inserter.insert(Constants.OBJ_BLOB, newFileData.getBytes(StandardCharsets.UTF_8));
-                    ObjectId objectId = treeWalk.getObjectId(0);
-                    // 创建 DirCacheEntry
-                    DirCacheEntry entry = new DirCacheEntry(path);
-                    entry.setObjectId(newBlobId);
-                    entry.setFileMode(treeWalk.getFileMode(0));
-                    builder.add(entry);
-                } else {
-                    // 保持其他文件不变
-                    DirCacheEntry entry = new DirCacheEntry(path);
-                    entry.setObjectId(treeWalk.getObjectId(0));
-                    entry.setFileMode(treeWalk.getFileMode(0));
-                    builder.add(entry);
-                }
-            }
-            // 完成构建新的索引
-            builder.finish();
-
-            // 创建新的树对象
-            ObjectId newTreeId = dirCache.writeTree(inserter);
-            inserter.flush();
-            //推送commit
-            pushCommit(repositoryFile,inserter, repository,newTreeId);
-
-            // 关闭仓库
-            repository.close();
         }catch (Exception e){
             throw new SystemException("报错："+e.getMessage());
         }
@@ -248,8 +350,9 @@ public class GitFileUtil {
      * 下载裸仓库 为zip
      * @param bareAddress 裸仓库地址
      * @param branch 分支
+     * @param headType 类型 tag、branch
      */
-    public static void downLoadBareRepoZip(String bareAddress, String branch, HttpServletResponse response) {
+    public static void downLoadBareRepoZip(String bareAddress, String branch,String headType, HttpServletResponse response) {
         try {
             File bareRepoDir = new File(bareAddress);
             // 加载裸仓库
@@ -257,7 +360,7 @@ public class GitFileUtil {
                     .setGitDir(bareRepoDir)
                     .build();
             //获取裸仓库的TreeWalk
-            TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
+            TreeWalk treeWalk = getTreeWalk(repository, branch,headType);
             ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
 
             // 遍历仓库中的所有文件并打包为 ZIP
@@ -287,8 +390,10 @@ public class GitFileUtil {
      * 下载裸仓库 为tar
      * @param bareAddress 裸仓库地址
      * @param branch 分支
+     * @param headType 类型 tag、branch
      */
-    public static void downLoadBareRepoTar(String bareAddress, String branch, HttpServletResponse response) {
+    public static void downLoadBareRepoTar(String bareAddress, String branch,String headType,
+                                           HttpServletResponse response) {
         try {
             File bareRepoDir = new File(bareAddress);
             // 加载裸仓库
@@ -296,7 +401,7 @@ public class GitFileUtil {
                     .setGitDir(bareRepoDir)
                     .build();
             //获取裸仓库的TreeWalk
-            TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
+            TreeWalk treeWalk = getTreeWalk(repository, branch,headType);
             TarArchiveOutputStream tarOut = new TarArchiveOutputStream(response.getOutputStream());
             tarOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
             // 遍历仓库中的所有文件并打包为 tar
@@ -434,7 +539,6 @@ public class GitFileUtil {
         return treeWalk;
     }
 
-
     /**
      * 获取裸仓库的HeadCommit
      * @param refCode  refCode
@@ -482,10 +586,13 @@ public class GitFileUtil {
         // 插入新的提交对象
         ObjectId newCommitId = inserter.insert(commitBuilder);
         inserter.flush();
+        inserter.close();
 
         // 更新引用 (如 master)
         RefUpdate refUpdate = repository.updateRef("refs/heads/"+repositoryFile.getBranch());
         refUpdate.setNewObjectId(newCommitId);
+        //refUpdate.setExpectedOldObjectId(ObjectId.zeroId());
+        refUpdate.setForceUpdate(true);
         refUpdate.update();
 
     }

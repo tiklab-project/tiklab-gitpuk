@@ -1,6 +1,7 @@
 package io.tiklab.gitpuk.authority.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.tiklab.gitpuk.authority.GitLfsAuthService;
 import io.tiklab.gitpuk.authority.lfs.GitLfsAuth;
 import io.tiklab.gitpuk.authority.ValidUsrPwdServer;
 import io.tiklab.gitpuk.authority.request.LfsBatchRequest;
@@ -65,6 +66,9 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private UserService userService;
 
+        @Autowired
+        private GitLfsAuthService gitLfsAuthService;
+
         //拦截请求效验数据
 
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -78,6 +82,7 @@ public class HttpServlet extends GitServlet {
             boolean authorized=false;
             String username=null;
             String authHeader = request.getHeader("Authorization");
+            Enumeration<String> headerNames = request.getHeaderNames();
             if (authHeader != null && authHeader.startsWith("Basic ")) {
                 byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
                 String[] authTokens = new String(decode).split(":");
@@ -179,9 +184,9 @@ public class HttpServlet extends GitServlet {
         lfsData.setResponse(response);
         lfsData.setLfsBatchRequest(lfsBatchRequest);
         lfsData.setType("http");
-
+        lfsData.setDomainNamePath(yamlDataMaService.visitAddress());
         //解析lfs数据
-        GitLfsAuth.HandleLfsBatch(lfsData);
+        gitLfsAuthService.HandleLfsBatch(lfsData);
     }
 
 
