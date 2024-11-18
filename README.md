@@ -144,8 +144,9 @@ cd tiklab-gitpuk
 
 ### 配置MAVEN仓库
 配置maven的settings.xml文件的远程仓库为一下内容
-```<mirror>
-<id>hadess</id>
+```
+<mirror>
+    <id>hadess</id>
     <name>hadess</name>
     <url>https://mirror.tiklab.net/repository/tiklab-maven</url>  
     <mirrorOf>*</mirrorOf>
