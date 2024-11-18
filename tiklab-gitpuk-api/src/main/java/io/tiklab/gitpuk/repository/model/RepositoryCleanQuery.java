@@ -1,10 +1,13 @@
 package io.tiklab.gitpuk.repository.model;
 
+import io.tiklab.core.page.Page;
 import io.tiklab.postin.annotation.ApiProperty;
 
 import java.util.List;
 
 public class RepositoryCleanQuery {
+    @ApiProperty(name ="pageParam",desc = "分页参数")
+    private Page pageParam = new Page();
 
     @ApiProperty(name ="repositoryId",desc = "仓库id")
     private String  repositoryId;
@@ -20,6 +23,14 @@ public class RepositoryCleanQuery {
 
     @ApiProperty(name ="fileNameList",desc = "文件名字list")
     private List<String> fileNameList;
+
+    public Page getPageParam() {
+        return pageParam;
+    }
+
+    public void setPageParam(Page pageParam) {
+        this.pageParam = pageParam;
+    }
 
     public String getRepositoryId() {
         return repositoryId;

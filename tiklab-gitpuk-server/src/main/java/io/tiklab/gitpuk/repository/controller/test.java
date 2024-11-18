@@ -1,9 +1,13 @@
 package io.tiklab.gitpuk.repository.controller;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheBuilder;
 import org.eclipse.jgit.dircache.DirCacheEntry;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.internal.storage.file.GC;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -13,6 +17,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 
 public class test {
 
@@ -41,8 +46,27 @@ public class test {
     }
 
     // 创建文件夹的 Tree
-    private static void createFolderTree() throws IOException {
-        String s = StringUtils.substringAfter("http://e.tiklab.net", "http://");
-        System.out.println("s:"+s);
+    private static void createFolderTree() throws IOException, ParseException, GitAPIException {
+        File bareRepoDir = new File("/Users/limingliang/tiklab/tiklab-gitpuk/repository/f8f3f57db2ae.git");
+        // 加载裸仓库
+        Repository repository = new FileRepositoryBuilder()
+                .setGitDir(bareRepoDir)
+                .build();
+     /*   ObjectId objectId = ObjectId.fromString("7b3d75af05fdde969c4f53ed56af7a973476990d");
+        RefUpdate refUpdate = repository.updateRef("refs/heads/master");
+        refUpdate.setNewObjectId(objectId);
+        refUpdate.setForceUpdate(true);
+        refUpdate.update();*/
+
+        FileRepository fileRepo = new FileRepository(bareRepoDir);
+        GC gc = new GC(fileRepo);
+        gc.setExpireAgeMillis(0); // Expire all unreachable objects immediately
+        gc.prunePacked();
+        gc.gc();
+
+
+
+    /*    Git git = new Git(repository);
+        git.gc().setAggressive(true).call();*/
     }
 }

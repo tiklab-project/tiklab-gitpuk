@@ -300,12 +300,14 @@ public class GitUntil {
             UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(remoteInfo.getAccount(), remoteInfo.getPassword());
             git.push().setCredentialsProvider(credentialsProvider)
                     .setPushAll()
+                    .setForce(true)
                     .call();
         }
         //通过令牌推送
         if (("token").equals(remoteInfo.getAuthWay())){
             PushCommand pushCommand = git.push();
             pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(remoteInfo.getSecretKey(), ""));
+            pushCommand.setForce(true);
             pushCommand.call();
         }
             git.close();

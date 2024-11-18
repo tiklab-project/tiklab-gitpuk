@@ -242,6 +242,16 @@ public class RepositoryServerImpl implements RepositoryService {
 
                 //发送消息日志
                 sendMessLog(repositoryEntity,"delete",null);
+
+                //删除演示库时  删除项目内的演示文件
+                if (repositoryEntity.getCategory()==1){
+                    try {
+                        File zipFile = new File(AppHomeContext.getAppHome()+"/file/sample.zip");
+                        FileUtils.delete(zipFile);
+                    }catch (Exception e){
+                        logger.info("删除文件sample.zip失败");
+                    }
+                }
             }
         };
         thread.start();

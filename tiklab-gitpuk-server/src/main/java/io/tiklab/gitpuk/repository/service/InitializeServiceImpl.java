@@ -35,6 +35,10 @@ public class InitializeServiceImpl implements InitializeService {
             return;
         }
         File zipFile = new File(AppHomeContext.getAppHome()+"/file/sample.zip");
+        //示例文件不存在 不创建示例数据
+        if (!zipFile.exists()){
+          return;
+        }
 
         //创建示例仓库
         Repository repository = new Repository();

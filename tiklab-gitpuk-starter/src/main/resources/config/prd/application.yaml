@@ -27,13 +27,6 @@ jdbc:
   username: postgres
   password: darth2020
 
-
-
-DATA_HOME: /opt/thoughtware/gittok
-
-plugin:
-  path: ${DATA_HOME}/plugin
-
 postgresql:
   embbed:
     enable: true
@@ -43,6 +36,14 @@ postgresql:
     username: postgres
     password: darth2020
     address: ${DATA_HOME}/postgresql
+
+
+DATA_HOME: /opt/thoughtware/gittok
+
+plugin:
+  path: ${DATA_HOME}/plugin
+
+
 
 soular:
   embbed:

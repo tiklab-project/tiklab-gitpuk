@@ -1,6 +1,8 @@
 package io.tiklab.gitpuk.repository.service;
 
 import io.tiklab.core.exception.SystemException;
+import io.tiklab.gitpuk.common.git.GitCommitUntil;
+import io.tiklab.gitpuk.common.git.GitFileUtil;
 import io.tiklab.gitpuk.repository.model.RepositoryClean;
 import io.tiklab.gitpuk.repository.model.RepositoryCleanQuery;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
@@ -12,10 +14,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.dircache.DirCache;
+import org.eclipse.jgit.dircache.DirCacheBuilder;
+import org.eclipse.jgit.dircache.DirCacheEditor;
+import org.eclipse.jgit.dircache.DirCacheEntry;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.internal.storage.file.GC;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.slf4j.Logger;
@@ -47,6 +57,8 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
     //文件
     public static Map<String , List<RepositoryClean>> fileMap = new HashMap<>();
+    //状态
+    public static Map<String , String> stateMap = new HashMap<>();
 
 
     //删除结果
@@ -58,9 +70,12 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
     @Override
     public  String findLargeFile(RepositoryCleanQuery repositoryCleanQuery){
-        long startTime = System.currentTimeMillis();
-        fileMap.remove(repositoryCleanQuery.getRepositoryId());
-        String rpyPath = gitTorkYamlDataMaService.repositoryAddress() + "/" + repositoryCleanQuery.getRepositoryId() + ".git";
+        String state = stateMap.get(repositoryCleanQuery.getRepositoryId());
+        if (("run").equals(state)){
+            return "OK";
+        }
+        stateMap.put(repositoryCleanQuery.getRepositoryId(),"run");
+        String rpyPath = RepositoryUtil.findRepositoryAddress(gitTorkYamlDataMaService.repositoryAddress(), repositoryCleanQuery.getRepositoryId());
 
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.submit(new Runnable(){
@@ -94,7 +109,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                             ObjectId objectId = treeWalk.getObjectId(0);
                             try {
                                 ObjectReader objectReader = repository.newObjectReader();
-
+                                String pathString = treeWalk.getPathString();
                                 /**
                                  * 查询文件大小
                                  * @param Constants.OBJ_BLOB：表示对象是一个blob（文件）。
@@ -103,6 +118,9 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                                  * @param Constants.OBJ_TAG：表示对象是一个tag（标签）。
                                  */
                                 long objectSize = objectReader.getObjectSize(objectId, Constants.OBJ_BLOB);
+                                if (("thoughtware-hadess-starter/src/main/resources/static/js/vender.e732348e.js").equals(pathString)){
+                                    System.out.println("12");
+                                }
                                 if (objectSize>=sizeMb){
                                     RepositoryClean repositoryClean = new RepositoryClean();
                                     repositoryClean.setFileName(treeWalk.getPathString());
@@ -110,8 +128,9 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                                     String size = RepositoryUtil.countStorageSize(objectSize);
                                     repositoryClean.setSize(size);
                                     fileList.add(repositoryClean);
-                                    logger.info("文件："+treeWalk.getPathString()+" " +objectSize);
+                                   // logger.info("文件："+treeWalk.getPathString()+" " +objectSize);
                                 }
+                                objectReader.close();
                             }catch (Exception e){
                                 //没有查询到当前文件直接跳过
                                 if (e.getMessage().contains("Missing unknown")){
@@ -137,8 +156,10 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                         }
                     }
 
+                    stateMap.put(repositoryCleanQuery.getRepositoryId(),"end");
                     fileMap.put(repositoryCleanQuery.getRepositoryId(),arrayList);
                 }catch (Exception e){
+                    stateMap.put(repositoryCleanQuery.getRepositoryId(),"end");
                     RepositoryClean repositoryClean = new RepositoryClean();
                     repositoryClean.setMsg("fail");
                     arrayList.add(repositoryClean);
@@ -161,12 +182,15 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                 repositoryCleans = repositoryCleans.stream().sorted(Comparator.comparing(RepositoryClean::getFileSize).reversed()).collect(Collectors.toList());
             }
         }
+        if (CollectionUtils.isNotEmpty(repositoryCleans)){
+            fileMap.remove(repositoryCleanQuery.getRepositoryId());
+            stateMap.remove(repositoryCleanQuery.getRepositoryId());
+        }
         return repositoryCleans;
     }
 
     @Override
     public String execCleanFile(String rpyId) {
-
 
         String rpyPath = gitTorkYamlDataMaService.repositoryAddress() + "/" + rpyId + ".git";
 
@@ -174,12 +198,11 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
             Git git = Git.open(new File(rpyPath));
             Repository repository = git.getRepository();
 
-
+            //执行gc 同一引用下的pack和idx文件 会合并成一个。pack下面就只存在引用的文件和没有备引用的文件
             git.gc().setExpire(new java.util.Date()).call();
 
             // 关闭Git仓库
             repository.close();
-
 
             File folder = new File(rpyPath+"/objects/pack");
             if (folder.isDirectory()) {
@@ -187,6 +210,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                 if (files != null) {
                     List<File> idxFileList = new ArrayList<>();
                     List<File> packFileList = new ArrayList<>();
+
                     for (File file : files) {
                         if (file.getName().endsWith(".idx")){
                             idxFileList.add(file);
@@ -196,17 +220,22 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                         }
                     }
 
-                    // 按照创建时间进行排序
-                    idxFileList.sort(Comparator.comparingLong(File::lastModified).reversed());
-                    for (int i=0;i<idxFileList.size();i++){
-                        if (i>0){
-                            idxFileList.get(i).delete();
+                    if (idxFileList.size()>1){
+                        // 按照创建时间进行排序
+                        idxFileList.sort(Comparator.comparingLong(File::lastModified).reversed());
+                        for (int i=0;i<idxFileList.size();i++){
+                            if (i>0){
+                                idxFileList.get(i).delete();
+                            }
                         }
                     }
-                    packFileList.sort(Comparator.comparingLong(File::lastModified).reversed());
-                    for (int i=0;i<packFileList.size();i++){
-                        if (i>0){
-                            packFileList.get(i).delete();
+
+                    if (packFileList.size()>1){
+                        packFileList.sort(Comparator.comparingLong(File::lastModified).reversed());
+                        for (int i=0;i<packFileList.size();i++){
+                            if (i>0){
+                                packFileList.get(i).delete();
+                            }
                         }
                     }
                 }
@@ -224,6 +253,94 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
         }
     }
 
+
+
+
+    //直接在线上操作
+    public String execCleanFile1(String rpyId){
+        String rpyPath = RepositoryUtil.findRepositoryAddress(gitTorkYamlDataMaService.repositoryAddress(), rpyId);
+
+        String filePathToRemove="thoughtware-hadess-starter/src/main/resources/static/js/vender.e732348e.js";
+        try {
+
+            File bareRepoDir = new File(rpyPath);
+            // 加载裸仓库
+            Repository repository = new FileRepositoryBuilder()
+                    .setGitDir(bareRepoDir)
+                    .build();
+            Git git = new Git(repository);
+         //   Iterable<RevCommit> commits = git.log().addPath(filePathToRemove).call();
+
+
+
+            ObjectId refObjectId = GitCommitUntil.getRefObjectId(repository, "master", "branch");
+            RevWalk revWalk = new RevWalk(repository);
+            revWalk.sort(RevSort.COMMIT_TIME_DESC);
+            revWalk.sort(RevSort.REVERSE);
+            revWalk.markStart(revWalk.parseCommit(refObjectId));
+
+            ObjectId newCommitId=null;
+            for (RevCommit commit : revWalk) {
+                String fullMessage = commit.getFullMessage();
+
+                RevTree tree = commit.getTree();
+                TreeWalk treeWalk = new TreeWalk(repository);
+                treeWalk.addTree(tree);
+                treeWalk.setRecursive(true);
+
+                // 初始化 DirCache
+                DirCache dirCache = DirCache.newInCore();
+                DirCacheBuilder builder = dirCache.builder();
+                while (treeWalk.next()) {
+                    String path = treeWalk.getPathString();
+                    if (!path.equals(filePathToRemove)) {
+                        DirCacheEntry entry = new DirCacheEntry(path);
+                        entry.setObjectId(treeWalk.getObjectId(0));
+                        entry.setFileMode(treeWalk.getFileMode(0));
+                        builder.add(entry);
+                    }
+                }
+                // 完成构建新的索引
+                builder.finish();
+
+
+                // 创建新的树对象
+                ObjectInserter inserter = repository.newObjectInserter();
+                ObjectId newTreeId = dirCache.writeTree(inserter);
+                inserter.flush();
+
+                CommitBuilder commitBuilder = new CommitBuilder();
+                if (ObjectUtils.isNotEmpty(newCommitId)){
+                    commitBuilder.setParentIds(newCommitId);
+                }
+                commitBuilder.setTreeId(newTreeId);
+                commitBuilder.setAuthor(commit.getAuthorIdent());
+                commitBuilder.setCommitter(commit.getCommitterIdent());
+                commitBuilder.setMessage(commit.getFullMessage());
+
+                newCommitId = inserter.insert(commitBuilder);
+                inserter.close();
+
+                RefUpdate refUpdate = repository.updateRef("refs/heads/master");
+                refUpdate.setNewObjectId(newCommitId);
+                System.out.println("newCommitId:"+newCommitId);
+                refUpdate.setForceUpdate(true);
+                refUpdate.update();
+            }
+            FileRepository fileRepo = new FileRepository(bareRepoDir);
+            GC gc = new GC(fileRepo);
+            gc.setExpireAgeMillis(0); // Expire all unreachable objects immediately
+            gc.gc();
+            // 执行彻底垃圾回收
+           // git.gc().setAggressive(true).call();
+            // 关闭资源
+            git.close();
+            // 关闭对象
+            return "ok";
+        }catch (Exception e){
+            throw new SystemException(e);
+        }
+    }
 /*    @Override
     public String clearLargeFile(RepositoryCleanQuery repositoryCleanQuery) {
 
@@ -924,7 +1041,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
 
                 // 设置要删除引用的强制更新
                 refUpdate.setForceUpdate(true);
-
+                refUpdate.update();
                 // 删除引用
                 RefUpdate.Result result = refUpdate.delete();
             }

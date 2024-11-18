@@ -5,6 +5,7 @@ import io.tiklab.core.exception.SystemException;
 import io.tiklab.gitpuk.merge.model.MergeClashFile;
 import io.tiklab.gitpuk.merge.model.MergeClashFileSet;
 import io.tiklab.gitpuk.merge.model.MergeData;
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.*;
 import org.eclipse.jgit.dircache.DirCache;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GitMergeUtil {
     private static Logger logger = LoggerFactory.getLogger(GitMergeUtil.class);
@@ -406,7 +408,7 @@ public class GitMergeUtil {
     public static void conflictResolutionFile(MergeClashFileSet mergeClashFileSet, String repositoryPath){
         try {
             MergeClashFile mergeClashFile = mergeClashFileSet.getMergeClashFileList().get(0);
-
+            List<MergeClashFile> clashFileList = mergeClashFileSet.getMergeClashFileList();
 
             File bareRepoDir = new File(repositoryPath);
             // 加载裸仓库
@@ -435,7 +437,7 @@ public class GitMergeUtil {
             // 创建新的树对象
             ObjectInserter inserter = repository.newObjectInserter();
             //更新内容
-            ObjectId newTreeId = updateBareRepoFile(inserter, treeWalk, mergeClashFile.getFilePath(), mergeClashFile.getFileData());
+            ObjectId newTreeId = updateBareRepoFile(inserter, treeWalk, clashFileList);
 
 
             // 找到两个分支的公共祖先（merge base）
@@ -609,11 +611,10 @@ public class GitMergeUtil {
      * 更新裸仓库的文件
      * @param inserter  inserter
      * @param treeWalk treeWalk
-     * @param filePath 更新文件地址
-     * @param fileData 更新的文件内容
+     * @param clashFileList clashFileList
      */
     public static ObjectId updateBareRepoFile( ObjectInserter inserter, TreeWalk treeWalk,
-                                              String filePath,String fileData) throws IOException {
+                                               List<MergeClashFile> clashFileList) throws IOException {
 
             // 初始化 DirCache
             DirCache dirCache = DirCache.newInCore();
@@ -623,8 +624,9 @@ public class GitMergeUtil {
             ObjectId newBlobId = null;
             while (treeWalk.next()) {
                 String path = treeWalk.getPathString();
-
-                if (path.equals(filePath)) {
+                List<MergeClashFile> clashFiles = clashFileList.stream().filter(a -> (path).equals(a.getFilePath())).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(clashFiles)){
+                    String fileData = clashFiles.get(0).getFileData();
                     // 创建新的 Blob 对象，包含新的文件内容
                     newBlobId = inserter.insert(Constants.OBJ_BLOB, fileData.getBytes(StandardCharsets.UTF_8));
 
@@ -633,7 +635,7 @@ public class GitMergeUtil {
                     entry.setObjectId(newBlobId);
                     entry.setFileMode(treeWalk.getFileMode(0));
                     builder.add(entry);
-                } else {
+                }else {
                     // 保持其他文件不变
                     DirCacheEntry entry = new DirCacheEntry(path);
                     entry.setObjectId(treeWalk.getObjectId(0));
@@ -641,32 +643,11 @@ public class GitMergeUtil {
                     builder.add(entry);
                 }
             }
-            // 完成构建新的索引
-            builder.finish();
-            // 创建新的树对象
+          // 完成构建新的索引
+         builder.finish();
+          // 创建新的树对象
          ObjectId newTreeId = dirCache.writeTree(inserter);
          inserter.flush();
-
-        /*RevCommit headCommit = GitFileUtil.getHeadCommit(repository, "a","branch");
-
-        // 创建新的提交
-        CommitBuilder commitBuilder = new CommitBuilder();
-        commitBuilder.setTreeId(newTreeId);
-        commitBuilder.setParentId(headCommit);
-        commitBuilder.setAuthor(new PersonIdent("Author", "author@example.com"));
-        commitBuilder.setCommitter(new PersonIdent("Committer", "committer@example.com"));
-        commitBuilder.setMessage("12");
-
-        // 插入新的提交对象
-        ObjectId newCommitId = inserter.insert(commitBuilder);
-        inserter.flush();
-
-        // 更新引用 (如 master)
-        RefUpdate refUpdate = repository.updateRef("refs/heads/"+"a");
-        refUpdate.setNewObjectId(newCommitId);
-        refUpdate.update();*/
-
-
         return newTreeId;
         }
 
