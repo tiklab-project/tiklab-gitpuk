@@ -57,6 +57,8 @@ public class RecordCommitServiceImpl implements RecordCommitService {
     @Autowired
     CommitServer commitServer;
 
+    @Autowired
+    private RepWebHookService webHookService;
 
     @Override
     public String createRecordCommit(@NotNull @Valid RecordCommit openRecord) {
@@ -257,7 +259,10 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         recordCommit.setCommitTime(new Timestamp(System.currentTimeMillis()));
         recordCommit.setUserId(userId);
         this.createRecordCommit(recordCommit);
-        }
+
+        //执行webHook
+        webHookService.execWebHook(repository.getRpyId(),"pushBranch",repository.getDefaultBranch());
+    }
 
     @Override
     public List<RecordCommit> findTimeRecordCommitList(String startTime, String endTime,String rpyId) {

@@ -49,6 +49,7 @@ public class GitPukMessageServiceImpl implements GitPukMessageService {
         dispatchNotice.setSendId(LoginContext.getLoginId());
         dispatchNotice.setLink(map.get("link").toString());
         dispatchNotice.setAction(map.get("action").toString());
+
         dispatchNotice.setBaseUrl(baseUrl);
 
         dispatchNoticeService.sendMessageNotice(dispatchNotice);

@@ -10,8 +10,10 @@ import io.tiklab.gitpuk.authority.utils.ReturnResponse;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
 import io.tiklab.gitpuk.common.RepositoryUtil;
 import io.tiklab.gitpuk.repository.model.Repository;
+import io.tiklab.gitpuk.repository.model.RepositoryQuery;
 import io.tiklab.gitpuk.repository.service.MemoryManService;
 import io.tiklab.gitpuk.repository.service.RecordCommitService;
+import io.tiklab.gitpuk.repository.service.RepWebHookService;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
@@ -69,6 +71,8 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private GitLfsAuthService gitLfsAuthService;
 
+
+
         //拦截请求效验数据
 
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -109,7 +113,20 @@ public class HttpServlet extends GitServlet {
                  return;
             }
 
-            /*//仓库上传权限
+
+            if (requestURI.endsWith("info/refs")){
+                //查询仓库
+                Repository  repository = findRepository(request.getRequestURI());
+
+                boolean privilege = validUsrPwdServer.validUserPrivilege(username, repository.getRpyId());
+                if (!privilege){
+                    ReturnResponse.authPrivilege(response);
+                    return;
+                }
+            }
+
+
+            //仓库上传权限
             if (requestURI.endsWith("git-receive-pack")){
                     String[] split = requestURI.split("/");
                     String groupName = split[2];
@@ -123,7 +140,7 @@ public class HttpServlet extends GitServlet {
                             response.getWriter().write("You are not allowed to push code to this project");
                             return;
                     }
-            }*/
+            }
 
             //处理lfs
             if (requestURI.endsWith("/info/lfs/objects/batch")) {
@@ -195,13 +212,14 @@ public class HttpServlet extends GitServlet {
      * @param request request
      * @param username 用户名称
      */
-    public void compileCommit(HttpServletRequest request ,String username) throws IOException {
+    public void compileCommit(HttpServletRequest request,String username) throws IOException {
         String method = request.getMethod();
         String requestURI = request.getRequestURI();
         if (("POST").equals(method)&&requestURI.endsWith("git-receive-pack")){
           if (!ObjectUtils.isEmpty(request.getHeader("accept-encoding"))){
               String beforeLast = StringUtils.substringBeforeLast(requestURI, "/");
               String repositoryPath = StringUtils.substringAfterLast(beforeLast, "xcode/").replace(".git", "");
+
               repositoryServer.compileRepository(repositoryPath);
 
               //添加推送记录
@@ -210,4 +228,18 @@ public class HttpServlet extends GitServlet {
           }
         }
     }
+
+    /**
+     * 截取仓库地址查询仓库
+     * @param requestURI 客户端地址
+     */
+    public Repository findRepository(String requestURI){
+        String beforeLast = StringUtils.substringBeforeLast(requestURI, "/");
+        String afterLast = StringUtils.substringAfterLast(beforeLast, "xcode/");
+        String repositoryPath=StringUtils.substringBeforeLast(afterLast,".git");
+        //通过仓库地址查询仓库是否存在
+        List<Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setAddress(repositoryPath));
+        return repositoryList.get(0);
+    }
+
 }

@@ -46,6 +46,7 @@ public class GitPukSqlLoad {
                 "apply-auth_1.0.1",
                 "privilege_1.0.1",
                 "privilege-gittok_1.0.1",
+                "gitpuk_1.0.1",
         });
         dsmConfig.newVersion("1.0.2", new String[]{
                 "message_1.0.2",

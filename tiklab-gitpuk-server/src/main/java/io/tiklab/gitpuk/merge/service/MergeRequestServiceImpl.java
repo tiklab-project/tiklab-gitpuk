@@ -12,6 +12,7 @@ import io.tiklab.gitpuk.common.git.GitBranchUntil;
 import io.tiklab.gitpuk.common.git.GitMergeUtil;
 import io.tiklab.gitpuk.merge.model.*;
 import io.tiklab.gitpuk.repository.model.Repository;
+import io.tiklab.gitpuk.repository.service.RepWebHookService;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import io.tiklab.gitpuk.merge.dao.MergeRequestDao;
 import io.tiklab.gitpuk.merge.entity.MergeRequestEntity;
@@ -69,7 +70,8 @@ public class MergeRequestServiceImpl implements MergeRequestService {
     @Autowired
     RepositoryService repoService;
 
-
+    @Autowired
+    private RepWebHookService webHookService;
 
     @Override
     @Transactional
@@ -83,6 +85,11 @@ public class MergeRequestServiceImpl implements MergeRequestService {
         createCondition(mergeRequest);
         //添加消息和日志
         sendMessLog(mergeRequest);
+
+
+        //执行webHook
+        webHookService.execWebHook(mergeRequest.getRepository().getRpyId(),"createMerge",mergeRequestId);
+
         return mergeRequestId;
     }
 
@@ -291,6 +298,10 @@ public class MergeRequestServiceImpl implements MergeRequestService {
             //添加差异提交记录
             addDiffCommit(mergeData );
 
+
+            //执行webHook
+            webHookService.execWebHook(rpyId,"execMerge",mergeData.getMergeRequestId());
+
             //添加代办
             Thread thread = new Thread() {
                 public void run() {
@@ -372,7 +383,7 @@ public class MergeRequestServiceImpl implements MergeRequestService {
 
 
     /**
-     *创建分支添加消息和日志
+     * 创建合并添加消息和日志
      * @param mergeRequest 合并请求
      */
     public void sendMessLog(MergeRequest mergeRequest){
@@ -388,7 +399,9 @@ public class MergeRequestServiceImpl implements MergeRequestService {
             map.put("message", "在仓库"+repository.getName()+"中创建了合并请求"+mergeRequest.getTitle());
             map.put("link", GitPukFinal.MERGE_DATA_PATH);
             map.put("repositoryPath",repository.getAddress());
+            map.put("qywxurl",GitPukFinal.MERGE_DATA_PATH);
             map.put("mergeId",mergeRequest.getId());
+            map.put("mergeName",mergeRequest.getTitle());
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_MERGE_CRATE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_MERGE_CRATE,"merge");
         }

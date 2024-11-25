@@ -22,10 +22,6 @@ public class GitPukFinal {
 
 
 
-
-
-
-
     /*
     * 消息、日志跳转路径
     * */
@@ -36,7 +32,7 @@ public class GitPukFinal {
     //仓库修改
     public static final String LOG_RPY_UPDATE = "/repository/${repositoryPath}/setting/info";
     //仓库重置
-    public static final String LOG_RPY_RESET = "/repository/${repositoryPath}";
+    public static final String LOG_RPY_RESET = "/repository/${repositoryPath}/code";
     public static final String MERGE_DATA_PATH = "/repository/${repositoryPath}/mergeAdd/${mergeId}";
 
 

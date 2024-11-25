@@ -49,4 +49,17 @@ public class ReturnResponse {
         writer.print("authentication failure");
     }
 
+    /**
+     * 认证用户权限
+     * @param response response
+     */
+    public static void authPrivilege (HttpServletResponse response) throws IOException {
+        response.setHeader("WWW-Authenticate", "Basic realm=\"HttpServlet\"");
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); //500
+        response.setHeader("X-Content-Type-Options", "nosniff");
+        response.setContentType("text/plain; charset=UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.print("User has no permission");
+    }
+
 }

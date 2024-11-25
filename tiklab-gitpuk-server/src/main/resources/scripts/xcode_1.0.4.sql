@@ -33,6 +33,17 @@ INSERT INTO pcs_mec_message_notice (id, message_type_id, type, bgroup, message_s
 INSERT INTO pcs_mec_message_template (id, msg_type_id, msg_send_type_id, title, content,link,bgroup,link_params) VALUES ('GTK_RESET', 'GTK_RESET', 'site', '重置仓库', '重置仓库',null,'gittok',null);
 INSERT INTO pcs_mec_message_template (id, msg_type_id, msg_send_type_id, title, content,link,bgroup,link_params) VALUES ('MERGE_CREATE', 'MERGE_CREATE', 'site', '创建合并请求', '创建合并请求',null,'gittok',null);
 
+INSERT INTO pcs_mec_message_template(id, msg_type_id, msg_send_type_id, title, content,link,bgroup,link_params) VALUES
+    ('bb09db8fa811', 'GTK_RESET', 'qywechat', NULL, '## 重置仓库\n
+> 执行人：<font color=comment>${userName}</font>\n
+> 仓库名称：<font color=warning>[${repositoryName}](${qywxurl})</font>','/#/repository/${repositoryPath}/code','gitpuk',NULL);
+
+INSERT INTO pcs_mec_message_template(id, msg_type_id, msg_send_type_id, title, content,link,bgroup,link_params) VALUES
+    ('bb09db8fa822', 'GTK_RESET', 'qywechat', NULL, '## 创建合并请求\n
+> 执行人：<font color=comment>${userName}</font>\n
+> 合并名字：<font color=warning>[${mergeName}](${qywxurl})</font>','/#/repository/${repositoryPath}/mergeAdd/${mergeId}','gitpuk',NULL);
+
+
 -- ---------------
 -- 消息发送人
 -- ---------------

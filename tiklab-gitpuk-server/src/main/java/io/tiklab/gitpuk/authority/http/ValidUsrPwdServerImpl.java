@@ -3,16 +3,31 @@ package io.tiklab.gitpuk.authority.http;
 import io.tiklab.gitpuk.authority.ValidUsrPwdServer;
 import io.tiklab.eam.passport.user.model.UserPassport;
 import io.tiklab.eam.passport.user.service.UserPassportService;
+import io.tiklab.user.dmUser.model.DmUser;
+import io.tiklab.user.dmUser.model.DmUserQuery;
+import io.tiklab.user.dmUser.service.DmUserService;
+import io.tiklab.user.user.model.User;
+import io.tiklab.user.user.service.UserService;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
 
 @Service
 public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
 
     @Autowired
     private UserPassportService userPassportService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private DmUserService dmUserService;
 
     private static final Logger logger = LoggerFactory.getLogger(ValidUsrPwdServerImpl.class);
 
@@ -40,6 +55,26 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
         userPassport.setDirId(id);
 
         userPassportService.validLogin(userPassport);
+
+
+    }
+
+    @Override
+    public boolean validUserPrivilege(String username,String repositoryId) {
+        //查询用户
+        User user = userService.findUserByUsername(username, null);
+        if (ObjectUtils.isEmpty(user)){
+            return false;
+        }
+        //通过用户和仓库查询 ，是否属于仓库成员
+        DmUserQuery dmUserQuery = new DmUserQuery();
+        dmUserQuery.setDomainId(repositoryId);
+        dmUserQuery.setUserId(user.getId());
+        List<DmUser> dmUserList = dmUserService.findDmUserList(dmUserQuery);
+        if (CollectionUtils.isEmpty(dmUserList)){
+            return false;
+        }
+        return true;
     }
 
 }

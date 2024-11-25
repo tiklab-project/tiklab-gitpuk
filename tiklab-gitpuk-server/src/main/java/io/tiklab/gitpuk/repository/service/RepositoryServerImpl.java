@@ -523,6 +523,7 @@ public class RepositoryServerImpl implements RepositoryService {
         if (!ObjectUtils.isEmpty(repository)){
             RepositoryCloneAddress cloneAddress = findCloneAddress(id);
             repository.setFullPath(cloneAddress.getHttpAddress());
+            repository.setSshPath(cloneAddress.getSSHAddress());
         }
         try {
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),id);
@@ -926,24 +927,11 @@ public class RepositoryServerImpl implements RepositoryService {
         mergeRequestService.deleteMergeRequestByCondition("rpyId",rpyId);
 
         //删除文件
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
-        File file = new File(repositoryAddress);
-        if (!file.exists()){
-            return;
-        }
-        RepositoryFileUtil.deleteFile(file);
+        deleteFile(rpyId);
 
     }
 
-
-
-
-    /**
-     *重置的时候删除仓库关联数据
-     * @param rpyId 仓库id
-     */
-    public void deleteRpyRelatedData(String rpyId){
-
+    public void deleteFile(String rpyId){
         //删除文件
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
         File file = new File(repositoryAddress);
@@ -955,12 +943,11 @@ public class RepositoryServerImpl implements RepositoryService {
 
     /**
      * push 仓库数据后编辑仓库信息
-     * @param repositoryPath
+     * @param repositoryId
      */
-    public void compileRepository(String repositoryPath)  {
+    public void compileRepository(String repositoryId)  {
 
-        //通过仓库地址查询仓库是否存在
-        Repository repository = this.findConciseRepositoryByAddress(repositoryPath);
+        Repository repository = findConciseRepositoryByAddress(repositoryId);
         if (!ObjectUtils.isEmpty(repository)){
             //仓库地址
             String repositoryUrl = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(), repository.getRpyId());
@@ -999,7 +986,7 @@ public class RepositoryServerImpl implements RepositoryService {
                     branchService.createRepositoryBranch(repositoryBranch);
                 }
             } catch (Exception e) {
-                logger.error("提交"+repositoryPath+"代码后获取仓库分支失败："+e.getMessage() );
+                logger.error("提交"+repository.getAddress()+"代码后获取仓库分支失败："+e.getMessage() );
                 throw new SystemException(e);
             }
 
@@ -1041,35 +1028,46 @@ public class RepositoryServerImpl implements RepositoryService {
         
         HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
 
+        map.put("repositoryName", repository.getName());
         map.put("repositoryId",repository.getRpyId());
         map.put("action",repository.getName());
+        //删除仓库发送消息和日志
         if (("delete").equals(type)){
             map.put("message", repository.getName());
             map.put("link", GitPukFinal.LOG_RPY_DELETE);
+            map.put("qywxurl",GitPukFinal.LOG_RPY_DELETE);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_DELETE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_DELETE,"repository");
         }
 
+        //更新仓库发送消息和日志
         if (("update").equals(type)){
             map.put("message", repository.getName()+"更改为"+updateName);
             map.put("link", GitPukFinal.LOG_RPY_UPDATE);
-            map.put("repositoryPath",repository.getAddress());
+            map.put("qywxurl",GitPukFinal.LOG_RPY_UPDATE);
+            map.put("updateName",repository.getName());
+            map.put("repositoryName",updateName);
+            String replaceAll = repository.getAddress().replaceAll(repository.getName(), updateName);
+            map.put("repositoryPath",replaceAll);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_UPDATE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_UPDATE,"repository");
         }
 
+        //创建仓库发送消息和日志
+        map.put("repositoryPath",repository.getAddress());
         if (("create").equals(type)){
             map.put("message", repository.getName());
             map.put("link", GitPukFinal.LOG_RPY_CREATE);
-            map.put("repositoryPath",repository.getAddress());
+            map.put("qywxurl",GitPukFinal.LOG_RPY_CREATE);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_CREATE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_CREATE,"repository");
         }
 
+        //重置仓库发送消息和日志
         if (("reset").equals(type)){
             map.put("message", repository.getName());
             map.put("link", GitPukFinal.LOG_RPY_RESET);
-            map.put("repositoryPath",repository.getAddress());
+            map.put("qywxurl",GitPukFinal.LOG_RPY_RESET);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_RESET);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_RESET,"repository");
         }

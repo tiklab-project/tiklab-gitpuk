@@ -190,6 +190,11 @@ public class Repository implements Serializable {
     private String fullPath;
 
     /**
+     * 仓库ssh拉取路径
+     */
+    private String sshPath;
+
+    /**
      * 角色
      */
     private String role;
@@ -399,6 +404,13 @@ public class Repository implements Serializable {
         this.uniqueBranch = uniqueBranch;
     }
 
+    public String getSshPath() {
+        return sshPath;
+    }
+
+    public void setSshPath(String sshPath) {
+        this.sshPath = sshPath;
+    }
 }
 
 

@@ -25,7 +25,4 @@ public interface GitPukMessageService {
      */
     HashMap<String,Object> initMessageAndLogMap();
 
-
-
-
 }

@@ -6,6 +6,8 @@ import io.tiklab.gitpuk.merge.model.MergeRequest;
 import io.tiklab.gitpuk.merge.model.MergeRequestQuery;
 import io.tiklab.gitpuk.merge.service.MergeRequestService;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
+import io.tiklab.gitpuk.repository.service.RepWebHookService;
+import io.tiklab.gitpuk.repository.service.RepWebHookServiceImpl;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
@@ -43,6 +45,10 @@ public class BranchServerImpl implements BranchServer {
 
     @Autowired
     MergeRequestService mergerRequestService;
+
+    @Autowired
+    RepWebHookService webHookService;
+
 
 
     @Override
@@ -96,6 +102,9 @@ public class BranchServerImpl implements BranchServer {
             branch.setCreateUser(LoginContext.getLoginId());
             repositoryBranchService.createRepositoryBranch(branch);
 
+            //执行webHook
+            webHookService.execWebHook(rpyId,"createBranch",branchMessage.getBranchName());
+
         } catch (Exception e) {
             if (e.getMessage().equals("分支名与标签名不可以重复")){
                 throw new ApplicationException("分支名与标签名不可以重复");
@@ -118,6 +127,9 @@ public class BranchServerImpl implements BranchServer {
 
             //删除分支 移除分支记录
             repositoryBranchService.deleteRepositoryBranch(rpyId, branchMessage.getBranchName());
+
+            //执行webHook
+            webHookService.execWebHook(rpyId,"deleteBranch",branchMessage.getBranchName());
 
         } catch (IOException | GitAPIException e) {
             throw new ApplicationException("分支删除失败"+e);

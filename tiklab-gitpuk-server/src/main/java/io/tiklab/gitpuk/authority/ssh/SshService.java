@@ -294,6 +294,7 @@ public class SshService {
                 receivePack.setPostReceiveHook(new PostReceiveHook() {
                     @Override
                     public void onPostReceive(ReceivePack rp, Collection<ReceiveCommand> commands) {
+
                         //push 推送后编辑仓库数据
                         repositoryServer.compileRepository(rpyPath);
 

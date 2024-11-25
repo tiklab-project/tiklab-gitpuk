@@ -19,4 +19,12 @@ public interface ValidUsrPwdServer {
      * @return EamTicket
      */
     void validUser(String username ,String password,String id);
+
+    /**
+     * 通过用户查询是否有推送或者拉取的权限
+     * @param username 用户名
+     * @param repositoryId 仓库id
+     * @return true 效验成功 false 失败
+     */
+    boolean validUserPrivilege(String username,String repositoryId);
 }

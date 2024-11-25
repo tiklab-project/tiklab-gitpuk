@@ -221,9 +221,9 @@ public interface RepositoryService {
 
     /**
      * push 仓库数据后编辑仓库信息
-     * @param  repositoryPath
+     * @param  repositoryId repositoryId
      */
-    void compileRepository(String repositoryPath);
+    void compileRepository(String repositoryId);
 
 
     /**

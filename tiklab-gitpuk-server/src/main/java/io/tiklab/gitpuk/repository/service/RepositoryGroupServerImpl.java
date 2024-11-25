@@ -306,6 +306,8 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         if (("delete").equals(type)){
             map.put("message", groupRepository.getName());
             map.put("link", GitPukFinal.GROUP_RPY_DELETE);
+            map.put("groupName",groupRepository.getName());
+            map.put("qywxurl",GitPukFinal.GROUP_RPY_DELETE);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_DELETE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_DELETE,"repositoryGroup");
         }
@@ -313,7 +315,9 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         if (("update").equals(type)){
             map.put("message", groupRepository.getName()+"更改为"+updateName);
             map.put("link", GitPukFinal.GROUP_RPY_UPDATE);
-            map.put("groupName",groupRepository.getName());
+            map.put("groupName",updateName);
+            map.put("update",groupRepository.getName());
+            map.put("qywxurl",GitPukFinal.GROUP_RPY_UPDATE);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_UPDATE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_UPDATE,"repositoryGroup");
         }
@@ -322,6 +326,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
             map.put("message", groupRepository.getName());
             map.put("link", GitPukFinal.GROUP_RPY_CREATE);
             map.put("groupName",groupRepository.getName());
+            map.put("qywxurl",GitPukFinal.GROUP_RPY_CREATE);
             gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_CREATE);
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_CREATE,"repositoryGroup");
         }

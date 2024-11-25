@@ -80,7 +80,7 @@ public class LeadAuthDao {
     }
 
     /**
-     * 条件查询插件
+     * 条件查询导入外部仓库校验
      * @param leadAuthQuery
      * @return
      */
