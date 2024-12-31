@@ -38,10 +38,7 @@ public class WebHookRepository {
     @ApiProperty(name = "groupName" ,desc =" 仓库组名字")
     private String groupName;
 
-    /**
-     * @pi.model: User
-     * @pi.desc: 创建人
-     */
+
     @Mappings({
             @Mapping(source = "user.id",target = "userId")
     })

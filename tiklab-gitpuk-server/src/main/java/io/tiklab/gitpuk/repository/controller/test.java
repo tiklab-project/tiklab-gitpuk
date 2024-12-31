@@ -1,5 +1,6 @@
 package io.tiklab.gitpuk.repository.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -14,10 +15,13 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.springframework.util.ObjectUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 
 public class test {
 
@@ -34,16 +38,41 @@ public class test {
         orders.append(" -p 5432 ");
         orders.append(" -f /Users/limingliang/work/work-source/thoughtware-gittok-ee_db_backups.sql");
 */
-        createFolderTree();
-        double numerator = 7; // 被除数
-        double denominator = 2; // 除数
+     //   createFolderTree();
 
-        // 计算相除并向上取整
-        double result = Math.ceil(numerator / denominator);
 
-        // 输出结果
-        System.out.println("结果: " + result);
+
+        List<String> items = Arrays.asList("item1", "item2", "item3", "item4");
+
+        for (String item : items) {
+            try {
+                // 模拟可能抛出异常的处理
+                if (item.equals("item2")) {
+                    throw new Exception("处理失败");
+                }
+                System.out.println("成功处理: " + item);
+            } catch (Exception e) {
+                // 捕获异常并打印错误信息
+
+                System.out.println("处理 " + item + " 时发生异常: " + e.getMessage());
+                continue;
+            }
+            System.out.println("循环结束，继续执行后续操作"+item);
+        }
+
+        System.out.println("循环结束，继续执行后续操作");
     }
+
+    private static void processItem(String item) throws Exception {
+        // 模拟可能抛出异常的处理
+        if (item.equals("item2")) {
+            throw new Exception("处理失败");
+        }
+        System.out.println("成功处理: " + item);
+    }
+
+
+
 
     // 创建文件夹的 Tree
     private static void createFolderTree() throws IOException, ParseException, GitAPIException {

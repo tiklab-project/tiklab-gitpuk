@@ -42,7 +42,7 @@ public class InitializeServiceImpl implements InitializeService {
 
         //创建示例仓库
         Repository repository = new Repository();
-        repository.setName("sample");
+        repository.setName("示例仓库");
         repository.setAddress("admin/sample");
         repository.setRules("public");
         repository.setClassifyState("false");

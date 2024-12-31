@@ -39,12 +39,6 @@
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-gitpuk-api</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>tiklab-postin-annotation</artifactId>
-					<groupId>io.tiklab</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>
@@ -133,12 +127,6 @@
             <version>${commons-io.version}</version>
             <scope>compile</scope>
         </dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-postin-annotation</artifactId>
-			<version>${tiklab-postin.version}</version>
-			<scope>compile</scope>
-		</dependency>
 
 
 		<!-- QuartzConfigration -->

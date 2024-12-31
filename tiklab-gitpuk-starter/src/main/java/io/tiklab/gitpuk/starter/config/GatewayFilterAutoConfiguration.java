@@ -83,7 +83,8 @@ public class GatewayFilterAutoConfiguration {
                         "/message/messageItem/syncUpdateMessage",
                         "/message/messageItem/syncDeleteMessage",
                         "/permission/findPermissions",
-                        "/RepWeb/createRepWebHook"
+                        "/RepWeb/createRepWebHook",
+                        "/init/install/findStatus"
 
                 })
                 .ignorePreUrls(new String[]{

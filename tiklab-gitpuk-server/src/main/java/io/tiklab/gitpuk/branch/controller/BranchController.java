@@ -18,10 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-/**
- * @pi.protocol: http
- * @pi.groupName: branch
- */
+
 @RestController
 @RequestMapping("/branch")
 @Api(name = "BranchController",desc = "裸仓库中的分支管理")
@@ -30,13 +27,7 @@ public class BranchController {
     @Autowired
     BranchServer branchServer;
 
-    /**
-     * @pi.name:通过仓库id查询分支
-     * @pi.path:/branch/findAllBranch
-     * @pi.methodType:post
-     * @pi.request-type:formdata
-     * @pi.param:  name=rpyId;dataType=string;value=rpyId;
-     */
+
     @RequestMapping(path="/findAllBranch",method = RequestMethod.POST)
     @ApiMethod(name = "findAllBranch",desc = "查询分支")
     @ApiParam(name = "rpyId",desc = "rpyId",required = true)
@@ -47,13 +38,7 @@ public class BranchController {
         return Result.ok(allBranch);
     }
 
-    /**
-     * @pi.name: 条件查询分支
-     * @pi.path:/branch/findBranchList
-     * @pi.methodType:post
-     * @pi.request-type:json
-     * @pi.param: model=BranchQuery ;
-     */
+
     @RequestMapping(path="/findBranchList",method = RequestMethod.POST)
     @ApiMethod(name = "findBranchList",desc = "条件查询分支")
     @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
@@ -65,13 +50,7 @@ public class BranchController {
         return Result.ok(allBranch);
     }
 
-    /**
-     * @pi.name: 条件查询分支
-     * @pi.path:/branch/findBranch
-     * @pi.methodType:post
-     * @pi.request-type:json
-     * @pi.param: model=rpyId ;
-     */
+
     @RequestMapping(path="/findBranch",method = RequestMethod.POST)
     @ApiMethod(name = "findBranch",desc = " 查询单个分支")
     @ApiParam(name = "rpyId",desc = "rpyId",required = true)
@@ -82,13 +61,7 @@ public class BranchController {
         return Result.ok(branch);
     }
 
-    /**
-     * @pi.name: 创建分支
-     * @pi.path:/branch/createBranch
-     * @pi.methodType:post
-     * @pi.request-type:json
-     * @pi.param: model=BranchMessage ;
-     */
+
     @RequestMapping(path="/createBranch",method = RequestMethod.POST)
     @ApiMethod(name = "createBranch",desc = "创建分支")
     @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
@@ -99,13 +72,7 @@ public class BranchController {
         return Result.ok();
     }
 
-    /**
-     * @pi.name: 删除分支
-     * @pi.path:/branch/deleteBranch
-     * @pi.methodType:post
-     * @pi.request-type:json
-     * @pi.param: model=BranchMessage ;
-     */
+
     @RequestMapping(path="/deleteBranch",method = RequestMethod.POST)
     @ApiMethod(name = "deleteBranch",desc = "删除分支")
     @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
@@ -116,13 +83,7 @@ public class BranchController {
         return Result.ok();
     }
 
-    /**
-     * @pi.name: 修改默认分支
-     * @pi.path:/branch/updateDefaultBranch
-     * @pi.methodType:post
-     * @pi.request-type:json
-     * @pi.param: model=BranchQuery ;
-     */
+
     @RequestMapping(path="/updateDefaultBranch",method = RequestMethod.POST)
     @ApiMethod(name = "updateDefaultBranch",desc = "修改默认分支")
     @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
@@ -133,13 +94,7 @@ public class BranchController {
         return Result.ok();
     }
 
-    /**
-     * @pi.name: 合并分支
-     * @pi.path:/branch/mergeBranch
-     * @pi.methodType:post
-     * @pi.request-type:json
-     * @pi.param: model=BranchQuery ;
-     */
+
     @RequestMapping(path="/mergeBranch",method = RequestMethod.POST)
     @ApiMethod(name = "mergeBranch",desc = "合并分支")
     @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)

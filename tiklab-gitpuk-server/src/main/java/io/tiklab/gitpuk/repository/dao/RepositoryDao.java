@@ -12,7 +12,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -99,6 +101,11 @@ public class RepositoryDao {
      * @return
      */
     public Pagination<RepositoryEntity> findRepositoryPage(RepositoryQuery repositoryQuery, String[] ids) {
+        if (ObjectUtils.isEmpty(ids)){
+            Pagination<RepositoryEntity> objectPagination = new Pagination<>();
+            return objectPagination;
+        }
+
 
         QueryBuilders pagination = QueryBuilders.createQuery(RepositoryEntity.class)
                 .in("rpyId", ids);

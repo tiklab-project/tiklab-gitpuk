@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,6 +150,9 @@ public class RepositoryGroupDao {
      * 查询仓库组
      */
     public List<RepositoryGroupEntity> findGroupBuyGroupIds(String[] groupIds) {
+        if (ObjectUtils.isEmpty(groupIds)){
+           return Collections.emptyList();
+        }
         QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryGroupEntity.class)
                 .in("groupId",groupIds)
                 .get();

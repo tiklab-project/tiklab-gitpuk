@@ -7,6 +7,9 @@ import io.tiklab.dal.jpa.criterial.condition.QueryCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.QueryBuilders;
 import io.tiklab.gitpuk.repository.entity.RepositoryCollectEntity;
 import io.tiklab.gitpuk.repository.model.RepositoryCollectQuery;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,10 +116,12 @@ public class RepositoryCollectDao {
      * @return
      */
     public List<RepositoryCollectEntity> findRepositoryCollectList(String[] repositoryIds,String userId) {
-        QueryCondition queryCondition = QueryBuilders.createQuery(RepositoryCollectEntity.class)
-                .in("repositoryId", repositoryIds)
-                .eq("userId", userId)
-                .get();
+        QueryBuilders queryBuilders = QueryBuilders.createQuery(RepositoryCollectEntity.class)
+                .eq("userId", userId);
+        if (ObjectUtils.isNotEmpty(repositoryIds)){
+            queryBuilders.in("repositoryId", repositoryIds);
+        }
+        QueryCondition queryCondition = queryBuilders.get();
         return jpaTemplate.findList(queryCondition, RepositoryCollectEntity.class);
     }
 
