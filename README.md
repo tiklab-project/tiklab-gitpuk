@@ -8,14 +8,14 @@ GitPuk是一款开源、免费的代码管理工具，提供了代码库、分�
 -  统一管理关联的项目
 -  单独的成员权限
 
-   ![](https://community.tiklab.net/api/image/183a5dbbe2aa1517)
+   ![](https://image.tiklab.net/img/g1/homes/ab50a590e6977993)
 
    
 ### 仓库管理
 简洁的仓库库管理界面，易用的属性，极大的提高了开发的效率。代码库功能大致如下
 - 包含代码、提交信息、分支、标签、扫描等主要功能
 
-  ![](https://community.tiklab.net/api/image/0f7af0074309f4bc)
+  ![](https://image.tiklab.net/img/g1/homes/509e32d2ceb9ed4c)
 - 支持http、ssh两种协议
 
  通过http、ssh协议推送拉取代码，使用ssh需要先添公钥
@@ -23,7 +23,7 @@ GitPuk是一款开源、免费的代码管理工具，提供了代码库、分�
 - 包含统计分析功能
 
  代码库内有提交次数统计、提交频率统计
-  ![](https://community.tiklab.net/api/image/5b2f0922bb24cbc3)
+
 -  内置成员权限
 
   每个项目拥有独立的成员与权限管理模块，并且支持自定义权限
@@ -31,11 +31,9 @@ GitPuk是一款开源、免费的代码管理工具，提供了代码库、分�
 ### 分支管理
 多分支管理结合分支的合并功能，在团队开发中极大的增加了协同能力；不同分支的代码文件对比，明确的看到代码的变动情况
 
-![](https://community.tiklab.net/api/image/bc995a7b4e12392c)
 
 ### 合并请求管理
 提高开发团队在多个分支之间高效协作。GitPuk 能够自动检测冲突，并为开发者提供直观的冲突解决方案，确保代码合并的准确性和一致性
-![](https://community.tiklab.net/api/image/f4340a934f68f3e8)
 
 支持四种合并方式：
 

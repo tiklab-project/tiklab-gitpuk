@@ -134,8 +134,9 @@ public class Repository implements Serializable {
         return rpyId;
     }
 
-    public void setRpyId(String rpyId) {
+    public Repository setRpyId(String rpyId) {
         this.rpyId = rpyId;
+        return this;
     }
 
     public RepositoryGroup getGroup() {

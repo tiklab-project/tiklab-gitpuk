@@ -1,9 +1,7 @@
 package io.tiklab.gitpuk.repository.service;
 
 
-import io.tiklab.gitpuk.repository.model.Repository;
-import io.tiklab.gitpuk.repository.model.RepositoryGroup;
-import io.tiklab.gitpuk.repository.model.RepositoryGroupQuery;
+import io.tiklab.gitpuk.repository.model.*;
 import io.tiklab.gitpuk.common.GitPukFinal;
 import io.tiklab.gitpuk.common.GitPukMessageService;
 import io.tiklab.gitpuk.common.RepositoryUtil;
@@ -28,6 +26,7 @@ import io.tiklab.user.dmUser.service.DmUserService;
 
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -64,6 +63,9 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Autowired
     private DmRoleUserService dmRoleUserService;
 
+    @Autowired
+    RepositoryForkService repositoryForkService;
+
     /**
      * 创建仓库组
      * @param repositoryGroup 信息
@@ -72,9 +74,10 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
     @Override
     public String createCodeGroup(RepositoryGroup repositoryGroup) {
         RepositoryGroupEntity groupEntity = BeanMapper.map(repositoryGroup, RepositoryGroupEntity.class);
-        Random random = new Random();
+
         // 生成0到4之间的随机数
-        int randomNum = random.nextInt(5);
+        int randomNum = RepositoryUtil.getRandomNum(5);
+
         groupEntity.setColor(randomNum);
         groupEntity.setCreateTime(RepositoryUtil.date(1,new Date()));
         String codeGroupId = repositoryGroupDao.createCodeGroup(groupEntity);
@@ -131,7 +134,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
                 RepositoryGroupEntity group = repositoryGroupDao.findRepositoryGroup(repositoryGroup.getGroupId());
                 if (!ObjectUtils.isEmpty(group)){
                     if (!group.getName().equals(repositoryGroup.getName())){
-                        List<Repository> repositoryList = repositoryServer.findRepositoryList(group.getGroupId());
+                        List<Repository> repositoryList = repositoryServer.findRepositoryListByGroup(group.getGroupId());
                         if (CollectionUtils.isNotEmpty(repositoryList)){
                             for (Repository repository:repositoryList){
                                 String name = repositoryGroup.getName();
@@ -259,6 +262,46 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
         return groupList;
     }
 
+    @Override
+    public List<RepositoryGroup> findCanForkGroup(RepositoryGroupQuery repositoryGroupQuery) {
+        String repName = repositoryGroupQuery.getRepositoryName();
+        String repPath = repositoryGroupQuery.getRepositoryAddress();
+        String repositoryId = repositoryGroupQuery.getRepositoryId();
+
+        List<RepositoryGroup> allGroup = this.findCanCreateRpyGroup(LoginContext.getLoginId());
+
+        List<Repository> rpyList = repositoryServer.findRpyList();
+
+
+        List<RepositoryGroup> collect = allGroup.stream().map(group -> {
+            List<Repository> repositories = rpyList.stream().
+                    filter(a ->!ObjectUtils.isEmpty(a.getGroup())&&group.getGroupId().equals(a.getGroup().getGroupId()))
+                    .filter(b -> (repName).equals(b.getName()) || (repPath).equals(b.getAddress()))
+                    .collect(Collectors.toList());
+
+          if (CollectionUtils.isNotEmpty(repositories)) {
+                group.setFork(true);
+                group.setDesc("已存在同名/同路径仓库");
+            }
+            return group;
+        }).collect(Collectors.toList());
+
+
+        //fork携带上用户
+        RepositoryGroup repositoryGroup = new RepositoryGroup();
+        repositoryGroup.setGroupId("user");
+        repositoryGroup.setName(repositoryGroupQuery.getUserName());
+        repositoryGroup.setDataType("个人");
+        List<Repository> repositories = rpyList.stream().filter(a -> a.getUser().getId().equals(LoginContext.getLoginId())
+                && ObjectUtils.isEmpty(a.getGroup())&&repositoryId.equals(a.getRpyId()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(repositories)){
+            repositoryGroup.setDesc("已存在同名/同路径仓库");
+
+        }
+        collect.add(0,repositoryGroup);
+        return collect;
+    }
 
 
     /**

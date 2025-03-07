@@ -1,6 +1,7 @@
 package io.tiklab.gitpuk.repository.service;
 
 import io.tiklab.core.exception.SystemException;
+import io.tiklab.gitpuk.common.GitPukFinal;
 import io.tiklab.gitpuk.common.git.GitCommitUntil;
 import io.tiklab.gitpuk.common.git.GitFileUtil;
 import io.tiklab.gitpuk.repository.model.RepositoryClean;
@@ -165,7 +166,7 @@ public class RepositoryCleanServiceImpl implements RepositoryCleanService{
                     arrayList.add(repositoryClean);
                     fileMap.put(repositoryCleanQuery.getRepositoryId(),arrayList);
                     logger.info("执行错误："+e.getMessage());
-                    throw new SystemException(900,e.getMessage());
+                    throw new SystemException(GitPukFinal.SYSTEM_EXCEPTION,e.getMessage());
                 }
             }});
         return "OK" ;

@@ -55,13 +55,22 @@ public class RepositoryGroup implements Serializable {
     @ApiProperty(name="role",desc="角色")
     private String role;
 
+    @ApiProperty(name="fork",desc="是否可以fork")
+    private boolean fork;
+
+    @ApiProperty(name="desc",desc="描述")
+    private String desc;
+
+    @ApiProperty(name="dataType",desc="数据类型 个人、仓库组")
+    private String dataType;
 
     public String getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public RepositoryGroup setGroupId(String groupId) {
         this.groupId = groupId;
+        return this;
     }
 
     public String getName() {
@@ -142,6 +151,31 @@ public class RepositoryGroup implements Serializable {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isFork() {
+        return fork;
+
+    }
+
+    public void setFork(boolean fork) {
+        this.fork = fork;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 }
 

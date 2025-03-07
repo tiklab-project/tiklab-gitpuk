@@ -2,6 +2,7 @@ package io.tiklab.gitpuk.common.git;
 
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
+import io.tiklab.gitpuk.common.GitPukFinal;
 import io.tiklab.gitpuk.merge.model.MergeClashFile;
 import io.tiklab.gitpuk.merge.model.MergeClashFileSet;
 import io.tiklab.gitpuk.merge.model.MergeData;
@@ -85,7 +86,7 @@ public class GitMergeUtil {
 
                 }else {
                     logger.info(repositoryPath+"合并不满足FastForward条件" );
-                    throw new ApplicationException(5000,"当前合并不满足FastForward条件");
+                    throw new ApplicationException(GitPukFinal.SYSTEM_EXCEPTION,"当前合并不满足FastForward条件");
                 }
             }
 
@@ -95,7 +96,7 @@ public class GitMergeUtil {
                 ThreeWayMerger merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
                 boolean mergedSuccessfully = merger.merge(targetCommit, originCommit);
                 if (!mergedSuccessfully) {
-                    throw new ApplicationException(5000,"三方合并策略失败");
+                    throw new ApplicationException(GitPukFinal.SYSTEM_EXCEPTION,"三方合并策略失败");
                 }
 
                 // 获取合并后的树结构
@@ -210,7 +211,7 @@ public class GitMergeUtil {
             git.close();
             return "ok";
         }catch (Exception e){
-            throw new SystemException("合并失败"+e.getMessage());
+            throw new SystemException("不支持该合并方式,请换一个合并方式");
         }
     }
 

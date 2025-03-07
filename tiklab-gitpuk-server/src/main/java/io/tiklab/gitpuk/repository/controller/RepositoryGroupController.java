@@ -96,4 +96,12 @@ public class RepositoryGroupController {
         return Result.ok(repositoryGroupList);
     }
 
+    @RequestMapping(path="/findCanForkGroup",method = RequestMethod.POST)
+    @ApiMethod(name = "findCanCreateRpyGroup",desc = "查询可以Fork的仓库组")
+    public Result<List<RepositoryGroup>> findCanForkGroup(@RequestBody @NotNull @Valid RepositoryGroupQuery repositoryGroupQuery){
+        List<RepositoryGroup> repositoryGroupList = groupServer.findCanForkGroup(repositoryGroupQuery);
+
+        return Result.ok(repositoryGroupList);
+    }
+
 }

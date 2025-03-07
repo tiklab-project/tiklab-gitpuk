@@ -1,9 +1,5 @@
 app:
-  name: thoughtware-gitpuk
-  version: ce
-
-APP_HOME: ${APP_HOME}
-application: gitpuk
+  name: gitpuk
 
 spring:
   config:
@@ -14,113 +10,72 @@ spring:
 server:
   port: 8090
 
-gitPuk:
-  ssh:
-    port: 10001
-    key: thoughtware-gitpuk-starter/file/id_rsa
-  file: thoughtware-gitpuk-starter/file
+APP_HOME: ${APP_HOME}
 
+#DATA config
+DATA_HOME: ${user.home}/tiklab/gitpuk
 
+#database config
 jdbc:
   driverClassName: org.postgresql.Driver
   url: jdbc:postgresql://localhost:5431/gitpuk_ce?stringtype=unspecified
   username: postgres
   password: darth2020
 
-
-#plugin config
-DATA_HOME: /opt/thoughtware/gitpuk_ce
-
-
-plugin:
-  path: ${DATA_HOME}/plugin
-
 postgresql:
   embbed:
     enable: true
-  database: gitpuk_ce
+  database: tiklab_gittpuk
   db:
-    port: 5431
+    port: 5432
     username: postgres
     password: darth2020
     address: ${DATA_HOME}/postgresql
 
-soular:
-  embbed:
-    enable: true
-
-
-#dfs config
-dfs:
-  server:
-    enabled: false
-    mode: server
-    port: 4001
-    datapath: ${DATA_HOME}/files
-  client:
-    url: 127.0.0.1:4000
-    bucket: ${app.name}
 
 #dcs config
 dcs:
   server:
     enabled: true
     mode: server
-    port: 5001
+    port: 5000
     datapath: ${DATA_HOME}/caches
   client:
-    url: 127.0.0.1:5001
+    url: 127.0.0.1:5000
     group: g1
     database: dcs1
     expire: 7200
 
-#dcs config
-dss:
-  server:
-    enabled: false
-    mode: server
-    port: 6001
-    datapath: ${DATA_HOME}/index
-  client:
-    url: 127.0.0.1:6001
-    bucket: ${app.name}
-
-datapath: ${DATA_HOME}/caches
+soular:
+  embbed:
+    enable: false
+  address: http://eas-ce.demo.tiklab.net
 
 
-
-message:
-  sms:
-    enabled: true
+gitPuk:
+  ssh:
+    port: 10000
+    key: tiklab-gitpuk-starter/file/id_rsa
+  file: tiklab-gitpuk-starter/file
 
 base:
-  url: http://e.eas.thoughtware.net
-
-
-#homes
-homes:
-  address: http://homes.tiklab.net
-
-#license
-licences:
-  path: ${DATA_HOME}/licences
-
-#file
-file:
-  path: http://file.tiklab.net
-
-
+  url: http://eas-ce.demo.tiklab.net
 
 repository:
   address: ${DATA_HOME}/repository
 
-
-
-visit:
-  address: http://e.gitpuk.tiklab.net
+#license
+licences:
+  path: ${DATA_HOME}/licences
 
 backups:
   time: 0 0 2 * * ?
   dir: /data
   xcode:
     dir: ${DATA_HOME}/repository
+
+visit:
+  address: http://gitpuk-ce.demo.tiklab.net
+
+spotbugs:
+  address: /embbed/spotbugs-4.8.1/bin

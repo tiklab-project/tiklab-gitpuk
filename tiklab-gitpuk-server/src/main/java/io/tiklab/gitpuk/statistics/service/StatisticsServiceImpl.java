@@ -1,9 +1,11 @@
 package io.tiklab.gitpuk.statistics.service;
 
+import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.gitpuk.commit.model.CommitMessage;
+import io.tiklab.gitpuk.common.GitPukFinal;
 import io.tiklab.gitpuk.merge.model.MergeRequest;
 import io.tiklab.gitpuk.merge.model.MergeRequestQuery;
 import io.tiklab.gitpuk.merge.service.MergeRequestService;
@@ -90,7 +92,7 @@ public class StatisticsServiceImpl implements StatisticsService{
         try {
             if (!("all").equals(statisticsQuery.getBranchType())&&StringUtils.isEmpty(statisticsQuery.getBranch())){
                 logger.info("查询单个仓库提交没有选择分支");
-                throw new SystemException(5000,"没有分支");
+                throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"没有分支");
             }
 
             Statistics statistics = new Statistics();

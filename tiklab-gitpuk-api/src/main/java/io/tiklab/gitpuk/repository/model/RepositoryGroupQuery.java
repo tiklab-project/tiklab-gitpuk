@@ -5,6 +5,7 @@ import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
 import java.io.Serializable;
+import java.util.List;
 
 @ApiModel
 public class RepositoryGroupQuery implements Serializable {
@@ -23,6 +24,24 @@ public class RepositoryGroupQuery implements Serializable {
 
     @ApiProperty(name ="rules",desc = "仓库权限 public、private")
     private String  rules;
+
+
+
+    @ApiProperty(name ="repositoryId",desc = "用于fork仓库id 用于fork")
+    private String  repositoryId;
+
+    @ApiProperty(name ="repositoryName",desc = "仓库名称 用于fork")
+    private String  repositoryName;
+
+    @ApiProperty(name ="repositoryAddress",desc = "仓库路径 用于fork")
+    private String  repositoryAddress;
+
+    @ApiProperty(name ="groupId",desc = "仓库组id 用于fork")
+    private String  groupId;
+
+    @ApiProperty(name ="userName",desc = "用户名字 用于fork")
+    private String  userName;
+
 
     public Page getPageParam() {
         return pageParam;
@@ -62,6 +81,46 @@ public class RepositoryGroupQuery implements Serializable {
 
     public void setRules(String rules) {
         this.rules = rules;
+    }
+
+    public String getRepositoryName() {
+        return repositoryName;
+    }
+
+    public void setRepositoryName(String repositoryName) {
+        this.repositoryName = repositoryName;
+    }
+
+    public String getRepositoryAddress() {
+        return repositoryAddress;
+    }
+
+    public void setRepositoryAddress(String repositoryAddress) {
+        this.repositoryAddress = repositoryAddress;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getRepositoryId() {
+        return repositoryId;
+    }
+
+    public void setRepositoryId(String repositoryId) {
+        this.repositoryId = repositoryId;
     }
 }
 

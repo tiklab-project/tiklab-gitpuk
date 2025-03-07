@@ -81,6 +81,12 @@ public interface RepositoryGroupServer {
      */
     List<RepositoryGroup> findCanCreateRpyGroup(String userId);
 
+    /**
+     * 查询剋fork的仓库组
+     * @param repositoryGroupQuery repositoryGroupQuery
+     * @return 仓库组list
+     */
+    List<RepositoryGroup> findCanForkGroup(RepositoryGroupQuery repositoryGroupQuery);
 }
 
 

@@ -2,6 +2,7 @@ package io.tiklab.gitpuk.common.git;
 
 
 import io.tiklab.core.exception.SystemException;
+import io.tiklab.gitpuk.common.GitPukFinal;
 import io.tiklab.gitpuk.tag.model.Tag;
 import io.tiklab.gitpuk.common.RepositoryUtil;
 import org.apache.commons.collections.CollectionUtils;
@@ -38,7 +39,7 @@ public class GitTagUntil {
         List<Ref> localBranches = repository.getRefDatabase().getRefsByPrefix("refs/heads/");
         List<Ref> collect = localBranches.stream().filter(ref -> ref.getName().endsWith(tag.getTagName())).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(collect)){
-            throw new SystemException(5000,"标签名与分支名不可以重复");
+            throw new SystemException(GitPukFinal.REPEAT01_EXCEPTION,"标签名与分支名不可以重复");
         }
 
         // 获取远程分支

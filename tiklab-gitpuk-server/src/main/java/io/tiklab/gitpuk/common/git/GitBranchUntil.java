@@ -5,6 +5,7 @@ import io.tiklab.gitpuk.branch.model.Branch;
 import io.tiklab.gitpuk.branch.model.BranchQuery;
 import io.tiklab.gitpuk.commit.model.CommitMessage;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.gitpuk.common.GitPukFinal;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -46,7 +47,7 @@ public class GitBranchUntil {
         List<Ref> refList = git.tagList().call();
         List<Ref> collect = refList.stream().filter(a -> a.getName().endsWith(branchName)).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(collect)){
-            throw new SystemException(500,"分支名与标签名不可以重复");
+            throw new SystemException(GitPukFinal.REPEAT01_EXCEPTION,"分支名与标签名不可以重复");
         }
 
         Ref call = git.branchCreate()
@@ -404,9 +405,9 @@ public class GitBranchUntil {
                 //获取差异差异文件类型
                 String name = entry.getChangeType().name();
 
-                //新的newObjectId 和旧的oldObjectId 不为空再执行差异内容
+               /* //新的newObjectId 和旧的oldObjectId 不为空再执行差异内容
                 ObjectId oldObjectId = fileHeader.getOldId().toObjectId();
-                ObjectId newObjectId = fileHeader.getNewId().toObjectId();
+                ObjectId newObjectId = fileHeader.getNewId().toObjectId();*/
 
                 /*
                  * ADD: 表示文件是新增的，即在一个分支中添加了一个新文件。

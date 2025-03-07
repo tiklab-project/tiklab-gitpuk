@@ -2,6 +2,8 @@ package io.tiklab.gitpuk.branch.service;
 
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.gitpuk.branch.model.*;
+import io.tiklab.gitpuk.common.GitPukFinal;
+import io.tiklab.gitpuk.common.git.GitFileUtil;
 import io.tiklab.gitpuk.merge.model.MergeRequest;
 import io.tiklab.gitpuk.merge.model.MergeRequestQuery;
 import io.tiklab.gitpuk.merge.service.MergeRequestService;
@@ -197,7 +199,7 @@ public class BranchServerImpl implements BranchServer {
             Repository repository = git.getRepository();
             GitBranchUntil.updateFullBranch(repository, branchQuery.getName());
         } catch (IOException e) {
-            throw new SystemException(9000,"切换默认分支失败:"+branchQuery.getName());
+            throw new SystemException(GitPukFinal.SYSTEM_EXCEPTION,"切换默认分支失败:"+branchQuery.getName());
         }
     }
 
@@ -211,7 +213,7 @@ public class BranchServerImpl implements BranchServer {
             Repository repository = git.getRepository();
             //GitBranchUntil.mergeBranch(repository, branchQuery.getName());
         } catch (IOException e) {
-            throw new SystemException(9000,"获取仓库失败:"+branchQuery.getName());
+            throw new SystemException(GitPukFinal.SYSTEM_EXCEPTION,"获取仓库失败:"+branchQuery.getName());
         }
     }
 }

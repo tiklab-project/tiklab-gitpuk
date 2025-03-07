@@ -1,6 +1,7 @@
 package io.tiklab.gitpuk.repository.controller;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -27,6 +28,18 @@ public class test {
 
     public static void main(String[] args) throws Exception {
 
+        // 源文件夹路径
+        String sourceDirPath = "/Users/limingliang/tiklab/tiklab-gitpuk/repository/aee3bef1c5e7.git";
+        // 目标文件夹路径
+        String targetDirPath = "/Users/limingliang/tiklab/tiklab-gitpuk/repository/aee3bef1c5e7123.git";
+
+        File sourceDir = new File(sourceDirPath);
+        File targetDir = new File(targetDirPath);
+
+        FileUtils.copyDirectory(sourceDir, targetDir);
+
+
+
        /* StringBuilder orders = new StringBuilder();
         orders.append("export PGPASSWORD=darth2020");
         orders.append(" && ");
@@ -41,7 +54,7 @@ public class test {
      //   createFolderTree();
 
 
-
+/*
         List<String> items = Arrays.asList("item1", "item2", "item3", "item4");
 
         for (String item : items) {
@@ -58,7 +71,7 @@ public class test {
                 continue;
             }
             System.out.println("循环结束，继续执行后续操作"+item);
-        }
+        }*/
 
         System.out.println("循环结束，继续执行后续操作");
     }

@@ -406,6 +406,4 @@ public class MergeRequestServiceImpl implements MergeRequestService {
             gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_MERGE_CRATE,"merge");
         }
     }
-
-
 }

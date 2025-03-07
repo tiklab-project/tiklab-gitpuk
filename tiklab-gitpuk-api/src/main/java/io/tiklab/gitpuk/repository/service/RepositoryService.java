@@ -102,7 +102,7 @@ public interface RepositoryService {
      * 通过仓库组id查询仓库
      * @param groupId groupId
      */
-    List<Repository> findRepositoryList(String groupId);
+    List<Repository> findRepositoryListByGroup(String groupId);
 
     /**
      * 分页条件查询仓库

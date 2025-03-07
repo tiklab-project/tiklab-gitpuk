@@ -3,6 +3,7 @@ package io.tiklab.gitpuk.file.service;
 import com.alibaba.fastjson.JSONObject;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
+import io.tiklab.gitpuk.common.GitPukFinal;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
 import io.tiklab.gitpuk.common.git.GitBranchUntil;
 import io.tiklab.gitpuk.common.git.GitFileUtil;
@@ -111,9 +112,9 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
             //查询文件
             fileTrees = RepositoryFileUtil.findFileTree(repositoryAddress,message);
         } catch (IOException e) {
-            throw new ApplicationException( "仓库信息获取失败：" + e);
+            throw new ApplicationException(GitPukFinal.SYSTEM_EXCEPTION,"仓库信息获取失败：" + e);
         } catch (GitAPIException e) {
-            throw new ApplicationException( "提交信息获取失败：" + e);
+            throw new ApplicationException(GitPukFinal.SYSTEM_EXCEPTION, "提交信息获取失败：" + e);
         }
         return fileTrees;
     }

@@ -1,23 +1,20 @@
 app:
   name: tiklab-gitpuk
-  version: ce
 
-APP_HOME: ${APP_HOME}
-application: gitpuk
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  freemarker:
+    checkTemplateLocation: false
 
 server:
   port: 8090
 
-spring:
-  freemarker:
-    checkTemplateLocation: false
+APP_HOME: ${APP_HOME}
 
-gitPuk:
-  ssh:
-    port: 10002
-    key: thoughtware-gitpuk-starter/file/id_rsa
-  file: thoughtware-gitpuk-starter/file
+DATA_HOME: ${user.home}/tiklab/${app.name}
 
+#database config
 jdbc:
   driverClassName: org.postgresql.Driver
   #url: jdbc:postgresql://172.10.1.10:5432/tiklab-gitpuk?stringtype=unspecified
@@ -26,34 +23,12 @@ jdbc:
   username: postgres
   password: darth2020
 
+# Enable the embedded database
 postgresql:
   embbed:
     enable: false
   type: local
   database: tiklab-gitpuk
-
-
-
-soular:
-  embbed:
-    enable: true
-
-#plugin config
-DATA_HOME: ${user.home}/tiklab/${app.name}
-plugin:
-  path: ${DATA_HOME}/plugin
-
-#dfs config
-dfs:
-  server:
-    enabled: false
-    mode: server
-    port: 4000
-    datapath: ${DATA_HOME}/files
-  client:
-    url: 127.0.0.1:4000
-    bucket: ${app.name}
-
 
 #dcs config
 dcs:
@@ -67,67 +42,39 @@ dcs:
     database: dcs1
     expire: 7200
 
-#dcs config
-dss:
-  server:
-    enabled: false
-    mode: server
-    port: 6000
-    datapath: ${DATA_HOME}/index
-  client:
-    url: 127.0.0.1:6000
-    bucket: ${app.name}
-
-datapath: ${DATA_HOME}/caches
+soular:
+  embbed:
+    enable: true
 
 message:
   sms:
     enabled: true
 
-
-#    enable: false
-#  address: http://192.168.10.14:8080
-#  web:
-#    address: http://192.168.10.14:3003
+gitPuk:
+  ssh:
+    port: 10002
+    key: tiklab-gitpuk-starter/file/id_rsa
+  file: tiklab-gitpuk-starter/file
 
 base:
   url: http://192.168.10.9:8090
 
-
-
-#homes
-homes:
-  address: https://homes.tiklab.net
-
-#license
-
-
-#file
-file:
-  path: http://file.dev.tiklab.net
-
-
 repository:
   address: ${DATA_HOME}/repository
 
+#license
+licences:
+  path: ${DATA_HOME}/licences
+
+
 backups:
   time: 0 0 2 * * ?
-  dir: ${DATA_HOME}
+  dir: /data
   xcode:
-    dir: /Users/limingliang/tiklab/thoughtware-gitpuk/repository
-  pgsql:
-    dir: /Users/limingliang/postgreSQL/bin
+    dir: ${DATA_HOME}/repository
 
 visit:
   address: ""
 
 spotbugs:
   address: /embbed/spotbugs-4.8.1/bin
-
-
-
-
-
-
-
-

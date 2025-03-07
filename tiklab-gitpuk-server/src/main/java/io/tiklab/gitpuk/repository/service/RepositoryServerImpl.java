@@ -123,6 +123,9 @@ public class RepositoryServerImpl implements RepositoryService {
     @Autowired
     MergeRequestService mergeRequestService;
 
+    @Autowired
+    RepositoryForkService repositoryForkService;
+
 
     /**
      * 创建仓库
@@ -174,9 +177,9 @@ public class RepositoryServerImpl implements RepositoryService {
     public String createRpy(Repository repository) {
         repository.setCreateTime(RepositoryUtil.date(1,new Date()));
         repository.setUpdateTime(RepositoryUtil.date(1,new Date()));
-        Random random = new Random();
+
         // 生成0到4之间的随机数
-        int randomNum = random.nextInt(5);
+        int randomNum = RepositoryUtil.getRandomNum(5);
         repository.setColor(randomNum);
         RepositoryEntity repositoryEntity = BeanMapper.map(repository, RepositoryEntity.class);
 
@@ -305,13 +308,13 @@ public class RepositoryServerImpl implements RepositoryService {
             List<RepositoryEntity> entities = repositoryEntityList.stream().filter(a -> a.getName().equals(repository.getName())&&
                     !a.getRpyId().equals(repository.getRpyId())).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(entities)){
-                throw  new SystemException(9000,"仓库名字重复");
+                throw  new SystemException(GitPukFinal.REPEAT01_EXCEPTION,"仓库名字重复");
             }
 
             List<RepositoryEntity> path = repositoryEntityList.stream().filter(a -> a.getAddress().equals(repository.getAddress())&&
                     !a.getRpyId().equals(repository.getRpyId())).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(path)){
-                throw  new SystemException(9001,"仓库地址重复");
+                throw  new SystemException(GitPukFinal.REPEAT02_EXCEPTION,"仓库地址重复");
             }
         }
         repositoryDao.updateRpy(repositoryEntity);
@@ -489,7 +492,7 @@ public class RepositoryServerImpl implements RepositoryService {
     }
 
     @Override
-    public List<Repository> findRepositoryList(String groupId) {
+    public List<Repository> findRepositoryListByGroup(String groupId) {
         List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(new RepositoryQuery().setGroupId(groupId));
         List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
         return repositoryList;
@@ -620,7 +623,7 @@ public class RepositoryServerImpl implements RepositoryService {
 
         }catch (Exception e){
             logger.info("查询简洁的仓库获取分支失败："+e.getMessage());
-            throw new SystemException(9000,"查询仓库获取分支失败"+e.getMessage());
+            throw new SystemException(GitPukFinal.SYSTEM_EXCEPTION,"查询仓库获取分支失败"+e.getMessage());
         }
     }
 
@@ -658,7 +661,7 @@ public class RepositoryServerImpl implements RepositoryService {
 
             User user = userService.findUserByUsernameByPassWard(account, password);
             if (ObjectUtils.isEmpty(user)){
-                throw new SystemException(5000,"当前用户:"+account+"不存在");
+                throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"当前用户:"+account+"不存在");
             }
             List<RepositoryEntity> repositoryEntityList = repositoryDao.findAllRpy();
             List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
@@ -817,7 +820,7 @@ public class RepositoryServerImpl implements RepositoryService {
            }
             return defaultBranch.get(0).getBranchName();
         } catch (Exception e) {
-            throw new SystemException(9000,"仓库不存在"+e);
+            throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"仓库不存在"+e);
         }
     }
 
@@ -925,6 +928,9 @@ public class RepositoryServerImpl implements RepositoryService {
         lfsService.deleteRepositoryLfsByRpyId(rpyId);
         //删除合并请求
         mergeRequestService.deleteMergeRequestByCondition("rpyId",rpyId);
+
+        //删除fork记录
+        repositoryForkService.deleteRepForkByRpyId(rpyId);
 
         //删除文件
         deleteFile(rpyId);
