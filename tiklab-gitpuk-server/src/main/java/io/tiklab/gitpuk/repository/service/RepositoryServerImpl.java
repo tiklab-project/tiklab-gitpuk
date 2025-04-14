@@ -34,6 +34,7 @@ import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
+import io.tiklab.user.user.model.UserQuery;
 import io.tiklab.user.user.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -117,8 +118,6 @@ public class RepositoryServerImpl implements RepositoryService {
     @Autowired
     RoleFunctionService roleFunService;
 
-    @Autowired
-    RepositoryLfsService lfsService;
 
     @Autowired
     MergeRequestService mergeRequestService;
@@ -658,10 +657,15 @@ public class RepositoryServerImpl implements RepositoryService {
 
     @Override
     public List<Repository> findRepositoryByUser(String account, String password,String DirId) {
-
-            User user = userService.findUserByUsernameByPassWard(account, password);
-            if (ObjectUtils.isEmpty(user)){
-                throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"当前用户:"+account+"不存在");
+        UserQuery userQuery = new UserQuery();
+        userQuery.setName(account);
+        List<User> userList = userService.findUserList(userQuery);
+        if (CollectionUtils.isEmpty(userList)){
+            throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"当前用户:"+account+"不存在");
+        }
+        User user = userService.findUserByUsernameByPassWard(account, password);
+        if (ObjectUtils.isEmpty(user)){
+                throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"当前用户:"+account+"密码错误");
             }
             List<RepositoryEntity> repositoryEntityList = repositoryDao.findAllRpy();
             List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
@@ -924,8 +928,7 @@ public class RepositoryServerImpl implements RepositoryService {
         leadRecordService.deleteLeadRecord("rpyId",rpyId);
         //删除数据库分支记录
         branchService.deleteRepositoryBranch(rpyId,null);
-        //删除lfs大文件记录
-        lfsService.deleteRepositoryLfsByRpyId(rpyId);
+
         //删除合并请求
         mergeRequestService.deleteMergeRequestByCondition("rpyId",rpyId);
 
@@ -934,8 +937,9 @@ public class RepositoryServerImpl implements RepositoryService {
 
         //删除文件
         deleteFile(rpyId);
-
     }
+
+
 
     public void deleteFile(String rpyId){
         //删除文件

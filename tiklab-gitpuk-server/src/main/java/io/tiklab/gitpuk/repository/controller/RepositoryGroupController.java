@@ -29,7 +29,7 @@ public class RepositoryGroupController {
 
     @RequestMapping(path="/createGroup",method = RequestMethod.POST)
     @ApiMethod(name = "createGroup",desc = "创建仓库组")
-    @ApiParam(name = "code",desc = "code",required = true)
+    @ApiParam(name = "group",desc = "group",required = true)
     public Result<String> createGroup(@RequestBody @NotNull @Valid RepositoryGroup group){
 
         String rpyId = groupServer.createCodeGroup(group);
@@ -40,7 +40,7 @@ public class RepositoryGroupController {
 
     @RequestMapping(path="/deleteGroup",method = RequestMethod.POST)
     @ApiMethod(name = "deleteGroup",desc = "删除仓库组")
-    @ApiParam(name = "rpyId",desc = "仓库组id",required = true)
+    @ApiParam(name = "groupId",desc = "仓库组id",required = true)
     public Result<Void> deleteGroup(@NotNull String groupId){
 
         groupServer.deleteCodeGroup(groupId);
@@ -51,7 +51,7 @@ public class RepositoryGroupController {
 
     @RequestMapping(path="/updateGroup",method = RequestMethod.POST)
     @ApiMethod(name = "updateGroup",desc = "更新仓库组")
-    @ApiParam(name = "code",desc = "code",required = true)
+    @ApiParam(name = "group",desc = "group",required = true)
     public Result<Void> updateGroup(@RequestBody @NotNull @Valid RepositoryGroup group){
 
         groupServer.updateCodeGroup(group);
@@ -61,7 +61,7 @@ public class RepositoryGroupController {
 
     @RequestMapping(path="/findRepositoryGroupPage",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryGroupPage",desc = "查询仓库组")
-    @ApiParam(name = "userId",desc = "用户id",required = true)
+    @ApiParam(name = "repositoryGroupQuery",desc = "repositoryGroupQuery",required = true)
     public Result<Pagination<RepositoryGroup>> findRepositoryGroupPage(@RequestBody @NotNull @Valid RepositoryGroupQuery repositoryGroupQuery){
 
         Pagination<RepositoryGroup> codeList = groupServer.findRepositoryGroupPage(repositoryGroupQuery);
@@ -90,6 +90,7 @@ public class RepositoryGroupController {
 
     @RequestMapping(path="/findCanCreateRpyGroup",method = RequestMethod.POST)
     @ApiMethod(name = "findCanCreateRpyGroup",desc = "查询自己创建的和有权限查看的仓库组")
+    @ApiParam(name = "userId",desc = "userId",required = true)
     public Result<List<RepositoryGroup>> findCanCreateRpyGroup(@NotNull  String userId){
         List<RepositoryGroup> repositoryGroupList = groupServer.findCanCreateRpyGroup(userId);
 
@@ -98,6 +99,7 @@ public class RepositoryGroupController {
 
     @RequestMapping(path="/findCanForkGroup",method = RequestMethod.POST)
     @ApiMethod(name = "findCanCreateRpyGroup",desc = "查询可以Fork的仓库组")
+    @ApiParam(name = "repositoryGroupQuery",desc = "repositoryGroupQuery",required = true)
     public Result<List<RepositoryGroup>> findCanForkGroup(@RequestBody @NotNull @Valid RepositoryGroupQuery repositoryGroupQuery){
         List<RepositoryGroup> repositoryGroupList = groupServer.findCanForkGroup(repositoryGroupQuery);
 

@@ -3,14 +3,15 @@ package io.tiklab.gitpuk.repository.model;
 import io.tiklab.core.order.Order;
 import io.tiklab.core.order.OrderBuilders;
 import io.tiklab.core.page.Page;
-import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
-import java.io.Serializable;
 import java.util.List;
 
-@ApiModel
-public class RepositoryLfsQuery implements Serializable {
+/**
+ * 集成关联表
+ */
+
+public class IntRelevancyQuery {
 
     @ApiProperty(name ="pageParam",desc = "分页参数")
     private Page pageParam = new Page();
@@ -20,12 +21,9 @@ public class RepositoryLfsQuery implements Serializable {
 
     @ApiProperty(name ="repositoryId",desc = "仓库id")
     private String  repositoryId;
-    @ApiProperty(name ="oid",desc = "oid")
-    private String  oid;
 
-    @ApiProperty(name ="isDelete",desc = "是否删除 0  删除、1 未删除")
-    private Integer  isDelete=1;
-
+    @ApiProperty(name ="relevancyId",desc = "关联的id")
+    private String  relevancyId;
 
 
     public Page getPageParam() {
@@ -52,58 +50,11 @@ public class RepositoryLfsQuery implements Serializable {
         this.repositoryId = repositoryId;
     }
 
-    public String getOid() {
-        return oid;
+    public String getRelevancyId() {
+        return relevancyId;
     }
 
-    public void setOid(String oid) {
-        this.oid = oid;
-    }
-
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
+    public void setRelevancyId(String relevancyId) {
+        this.relevancyId = relevancyId;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

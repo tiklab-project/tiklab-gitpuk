@@ -35,18 +35,18 @@ public class RepositoryCollectController {
 
     @RequestMapping(path="/createRepositoryCollect",method = RequestMethod.POST)
     @ApiMethod(name = "createRepositoryCollect",desc = "创建收藏仓库")
-    @ApiParam(name = "RepositoryCollect",desc = "RepositoryCollect",required = true)
-    public Result<String> createRepositoryCollect(@RequestBody @NotNull @Valid RepositoryCollect RepositoryCollect){
-        String id = repositoryCollectService.createRepositoryCollect(RepositoryCollect);
+    @ApiParam(name = "repositoryCollect",desc = "repositoryCollect",required = true)
+    public Result<String> createRepositoryCollect(@RequestBody @NotNull @Valid RepositoryCollect repositoryCollect){
+        String id = repositoryCollectService.createRepositoryCollect(repositoryCollect);
 
         return Result.ok(id);
     }
 
     @RequestMapping(path="/updateRepositoryCollect",method = RequestMethod.POST)
     @ApiMethod(name = "updateRepositoryCollect",desc = "修改收藏仓库")
-    @ApiParam(name = "RepositoryCollect",desc = "RepositoryCollect",required = true)
-    public Result<Void> updateRepositoryCollect(@RequestBody @NotNull @Valid RepositoryCollect RepositoryCollect){
-        repositoryCollectService.updateRepositoryCollect(RepositoryCollect);
+    @ApiParam(name = "repositoryCollect",desc = "repositoryCollect",required = true)
+    public Result<Void> updateRepositoryCollect(@RequestBody @NotNull @Valid RepositoryCollect repositoryCollect){
+        repositoryCollectService.updateRepositoryCollect(repositoryCollect);
 
         return Result.ok();
     }
@@ -88,7 +88,7 @@ public class RepositoryCollectController {
 
     @RequestMapping(path = "/findRepositoryCollectList",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryCollectList",desc = "通过条件查询")
-    @ApiParam(name = "RepositoryCollectQuery",desc = "RepositoryCollectQuery",required = true)
+    @ApiParam(name = "repositoryCollectQuery",desc = "repositoryCollectQuery",required = true)
     public Result<List<RepositoryCollect>> findRepositoryCollectList(@RequestBody @Valid @NotNull RepositoryCollectQuery repositoryCollectQuery){
         List<RepositoryCollect> artifactList = repositoryCollectService.findRepositoryCollectList(repositoryCollectQuery);
 
@@ -97,7 +97,7 @@ public class RepositoryCollectController {
 
     @RequestMapping(path = "/findRepositoryCollectPage",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryCollectPage",desc = "通过条件分页查询")
-    @ApiParam(name = "RepositoryCollectQuery",desc = "RepositoryCollectQuery",required = true)
+    @ApiParam(name = "repositoryCollectQuery",desc = "repositoryCollectQuery",required = true)
     public Result<Pagination<RepositoryCollect>> findRepositoryCollectPage(@RequestBody @Valid @NotNull RepositoryCollectQuery repositoryCollectQuery){
         Pagination<RepositoryCollect> pagination = repositoryCollectService.findRepositoryCollectPage(repositoryCollectQuery);
 

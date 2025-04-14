@@ -22,7 +22,7 @@ import java.sql.Timestamp;
 public class AuthSsh {
 
 
-    @ApiProperty(name="authId",desc="id")
+    @ApiProperty(name="id",desc="id")
     private String id;
 
     @Mappings({

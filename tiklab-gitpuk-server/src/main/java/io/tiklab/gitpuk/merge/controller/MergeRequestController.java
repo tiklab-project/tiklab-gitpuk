@@ -107,7 +107,7 @@ public class MergeRequestController {
 
     @RequestMapping(path = "/execMerge",method = RequestMethod.POST)
     @ApiMethod(name = "execMerge",desc = "执行合并")
-    @ApiParam(name = "mergeRequestQuery",desc = "mergeRequestQuery",required = true)
+    @ApiParam(name = "mergeData",desc = "mergeData",required = true)
     public Result<Void> execMerge(@RequestBody @Valid @NotNull MergeData mergeData){
         String s = mergeRequestService.execMerge(mergeData);
 
@@ -116,7 +116,7 @@ public class MergeRequestController {
 
     @RequestMapping(path = "/findConflictingFile",method = RequestMethod.POST)
     @ApiMethod(name = "findConflictingFile",desc = "查询冲突文件")
-    @ApiParam(name = "filePath",desc = "filePath",required = true)
+    @ApiParam(name = "mergeData",desc = "mergeData",required = true)
     public Result<List<String>> findConflictingFile(@RequestBody @Valid @NotNull MergeData mergeData){
         List<String> mergeClashFile = mergeRequestService.findConflictingFile(mergeData);
 
@@ -134,7 +134,7 @@ public class MergeRequestController {
 
     @RequestMapping(path = "/conflictResolutionFile",method = RequestMethod.POST)
     @ApiMethod(name = "conflictResolutionFile",desc = "在线解决冲突文件")
-    @ApiParam(name = "filePath",desc = "filePath",required = true)
+    @ApiParam(name = "mergeClashFileSet",desc = "mergeClashFileSet",required = true)
     public Result<MergeClashFile> conflictResolutionFile(@RequestBody @NotNull MergeClashFileSet mergeClashFileSet){
          mergeRequestService.conflictResolutionFile(mergeClashFileSet);
 

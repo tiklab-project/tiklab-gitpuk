@@ -350,7 +350,7 @@ public class GitFileUtil {
      * 下载裸仓库 为zip
      * @param bareAddress 裸仓库地址
      * @param branch 分支
-     * @param headType 类型 tag、branch
+     * @param headType 类型 tag、branch、commit
      */
     public static void downLoadBareRepoZip(String bareAddress, String branch,String headType, HttpServletResponse response) {
         try {
@@ -390,7 +390,7 @@ public class GitFileUtil {
      * 下载裸仓库 为tar
      * @param bareAddress 裸仓库地址
      * @param branch 分支
-     * @param headType 类型 tag、branch
+     * @param headType 类型 tag、branch、commit
      */
     public static void downLoadBareRepoTar(String bareAddress, String branch,String headType,
                                            HttpServletResponse response) {

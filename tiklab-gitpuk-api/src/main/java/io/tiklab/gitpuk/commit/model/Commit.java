@@ -1,82 +1,71 @@
 package io.tiklab.gitpuk.commit.model;
 
+import io.tiklab.postin.annotation.ApiModel;
+import io.tiklab.postin.annotation.ApiProperty;
+
 /**
  * 获取指定branch的提交信息
  */
+@ApiModel
 public class Commit {
 
-    /**
-     * 仓库id
-     */
+    @ApiProperty(name="rpyId",desc="仓库id")
     private String rpyId;
 
-    /**
-     * 分支
-     */
+
+    @ApiProperty(name="branch",desc="分支")
     private String branch;
 
-   // refCode 分支、标签名字或者 commitId
+    @ApiProperty(name="refCode",desc="分支、标签名字或者 commitId")
     private String refCode;
 
-    //类型 branch、tag、commit
+    @ApiProperty(name="refCodeType",desc="类型 branch、tag、commit")
     private String refCodeType;
 
-    /**
-     * 文件地址
-     */
+
+    @ApiProperty(name="filePath",desc="文件地址")
     private String filePath;
 
-    /**
-     * 模糊查询地址
-     */
+
+    @ApiProperty(name="likePath",desc="模糊查询地址")
     private String likePath;
 
-    /**
-     * 开始数量
-     */
+
+    @ApiProperty(name="begin",desc="开始数量")
     private int begin;
 
-    /**
-     * 结束数量
-     */
+
+    @ApiProperty(name="end",desc="结束数量")
     private int end;
 
-    /**
-     * 查询所有
-     */
+
+    @ApiProperty(name="number",desc="查询所有")
     private String number;
 
-    /**
-     * 输入的查询提交信息
-     */
+
+    @ApiProperty(name="commitInfo",desc="输入的查询提交信息")
     private String commitInfo;
 
-    /**
-     * 提交人
-     */
+
+    @ApiProperty(name="commitUser",desc="提交人")
     private String commitUser;
 
-    /*
-    * 目标分支
-    * */
+
+    @ApiProperty(name="targetBranch",desc="目标分支")
     private String targetBranch;
 
 
-    /**
-     * 查询是否是通过commitId查询  （通过提交界面查询提交代码文件或者查询代码文件的详情）
-     */
+
+    @ApiProperty(name="findCommitId",desc="查询是否是通过commitId查询(通过提交界面查询提交代码文件或者查询代码文件的详情")
     private boolean findCommitId;
 
 
 
-    /**
-     *源commitId （一般都是父级）
-     */
+    @ApiProperty(name="originCommitId",desc="源commitId （一般都是父级")
     private String originCommitId;
 
-    /**
-     *当前的commitId
-     */
+
+    @ApiProperty(name="commitId",desc="当前的commitId")
     private String commitId;
 
 

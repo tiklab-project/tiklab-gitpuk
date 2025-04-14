@@ -1,19 +1,12 @@
 package io.tiklab.gitpuk.authority.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.tiklab.gitpuk.authority.GitLfsAuthService;
-import io.tiklab.gitpuk.authority.lfs.GitLfsAuth;
+import io.tiklab.gitpuk.authority.lfs.LfsAuthService;
 import io.tiklab.gitpuk.authority.ValidUsrPwdServer;
-import io.tiklab.gitpuk.authority.request.LfsBatchRequest;
-import io.tiklab.gitpuk.authority.request.LfsData;
 import io.tiklab.gitpuk.authority.utils.ReturnResponse;
-import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
-import io.tiklab.gitpuk.common.RepositoryUtil;
 import io.tiklab.gitpuk.repository.model.Repository;
 import io.tiklab.gitpuk.repository.model.RepositoryQuery;
 import io.tiklab.gitpuk.repository.service.MemoryManService;
 import io.tiklab.gitpuk.repository.service.RecordCommitService;
-import io.tiklab.gitpuk.repository.service.RepWebHookService;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
@@ -62,14 +55,12 @@ public class HttpServlet extends GitServlet {
         @Autowired
         private MemoryManService memoryManService;
 
-        @Autowired
-        private GitPukYamlDataMaService yamlDataMaService;
 
         @Autowired
         private UserService userService;
 
         @Autowired
-        private GitLfsAuthService gitLfsAuthService;
+        private LfsAuthService httpLfsAuthService;
 
 
 
@@ -144,7 +135,10 @@ public class HttpServlet extends GitServlet {
 
             //处理lfs
             if (requestURI.endsWith("/info/lfs/objects/batch")) {
-                lfsAnalysis(request,response);
+                boolean result = httpLfsAuthService.HttpLfsAnalysis(request, response);
+                if (!result){
+                    return;
+                }
             }else {
                 super.service(req, res);
             }
@@ -171,40 +165,6 @@ public class HttpServlet extends GitServlet {
             super.doGet(req, rsp);
         }
 
-    /**
-     * 解析lfs 数据
-     * @param request request
-     * @param response response
-     */
-    public void lfsAnalysis(HttpServletRequest request,HttpServletResponse response) throws IOException {
-        String requestURI = request.getRequestURI();
-        LfsData lfsData = new LfsData();
-
-        //解析 客户端上传的数据
-        LfsBatchRequest lfsBatchRequest = new ObjectMapper().readValue(request.getInputStream(), LfsBatchRequest.class);
-
-        //上传的时候 判断lfs剩余的内存是否足够
-        if ("upload".equalsIgnoreCase(lfsBatchRequest.getOperation())){
-            boolean lfsStorage = memoryManService.isLfsStorage(request,lfsBatchRequest);
-            if (!lfsStorage){
-                ReturnResponse.lfsNotMemory(response);
-                return;
-            }
-        }else {
-            //拉取
-            String address = StringUtils.substringBetween(requestURI, "xcode/", ".git");
-            Repository repository = repositoryServer.findOnlyRpyByAddress(address);
-            String rpyLfsPath = RepositoryUtil.getRpyLfsPath(yamlDataMaService.repositoryAddress(), repository.getRpyId());
-            lfsData.setLfsPath(rpyLfsPath);
-        }
-        lfsData.setRequest(request);
-        lfsData.setResponse(response);
-        lfsData.setLfsBatchRequest(lfsBatchRequest);
-        lfsData.setType("http");
-        lfsData.setDomainNamePath(yamlDataMaService.visitAddress());
-        //解析lfs数据
-        gitLfsAuthService.HandleLfsBatch(lfsData);
-    }
 
 
     /**

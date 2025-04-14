@@ -36,7 +36,7 @@ public class LeadAuthController {
 
     @RequestMapping(path="/createLeadAuth",method = RequestMethod.POST)
     @ApiMethod(name = "createLeadAuth",desc = "创建第三方仓库认证")
-    @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
+    @ApiParam(name = "leadAuth",desc = "leadAuth",required = true)
     public Result<String> createLeadAuth(@RequestBody @NotNull @Valid LeadAuth leadAuth){
         String id = leadAuthService.createLeadAuth(leadAuth);
 
@@ -45,7 +45,7 @@ public class LeadAuthController {
 
     @RequestMapping(path="/updateLeadAuth",method = RequestMethod.POST)
     @ApiMethod(name = "updateLeadAuth",desc = "修改第三方仓库认证")
-    @ApiParam(name = "LeadAuth",desc = "LeadAuth",required = true)
+    @ApiParam(name = "leadAuth",desc = "leadAuth",required = true)
     public Result<Void> updateLeadAuth(@RequestBody @NotNull @Valid LeadAuth leadAuth){
         leadAuthService.updateLeadAuth(leadAuth);
 
@@ -80,7 +80,7 @@ public class LeadAuthController {
 
     @RequestMapping(path = "/findLeadAuthList",method = RequestMethod.POST)
     @ApiMethod(name = "findLeadAuthList",desc = "通过条件查询")
-    @ApiParam(name = "LeadAuthQuery",desc = "LeadAuthQuery",required = true)
+    @ApiParam(name = "leadAuthQuery",desc = "leadAuthQuery",required = true)
     public Result<List<LeadAuth>> findLeadAuthList(@RequestBody @Valid @NotNull LeadAuthQuery leadAuthQuery){
         List<LeadAuth> artifactList = leadAuthService.findLeadAuthList(leadAuthQuery);
 

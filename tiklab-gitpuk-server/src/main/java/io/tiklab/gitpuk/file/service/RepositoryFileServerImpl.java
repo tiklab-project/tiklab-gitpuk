@@ -10,7 +10,6 @@ import io.tiklab.gitpuk.common.git.GitFileUtil;
 import io.tiklab.gitpuk.file.model.*;
 import io.tiklab.gitpuk.common.RepositoryFileUtil;
 import io.tiklab.gitpuk.common.RepositoryUtil;
-import io.tiklab.gitpuk.repository.service.RepositoryLfsService;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,8 +33,6 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
     @Autowired
     GitPukYamlDataMaService yamlDataMaService;
 
-    @Autowired
-    RepositoryLfsService repositoryLfsService;
 
     @Override
     public void createBareFolder(RepositoryFile repositoryFile) {
@@ -150,17 +147,17 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
         JSONObject downLoadQuery = this.getDownLoadQuery(queryString);
 
         String headName;
-        String headType;
 
         String rpyName = downLoadQuery.get("rpyName").toString();
         String type = downLoadQuery.get("type").toString();
         Object branchObj = downLoadQuery.get("branch");
+        String refCodeType = downLoadQuery.get("refCodeType").toString();
+
         if (ObjectUtils.isNotEmpty(branchObj)){
             headName=branchObj.toString();
-            headType="branch";
+
         }else {
             headName = downLoadQuery.get("tag").toString();
-            headType="tag";
         }
 
         String rpyPath = yamlDataMaService.repositoryAddress();
@@ -172,14 +169,14 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
             response.setContentType("application/zip");
             response.setHeader("Content-Disposition", "attachment; filename="+rpyName+"."+type);
             //下载裸仓库文件
-            GitFileUtil.downLoadBareRepoZip(bareAddress,headName,headType,response);
+            GitFileUtil.downLoadBareRepoZip(bareAddress,headName,refCodeType,response);
         }
         //下载裸仓库为tar
         if (("tar").equals(type)){
             response.setContentType("application/x-tar");
             response.setHeader("Content-Disposition", "attachment; filename="+rpyName+"."+type);
             //下载裸仓库文件
-            GitFileUtil.downLoadBareRepoTar(bareAddress,headName,headType,response);
+            GitFileUtil.downLoadBareRepoTar(bareAddress,headName,refCodeType,response);
         }
 
     }

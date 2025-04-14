@@ -1,6 +1,7 @@
 package io.tiklab.gitpuk.authority.ssh;
 
 
+import io.tiklab.gitpuk.authority.lfs.LfsAuthService;
 import io.tiklab.gitpuk.authority.ValidUsrPwdServer;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
 import io.tiklab.gitpuk.repository.service.RecordCommitService;
@@ -65,6 +66,9 @@ public class SshService {
     @Autowired
     GitPukYamlDataMaService GitTokYamlDataMaService;
 
+    @Autowired
+    LfsAuthService lfsAuthService;
+
 
 
     @Bean
@@ -89,7 +93,8 @@ public class SshService {
         PublickeyAuthenticator publicKeyValid = authInstance.getPublicKeyValid(authSShServer);
         sshServer.setPublickeyAuthenticator(publicKeyValid);
         try {
-            sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer,recordCommitService));
+            sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer
+                    ,recordCommitService,lfsAuthService));
             sshServer.start();
             int port = sshServer.getPort();
             logger.info("ssh端口："+port);
@@ -116,10 +121,17 @@ public class SshService {
 
         private final RecordCommitService recordCommitService;
 
-        public GitTokSshCommandFactory(GitPukYamlDataMaService yamlDataMaService, RepositoryService repositoryServer, RecordCommitService recordCommitService) {
+        private final LfsAuthService lfsAuthService;
+
+        public GitTokSshCommandFactory(GitPukYamlDataMaService yamlDataMaService,
+                                       RepositoryService repositoryServer,
+                                       RecordCommitService recordCommitService,
+                                       LfsAuthService lfsAuthService) {
+
             this.yamlDataMaService = yamlDataMaService;
             this.repositoryServer=repositoryServer;
             this.recordCommitService=recordCommitService;
+            this.lfsAuthService=lfsAuthService;
         }
 
 
@@ -166,12 +178,15 @@ public class SshService {
 
                         //git lfs文件
                     }else if (command.startsWith("git-lfs-authenticate")){
+
                         //截取上传路径或ip
                         String s = StringUtils.substringBefore(clientAddress, ":");
                         if (s.startsWith("/")){
                             s=StringUtils.substringAfter(s, "/");
                         }
-                        return new GitLfsCommand(yamlDataMaService,s,rpyPath);
+
+                       return lfsAuthService.SshLfsCommand(yamlDataMaService,s,rpyPath);
+                        //return new GitLfsCommand(yamlDataMaService,s,rpyPath);
                     }
                 } catch (Exception | Error e) {
                     throw new ApplicationException("仓库不存在");

@@ -107,7 +107,7 @@ public class RemoteInfoController {
 
     @RequestMapping(path = "/findMirrorResult",method = RequestMethod.POST)
     @ApiMethod(name = "sendOneRepository",desc = "获取推送结果")
-    @ApiParam(name = "remoteInfo",desc = "remoteInfo",required = true)
+    @ApiParam(name = "rpyId",desc = "仓库id",required = true)
     public Result<RemoteInfo> findMirrorResult( @NotNull String remoteInfoId,@NotNull  String rpyId){
         String oneRepository = remoteInfoService.findMirrorResult(remoteInfoId,rpyId);
 

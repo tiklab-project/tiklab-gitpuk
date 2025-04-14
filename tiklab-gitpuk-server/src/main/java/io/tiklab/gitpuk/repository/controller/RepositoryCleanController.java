@@ -28,7 +28,7 @@ public class RepositoryCleanController {
 
     @RequestMapping(path="/findLargeFile",method = RequestMethod.POST)
     @ApiMethod(name = "findLargeFile",desc = "条件查询大文件")
-    @ApiParam(name = "repository",desc = "repository",required = true)
+    @ApiParam(name = "repositoryCleanQuery",desc = "repositoryCleanQuery",required = true)
     public Result<String> findLargeFile(@RequestBody @NotNull @Valid RepositoryCleanQuery repositoryCleanQuery){
         String file = cleanService.findLargeFile(repositoryCleanQuery);
 
@@ -37,7 +37,7 @@ public class RepositoryCleanController {
 
     @RequestMapping(path="/findLargeFileResult",method = RequestMethod.POST)
     @ApiMethod(name = "findLargeFileResult",desc = "条件查询大文件结果")
-    @ApiParam(name = "repository",desc = "repository",required = true)
+    @ApiParam(name = "repositoryCleanQuery",desc = "repositoryCleanQuery",required = true)
     public Result<List<RepositoryClean>> findLargeFileResult(@RequestBody @NotNull @Valid RepositoryCleanQuery repositoryCleanQuery){
         List<RepositoryClean> repositoryClean  =  cleanService.findLargeFileResult(repositoryCleanQuery);
 
@@ -46,7 +46,7 @@ public class RepositoryCleanController {
 
     @RequestMapping(path="/execCleanFile",method = RequestMethod.POST)
     @ApiMethod(name = "execCleanFile",desc = "执行清理裸仓库中你的无效文件")
-    @ApiParam(name = "execCleanFile",desc = "repositoryCleanQuery",required = true)
+    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
     public Result<String> execCleanFile(String rpyId){
         String largeFile = cleanService.execCleanFile(rpyId);
 

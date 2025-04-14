@@ -74,7 +74,7 @@ public class RepositoryFileController {
 
     @RequestMapping(path="/findBareAllFile",method = RequestMethod.POST)
     @ApiMethod(name = "findBareAllFile",desc = "条件查询裸仓库所有文件")
-    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    @ApiParam(name = "fileFindQuery",desc = "fileFindQuery",required = true)
     public Result<String> findBareAllFile( @RequestBody @NotNull @Valid FileFindQuery fileFindQuery){
 
         List<String> bareAllFile = repositoryFileServer.findBareAllFile(fileFindQuery);
@@ -113,7 +113,7 @@ public class RepositoryFileController {
 
     @RequestMapping(path="/downLoadBareRepo/**",method = RequestMethod.GET)
     @ApiMethod(name = "writeFile",desc = "下载裸仓库")
-    @ApiParam(name = "fileQuery",desc = "fileQuery",required = true)
+    @ApiParam(name = "request",desc = "request",required = true)
     public void downLoadBareRepo(HttpServletRequest request, HttpServletResponse response){
         String queryString = request.getQueryString();
 
@@ -123,7 +123,7 @@ public class RepositoryFileController {
 
     @RequestMapping(path="/downLoadLfsFile/**",method = RequestMethod.GET)
     @ApiMethod(name = "downloadLfsFile",desc = "下载lfs文件")
-    @ApiParam(name = "fileDownload",desc = "fileDownload",required = true)
+    @ApiParam(name = "request",desc = "request",required = true)
     public void downloadLfsFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String queryString = request.getQueryString();
 

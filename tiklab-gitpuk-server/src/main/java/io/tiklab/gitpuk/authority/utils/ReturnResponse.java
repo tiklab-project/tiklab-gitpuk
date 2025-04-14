@@ -9,6 +9,19 @@ import java.io.PrintWriter;
 * */
 public class ReturnResponse {
 
+    /**
+     * lfs不支持
+     * @param response response
+     */
+    public static void lfsNotSupport (HttpServletResponse response) throws IOException {
+        String jsonResponse ="{\"message\": \"This server does not support Git LFS. Please remove LFS files Or Upgrade community Edition\"," +
+                " \"documentation_url\": \"https://your-server.com/docs\"}";
+        // 设置状态码 507
+        response.setStatus(507); // 507
+        response.setContentType("application/json; charset=UTF-8");
+        response.getWriter().write(jsonResponse);
+    }
+
 
     /**
      * lfs内存不足

@@ -85,7 +85,8 @@ public class GatewayFilterAutoConfiguration {
                         "/permission/findPermissions",
                         "/RepWeb/createRepWebHook",
                         "/init/install/findStatus",
-                        "/state/apply/findApply"
+                        "/state/apply/findApply",
+                        "/openapi/doc"
                 })
                 .ignorePreUrls(new String[]{
                         "/service",

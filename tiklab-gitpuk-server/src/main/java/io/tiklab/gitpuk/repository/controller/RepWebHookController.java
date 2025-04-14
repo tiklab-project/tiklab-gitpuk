@@ -38,7 +38,7 @@ public class RepWebHookController {
 
     @RequestMapping(path="/createRepWebHook",method = RequestMethod.POST)
     @ApiMethod(name = "createRepWebHook",desc = "创建repRepWebHook")
-    @ApiParam(name = "RepWebHook",desc = "RepWebHook",required = true)
+    @ApiParam(name = "repRepWebHook",desc = "repRepWebHook",required = true)
     public Result<String> createRepWebHook(@RequestBody @NotNull @Valid RepWebHook repRepWebHook){
         String id = repRepWebHookService.createRepWebHook(repRepWebHook);
 
@@ -47,7 +47,7 @@ public class RepWebHookController {
 
     @RequestMapping(path="/updateRepWebHook",method = RequestMethod.POST)
     @ApiMethod(name = "updateRepWebHook",desc = "修改repRepWebHook")
-    @ApiParam(name = "RepWebHook",desc = "RepWebHook",required = true)
+    @ApiParam(name = "repRepWebHook",desc = "repRepWebHook",required = true)
     public Result<Void> updateRepWebHook(@RequestBody @NotNull @Valid RepWebHook repRepWebHook){
         repRepWebHookService.updateRepWebHook(repRepWebHook);
 
@@ -82,7 +82,7 @@ public class RepWebHookController {
 
     @RequestMapping(path = "/findRepWebHookList",method = RequestMethod.POST)
     @ApiMethod(name = "findRepWebHookList",desc = "通过条件查询")
-    @ApiParam(name = "RepWebHookQuery",desc = "RepWebHookQuery",required = true)
+    @ApiParam(name = "repRepWebHookQuery",desc = "repRepWebHookQuery",required = true)
     public Result<List<RepWebHook>> findRepWebHookList(@RequestBody @Valid @NotNull RepWebHookQuery repRepWebHookQuery){
         List<RepWebHook> artifactList = repRepWebHookService.findRepWebHookList(repRepWebHookQuery);
 

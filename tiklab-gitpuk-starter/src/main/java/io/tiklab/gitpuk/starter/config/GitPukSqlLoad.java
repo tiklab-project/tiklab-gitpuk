@@ -65,6 +65,7 @@ public class GitPukSqlLoad {
                 "xcode_1.0.3",
                 "privilege_1.0.3",
                 "privilege-gittok_1.0.3",
+                "gitpuk_1.0.3",
         });
         dsmConfig.newVersion("1.0.4", new String[]{
                 "message_1.0.4",

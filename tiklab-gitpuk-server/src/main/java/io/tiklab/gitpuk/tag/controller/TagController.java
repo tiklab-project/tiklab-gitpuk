@@ -26,7 +26,7 @@ public class TagController {
     TagService tagService;
     @RequestMapping(path="/createTag",method = RequestMethod.POST)
     @ApiMethod(name = "create",desc = "创建标签")
-    @ApiParam(name = "repository",desc = "repository",required = true)
+    @ApiParam(name = "tag",desc = "tag",required = true)
     public Result<String> createTag(@RequestBody @NotNull @Valid Tag tag){
 
       tagService.createTag(tag);
@@ -37,7 +37,7 @@ public class TagController {
 
     @RequestMapping(path="/deleteTag",method = RequestMethod.POST)
     @ApiMethod(name = "deleteTag",desc = "删除标签")
-    @ApiParam(name = "tagName",desc = "tagName",required = true)
+    @ApiParam(name = "tag",desc = "tag",required = true)
     public Result<String> deleteTag(@RequestBody @NotNull @Valid Tag tag){
 
         tagService.deleteTag(tag);
@@ -47,7 +47,7 @@ public class TagController {
 
     @RequestMapping(path="/findTagList",method = RequestMethod.POST)
     @ApiMethod(name = "findTagList",desc = "查询标签")
-    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    @ApiParam(name = "tagQuery",desc = "tagQuery",required = true)
     public Result<List<Tag>> findTagList(@RequestBody @NotNull @Valid TagQuery tagQuery){
 
        List<Tag> tagList= tagService.findTagList(tagQuery);

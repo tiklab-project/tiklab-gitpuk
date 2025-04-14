@@ -29,7 +29,7 @@ public class LeadToController {
 
     @RequestMapping(path="/findThirdRepositoryList",method = RequestMethod.POST)
     @ApiMethod(name = "findThirdRepositoryList",desc = "查询第三方仓库应用的仓库")
-    @ApiParam(name = "importAuthId",desc = "importAuthId",required = true)
+    @ApiParam(name = "leadToQuery",desc = "leadToQuery",required = true)
     public Result<List> findThirdRepositoryList(@RequestBody @NotNull @Valid LeadToQuery leadToQuery){
 
         Pagination<LeadTo> thirdRepositoryList = toLeadService.findThirdRepositoryList(leadToQuery);
@@ -39,7 +39,7 @@ public class LeadToController {
 
     @RequestMapping(path="/toLeadRepository",method = RequestMethod.POST)
     @ApiMethod(name = "toLeadRepository",desc = " 导入仓库")
-    @ApiParam(name = "repositoryAddress",desc = "仓库路径",required = true)
+    @ApiParam(name = "leadToQuery",desc = "leadToQuery",required = true)
     public Result<String> toLeadRepository(@RequestBody @NotNull @Valid LeadToQuery leadToQuery){
 
         String repository = toLeadService.toLeadRepository(leadToQuery);

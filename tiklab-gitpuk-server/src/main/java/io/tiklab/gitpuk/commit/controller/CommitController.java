@@ -36,7 +36,7 @@ public class CommitController {
 
     @RequestMapping(path="/findBareLatelyCommit",method = RequestMethod.POST)
     @ApiMethod(name = "findBareLatelyCommit",desc = "查询裸仓库最近一次提交记录")
-    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    @ApiParam(name = "commit",desc = "commit",required = true)
     public Result<CommitMessage> findBareLatelyCommit(@RequestBody @Valid @NotNull Commit commit){
 
         CommitMessage allBranch = commitServer.findLatelyBranchCommit(commit);
@@ -49,7 +49,7 @@ public class CommitController {
 
     @RequestMapping(path="/findLikeCommitDiffFileList",method = RequestMethod.POST)
     @ApiMethod(name = "findLikeCommitDiffFileList",desc = "模糊查询两个提交之前的差异文件")
-    @ApiParam(name = "commit",desc = "commitId",required = true)
+    @ApiParam(name = "commit",desc = "commit",required = true)
     public Result<FileDiffEntry> findLikeCommitDiffFileList(@RequestBody @Valid @NotNull Commit commit){
 
         FileDiffEntry commitFileDiffList = commitServer.findLikeCommitDiffFileList(commit);
@@ -60,7 +60,7 @@ public class CommitController {
 
     @RequestMapping(path="/findCommitFileDiff",method = RequestMethod.POST)
     @ApiMethod(name = "findCommitFileDiff",desc = "查询具体文件两次提交的差异")
-    @ApiParam(name = "commit",desc = "commitId",required = true)
+    @ApiParam(name = "commit",desc = "commit",required = true)
     public Result< List<CommitFileDiff>> findCommitDiffFile(@RequestBody @Valid @NotNull Commit commit){
 
         List<CommitFileDiff> fileDiff = commitServer.findCommitFileDiff(commit);
@@ -73,7 +73,7 @@ public class CommitController {
 
     @RequestMapping(path="/findCommitLineFile",method = RequestMethod.POST)
     @ApiMethod(name = "findCommitLineFile",desc = "查询提交文件具体内容信息")
-    @ApiParam(name = "commit",desc = "commitId",required = true)
+    @ApiParam(name = "commit",desc = "commit",required = true)
     public Result< List<CommitFileDiff>> findCommitDiffFile( @RequestBody @Valid @NotNull CommitFile commit){
 
         List<CommitFileDiff> fileDiff = commitServer.findCommitLineFile(commit);
@@ -149,7 +149,7 @@ public class CommitController {
     }
     @RequestMapping(path="/findDiffFileByCommitId",method = RequestMethod.POST)
     @ApiMethod(name = "findDiffFileByCommitId",desc = "通过提交commitId 查询与父级的差异文件")
-    @ApiParam(name = "commit",desc = "commitId",required = true)
+    @ApiParam(name = "commit",desc = "commit",required = true)
     public Result<FileDiffEntry> findDiffFileByCommitId(@RequestBody @Valid @NotNull Commit commit){
 
         FileDiffEntry commitFileDiffList = commitServer.findDiffFileByCommitId(commit);
@@ -159,7 +159,7 @@ public class CommitController {
 
     @RequestMapping(path="/findDiffFileByMergeId",method = RequestMethod.POST)
     @ApiMethod(name = "findDiffFileByMergeId",desc = "通过合并请求id 查询差异文件")
-    @ApiParam(name = "commit",desc = "commit",required = true)
+    @ApiParam(name = "mergeId",desc = "mergeId",required = true)
     public Result<FileDiffEntry> findDiffFileByMergeId(@Valid @NotNull String mergeId){
 
         FileDiffEntry fileDiffList = commitServer.findDiffFileByMergeId(mergeId);
@@ -180,7 +180,7 @@ public class CommitController {
 
     @RequestMapping(path="/findLatelyCommit",method = RequestMethod.POST)
     @ApiMethod(name = "findLatelyCommit",desc = "查询仓库最近提交")
-    @ApiParam(name = "RepositoryId",desc = "RepositoryId、time",required = true)
+    @ApiParam(name = "repositoryId",desc = "RepositoryId、time",required = true)
     public Result<List<CommitMessage>> findLatelyCommit(@Valid @NotNull String repositoryId,Integer number){
 
         List<CommitMessage> commitMessageList = commitServer.findLatelyCommit(repositoryId,number);

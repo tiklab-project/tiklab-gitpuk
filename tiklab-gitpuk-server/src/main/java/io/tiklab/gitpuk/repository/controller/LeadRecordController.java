@@ -34,7 +34,7 @@ public class LeadRecordController {
 
     @RequestMapping(path="/createLeadRecord",method = RequestMethod.POST)
     @ApiMethod(name = "createLeadRecord",desc = "创建第三方仓库记录")
-    @ApiParam(name = "LeadRecord",desc = "LeadRecord",required = true)
+    @ApiParam(name = "leadRecord",desc = "leadRecord",required = true)
     public Result<String> createLeadRecord(@RequestBody @NotNull @Valid LeadRecord leadRecord){
         String id = leadRecordService.createLeadRecord(leadRecord);
 
@@ -70,7 +70,7 @@ public class LeadRecordController {
 
     @RequestMapping(path = "/findLeadRecordList",method = RequestMethod.POST)
     @ApiMethod(name = "findLeadRecordList",desc = "通过条件查询")
-    @ApiParam(name = "LeadRecordQuery",desc = "LeadRecordQuery",required = true)
+    @ApiParam(name = "leadRecordQuery",desc = "leadRecordQuery",required = true)
     public Result<List<LeadRecord>> findLeadRecordList(@RequestBody @Valid @NotNull LeadRecordQuery leadRecordQuery){
         List<LeadRecord> artifactList = leadRecordService.findLeadRecordList(leadRecordQuery);
 

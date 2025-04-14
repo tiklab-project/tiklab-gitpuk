@@ -48,7 +48,7 @@ public class AuthSshController {
 
     @RequestMapping(path="/deleteAuthSsh",method = RequestMethod.POST)
     @ApiMethod(name = "deleteAuthSsh",desc = "删除认证")
-    @ApiParam(name = "Id",desc = "认证id",required = true)
+    @ApiParam(name = "id",desc = "认证id",required = true)
     public Result<Void> deleteAuthSsh(@NotNull String id){
 
         authSshServer.deleteAuthSsh(id);
@@ -59,7 +59,7 @@ public class AuthSshController {
 
     @RequestMapping(path="/findOneAuthSsh",method = RequestMethod.POST)
     @ApiMethod(name = "findOneAuthSsh",desc = "查询单个认证")
-    @ApiParam(name = "authSshId",desc = "认证id",required = true)
+    @ApiParam(name = "id",desc = "认证id",required = true)
     public Result<AuthSsh> findOneAuthSsh(@NotNull String id){
 
         AuthSsh authSsh = authSshServer.findOneAuthSsh(id);
@@ -71,6 +71,7 @@ public class AuthSshController {
 
     @RequestMapping(path="/findAuthSshList",method = RequestMethod.POST)
     @ApiMethod(name = "findUserAuthSsh",desc = "查询认证")
+    @ApiParam(name = "authSshQuery",desc = "authSshQuery",required = true)
     public Result<List<AuthSsh>> findAuthSshList(@RequestBody @NotNull @Valid AuthSshQuery authSshQuery){
 
         List<AuthSsh> List = authSshServer.findAuthSshList(authSshQuery);

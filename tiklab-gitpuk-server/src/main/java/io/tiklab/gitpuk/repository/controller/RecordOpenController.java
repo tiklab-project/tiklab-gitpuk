@@ -35,18 +35,18 @@ public class RecordOpenController {
 
     @RequestMapping(path="/createRecordOpen",method = RequestMethod.POST)
     @ApiMethod(name = "createRecordOpen",desc = "创建打开仓库记录管理")
-    @ApiParam(name = "RecordOpen",desc = "RecordOpen",required = true)
-    public Result<String> createRecordOpen(@RequestBody @NotNull @Valid RecordOpen RecordOpen){
-        String id = recordOpenService.createRecordOpen(RecordOpen);
+    @ApiParam(name = "recordOpen",desc = "recordOpen",required = true)
+    public Result<String> createRecordOpen(@RequestBody @NotNull @Valid RecordOpen recordOpen){
+        String id = recordOpenService.createRecordOpen(recordOpen);
 
         return Result.ok(id);
     }
 
     @RequestMapping(path="/updateRecordOpen",method = RequestMethod.POST)
     @ApiMethod(name = "updateRecordOpen",desc = "修改打开仓库记录管理")
-    @ApiParam(name = "RecordOpen",desc = "RecordOpen",required = true)
-    public Result<Void> updateRecordOpen(@RequestBody @NotNull @Valid RecordOpen RecordOpen){
-        recordOpenService.updateRecordOpen(RecordOpen);
+    @ApiParam(name = "recordOpen",desc = "recordOpen",required = true)
+    public Result<Void> updateRecordOpen(@RequestBody @NotNull @Valid RecordOpen recordOpen){
+        recordOpenService.updateRecordOpen(recordOpen);
 
         return Result.ok();
     }
@@ -79,7 +79,7 @@ public class RecordOpenController {
 
     @RequestMapping(path = "/findRecordOpenList",method = RequestMethod.POST)
     @ApiMethod(name = "findRecordOpenList",desc = "通过条件查询")
-    @ApiParam(name = "RecordOpenQuery",desc = "RecordOpenQuery",required = true)
+    @ApiParam(name = "recordOpenQuery",desc = "recordOpenQuery",required = true)
     public Result<List<RecordOpen>> findRecordOpenList(@RequestBody @Valid @NotNull RecordOpenQuery recordOpenQuery){
         List<RecordOpen> artifactList = recordOpenService.findRecordOpenList(recordOpenQuery);
 
@@ -88,7 +88,7 @@ public class RecordOpenController {
 
     @RequestMapping(path = "/findRecordOpenPage",method = RequestMethod.POST)
     @ApiMethod(name = "findRecordOpenPage",desc = "通过条件分页查询")
-    @ApiParam(name = "RecordOpenQuery",desc = "RecordOpenQuery",required = true)
+    @ApiParam(name = "recordOpenQuery",desc = "recordOpenQuery",required = true)
     public Result<Pagination<RecordOpen>> findRecordOpenPage(@RequestBody @Valid @NotNull RecordOpenQuery recordOpenQuery){
         Pagination<RecordOpen> pagination = recordOpenService.findRecordOpenPage(recordOpenQuery);
 

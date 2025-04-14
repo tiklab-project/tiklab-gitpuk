@@ -36,7 +36,7 @@ public class RepositoryForkController {
 
     @RequestMapping(path="/createRepositoryFork",method = RequestMethod.POST)
     @ApiMethod(name = "createRepositoryFork",desc = "创建仓库fork")
-    @ApiParam(name = "RepositoryFork",desc = "RepositoryFork",required = true)
+    @ApiParam(name = "repositoryFork",desc = "repositoryFork",required = true)
     public Result<String> createRepositoryFork(@RequestBody @NotNull @Valid RepositoryFork repositoryFork){
         String id = repositoryForkService.createRepositoryFork(repositoryFork);
 
@@ -48,7 +48,7 @@ public class RepositoryForkController {
 
     @RequestMapping(path="/updateRepositoryFork",method = RequestMethod.POST)
     @ApiMethod(name = "updateRepositoryFork",desc = "修改仓库fork")
-    @ApiParam(name = "RepositoryFork",desc = "RepositoryFork",required = true)
+    @ApiParam(name = "repositoryFork",desc = "repositoryFork",required = true)
     public Result<Void> updateRepositoryFork(@RequestBody @NotNull @Valid RepositoryFork repositoryFork){
         repositoryForkService.updateRepositoryFork(repositoryFork);
 
@@ -83,7 +83,7 @@ public class RepositoryForkController {
 
     @RequestMapping(path = "/findRepositoryForkList",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryForkList",desc = "通过条件查询")
-    @ApiParam(name = "RepositoryForkQuery",desc = "RepositoryForkQuery",required = true)
+    @ApiParam(name = "repositoryForkQuery",desc = "repositoryForkQuery",required = true)
     public Result<List<RepositoryFork>> findRepositoryForkList(@RequestBody @Valid @NotNull RepositoryForkQuery repositoryForkQuery){
         List<RepositoryFork> artifactList = repositoryForkService.findRepositoryForkList(repositoryForkQuery);
 
@@ -92,7 +92,7 @@ public class RepositoryForkController {
 
     @RequestMapping(path = "/findRepositoryForkPage",method = RequestMethod.POST)
     @ApiMethod(name = "findRepositoryForkPage",desc = "通过条件分页查询")
-    @ApiParam(name = "RepositoryForkQuery",desc = "RepositoryForkQuery",required = true)
+    @ApiParam(name = "repositoryForkQuery",desc = "repositoryForkQuery",required = true)
     public Result<List<Pagination<RepositoryFork>>> findRepositoryForkPage(@RequestBody @Valid @NotNull RepositoryForkQuery repositoryForkQuery){
         Pagination<RepositoryFork> repositoryForkPage = repositoryForkService.findRepositoryForkPage(repositoryForkQuery);
 
@@ -110,7 +110,7 @@ public class RepositoryForkController {
 
     @RequestMapping(path="/findForkResult",method = RequestMethod.POST)
     @ApiMethod(name = "findForkResult",desc = "查询fork结果")
-    @ApiParam(name = "repositoryFork",desc = "repositoryFork",required = true)
+    @ApiParam(name = "repositoryId",desc = "仓库id",required = true)
     public Result<Integer> findForkResult( @NotNull String repositoryId){
         Integer result = repositoryForkService.findForkResult(repositoryId);
 

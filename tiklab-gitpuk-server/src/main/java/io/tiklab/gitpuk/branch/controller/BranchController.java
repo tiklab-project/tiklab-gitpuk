@@ -53,7 +53,7 @@ public class BranchController {
 
     @RequestMapping(path="/findBranch",method = RequestMethod.POST)
     @ApiMethod(name = "findBranch",desc = " 查询单个分支")
-    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    @ApiParam(name = "commitId",desc = "commitId",required = true)
     public Result<Branch> findBranch(@NotNull String rpyId,@NotNull String commitId){
 
         Branch branch = branchServer.findBranch(rpyId, commitId);
@@ -86,7 +86,7 @@ public class BranchController {
 
     @RequestMapping(path="/updateDefaultBranch",method = RequestMethod.POST)
     @ApiMethod(name = "updateDefaultBranch",desc = "修改默认分支")
-    @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
+    @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
     public Result<Void> updateDefaultBranch(@RequestBody @Valid @NotNull BranchQuery branchQuery){
 
         branchServer.updateDefaultBranch(branchQuery);
@@ -97,59 +97,11 @@ public class BranchController {
 
     @RequestMapping(path="/mergeBranch",method = RequestMethod.POST)
     @ApiMethod(name = "mergeBranch",desc = "合并分支")
-    @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
+    @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
     public Result<Void> mergeBranch(@RequestBody @Valid @NotNull BranchQuery branchQuery){
 
         branchServer.mergeBranch(branchQuery);
 
         return Result.ok();
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -70,16 +70,12 @@ public class StatisticsController {
 
     @RequestMapping(path="/codesStatistics",method = RequestMethod.POST)
     @ApiMethod(name = "commitCount",desc = "单个仓库提交代码统计")
-    @ApiParam(name = "commitCount",desc = "LeadRecord",required = true)
+    @ApiParam(name = "statisticsQuery",desc = "statisticsQuery",required = true)
     public Result<Statistics> codesStatistics(@RequestBody @NotNull @Valid StatisticsQuery statisticsQuery){
         Statistics statistics = statisticsService.codesStatistics(statisticsQuery);
 
         return Result.ok(statistics);
     }
-
-
-
-
 
 
 
@@ -123,6 +119,7 @@ public class StatisticsController {
 
     @RequestMapping(path="/statisticsTodoWorkByStatus",method = RequestMethod.POST)
     @ApiMethod(name = "statisticsTodoWorkByStatus",desc = "统计某个项目下，某个成员负责的事项对比")
+    @ApiParam(name = "params",desc = "params",required = true)
     public Result<Map<String,Object>> statisticsTodoWorkByStatus(@RequestBody @NotNull @Valid HashMap<String, String> params){
         Map<String, Integer> todoCount = statisticsService.statisticsTodoWorkByStatus(params);
 

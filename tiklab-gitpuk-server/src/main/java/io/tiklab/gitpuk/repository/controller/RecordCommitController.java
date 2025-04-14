@@ -36,18 +36,18 @@ public class RecordCommitController {
 
     @RequestMapping(path="/createRecordCommit",method = RequestMethod.POST)
     @ApiMethod(name = "createRecordCommit",desc = "创建打开仓库记录管理")
-    @ApiParam(name = "RecordCommit",desc = "RecordCommit",required = true)
-    public Result<String> createRecordCommit(@RequestBody @NotNull @Valid RecordCommit RecordCommit){
-        String id = recordCommitService.createRecordCommit(RecordCommit);
+    @ApiParam(name = "recordCommit",desc = "recordCommit",required = true)
+    public Result<String> createRecordCommit(@RequestBody @NotNull @Valid RecordCommit recordCommit){
+        String id = recordCommitService.createRecordCommit(recordCommit);
 
         return Result.ok(id);
     }
 
     @RequestMapping(path="/updateRecordCommit",method = RequestMethod.POST)
     @ApiMethod(name = "updateRecordCommit",desc = "修改打开仓库记录管理")
-    @ApiParam(name = "RecordCommit",desc = "RecordCommit",required = true)
-    public Result<Void> updateRecordCommit(@RequestBody @NotNull @Valid RecordCommit RecordCommit){
-        recordCommitService.updateRecordCommit(RecordCommit);
+    @ApiParam(name = "recordCommit",desc = "recordCommit",required = true)
+    public Result<Void> updateRecordCommit(@RequestBody @NotNull @Valid RecordCommit recordCommit){
+        recordCommitService.updateRecordCommit(recordCommit);
 
         return Result.ok();
     }
@@ -80,7 +80,7 @@ public class RecordCommitController {
 
     @RequestMapping(path = "/findRecordCommitList",method = RequestMethod.POST)
     @ApiMethod(name = "findRecordCommitList",desc = "通过条件查询")
-    @ApiParam(name = "RecordCommitQuery",desc = "RecordCommitQuery",required = true)
+    @ApiParam(name = "recordCommitQuery",desc = "recordCommitQuery",required = true)
     public Result<List<RecordCommit>> findRecordCommitList(@RequestBody @Valid @NotNull RecordCommitQuery recordCommitQuery){
         List<RecordCommit> artifactList = recordCommitService.findRecordCommitList(recordCommitQuery);
 
@@ -89,7 +89,7 @@ public class RecordCommitController {
 
     @RequestMapping(path = "/findRecordCommitPage",method = RequestMethod.POST)
     @ApiMethod(name = "findRecordCommitPage",desc = "通过条件分页查询")
-    @ApiParam(name = "RecordCommitQuery",desc = "RecordCommitQuery",required = true)
+    @ApiParam(name = "recordCommitQuery",desc = "recordCommitQuery",required = true)
     public Result<Pagination<RecordCommit>> findRecordCommitPage(@RequestBody @Valid @NotNull RecordCommitQuery recordCommitQuery){
         Pagination<RecordCommit> pagination = recordCommitService.findRecordCommitPage(recordCommitQuery);
 

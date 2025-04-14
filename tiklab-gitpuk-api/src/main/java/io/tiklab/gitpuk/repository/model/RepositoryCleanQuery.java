@@ -1,10 +1,11 @@
 package io.tiklab.gitpuk.repository.model;
 
 import io.tiklab.core.page.Page;
+import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
 import java.util.List;
-
+@ApiModel
 public class RepositoryCleanQuery {
     @ApiProperty(name ="pageParam",desc = "分页参数")
     private Page pageParam = new Page();

@@ -227,7 +227,7 @@ public class RepositoryController {
 
     @RequestMapping(path="/findRefCodeType",method = RequestMethod.POST)
     @ApiMethod(name = "findBareRepoType",desc = "查询仓库展示仓库的类型（分支、标签、提交的仓库）")
-    @ApiParam(name = "rpyId",desc = "rpyId",required = true)
+    @ApiParam(name = "repoId",desc = "仓库id",required = true)
     public Result<String> findRefCodeType( @NotNull String refCode,@NotNull String repoId){
 
         String type=repositoryServer.findRefCodeType(refCode,repoId);

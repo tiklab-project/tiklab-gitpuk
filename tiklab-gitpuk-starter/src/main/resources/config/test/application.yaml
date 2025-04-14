@@ -84,3 +84,6 @@ backups:
     dir: ${DATA_HOME}/repository
 
 
+postin:
+  scan:
+    package: io.tiklab.gitpuk
