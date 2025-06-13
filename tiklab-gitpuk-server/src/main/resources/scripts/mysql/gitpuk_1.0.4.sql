@@ -1,0 +1,1 @@
+ALTER TABLE rpy_integration_relevancy add type varchar(16);

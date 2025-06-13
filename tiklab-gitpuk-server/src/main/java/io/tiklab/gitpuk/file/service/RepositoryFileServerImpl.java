@@ -131,6 +131,7 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
     public byte[] downLoadBareFile(JSONObject jsonObject) {
         String branch = jsonObject.get("branch").toString();
         String filePath = jsonObject.get("filePath").toString();
+        String type = jsonObject.get("type").toString();
         String rpyPath = yamlDataMaService.repositoryAddress();
         //裸仓库地址
         String bareAddress = RepositoryUtil.findRepositoryAddress(rpyPath, jsonObject.get("rpyId").toString());
@@ -138,7 +139,7 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
             filePath = StringUtils.substringAfter(filePath, "/");
         }
         //下载裸仓库文件
-        byte[] bytes = GitFileUtil.downLoadBareRepoFile(filePath, bareAddress,branch);
+        byte[] bytes = GitFileUtil.downLoadBareRepoFile(filePath, bareAddress,branch,type);
         return bytes;
     }
 
@@ -199,11 +200,12 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
 
             if (fileAddress.startsWith("/")){
                  fileAddress = fileAddress.substring(1);
-            }
 
-             fileMessage = GitFileUtil.readBranchFile(repositoryAddress, fileAddress, refCode, fileQuery.getRefCodeType());
+            }
+            //fileAddress= StringUtils.substringAfter(fileAddress,"/");
             //读取裸仓库文件
-           // fileMessage =  RepositoryFileUtil.readBranchFile(repositoryAddress, branch, fileAddress, findCommitId);
+             fileMessage = GitFileUtil.readBranchFile(repositoryAddress, fileAddress, refCode, fileQuery.getRefCodeType());
+
            //如果该文件为lfs文件时，判断lfs文件是否存在
             if (StringUtils.isNotEmpty(fileMessage.getOid())){
                 String rpyLfsPath = RepositoryUtil.getRpyLfsPath(yamlDataMaService.repositoryAddress(), rpyId);

@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/statistics")
-@Api(name = "CommitStatisticsController",desc = "统计")
+//@Api(name = "CommitStatisticsController",desc = "统计")
 public class StatisticsController {
 
     @Autowired

@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/leadAuth")
-@Api(name = "LeadAuthController",desc = "导入第三方仓库的认证")
+//@Api(name = "LeadAuthController",desc = "导入第三方仓库的认证")
 public class LeadAuthController {
 
     private static Logger logger = LoggerFactory.getLogger(LeadAuthController.class);

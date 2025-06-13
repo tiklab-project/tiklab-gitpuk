@@ -302,9 +302,10 @@ public class GitFileUtil {
      * 下载裸仓库中的文件
      * @param filePath  filePath
      * @param bareAddress 裸仓库地址
-     * @param branch 分支
+     * @param branch branch
+     * @param  type 类型：commit、branch、tag
      */
-    public static byte[] downLoadBareRepoFile(String filePath,String bareAddress,String branch){
+    public static byte[] downLoadBareRepoFile(String filePath,String bareAddress,String branch,String type){
 
         try {
             File bareRepoDir = new File(bareAddress);
@@ -313,7 +314,7 @@ public class GitFileUtil {
                     .setGitDir(bareRepoDir)
                     .build();
             //获取裸仓库的TreeWalk
-            TreeWalk treeWalk = getTreeWalk(repository, branch,"branch");
+            TreeWalk treeWalk = getTreeWalk(repository, branch,type);
             ObjectId fileBlobId = null;
 
             while (treeWalk.next()) {

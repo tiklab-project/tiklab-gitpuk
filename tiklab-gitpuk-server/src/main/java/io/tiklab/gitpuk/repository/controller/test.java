@@ -23,12 +23,22 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class test {
 
     public static void main(String[] args) throws Exception {
 
-        // 源文件夹路径
+        String file="12";
+
+
+        boolean matches = file.matches("(?s)(?=.*1)(?=.*2).*");
+
+
+        System.out.println("结果："+matches);
+
+       /* // 源文件夹路径
         String sourceDirPath = "/Users/limingliang/tiklab/tiklab-gitpuk/repository/aee3bef1c5e7.git";
         // 目标文件夹路径
         String targetDirPath = "/Users/limingliang/tiklab/tiklab-gitpuk/repository/aee3bef1c5e7123.git";
@@ -36,7 +46,7 @@ public class test {
         File sourceDir = new File(sourceDirPath);
         File targetDir = new File(targetDirPath);
 
-        FileUtils.copyDirectory(sourceDir, targetDir);
+        FileUtils.copyDirectory(sourceDir, targetDir);*/
 
 
         System.out.println("循环结束，继续执行后续操作");

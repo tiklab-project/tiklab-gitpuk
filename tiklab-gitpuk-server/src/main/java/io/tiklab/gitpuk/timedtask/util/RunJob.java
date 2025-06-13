@@ -43,8 +43,6 @@ public  class RunJob implements org.quartz.Job {
         JobDataMap map = jobExecutionContext.getMergedJobDataMap();
         String group = (String)map.get("group");
         logger.info("定时任务group:"+group);
-
-
     }
 
 }

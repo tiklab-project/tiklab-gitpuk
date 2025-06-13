@@ -1,13 +1,13 @@
 package io.tiklab.gitpuk.starter.config;
 
 import io.tiklab.core.exception.ApplicationException;
-import io.tiklab.eam.client.author.config.TiklabApplicationRunner;
 import io.tiklab.gitpuk.timedtask.model.TimeTaskInstance;
 import io.tiklab.gitpuk.timedtask.service.TimeTaskInstanceService;
 import io.tiklab.gitpuk.timedtask.service.TimeTaskService;
 import io.tiklab.gitpuk.timedtask.util.JobManager;
 import io.tiklab.gitpuk.timedtask.util.RunJob;
 import io.tiklab.gitpuk.common.GitPukFinal;
+import io.tiklab.install.runner.TiklabApplicationRunner;
 import org.apache.commons.collections.CollectionUtils;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;

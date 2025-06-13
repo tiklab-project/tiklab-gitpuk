@@ -18,12 +18,12 @@ import io.tiklab.privilege.role.model.RoleUser;
 import io.tiklab.privilege.role.service.RoleFunctionService;
 import io.tiklab.privilege.role.service.RoleUserService;
 import io.tiklab.toolkit.beans.BeanMapper;
-import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.core.page.Pagination;
 import io.tiklab.core.page.PaginationBuilder;
 import io.tiklab.eam.common.context.LoginContext;
+import io.tiklab.toolkit.context.AppContext;
 import io.tiklab.toolkit.join.JoinTemplate;
 import io.tiklab.privilege.dmRole.model.DmRoleUser;
 import io.tiklab.privilege.dmRole.model.DmRoleUserQuery;
@@ -143,7 +143,7 @@ public class RepositoryServerImpl implements RepositoryService {
             //git文件存放位置
             String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),repositoryId);
 
-            String appHome = AppHomeContext.getAppHome();
+            String appHome = AppContext.getAppHome();
 
 
             String ignoreFilePath = null;
@@ -208,7 +208,7 @@ public class RepositoryServerImpl implements RepositoryService {
         if (!(userId).equals(userRoleAdmin.getUser().getId())){
             PatchUser patchUser1 = new PatchUser();
             patchUser1.setUserId(userId);
-            patchUser1.setRoleType(1);
+            patchUser1.setRoleType(2);
             List.add(patchUser1);
         }
         dmRoleService.initPatchDmRole(repositoryId, List);
@@ -248,7 +248,7 @@ public class RepositoryServerImpl implements RepositoryService {
                 //删除演示库时  删除项目内的演示文件
                 if (repositoryEntity.getCategory()==1){
                     try {
-                        File zipFile = new File(AppHomeContext.getAppHome()+"/file/sample.zip");
+                        File zipFile = new File(AppContext.getAppHome()+"/file/sample.zip");
                         FileUtils.delete(zipFile);
                     }catch (Exception e){
                         logger.info("删除文件sample.zip失败");

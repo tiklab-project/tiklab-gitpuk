@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/repositoryFile")
-@Api(name = "RepositoryFileController",desc = "仓库文件文件")
+//@Api(name = "RepositoryFileController",desc = "仓库文件文件")
 public class RepositoryFileController {
 
     @Autowired
@@ -84,7 +84,7 @@ public class RepositoryFileController {
 
 
     @RequestMapping(path="/readBareRepoFile",method = RequestMethod.POST)
-    @ApiMethod(name = "readFile",desc = "读取裸仓库的文件")
+    @ApiMethod(name = "readBareFile",desc = "读取裸仓库的文件")
     @ApiParam(name = "repositoryFileQuery",desc = "文件信息",required = true)
     public Result<FileMessage> readBareFile(@NotNull @RequestBody @Valid FileQuery repositoryFileQuery){
 

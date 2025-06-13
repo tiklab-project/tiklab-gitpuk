@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/integrationAddress")
-@Api(name = "IntegrationAddressController",desc = "系统集成地址")
+//@Api(name = "IntegrationAddressController",desc = "系统集成地址")
 public class IntegrationAddressController {
 
     @Autowired
@@ -67,7 +67,15 @@ public class IntegrationAddressController {
         return Result.ok(integrationAddress);
     }
 
+    @RequestMapping(path="/findAllIntegrationAddress",method = RequestMethod.POST)
+    @ApiMethod(name = "findAllIntegrationAddress",desc = "查询所有系统集成地址")
+    @ApiParam(name = "integrationAddressQuery",desc = "integrationAddressQuery",required = true)
+    public Result<List<IntegrationAddress>> findAllIntegrationAddress(){
 
+        List<IntegrationAddress> List = integrationAddressServer.findAllIntegrationAddress();
+
+        return Result.ok(List);
+    }
 
     @RequestMapping(path="/findIntegrationAddressList",method = RequestMethod.POST)
     @ApiMethod(name = "findUserIntegrationAddress",desc = "查询系统集成地址")
@@ -88,29 +96,6 @@ public class IntegrationAddressController {
 
         return Result.ok(integrationAddress);
     }
+
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

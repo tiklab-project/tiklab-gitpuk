@@ -2,7 +2,7 @@ package io.tiklab.gitpuk.starter;
 
 
 import io.tiklab.gitpuk.starter.annotation.EnableGitPuk;
-import io.tiklab.core.property.PropertyAndYamlSourceFactory;
+import io.tiklab.toolkit.property.PropertyAndYamlSourceFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
@@ -19,7 +19,6 @@ public class GitPukApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(GitPukApplication.class, args);
-
 	}
 
 }

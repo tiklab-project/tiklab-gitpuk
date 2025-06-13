@@ -1,9 +1,14 @@
+prefix=/opt/pginstaller_16.auto/server/staging_cache/osx.build
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
 Name: libecpg
 Description: PostgreSQL libecpg library
-Url: http://www.postgresql.org/
-Version: 10.23
+URL: https://www.postgresql.org/
+Version: 16.2
 Requires: 
-Requires.private: libpq libpgtypes
-Cflags: -I/mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64/include
-Libs: -L/mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64/lib -lecpg
-Libs.private: -L/opt/local/Current/lib -lm
+Requires.private: libpq, libpgtypes
+Cflags: -I${includedir}
+Libs: -L${libdir} -lecpg
+Libs.private: -L/opt/local/20220418/lib -L/opt/local/Current_v15/lib -L/opt/local/lib -lpgcommon -lpgport -lpq -lm

@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/recordCommit")
-@Api(name = "RecordCommitController",desc = "提交仓库的记录管理")
+@Api(name = "提交仓库的记录管理",desc = "提交仓库的记录管理")
 public class RecordCommitController {
 
     private static Logger logger = LoggerFactory.getLogger(RecordCommitController.class);
@@ -35,8 +35,8 @@ public class RecordCommitController {
     private RecordCommitService recordCommitService;
 
     @RequestMapping(path="/createRecordCommit",method = RequestMethod.POST)
-    @ApiMethod(name = "createRecordCommit",desc = "创建打开仓库记录管理")
-    @ApiParam(name = "recordCommit",desc = "recordCommit",required = true)
+    //@ApiMethod(name = "createRecordCommit",desc = "创建打开仓库记录管理")
+    //@ApiParam(name = "recordCommit",desc = "recordCommit",required = true)
     public Result<String> createRecordCommit(@RequestBody @NotNull @Valid RecordCommit recordCommit){
         String id = recordCommitService.createRecordCommit(recordCommit);
 
@@ -44,8 +44,8 @@ public class RecordCommitController {
     }
 
     @RequestMapping(path="/updateRecordCommit",method = RequestMethod.POST)
-    @ApiMethod(name = "updateRecordCommit",desc = "修改打开仓库记录管理")
-    @ApiParam(name = "recordCommit",desc = "recordCommit",required = true)
+    //@ApiMethod(name = "updateRecordCommit",desc = "修改打开仓库记录管理")
+    //@ApiParam(name = "recordCommit",desc = "recordCommit",required = true)
     public Result<Void> updateRecordCommit(@RequestBody @NotNull @Valid RecordCommit recordCommit){
         recordCommitService.updateRecordCommit(recordCommit);
 
@@ -53,8 +53,8 @@ public class RecordCommitController {
     }
 
     @RequestMapping(path="/deleteRecordCommit",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteRecordCommit",desc = "删除")
-    @ApiParam(name = "id",desc = "id",required = true)
+    //@ApiMethod(name = "deleteRecordCommit",desc = "删除")
+    //@ApiParam(name = "id",desc = "id",required = true)
     public Result<Void> deleteRecordCommit(@NotNull String id){
         recordCommitService.deleteRecordCommit(id);
 
@@ -62,8 +62,8 @@ public class RecordCommitController {
     }
 
     @RequestMapping(path="/findRecordCommit",method = RequestMethod.POST)
-    @ApiMethod(name = "findRecordCommit",desc = "通过id 查询")
-    @ApiParam(name = "id",desc = "id",required = true)
+    //@ApiMethod(name = "findRecordCommit",desc = "通过id 查询")
+    //@ApiParam(name = "id",desc = "id",required = true)
     public Result<RecordCommit> findRecordCommit(@NotNull String id){
         RecordCommit RecordCommit = recordCommitService.findRecordCommit(id);
 
@@ -71,7 +71,7 @@ public class RecordCommitController {
     }
 
     @RequestMapping(path="/findAllRecordCommit",method = RequestMethod.POST)
-    @ApiMethod(name = "findAllRecordCommit",desc = "查询所有查询")
+   // @ApiMethod(name = "findAllRecordCommit",desc = "查询所有查询")
     public Result<List<RecordCommit>> findAllRecordCommit(){
         List<RecordCommit> artifactList = recordCommitService.findAllRecordCommit();
 

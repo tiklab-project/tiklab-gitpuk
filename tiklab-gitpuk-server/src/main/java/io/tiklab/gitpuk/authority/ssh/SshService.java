@@ -5,11 +5,12 @@ import io.tiklab.gitpuk.authority.lfs.LfsAuthService;
 import io.tiklab.gitpuk.authority.ValidUsrPwdServer;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaService;
 import io.tiklab.gitpuk.repository.service.RecordCommitService;
+import io.tiklab.gitpuk.repository.service.RepositoryPushRule;
 import io.tiklab.gitpuk.setting.service.AuthSshServer;
 import io.tiklab.gitpuk.common.RepositoryFinal;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
-import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.toolkit.context.AppContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
@@ -23,6 +24,7 @@ import org.apache.sshd.server.command.CommandFactory;
 import org.apache.sshd.server.session.ServerSession;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +71,9 @@ public class SshService {
     @Autowired
     LfsAuthService lfsAuthService;
 
+    @Autowired
+    private RepositoryPushRule repositoryPushRule;
+
 
 
     @Bean
@@ -84,7 +89,7 @@ public class SshService {
             property= file.getParent();
         }*/
         // 设置主机密钥提供者
-        String appHome = AppHomeContext.getAppHome();
+        String appHome = AppContext.getAppHome();
         Path ssh_key = Paths.get(appHome+"/file/id_rsa");
         FileKeyPairProvider keyProvider = new FileKeyPairProvider(ssh_key);
         sshServer.setKeyPairProvider(keyProvider);
@@ -94,7 +99,7 @@ public class SshService {
         sshServer.setPublickeyAuthenticator(publicKeyValid);
         try {
             sshServer.setCommandFactory(new GitTokSshCommandFactory(GitTokYamlDataMaService,repositoryServer
-                    ,recordCommitService,lfsAuthService));
+                    ,recordCommitService,lfsAuthService,repositoryPushRule));
             sshServer.start();
             int port = sshServer.getPort();
             logger.info("ssh端口："+port);
@@ -123,15 +128,19 @@ public class SshService {
 
         private final LfsAuthService lfsAuthService;
 
+        private final RepositoryPushRule repositoryPushRule;
+
         public GitTokSshCommandFactory(GitPukYamlDataMaService yamlDataMaService,
                                        RepositoryService repositoryServer,
                                        RecordCommitService recordCommitService,
-                                       LfsAuthService lfsAuthService) {
+                                       LfsAuthService lfsAuthService,
+                                       RepositoryPushRule repositoryPushRule) {
 
             this.yamlDataMaService = yamlDataMaService;
             this.repositoryServer=repositoryServer;
             this.recordCommitService=recordCommitService;
             this.lfsAuthService=lfsAuthService;
+            this.repositoryPushRule=repositoryPushRule;
         }
 
 
@@ -168,10 +177,12 @@ public class SshService {
                         repo.close();
                         return new UploadPackCommand(uploadPack);
                     } else if (command.startsWith("git-receive-pack")) {
+                        String repoPath = command.substring("git-receive-pack ".length()).replace("'", "");
                         //ssh 上传
                         ReceivePack receivePack = new ReceivePack(repo);
+
                         repo.close();
-                        ReceivePackCommand receivePackCommand = new ReceivePackCommand(receivePack, repositoryServer, recordCommitService,
+                        ReceivePackCommand receivePackCommand = new ReceivePackCommand(receivePack, repositoryServer, recordCommitService,repositoryPushRule,
                                 rpyPath, userId);
 
                         return receivePackCommand;
@@ -275,14 +286,23 @@ public class SshService {
         private String rpyPath;
 
         private RecordCommitService recordCommitService;
-
+        private RepositoryPushRule repositoryPushRule;
         private String userId;
 
-        public ReceivePackCommand(ReceivePack receivePack,RepositoryService repositoryServer,RecordCommitService recordCommitService,String rpyPath,String userId) {
+
+
+        public ReceivePackCommand(ReceivePack receivePack,
+                                  RepositoryService repositoryServer,
+                                  RecordCommitService recordCommitService,
+                                  RepositoryPushRule repositoryPushRule,
+                                  String rpyPath,
+                                  String userId) {
+
             this.receivePack = receivePack;
             this.repositoryServer=repositoryServer;
             this.rpyPath=rpyPath;
             this.recordCommitService=recordCommitService;
+            this.repositoryPushRule=repositoryPushRule;
             this.userId=userId;
         }
 
@@ -304,8 +324,19 @@ public class SshService {
         @Override
         public void run() {
             try {
+                receivePack.setCheckReceivedObjects(true);
 
-                //PostReceiveHook 来检查引用（refs）是否有更新，从而判断是否有更改被推送。
+                // 2. 在调用receive()之前设置所有钩子
+                receivePack.setPreReceiveHook((receivePack1, commands) -> {
+
+                    for (ReceiveCommand command : commands) {
+                        //校验推送信息
+                        repositoryPushRule.pushRuleVerify(receivePack,command,rpyPath);
+                    }
+                });
+
+
+                //PostReceiveHook 来检查引用（refs）是否有更新，从而判断是否有更改被推送。执行后钩子回掉
                 receivePack.setPostReceiveHook(new PostReceiveHook() {
                     @Override
                     public void onPostReceive(ReceivePack rp, Collection<ReceiveCommand> commands) {
@@ -314,24 +345,20 @@ public class SshService {
                         repositoryServer.compileRepository(rpyPath);
 
                         recordCommitService.updateCommitRecord(rpyPath,userId,"ssh");
-
-                      /*  for (ReceiveCommand command : commands) {
-                            ReceiveCommand.Type type = command.getType();
-                        }*/
                     }
                 });
 
+
                 receivePack.receive(in, out, err);
-
-                this.exit.onExit(0);
-
+                exit.onExit(0);
 
             } catch (Exception e) {
-                try {
-                    throw new IOException(e);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+                e.printStackTrace();
+                PrintStream errPrintStream = new PrintStream(err);
+
+                errPrintStream.println("提交失败："+e.getMessage() );
+                errPrintStream.flush();
+                exit.onExit(1); // 失败退出
             }
         }
 
@@ -346,15 +373,10 @@ public class SshService {
         /**
          * @param channelSession 实例
          * @param environment    变量
-         * @throws IOException 异常
          */
         @Override
-        public void start(ChannelSession channelSession, Environment environment) throws IOException {
-            // String clientAddress = channelSession.getSession().getClientAddress().toString();
-            //
-            // if (!ValidKey.isType()){
-            //     this.exit.onExit(3,"Permission Denied");
-            // }
+        public void start(ChannelSession channelSession, Environment environment)  {
+
             new Thread(this).start();
         }
 

@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/leadRecord")
-@Api(name = "LeadRecordController",desc = "导入第三方仓库的记录")
+//@Api(name = "LeadRecordController",desc = "导入第三方仓库的记录")
 public class LeadRecordController {
 
     private static Logger logger = LoggerFactory.getLogger(LeadRecordController.class);

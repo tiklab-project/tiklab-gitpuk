@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/recordOpen")
-@Api(name = "RecordOpenController",desc = "打开仓库的记录管理")
+//@Api(name = "RecordOpenController",desc = "打开仓库的记录管理")
 public class RecordOpenController {
 
     private static Logger logger = LoggerFactory.getLogger(RecordOpenController.class);

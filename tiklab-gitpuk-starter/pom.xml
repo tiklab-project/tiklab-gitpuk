@@ -16,11 +16,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-postgresql-starter</artifactId>
-			<version>${tiklab-postgresql.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-toolkit-spring-boot-starter</artifactId>
 			<version>${tiklab-toolkit.version}</version>
 		</dependency>
@@ -116,8 +111,14 @@
 
 		<dependency>
 			<groupId>io.tiklab</groupId>
-			<artifactId>tiklab-install-server</artifactId>
-			<version>1.0.2</version>
+			<artifactId>tiklab-install-spring-boot-starter</artifactId>
+			<version>${tiklab-install.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-postgresql-spring-boot-starter</artifactId>
+			<version>${tiklab-postgresql.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.tiklab</groupId>

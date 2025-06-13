@@ -1,6 +1,6 @@
 package io.tiklab.gitpuk.common;
 
-import io.tiklab.core.context.AppHomeContext;
+import io.tiklab.toolkit.context.AppContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +74,7 @@ public class GitPukYamlDataMaServiceImpl implements GitPukYamlDataMaService {
 
     @Override
     public String spotbugsAddress() {
-        String appHome = AppHomeContext.getAppHome();
+        String appHome = AppContext.getAppHome();
         String path;
         if ("null".equals(spotbugsAddress)){
             path = new File(appHome).getParentFile().getParent()+"/embbed/spotbugs-4.8.1/bin";

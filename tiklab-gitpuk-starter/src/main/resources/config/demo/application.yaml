@@ -1,12 +1,6 @@
 app:
   name: gitpuk
 
-spring:
-  main:
-    allow-bean-definition-overriding: true
-  freemarker:
-    checkTemplateLocation: false
-
 server:
   port: 8090
 
@@ -47,15 +41,20 @@ dcs:
     database: dcs1
     expire: 7200
 
-# Enabling unified login
-soular:
-  embbed:
-    enable: false
-  address: http://eas-ce.demo.tiklab.net
 
-#repository config
-repository:
-  address: ${DATA_HOME}/repository
+#(local:本地登录  soular:统一登录)
+auth:
+  type: local
+  soular:
+    address: http://eas-ce.demo.tiklab.net
+
+
+external:
+  url: http://eas-ce.demo.tiklab.net
+
+
+
+
 
 gitPuk:
   ssh:
@@ -63,27 +62,11 @@ gitPuk:
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
 
-base:
-  url: http://eas-ce.demo.tiklab.net
 
 # git clone path
 visit:
   address: ""
 
-spotbugs:
-  address: /embbed/spotbugs-4.8.1/bin
-
-
-#license
-licences:
-  path: ${DATA_HOME}/licences
-
-backups:
-  time: 0 0 2 * * ?
-  dir: /data
-  xcode:
-    dir: ${DATA_HOME}/repository
-
-postin:
-  scan:
-    package: io.tiklab.gitpuk
+#repository config
+repository:
+  address: ${DATA_HOME}/repository

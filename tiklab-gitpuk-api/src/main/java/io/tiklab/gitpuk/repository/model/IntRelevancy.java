@@ -29,6 +29,8 @@ public class IntRelevancy {
     @ApiProperty(name="relevancyId",desc="关联的id")
     private String relevancyId;
 
+    @ApiProperty(name="type",desc="类型 scan、pipeline")
+    private String type;
 
 
     @ApiProperty(name="createTime",desc="创建时间")
@@ -78,56 +80,15 @@ public class IntRelevancy {
     public void setRelevancyIdList(List<String> relevancyIdList) {
         this.relevancyIdList = relevancyIdList;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

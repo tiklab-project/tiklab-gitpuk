@@ -262,6 +262,7 @@ public class CommitServerImpl implements CommitServer {
             CommitMessage commitMessage = GitCommitUntil.findNewestCommit(repository, commit.getRefCode(),commit.getRefCodeType());
             return commitMessage;
         }catch (Exception e){
+            e.printStackTrace();
             throw new ApplicationException("最后提交记录获取失败："+e);
         }
     }

@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/mergeCondition")
-@Api(name = "MergeConditionController",desc = "合并请求动态")
+//@Api(name = "MergeConditionController",desc = "合并请求动态")
 public class MergeConditionController {
 
     private static Logger logger = LoggerFactory.getLogger(MergeConditionController.class);

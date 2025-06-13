@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/mergeRequest")
-@Api(name = "MergeRequestController",desc = "合并请求")
+//@Api(name = "MergeRequestController",desc = "合并请求")
 public class MergeRequestController {
 
     private static Logger logger = LoggerFactory.getLogger(MergeRequestController.class);

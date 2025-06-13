@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/repositoryFork")
-@Api(name = "RepositoryForkController",desc = "仓库fork")
+//@Api(name = "RepositoryForkController",desc = "仓库fork")
 public class RepositoryForkController {
 
     private static Logger logger = LoggerFactory.getLogger(RepositoryForkController.class);

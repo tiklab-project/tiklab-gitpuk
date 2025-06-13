@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/mergeAuditor")
-@Api(name = "MergeAuditorController",desc = "合并请求审核人")
+//@Api(name = "MergeAuditorController",desc = "合并请求审核人")
 public class MergeAuditorController {
 
     private static Logger logger = LoggerFactory.getLogger(MergeAuditorController.class);

@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/branch")
-@Api(name = "BranchController",desc = "裸仓库中的分支管理")
+@Api(name = "分支管理",desc = "裸仓库中的分支管理")
 public class BranchController {
 
     @Autowired
@@ -52,8 +52,8 @@ public class BranchController {
 
 
     @RequestMapping(path="/findBranch",method = RequestMethod.POST)
-    @ApiMethod(name = "findBranch",desc = " 查询单个分支")
-    @ApiParam(name = "commitId",desc = "commitId",required = true)
+    //@ApiMethod(name = "findBranch",desc = " 查询单个分支")
+    //@ApiParam(name = "commitId",desc = "commitId",required = true)
     public Result<Branch> findBranch(@NotNull String rpyId,@NotNull String commitId){
 
         Branch branch = branchServer.findBranch(rpyId, commitId);
@@ -63,8 +63,8 @@ public class BranchController {
 
 
     @RequestMapping(path="/createBranch",method = RequestMethod.POST)
-    @ApiMethod(name = "createBranch",desc = "创建分支")
-    @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
+    //@ApiMethod(name = "createBranch",desc = "创建分支")
+    //@ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
     public Result<Void> createBranch(@RequestBody @Valid @NotNull BranchMessage branchMessage){
 
          branchServer.createBranch(branchMessage);
@@ -74,8 +74,8 @@ public class BranchController {
 
 
     @RequestMapping(path="/deleteBranch",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteBranch",desc = "删除分支")
-    @ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
+   // @ApiMethod(name = "deleteBranch",desc = "删除分支")
+    //@ApiParam(name = "branchMessage",desc = "branchMessage",required = true)
     public Result<Void> deleteBranch(@RequestBody @Valid @NotNull BranchMessage branchMessage){
 
         branchServer.deleteBranch(branchMessage);
@@ -85,8 +85,8 @@ public class BranchController {
 
 
     @RequestMapping(path="/updateDefaultBranch",method = RequestMethod.POST)
-    @ApiMethod(name = "updateDefaultBranch",desc = "修改默认分支")
-    @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
+   // @ApiMethod(name = "updateDefaultBranch",desc = "修改默认分支")
+    //@ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
     public Result<Void> updateDefaultBranch(@RequestBody @Valid @NotNull BranchQuery branchQuery){
 
         branchServer.updateDefaultBranch(branchQuery);
@@ -96,8 +96,8 @@ public class BranchController {
 
 
     @RequestMapping(path="/mergeBranch",method = RequestMethod.POST)
-    @ApiMethod(name = "mergeBranch",desc = "合并分支")
-    @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
+   // @ApiMethod(name = "mergeBranch",desc = "合并分支")
+  //  @ApiParam(name = "branchQuery",desc = "branchQuery",required = true)
     public Result<Void> mergeBranch(@RequestBody @Valid @NotNull BranchQuery branchQuery){
 
         branchServer.mergeBranch(branchQuery);

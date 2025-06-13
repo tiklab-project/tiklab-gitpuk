@@ -23,6 +23,7 @@ public class IntegrationAddressQuery {
     private String  code;
 
 
+
     public Page getPageParam() {
         return pageParam;
     }

@@ -25,6 +25,8 @@ public class IntRelevancyQuery {
     @ApiProperty(name ="relevancyId",desc = "关联的id")
     private String  relevancyId;
 
+    @ApiProperty(name ="type",desc = "type")
+    private String  type;
 
     public Page getPageParam() {
         return pageParam;
@@ -46,8 +48,9 @@ public class IntRelevancyQuery {
         return repositoryId;
     }
 
-    public void setRepositoryId(String repositoryId) {
+    public IntRelevancyQuery setRepositoryId(String repositoryId) {
         this.repositoryId = repositoryId;
+        return this;
     }
 
     public String getRelevancyId() {
@@ -56,5 +59,14 @@ public class IntRelevancyQuery {
 
     public void setRelevancyId(String relevancyId) {
         this.relevancyId = relevancyId;
+    }
+
+    public  String getType() {
+        return type;
+    }
+
+    public IntRelevancyQuery setType(String type) {
+        this.type = type;
+        return this;
     }
 }

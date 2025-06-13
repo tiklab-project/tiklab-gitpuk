@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/tag")
-@Api(name = "LeadAuthController",desc = "标签")
+//@Api(name = "LeadAuthController",desc = "标签")
 public class TagController {
 
     @Autowired

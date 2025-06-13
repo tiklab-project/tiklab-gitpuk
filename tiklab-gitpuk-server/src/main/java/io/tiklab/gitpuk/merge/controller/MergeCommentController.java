@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/mergeComment")
-@Api(name = "MergeCommentController",desc = "合并请求动态评论")
+//@Api(name = "MergeCommentController",desc = "合并请求动态评论")
 public class MergeCommentController {
 
     private static Logger logger = LoggerFactory.getLogger(MergeCommentController.class);

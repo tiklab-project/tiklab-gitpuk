@@ -1,11 +1,17 @@
 package io.tiklab.gitpuk.repository.service;
 
-import io.tiklab.core.context.AppHomeContext;
 import io.tiklab.core.exception.SystemException;
 import io.tiklab.gitpuk.repository.model.Repository;
 import io.tiklab.gitpuk.repository.model.RepositoryQuery;
 import io.tiklab.gitpuk.common.GitPukYamlDataMaServiceImpl;
 import io.tiklab.gitpuk.common.RepositoryFileUtil;
+import io.tiklab.privilege.dmRole.model.DmRole;
+import io.tiklab.privilege.dmRole.model.DmRoleQuery;
+import io.tiklab.privilege.dmRole.service.DmRoleService;
+import io.tiklab.privilege.role.model.Role;
+import io.tiklab.privilege.role.model.RoleQuery;
+import io.tiklab.privilege.role.service.RoleService;
+import io.tiklab.toolkit.context.AppContext;
 import io.tiklab.user.user.model.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -25,16 +31,22 @@ public class InitializeServiceImpl implements InitializeService {
     @Autowired
     GitPukYamlDataMaServiceImpl yamlDataMaService;
 
+    @Autowired
+    RoleService roleService;
+
+    @Autowired
+    DmRoleService dmRoleService;
+
 
     @Override
     public void createSampleData() {
-
+        updateRepRole();
         //已经存在演示库就不需要在初始化
         List<Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setCategory(1));
         if (CollectionUtils.isNotEmpty(repositoryList)){
             return;
         }
-        File zipFile = new File(AppHomeContext.getAppHome()+"/file/sample.zip");
+        File zipFile = new File(AppContext.getAppHome()+"/file/sample.zip");
         //示例文件不存在 不创建示例数据
         if (!zipFile.exists()){
           return;
@@ -80,8 +92,50 @@ public class InitializeServiceImpl implements InitializeService {
 
             File RpyZipFile = new File(rpyAddress + "/sample.zip");
             FileUtils.delete(RpyZipFile);
+
+
         } catch (IOException e) {
             throw new SystemException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateRepRole() {
+        List<Role> allRole = roleService.findAllRole();
+
+
+        if (CollectionUtils.isNotEmpty(allRole)){
+            for (Role role:allRole){
+                //移除项目管理员
+                if ((("3").equals(role.getParentId()))||("3").equals(role.getId())){
+                    roleService.deleteRole(role.getId());
+
+                    DmRoleQuery dmRoleQuery = new DmRoleQuery();
+                    dmRoleQuery.setRoleId(role.getId());
+                    List<DmRole> dmRoleList = dmRoleService.findDmRoleListByQuery(dmRoleQuery);
+                  if (CollectionUtils.isNotEmpty(dmRoleList)){
+                      for (DmRole dmRole:dmRoleList){
+                          dmRoleService.deleteDmRole(dmRole.getId());
+                      }
+                  }
+
+                }
+
+                //修改项目超级管理员
+                if (("pro_111111").equals(role.getParentId()) ||("pro_111111").equals(role.getId())){
+                    role.setName("项目管理员");
+                    roleService.updateRole(role);
+                }
+
+                if (("管理员角色").equals(role.getName())){
+                    role.setName("管理员");
+                    roleService.updateRole(role);
+                }
+                if (("普通角色").equals(role.getName())){
+                    role.setName("普通用户");
+                    roleService.updateRole(role);
+                }
+            }
         }
     }
 }

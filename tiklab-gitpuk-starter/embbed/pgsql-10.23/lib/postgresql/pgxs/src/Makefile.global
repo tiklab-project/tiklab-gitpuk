@@ -23,7 +23,7 @@ standard_targets = all install installdirs uninstall distprep clean distclean ma
 # these targets should recurse even into subdirectories not being built:
 standard_always_targets = distprep clean distclean maintainer-clean
 
-.PHONY: $(standard_targets) install-strip html man installcheck-parallel maintainer-check
+.PHONY: $(standard_targets) install-strip html man installcheck-parallel update-unicode
 
 # make `all' the default target
 all:
@@ -36,9 +36,11 @@ all:
 .SECONDARY:
 
 # PostgreSQL version number
-VERSION = 10.23
-MAJORVERSION = 10
-VERSION_NUM = 100023
+VERSION = 16.2
+MAJORVERSION = 16
+VERSION_NUM = 160002
+
+PACKAGE_URL = https://www.postgresql.org/
 
 # Set top_srcdir, srcdir, and VPATH.
 ifdef PGXS
@@ -59,8 +61,8 @@ endif
 endif
 else # not PGXS
 vpath_build = no
-abs_top_builddir = /mnt/hgfs/pginstaller.auto/server/source/postgres.linux-x64
-abs_top_srcdir = /mnt/hgfs/pginstaller.auto/server/source/postgres.linux-x64
+abs_top_builddir = /opt/pginstaller_16.auto/server/source/postgres.osx
+abs_top_srcdir = /opt/pginstaller_16.auto/server/source/postgres.osx
 
 ifneq ($(vpath_build),yes)
 top_srcdir = $(top_builddir)
@@ -73,9 +75,6 @@ endif
 endif # not PGXS
 
 vpathsearch = `for f in $(addsuffix /$(1),$(subst :, ,. $(VPATH))); do test -r $$f && echo $$f && break; done`
-
-# Saved arguments from configure
-configure_args =  '--with-icu' '--enable-debug' '--with-libs=/opt/local/Current/lib' '--with-includes=/opt/local/Current/include/libxml2:/opt/local/Current/include' '--prefix=/mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64' '--with-ldap' '--with-openssl' '--with-perl' '--with-python' '--with-tcl' '--with-tclconfig=/opt/edb/languagepack/v1/Tcl-8.6/lib' '--with-pam' '--enable-thread-safety' '--with-libxml' '--with-ossp-uuid' '--docdir=/mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64/doc/postgresql' '--with-libxslt' '--with-libedit-preferred' '--with-gssapi' 'LD_LIBRARY_PATH=/opt/local/Current/lib' 'CFLAGS=-O2 -DMAP_HUGETLB=0x40000' 'ICU_CFLAGS=-I/opt/local/Current/include' 'ICU_LIBS=-L/opt/local/Current/lib -licuuc -licudata -licui18n'
 
 
 ##########################################################################
@@ -95,7 +94,7 @@ ifndef PGXS
 # Note that prefix, exec_prefix, and datarootdir aren't defined in a PGXS build;
 # makefiles may only use the derived variables such as bindir.
 
-prefix := /mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64
+prefix := /opt/pginstaller_16.auto/server/staging_cache/osx.build
 exec_prefix := ${prefix}
 datarootdir := ${prefix}/share
 
@@ -135,7 +134,7 @@ endif
 
 mandir := ${datarootdir}/man
 
-docdir := /mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64/doc/postgresql
+docdir := /opt/pginstaller_16.auto/server/staging_cache/osx.build/doc/postgresql
 ifeq "$(findstring pgsql, $(docdir))" ""
 ifeq "$(findstring postgres, $(docdir))" ""
 override docdir := $(docdir)/postgresql
@@ -171,6 +170,7 @@ endif # PGXS
 includedir_server = $(pkgincludedir)/server
 includedir_internal = $(pkgincludedir)/internal
 pgxsdir = $(pkglibdir)/pgxs
+bitcodedir = $(pkglibdir)/bitcode
 
 
 ##########################################################################
@@ -183,13 +183,18 @@ with_icu	= yes
 with_perl	= yes
 with_python	= yes
 with_tcl	= yes
-with_openssl	= yes
+with_ssl	= openssl
+with_readline	= yes
 with_selinux	= no
 with_systemd	= no
+with_gssapi	= yes
+with_krb_srvnam	= postgres
+with_ldap	= yes
 with_libxml	= yes
 with_libxslt	= yes
+with_llvm	= no
 with_system_tzdata = 
-with_uuid	= ossp
+with_uuid	= e2fs
 with_zlib	= yes
 enable_rpath	= yes
 enable_nls	= no
@@ -198,30 +203,32 @@ enable_dtrace	= no
 enable_coverage	= no
 enable_tap_tests	= no
 enable_thread_safety	= yes
-enable_strong_random	= yes
 
-python_includespec	= -I/opt/edb/languagepack/v1/Python-3.7/include/python3.7m
-python_libdir		= /opt/edb/languagepack/v1/Python-3.7/lib
-python_libspec		= -L/opt/edb/languagepack/v1/Python-3.7/lib -lpython3.7m
-python_additional_libs	= -lcrypt -lpthread -ldl  -lutil -lrt -lm
+python_includespec	= -I/Library/edb/languagepack/v4/Python-3.11/include/python3.11
+python_libdir		= /Library/edb/languagepack/v4/Python-3.11/lib
+python_libspec		= -L/Library/edb/languagepack/v4/Python-3.11/lib -lpython3.11
+python_additional_libs	= -lintl -ldl  -framework CoreFoundation
 python_majorversion	= 3
-python_version		= 3.7
+python_version		= 3.11
 
 krb_srvtab = FILE:$(sysconfdir)/krb5.keytab
 
-ICU_CFLAGS		= -I/opt/local/Current/include
-ICU_LIBS		= -L/opt/local/Current/lib -licuuc -licudata -licui18n
+ICU_CFLAGS		= -I/opt/local/Current_v15/include
+ICU_LIBS		= -L/opt/local/Current_v15/lib -licuuc -licudata -licui18n
 
-TCLSH			= /opt/edb/languagepack/v1/Tcl-8.6/bin/tclsh
-TCL_LIBS		= -ldl -lz -lpthread -lm
-TCL_LIB_SPEC		= -L/opt/edb/languagepack/v1/Tcl-8.6/lib -ltcl8.6
-TCL_INCLUDE_SPEC	= -I/opt/edb/languagepack/v1/Tcl-8.6/include
+TCLSH			= /usr/bin/tclsh
+TCL_LIBS		=  -lz -lpthread -framework CoreFoundation 
+TCL_LIB_SPEC		= -L/Library/edb/languagepack/v4/Tcl-8.6/lib -ltcl8.6
+TCL_INCLUDE_SPEC	= -I/Library/edb/languagepack/v4/Tcl-8.6/include
 TCL_SHARED_BUILD	= 1
-TCL_SHLIB_LD_LIBS	= ${LIBS}
 
-PTHREAD_CFLAGS		= -pthread -D_REENTRANT -D_THREAD_SAFE -D_POSIX_PTHREAD_SEMANTICS
+PTHREAD_CFLAGS		= -pthread -D_REENTRANT -D_THREAD_SAFE
 PTHREAD_LIBS		= 
 
+LLVM_BINPATH = 
+CLANG = 
+BITCODE_CFLAGS =  -O2 
+BITCODE_CXXFLAGS =  -O2 
 
 ##########################################################################
 #
@@ -230,8 +237,8 @@ PTHREAD_LIBS		=
 # Compilers
 
 CPP = gcc -E
-CPPFLAGS =  -D_GNU_SOURCE  -I/opt/local/Current/include/libxml2 -I/opt/local/Current/include
-PG_SYSROOT = 
+CPPFLAGS = -isysroot $(PG_SYSROOT)  -I/opt/local/20220418/include/libxml2 -I/opt/local/Current_v15/include -I/opt/local/Current_v15/include  -I/opt/local/Current_v15/include/libxml2 -I/opt/local/Current_v15/include -I/opt/local/Current_v15/include/openssl/
+PG_SYSROOT = /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk
 
 override CPPFLAGS := $(ICU_CFLAGS) $(CPPFLAGS)
 
@@ -247,10 +254,21 @@ endif # not PGXS
 CC = gcc
 GCC = yes
 SUN_STUDIO_CC = no
-CFLAGS = -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -g -O2 -DMAP_HUGETLB=0x40000
-CFLAGS_SL = -fPIC
-CFLAGS_VECTOR =  -funroll-loops -ftree-vectorize
-CFLAGS_SSE42 = -msse4.2
+CXX = g++
+CFLAGS = -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Werror=vla -Werror=unguarded-availability-new -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -Wno-unused-command-line-argument -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX11.sdk -mmacosx-version-min=10.15 -arch x86_64 -arch arm64 -O2
+CFLAGS_SL = 
+# *_MODULE are for flags applied to extension libraries
+CFLAGS_SL_MODULE =  -fvisibility=hidden
+CXXFLAGS_SL_MODULE =  -fvisibility=hidden -fvisibility-inlines-hidden
+CFLAGS_UNROLL_LOOPS =  -funroll-loops
+CFLAGS_VECTORIZE =  -ftree-vectorize
+CFLAGS_CRC = 
+PERMIT_DECLARATION_AFTER_STATEMENT = -Wno-declaration-after-statement
+CXXFLAGS = -Wall -Wpointer-arith -Werror=unguarded-availability-new -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -g -O2
+
+LLVM_CPPFLAGS = 
+LLVM_CFLAGS = 
+LLVM_CXXFLAGS = 
 
 # Kind-of compilers
 
@@ -265,15 +283,12 @@ ZIC =
 # Linking
 
 AR = ar
-DLLTOOL = 
-DLLWRAP = 
-LIBS = -lxslt -lxml2 -lpam -lssl -lcrypto -lgssapi_krb5 -lz -ledit -lrt -lcrypt -ldl -lm 
+AROPT = crs
+LIBS = -lzstd -llz4 -lxslt -lxml2 -lpam -lssl -lcrypto -lgssapi_krb5 -lz -ledit -lm 
 LDAP_LIBS_FE = -lldap_r 
 LDAP_LIBS_BE = -lldap 
-UUID_LIBS = -luuid
-UUID_EXTRA_OBJS = 
-LD = /usr/bin/ld
-with_gnu_ld = yes
+UUID_LIBS = 
+LLVM_LIBS=
 
 # It's critical that within LDFLAGS, all -L switches pointing to build-tree
 # directories come before any -L switches pointing to external directories.
@@ -294,51 +309,96 @@ ifdef PGXS
 else
   LDFLAGS_INTERNAL = -L$(top_builddir)/src/port -L$(top_builddir)/src/common
 endif
-LDFLAGS = $(LDFLAGS_INTERNAL)   -L/opt/local/Current/lib -Wl,--as-needed
+LDFLAGS = $(LDFLAGS_INTERNAL) -isysroot $(PG_SYSROOT) -L/opt/local/Current_v15/lib -L/opt/local/20220418/lib -L/opt/local/lib -L/opt/local/Current_v15/lib -L/opt/local/Current_v15/lib  -Wl,-dead_strip_dylibs
 
 LDFLAGS_EX = 
+LDFLAGS_EX_BE = 
 # LDFLAGS_SL might have already been assigned by calling makefile
 LDFLAGS_SL += 
-LDREL = -r
-LDOUT = -o
-RANLIB = ranlib
 WINDRES = 
 X = 
 
 # Perl
 
-ifneq (/opt/edb/languagepack/v1/Perl-5.26/bin/perl,)
+ifneq (/Library/edb/languagepack/v4/Perl-5.38/bin/perl,)
     # quoted to protect pathname with spaces
-    PERL		= '/opt/edb/languagepack/v1/Perl-5.26/bin/perl'
+    PERL		= '/Library/edb/languagepack/v4/Perl-5.38/bin/perl'
 else
     PERL		= $(missing) perl
 endif
-perl_archlibexp		= /opt/edb/languagepack/v1/Perl-5.26/lib
-perl_privlibexp		= /opt/edb/languagepack/v1/Perl-5.26/lib
-perl_includespec	= -I/opt/edb/languagepack/v1/Perl-5.26/lib/CORE
-perl_embed_ccflags	= -DUSE_SITECUSTOMIZE -DPERL_RELOCATABLE_INCPUSH 
-perl_embed_ldflags	=   -fstack-protector  -L/opt/edb/languagepack/v1/Perl-5.26/lib/CORE -lperl -lpthread -lnsl -ldl -lm -lcrypt -lutil -lc
+perl_archlibexp		= /Library/edb/languagepack/v4/Perl-5.38/lib
+perl_privlibexp		= /Library/edb/languagepack/v4/Perl-5.38/lib
+perl_includespec	= -I/Library/edb/languagepack/v4/Perl-5.38/lib/CORE
+perl_embed_ccflags	= -DPERL_DARWIN -DNO_POSIX_2008_LOCALE -DUSE_SITECUSTOMIZE -DPERL_RELOCATABLE_INCPUSH -Duselargefiles 
+perl_embed_ldflags	=   -L/Library/edb/languagepack/v4/Perl-5.38/lib/CORE -lperl
 
 # Miscellaneous
 
-AWK	= gawk
+AWK	= awk
 LN_S	= ln -s
 MSGFMT  = 
 MSGFMT_FLAGS = 
 MSGMERGE = 
-PYTHON	= /opt/edb/languagepack/v1/Python-3.7/bin/python3
-TAR	= /bin/tar
+OPENSSL	= /opt/local/Current_v15/bin/openssl
+PYTHON	= /Library/edb/languagepack/v4/Python-3.11/bin/python3
+TAR	= /usr/bin/tar
 XGETTEXT = 
 
 GZIP	= gzip
 BZIP2	= bzip2
+LZ4	= 
+ZSTD	= 
+
+DOWNLOAD = wget -O $@ --no-use-server-timestamps
+#DOWNLOAD = curl -o $@
+
+
+# Unicode data information
+
+# Before each major release, update these and run make update-unicode.
+
+# Pick a release from here: <https://www.unicode.org/Public/>.  Note
+# that the most recent release listed there is often a pre-release;
+# don't pick that one, except for testing.
+UNICODE_VERSION = 15.0.0
+
+# Pick a release from here: <http://cldr.unicode.org/index/downloads>
+CLDR_VERSION = 43
+
+
+# Tree-wide build support
+
+# Just about every code subdirectory wants to have the generated headers
+# available before building, but we don't want parallel makes all trying
+# to build the same headers.  These rules, together with the recursion rules
+# below, ensure that we update the generated headers once, if needed,
+# at the top level of any "make all/install/check/installcheck" request.
+# If a particular subdirectory knows this isn't needed in itself or its
+# children, it can set NO_GENERATED_HEADERS.
+
+all install check installcheck: submake-generated-headers
+
+.PHONY: submake-generated-headers
+
+submake-generated-headers:
+ifndef NO_GENERATED_HEADERS
+ifeq ($(MAKELEVEL),0)
+	$(MAKE) -C $(top_builddir)/src/backend generated-headers
+endif
+endif
+
 
 # Testing
+
+# In much the same way as above, these rules ensure that we build a temp
+# install tree just once in any recursive "make check".  The additional test
+# on abs_top_builddir prevents doing anything foolish to the root directory.
 
 check: temp-install
 
 .PHONY: temp-install
-temp-install:
+
+temp-install: | submake-generated-headers
 ifndef NO_TEMP_INSTALL
 ifneq ($(abs_top_builddir),)
 ifeq ($(MAKELEVEL),0)
@@ -376,7 +436,7 @@ ld_library_path_var = LD_LIBRARY_PATH
 # need something more here. If not defined then the expansion does
 # nothing.
 with_temp_install = \
-	PATH="$(abs_top_builddir)/tmp_install$(bindir):$$PATH" \
+	PATH="$(abs_top_builddir)/tmp_install$(bindir):$(CURDIR):$$PATH" \
 	$(call add_to_path,$(strip $(ld_library_path_var)),$(abs_top_builddir)/tmp_install$(libdir)) \
 	$(with_temp_install_extra)
 
@@ -384,34 +444,47 @@ ifeq ($(enable_tap_tests),yes)
 
 ifndef PGXS
 define prove_installcheck
-rm -rf $(CURDIR)/tmp_check/log
+echo "# +++ tap install-check in $(subdir) +++" && \
+rm -rf '$(CURDIR)'/tmp_check && \
+$(MKDIR_P) '$(CURDIR)'/tmp_check && \
 cd $(srcdir) && \
-   TESTDIR='$(CURDIR)' PATH="$(bindir):$$PATH" PGPORT='6$(DEF_PGPORT)' \
-   top_builddir='$(CURDIR)/$(top_builddir)' \
+   TESTLOGDIR='$(CURDIR)/tmp_check/log' \
+   TESTDATADIR='$(CURDIR)/tmp_check' \
+   PATH="$(bindir):$(CURDIR):$$PATH" \
+   PGPORT='6$(DEF_PGPORT)' top_builddir='$(CURDIR)/$(top_builddir)' \
    PG_REGRESS='$(CURDIR)/$(top_builddir)/src/test/regress/pg_regress' \
    $(PROVE) $(PG_PROVE_FLAGS) $(PROVE_FLAGS) $(if $(PROVE_TESTS),$(PROVE_TESTS),t/*.pl)
 endef
 else # PGXS case
 define prove_installcheck
-rm -rf $(CURDIR)/tmp_check/log
+echo "# +++ tap install-check in $(subdir) +++" && \
+rm -rf '$(CURDIR)'/tmp_check && \
+$(MKDIR_P) '$(CURDIR)'/tmp_check && \
 cd $(srcdir) && \
-   TESTDIR='$(CURDIR)' PATH="$(bindir):$$PATH" PGPORT='6$(DEF_PGPORT)' \
-   top_builddir='$(top_builddir)' \
+   TESTLOGDIR='$(CURDIR)/tmp_check/log' \
+   TESTDATADIR='$(CURDIR)/tmp_check' \
+   PATH="$(bindir):$(CURDIR):$$PATH" \
+   PGPORT='6$(DEF_PGPORT)' \
    PG_REGRESS='$(top_builddir)/src/test/regress/pg_regress' \
    $(PROVE) $(PG_PROVE_FLAGS) $(PROVE_FLAGS) $(if $(PROVE_TESTS),$(PROVE_TESTS),t/*.pl)
 endef
 endif # PGXS
 
 define prove_check
-rm -rf $(CURDIR)/tmp_check/log
+echo "# +++ tap check in $(subdir) +++" && \
+rm -rf '$(CURDIR)'/tmp_check && \
+$(MKDIR_P) '$(CURDIR)'/tmp_check && \
 cd $(srcdir) && \
-   TESTDIR='$(CURDIR)' $(with_temp_install) PGPORT='6$(DEF_PGPORT)' \
+   TESTLOGDIR='$(CURDIR)/tmp_check/log' \
+   TESTDATADIR='$(CURDIR)/tmp_check' \
+   $(with_temp_install) \
+   PGPORT='6$(DEF_PGPORT)' top_builddir='$(CURDIR)/$(top_builddir)' \
    PG_REGRESS='$(CURDIR)/$(top_builddir)/src/test/regress/pg_regress' \
    $(PROVE) $(PG_PROVE_FLAGS) $(PROVE_FLAGS) $(if $(PROVE_TESTS),$(PROVE_TESTS),t/*.pl)
 endef
 
 else
-prove_installcheck = @echo "TAP tests not enabled"
+prove_installcheck = @echo "TAP tests not enabled. Try configuring with --enable-tap-tests"
 prove_check = $(prove_installcheck)
 endif
 
@@ -431,33 +504,26 @@ INSTALL_SHLIB	= $(INSTALL_SHLIB_ENV) $(INSTALL) $(INSTALL_SHLIB_OPTS) $(INSTALL_
 # Override in Makefile.port if necessary
 INSTALL_SHLIB_OPTS = -m 755
 
-MKDIR_P = /bin/mkdir -p
+MKDIR_P = ${SHELL} ${top_srcdir}/config/install-sh -c -d
 
 missing		= $(SHELL) $(top_srcdir)/config/missing
 
-STRIP		= strip
+STRIP		= strip -x
 STRIP_STATIC_LIB = strip -x
-STRIP_SHARED_LIB = strip --strip-unneeded
+STRIP_SHARED_LIB = strip -x
 
 # Documentation
 
 DBTOEPUB	= 
 FOP				= 
-NSGMLS			= 
-OSX				= 
-XMLLINT			= /usr/bin/xmllint
-XSLTPROC		= /usr/bin/xsltproc
+XMLLINT			= /opt/local/Current_v15/bin/xmllint
+XSLTPROC		= /opt/local/Current_v15/bin/xsltproc
 
 # Code coverage
 
 GCOV = 
 LCOV = 
 GENHTML = 
-
-ifeq ($(enable_coverage),yes)
-# ccache loses .gcno files
-export CCACHE_DISABLE = 1
-endif
 
 # Feature settings
 
@@ -471,26 +537,18 @@ WANTED_LANGUAGES =
 #
 
 # Name of the "template"
-PORTNAME= linux
+PORTNAME= darwin
 
-build_os = linux-gnu
+build_os = darwin20.6.0
 
-host_tuple = x86_64-pc-linux-gnu
-host_os = linux-gnu
+host_tuple = x86_64-apple-darwin20.6.0
+host_os = darwin20.6.0
 host_cpu = x86_64
-
-# Make HAVE_IPV6 available for initdb script creation
-HAVE_IPV6= yes
-
-# This is mainly for use on FreeBSD, where we have both a.out and elf
-# systems now.  May be applicable to other systems to?
-ELF_SYSTEM= true
 
 # Backend stack size limit has to be hard-wired on Windows (it's in bytes)
 WIN32_STACK_RLIMIT=4194304
 
-# Set if we have a working win32 crashdump header
-have_win32_dbghelp = no
+DLSUFFIX = .dylib
 
 # Pull in platform-specific magic
 include $(top_builddir)/src/Makefile.port
@@ -522,21 +580,39 @@ libpq_srcdir = $(top_srcdir)/src/interfaces/libpq
 libpq_builddir = $(top_builddir)/src/interfaces/libpq
 endif
 
-# This macro is for use by libraries linking to libpq.  (Because libpgport
-# isn't created with the same link flags as libpq, it can't be used.)
+# How to link to libpq.  (This macro may be used as-is by backend extensions.
+# Client-side code should go through libpq_pgport or libpq_pgport_shlib,
+# instead.)
 libpq = -L$(libpq_builddir) -lpq
 
-# This macro is for use by client executables (not libraries) that use libpq.
-# We force clients to pull symbols from the non-shared libraries libpgport
+# libpq_pgport is for use by client executables (not libraries) that use libpq.
+# We want clients to pull symbols from the non-shared libraries libpgport
 # and libpgcommon rather than pulling some libpgport symbols from libpq just
 # because libpq uses those functions too.  This makes applications less
 # dependent on changes in libpq's usage of pgport.  To do this we link to
 # pgport before libpq.  This does cause duplicate -lpgport's to appear
-# on client link lines.
-ifdef PGXS
+# on client link lines, since that also appears in $(LIBS).  On platforms
+# where we have symbol export control for libpq, the whole exercise is
+# unnecessary because libpq won't expose any of these symbols.  Currently,
+# only macOS warns about duplicate library references, so we only suppress
+# the duplicates on macOS.
+ifeq ($(PORTNAME),darwin)
+libpq_pgport = $(libpq)
+else ifdef PGXS
 libpq_pgport = -L$(libdir) -lpgcommon -lpgport $(libpq)
 else
 libpq_pgport = -L$(top_builddir)/src/common -lpgcommon -L$(top_builddir)/src/port -lpgport $(libpq)
+endif
+
+# libpq_pgport_shlib is the same idea, but for use in client shared libraries.
+# We need those clients to use the shlib variants.  (Ideally, users of this
+# macro would strip libpgport and libpgcommon from $(LIBS), but no harm is
+# done if they don't, since they will have satisfied all their references
+# from these libraries.)
+ifdef PGXS
+libpq_pgport_shlib = -L$(libdir) -lpgcommon_shlib -lpgport_shlib $(libpq)
+else
+libpq_pgport_shlib = -L$(top_builddir)/src/common -lpgcommon_shlib -L$(top_builddir)/src/port -lpgport_shlib $(libpq)
 endif
 
 # Cygwin seems to need ldap libraries to be mentioned here, too
@@ -549,22 +625,19 @@ endif
 #
 # Commonly used submake targets
 
-submake-libpq:
+submake-libpq: | submake-generated-headers
 	$(MAKE) -C $(libpq_builddir) all
 
-submake-libpgport:
+submake-libpgport: | submake-generated-headers
 	$(MAKE) -C $(top_builddir)/src/port all
 	$(MAKE) -C $(top_builddir)/src/common all
 
-submake-libpgfeutils:
+submake-libpgfeutils: | submake-generated-headers
 	$(MAKE) -C $(top_builddir)/src/port all
 	$(MAKE) -C $(top_builddir)/src/common all
 	$(MAKE) -C $(top_builddir)/src/fe_utils all
 
-submake-generated-headers:
-	$(MAKE) -C $(top_builddir)/src/backend generated-headers
-
-.PHONY: submake-libpq submake-libpgport submake-libpgfeutils submake-generated-headers
+.PHONY: submake-libpq submake-libpgport submake-libpgfeutils
 
 
 ##########################################################################
@@ -573,19 +646,22 @@ submake-generated-headers:
 
 ifneq ($(USE_MODULE_DB),)
   PL_TESTDB = pl_regression_$(NAME)
-  # Replace this with $(or ...) if we ever require GNU make 3.81.
   ifneq ($(MODULE_big),)
     CONTRIB_TESTDB=contrib_regression_$(MODULE_big)
+    ISOLATION_TESTDB=isolation_regression_$(MODULE_big)
   else
     ifneq ($(MODULES),)
       CONTRIB_TESTDB=contrib_regression_$(word 1,$(MODULES))
+      ISOLATION_TESTDB=isolation_regression_$(word 1,$(MODULES))
     else
       CONTRIB_TESTDB=contrib_regression_$(word 1,$(REGRESS))
+      ISOLATION_TESTDB=isolation_regression_$(word 1,$(ISOLATION))
     endif
   endif
 else
   PL_TESTDB = pl_regression
   CONTRIB_TESTDB = contrib_regression
+  ISOLATION_TESTDB = isolation_regression
 endif
 
 ifdef NO_LOCALE
@@ -602,6 +678,7 @@ pg_regress_locale_flags = $(if $(ENCODING),--encoding=$(ENCODING)) $(NOLOCALE)
 pg_regress_clean_files = results/ regression.diffs regression.out tmp_check/ tmp_check_iso/ log/ output_iso/
 
 pg_regress_check = \
+    echo "\# +++ regress check in $(subdir) +++" && \
     $(with_temp_install) \
     $(top_builddir)/src/test/regress/pg_regress \
     --temp-instance=./tmp_check \
@@ -610,12 +687,14 @@ pg_regress_check = \
     $(TEMP_CONF) \
     $(pg_regress_locale_flags) $(EXTRA_REGRESS_OPTS)
 pg_regress_installcheck = \
+    echo "\# +++ regress install-check in $(subdir) +++" && \
     $(top_builddir)/src/test/regress/pg_regress \
     --inputdir=$(srcdir) \
     --bindir='$(bindir)' \
     $(pg_regress_locale_flags) $(EXTRA_REGRESS_OPTS)
 
 pg_isolation_regress_check = \
+    echo "\# +++ isolation check in $(subdir) +++" && \
     $(with_temp_install) \
     $(top_builddir)/src/test/isolation/pg_isolation_regress \
     --temp-instance=./tmp_check_iso \
@@ -624,6 +703,7 @@ pg_isolation_regress_check = \
     $(TEMP_CONF) \
     $(pg_regress_locale_flags) $(EXTRA_REGRESS_OPTS)
 pg_isolation_regress_installcheck = \
+    echo "\# +++ isolation install-check in $(subdir) +++" && \
     $(top_builddir)/src/test/isolation/pg_isolation_regress \
     --inputdir=$(srcdir) --outputdir=output_iso \
     --bindir='$(bindir)' \
@@ -678,10 +758,10 @@ endif
 # substitute implementations of C library routines (see src/port/)
 # note we already included -L.../src/port in LDFLAGS above
 
-LIBOBJS =  ${LIBOBJDIR}fls$U.o ${LIBOBJDIR}strlcat$U.o ${LIBOBJDIR}strlcpy$U.o ${LIBOBJDIR}getpeereid$U.o
+LIBOBJS =  ${LIBOBJDIR}preadv$U.o ${LIBOBJDIR}pwritev$U.o ${LIBOBJDIR}explicit_bzero$U.o ${LIBOBJDIR}pthread_barrier_wait$U.o
 
 # files needed for the chosen CRC-32C implementation
-PG_CRC32C_OBJS = pg_crc32c_sse42.o pg_crc32c_sb8.o pg_crc32c_choose.o
+PG_CRC32C_OBJS = pg_crc32c_sb8.o
 
 LIBS := -lpgcommon -lpgport $(LIBS)
 
@@ -729,6 +809,13 @@ endif
 # foo.c -> foo.o -> foo steps.  This also ensures that dependency
 # tracking (see below) is used.
 %: %.c
+
+# Replace gmake's default rule for linking a single .o file to produce an
+# executable.  The main point here is to put LDFLAGS after the .o file,
+# since we put -l switches into LDFLAGS and those are order-sensitive.
+# In addition, include CFLAGS and LDFLAGS_EX per kanassProject conventions.
+%: %.o
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) $(LDFLAGS_EX) $(LIBS) -o $@$(X)
 
 ifndef PGXS
 
@@ -795,17 +882,19 @@ install-strip:
 # allows parallel make across directories and lets make -k and -q work
 # correctly.
 
-# We need the $(eval) function and order-only prerequisites, which are
-# available in GNU make 3.80.  That also happens to be the version
-# where the .VARIABLES variable was introduced, so this is a simple check.
-ifndef .VARIABLES
-$(error GNU make 3.80 or newer is required.  You are using version $(MAKE_VERSION))
+# We need the ability to export target-specific variables, which was
+# added in GNU make 3.81.  That also happens to be the version
+# where the .FEATURES variable was introduced, so this is a simple check.
+ifndef .FEATURES
+$(error GNU make 3.81 or newer is required.  You are using version $(MAKE_VERSION))
 endif
 
 # This function is only for internal use below.  It should be called
-# using $(eval).  It will set up a target so that it recurses into
-# a given subdirectory.  Note that to avoid a nasty bug in make 3.80,
-# this function has to avoid using any complicated constructs (like
+# using $(eval).  It will set up a target so that it recurses into a
+# given subdirectory.  For the tree-wide all/install/check/installcheck cases,
+# ensure we do our one-time tasks before recursing (see targets above).
+# Note that to avoid a nasty bug in make 3.80,
+# this function was written to not use any complicated constructs (like
 # multiple targets on a line) and also not contain any lines that expand
 # to more than about 200 bytes.  This is why we make it apply to just one
 # subdirectory at a time, rather than to a list of subdirectories.
@@ -815,7 +904,7 @@ endif
 define _create_recursive_target
 .PHONY: $(1)-$(2)-recurse
 $(1): $(1)-$(2)-recurse
-$(1)-$(2)-recurse: $(if $(filter check, $(3)), temp-install)
+$(1)-$(2)-recurse: $(if $(filter all install check installcheck, $(3)), submake-generated-headers) $(if $(filter check, $(3)), temp-install)
 	$$(MAKE) -C $(2) $(3)
 endef
 # Note that the use of $$ on the last line above is important; we want
@@ -859,6 +948,10 @@ ifndef COMPILE.c
 COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) -c
 endif
 
+ifndef COMPILE.cc
+COMPILE.cc = $(CXX) $(CXXFLAGS) $(CPPFLAGS) -c
+endif
+
 DEPDIR = .deps
 
 ifeq ($(GCC), yes)
@@ -867,6 +960,10 @@ ifeq ($(GCC), yes)
 %.o : %.c
 	@if test ! -d $(DEPDIR); then mkdir -p $(DEPDIR); fi
 	$(COMPILE.c) -o $@ $< -MMD -MP -MF $(DEPDIR)/$(*F).Po
+
+%.o : %.cpp
+	@if test ! -d $(DEPDIR); then mkdir -p $(DEPDIR); fi
+	$(COMPILE.cc) -o $@ $< -MMD -MP -MF $(DEPDIR)/$(*F).Po
 
 endif # GCC
 
@@ -916,30 +1013,50 @@ endif # enable_nls
 #		gcov from foo.gcda (by "make coverage")
 #   foo.c.gcov.out  stdout captured when foo.c.gcov is created, mildly
 #		interesting
-#   lcov.info	lcov tracefile, built from gcda files in one directory,
+#   lcov_test.info
+#		lcov tracefile, built from gcda files in one directory,
 #		later collected by "make coverage-html"
+#   lcov_base.info
+#		tracefile for zero counters for every file, so that
+#		even files that are not touched by tests are counted
+#		for the overall coverage rate
 
 ifeq ($(enable_coverage), yes)
 
-# There is a strange interaction between lcov and existing .gcov
-# output files.  Hence the rm command and the ordering dependency.
+# make coverage -- text output
 
-gcda_files := $(wildcard *.gcda)
+local_gcda_files = $(wildcard *.gcda)
 
-lcov.info: $(gcda_files)
-	rm -f *.gcov .*.gcov
-	$(if $^,$(LCOV) -d . -c -o $@ $(LCOVFLAGS) --gcov-tool $(GCOV))
+coverage: $(local_gcda_files:.gcda=.c.gcov)
 
-%.c.gcov: %.gcda | lcov.info
+%.c.gcov: %.gcda
 	$(GCOV) -b -f -p -o . $(GCOVFLAGS) $*.c >$*.c.gcov.out
 
-coverage: $(gcda_files:.gcda=.c.gcov) lcov.info
+# make coverage-html -- HTML output via lcov
 
 .PHONY: coverage-html
-coverage-html: coverage
+coverage-html: coverage-html-stamp
+
+GENHTML_FLAGS = -q --legend
+GENHTML_TITLE = PostgreSQL $(VERSION)
+
+coverage-html-stamp: lcov_base.info lcov_test.info
 	rm -rf coverage
-	mkdir coverage
-	$(GENHTML) --show-details --legend --output-directory=coverage --title=PostgreSQL --num-spaces=4 --prefix=$(abs_top_srcdir) `find . -name lcov.info -print`
+	$(GENHTML) $(GENHTML_FLAGS) -o coverage --title='$(GENHTML_TITLE)' --num-spaces=4 $(if $(filter no,$(vpath_build)),--prefix='$(abs_top_srcdir)') $^
+	touch $@
+
+LCOV += --gcov-tool $(GCOV)
+LCOVFLAGS = -q --no-external
+
+all_gcno_files = $(shell find . -name '*.gcno' -print)
+
+lcov_base.info: $(all_gcno_files)
+	$(LCOV) $(LCOVFLAGS) -c -i -d . -d $(srcdir) -o $@
+
+all_gcda_files = $(shell find . -name '*.gcda' -print)
+
+lcov_test.info: $(all_gcda_files)
+	$(LCOV) $(LCOVFLAGS) -c -d . -d $(srcdir) -o $@
 
 
 # hook for clean-up
@@ -947,8 +1064,8 @@ clean distclean maintainer-clean: clean-coverage
 
 .PHONY: clean-coverage
 clean-coverage:
-	rm -rf coverage
-	rm -f *.gcda *.gcno lcov.info *.gcov .*.gcov *.gcov.out
+	rm -rf coverage coverage-html-stamp
+	rm -f *.gcda *.gcno lcov*.info *.gcov .*.gcov *.gcov.out
 
 
 # User-callable target to reset counts between test runs
@@ -956,3 +1073,56 @@ coverage-clean:
 	rm -f `find . -name '*.gcda' -print`
 
 endif # enable_coverage
+
+##########################################################################
+#
+# LLVM support
+#
+
+ifndef COMPILE.c.bc
+# -Wno-ignored-attributes added so gnu_printf doesn't trigger
+# warnings, when the main binary is compiled with C.
+COMPILE.c.bc = $(CLANG) -Wno-ignored-attributes $(BITCODE_CFLAGS) $(CPPFLAGS) -flto=thin -emit-llvm -c
+endif
+
+ifndef COMPILE.cxx.bc
+COMPILE.cxx.bc = $(CLANG) -xc++ -Wno-ignored-attributes $(BITCODE_CXXFLAGS) $(CPPFLAGS) -flto=thin -emit-llvm -c
+endif
+
+%.bc : %.c
+	$(COMPILE.c.bc) -o $@ $<
+
+%.bc : %.cpp
+	$(COMPILE.cxx.bc) -o $@ $<
+
+# Install LLVM bitcode module (for JITing).
+#
+# The arguments are:
+# $(1) name of the module (e.g. an extension's name or postgres for core code)
+# $(2) source objects, with .o suffix
+#
+# The many INSTALL_DATA invocations aren't particularly fast, it'd be
+# good if we could coalesce them, but I didn't find a good way.
+#
+# Note: blank line at end of macro is necessary to let it be used in foreach
+define install_llvm_module
+$(MKDIR_P) '$(DESTDIR)${bitcodedir}/$(1)'
+$(MKDIR_P) $(sort $(dir $(addprefix '$(DESTDIR)${bitcodedir}'/$(1)/, $(2))))
+$(foreach obj, ${2}, $(INSTALL_DATA) $(patsubst %.o,%.bc, $(obj)) '$(DESTDIR)${bitcodedir}'/$(1)/$(dir $(obj))
+)
+cd '$(DESTDIR)${bitcodedir}' && $(LLVM_BINPATH)/llvm-lto -thinlto -thinlto-action=thinlink -o $(1).index.bc $(addprefix $(1)/,$(patsubst %.o,%.bc, $(2)))
+
+endef
+
+# Uninstall LLVM bitcode module.
+#
+# The arguments are:
+# $(1) name of the module (e.g. an extension's name or postgres for core code)
+#
+# This intentionally doesn't use the explicit installed file list,
+# seems too likely to change regularly.
+define uninstall_llvm_module
+rm -rf '$(DESTDIR)${bitcodedir}/$(1)/'
+rm -f '$(DESTDIR)${bitcodedir}/$(1).index.bc'
+
+endef

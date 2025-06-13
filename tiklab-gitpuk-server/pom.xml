@@ -34,10 +34,22 @@
 		</dependency>
 
 
+
+
 		<!--tiklab-->
 		<dependency>
 			<groupId>io.tiklab</groupId>
 			<artifactId>tiklab-gitpuk-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-sourcefare-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.tiklab</groupId>
+			<artifactId>tiklab-arbess-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -27,7 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/repRepWebHook")
-@Api(name = "RepWebHookController",desc = "repRepWebHook的认证")
+//@Api(name = "RepWebHookController",desc = "repRepWebHook的认证")
 public class RepWebHookController {
 
     private static Logger logger = LoggerFactory.getLogger(RepWebHookController.class);

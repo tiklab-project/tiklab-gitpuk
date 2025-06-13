@@ -3,7 +3,7 @@ package io.tiklab.gitpuk.repository.controller;
 import io.tiklab.core.Result;
 import io.tiklab.gitpuk.repository.model.IntRelevancy;
 import io.tiklab.gitpuk.repository.model.IntRelevancyQuery;
-import io.tiklab.gitpuk.repository.service.IntRelevancyServer;
+import io.tiklab.gitpuk.repository.service.IntRelevancyService;
 import io.tiklab.postin.annotation.Api;
 import io.tiklab.postin.annotation.ApiMethod;
 import io.tiklab.postin.annotation.ApiParam;
@@ -19,11 +19,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/intRelevancy")
-@Api(name = "IntRelevancyController",desc = "集成关联")
+//@Api(name = "IntRelevancyController",desc = "集成关联")
 public class IntRelevancyController {
 
     @Autowired
-    private IntRelevancyServer intRelevancyServer;
+    private IntRelevancyService intRelevancyServer;
 
     @RequestMapping(path="/createIntRelevancy",method = RequestMethod.POST)
     @ApiMethod(name = "createIntRelevancy",desc = "创建集成关联")

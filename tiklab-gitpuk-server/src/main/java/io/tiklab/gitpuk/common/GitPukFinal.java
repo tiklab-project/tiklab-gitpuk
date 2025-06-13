@@ -2,6 +2,8 @@ package io.tiklab.gitpuk.common;
 
 public class GitPukFinal {
 
+    // 仓库地址前缀
+    public static final String REP_PATH_PREFIX = "/xcode/";
 
     // 日志、消息类型
     public static final String LOG_TYPE_CREATE = "GTK_CREATE";
@@ -120,6 +122,9 @@ public class GitPukFinal {
 
 
 
+    //eslint可执行程序路径
+    public static final String ESLINT_PATH ="node_modules/eslint/bin/eslint.js";
+
     //默认异常
     public static final Integer SYSTEM_EXCEPTION = 56100;
 
@@ -135,6 +140,7 @@ public class GitPukFinal {
 
     //重复
     public static final Integer REPEAT02_EXCEPTION = 56112;
+
 
     //没有查询到
     public static final Integer NOT_FOUNT_EXCEPTION = 56404;

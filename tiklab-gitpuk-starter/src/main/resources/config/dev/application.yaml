@@ -1,12 +1,6 @@
 app:
   name: tiklab-gitpuk
 
-spring:
-  main:
-    allow-bean-definition-overriding: true
-  freemarker:
-    checkTemplateLocation: false
-
 server:
   port: 8090
 
@@ -16,11 +10,12 @@ DATA_HOME: ${user.home}/tiklab/${app.name}
 
 #database config
 jdbc:
-  driverClassName: org.postgresql.Driver
-  #url: jdbc:postgresql://172.10.1.10:5432/tiklab-gitpuk?stringtype=unspecified
-  url: jdbc:postgresql://172.10.1.10:5432/thoughtware-gittok?stringtype=unspecified
-  #url: jdbc:postgresql://172.13.1.23:5432/xcode_ee?stringtype=unspecified
-  username: postgres
+  #driverClassName: org.postgresql.Driver
+  #url: jdbc:postgresql://172.10.1.10:5432/thoughtware-gittok?stringtype=unspecified
+  #username: postgres
+  driverClassName: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://172.10.1.10:3306/tiklab_gitpuk?characterEncoding=utf8&useSSL=false
+  username: root
   password: darth2020
 
 # Enable the embedded database
@@ -29,6 +24,15 @@ postgresql:
     enable: false
   type: local
   database: tiklab-gitpuk
+
+
+#(local:本地登录  soular:统一登录)
+auth:
+  type: local
+  soular:
+    address: http://192.168.10.15:8080
+    web:
+      address: http://192.168.10.16:3010
 
 #dcs config
 dcs:
@@ -42,43 +46,22 @@ dcs:
     database: dcs1
     expire: 7200
 
-soular:
-  embbed:
-    enable: true
+external:
+  url: http://192.168.10.9:8090
 
-message:
-  sms:
-    enabled: true
+
+
 
 gitPuk:
   ssh:
-    port: 10003
+    port: 10051
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
-
-base:
-  url: http://192.168.10.9:8090
 
 repository:
   address: ${DATA_HOME}/repository
 
-#license
-licences:
-  path: ${DATA_HOME}/licences
-
-
-backups:
-  time: 0 0 2 * * ?
-  dir: /data
-  xcode:
-    dir: ${DATA_HOME}/repository
-
 visit:
   address: ""
 
-spotbugs:
-  address: /embbed/spotbugs-4.8.1/bin
 
-postin:
-  scan:
-    package: io.tiklab.gitpuk

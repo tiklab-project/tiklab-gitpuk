@@ -20,6 +20,9 @@ public class IntRelevancyEntity {
     @Column(name = "relevancy_id",notNull = true)
     private String relevancyId;
 
+    @Column(name = "type")
+    private String type;
+
     @Column(name = "create_time")
     private Timestamp createTime;
 
@@ -54,5 +57,13 @@ public class IntRelevancyEntity {
 
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

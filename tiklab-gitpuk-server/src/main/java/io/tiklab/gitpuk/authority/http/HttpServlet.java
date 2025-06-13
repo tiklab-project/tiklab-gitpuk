@@ -7,12 +7,14 @@ import io.tiklab.gitpuk.repository.model.Repository;
 import io.tiklab.gitpuk.repository.model.RepositoryQuery;
 import io.tiklab.gitpuk.repository.service.MemoryManService;
 import io.tiklab.gitpuk.repository.service.RecordCommitService;
+import io.tiklab.gitpuk.repository.service.RepositoryPushRule;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.service.UserService;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.http.server.GitServlet;
 
+import org.eclipse.jgit.transport.ReceivePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ public class HttpServlet extends GitServlet {
         private RepositoryService repositoryServer;
 
         @Autowired
+        private RepositoryPushRule repositoryPushRule;
+
+        @Autowired
         private MemoryManService memoryManService;
 
 
@@ -66,59 +71,62 @@ public class HttpServlet extends GitServlet {
 
         //拦截请求效验数据
 
-        public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-            // 将ServletRequest对象转换为HttpServletRequest对象
-            HttpServletRequest request = (HttpServletRequest) req;
-            String requestURI = request.getRequestURI();
-            logger.info("代码请求" + requestURI);
-            HttpServletResponse response = (HttpServletResponse) res;
+        public void service(ServletRequest req, ServletResponse res) {
 
-            //认证用户信息
-            boolean authorized=false;
-            String username=null;
-            String authHeader = request.getHeader("Authorization");
-            Enumeration<String> headerNames = request.getHeaderNames();
-            if (authHeader != null && authHeader.startsWith("Basic ")) {
-                byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
-                String[] authTokens = new String(decode).split(":");
-                if (authTokens.length == 2) {
-                    username = authTokens[0];
-                    String password = authTokens[1];
-                    //校验用户信息
-                    authorized = validUsrPwdServer.validUserNamePassword(username, password, "1");
+            try {
+                String commitMessage = req.getParameter("message");
+                // 将ServletRequest对象转换为HttpServletRequest对象
+                HttpServletRequest request = (HttpServletRequest) req;
+                String requestURI = request.getRequestURI();
+                logger.info("代码请求" + requestURI);
+                HttpServletResponse response = (HttpServletResponse) res;
+
+                //认证用户信息
+                boolean authorized=false;
+                String username=null;
+                String authHeader = request.getHeader("Authorization");
+                Enumeration<String> headerNames = request.getHeaderNames();
+                if (authHeader != null && authHeader.startsWith("Basic ")) {
+                    byte[] decode = Base64.getDecoder().decode(authHeader.substring(6));
+                    String[] authTokens = new String(decode).split(":");
+                    if (authTokens.length == 2) {
+                        username = authTokens[0];
+                        String password = authTokens[1];
+                        //校验用户信息
+                        authorized = validUsrPwdServer.validUserNamePassword(username, password, "1");
+                    }
                 }
-            }
-            //认证失败
-            if (!authorized){
-                logger.info("认证失败");
-                ReturnResponse.authFailure(response);
-                return;
-            }
-
-
-            //查询是否还有剩余内存
-            boolean resMemory = memoryManService.findResMemory();
-            if (!resMemory){
-                 logger.info("存储空间不足");
-                 ReturnResponse.serverNotMemory(response);
-                 return;
-            }
-
-
-            if (requestURI.endsWith("info/refs")){
-                //查询仓库
-                Repository  repository = findRepository(request.getRequestURI());
-
-                boolean privilege = validUsrPwdServer.validUserPrivilege(username, repository.getRpyId());
-                if (!privilege){
-                    ReturnResponse.authPrivilege(response);
+                //认证失败
+                if (!authorized){
+                    logger.info("认证失败");
+                    ReturnResponse.authFailure(response);
                     return;
                 }
-            }
 
 
-            //仓库上传权限
-            if (requestURI.endsWith("git-receive-pack")){
+                //查询是否还有剩余内存
+                boolean resMemory = memoryManService.findResMemory();
+                if (!resMemory){
+                    logger.info("存储空间不足");
+                    ReturnResponse.serverNotMemory(response);
+                    return;
+                }
+
+
+                if (requestURI.endsWith("info/refs")){
+                    //查询仓库
+                    Repository  repository = findRepository(request.getRequestURI());
+
+                    boolean privilege = validUsrPwdServer.validUserPrivilege(username, repository.getRpyId());
+                    if (!privilege){
+                        ReturnResponse.authPrivilege(response);
+                        return;
+                    }
+                }
+
+
+                //仓库上传权限
+                if (requestURI.endsWith("git-receive-pack")){
                     String[] split = requestURI.split("/");
                     String groupName = split[2];
                     String name = split[3].substring(0,split[3].indexOf(".git"));
@@ -126,32 +134,42 @@ public class HttpServlet extends GitServlet {
                     Repository repository = repositoryServer.findRepositoryByAddress(groupName + "/" + name);
 
                     if(repository.getState()==2){
-                            response.setHeader("Content-Type", "text/plain");
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.getWriter().write("You are not allowed to push code to this project");
-                            return;
+                        response.setHeader("Content-Type", "text/plain");
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.getWriter().write("You are not allowed to push code to this project");
+                        return;
                     }
-            }
 
-            //处理lfs
-            if (requestURI.endsWith("/info/lfs/objects/batch")) {
-                boolean result = httpLfsAuthService.HttpLfsAnalysis(request, response);
-                if (!result){
-                    return;
+
                 }
-            }else {
-                super.service(req, res);
+
+                //处理lfs
+                if (requestURI.endsWith("/info/lfs/objects/batch")) {
+                    boolean result = httpLfsAuthService.HttpLfsAnalysis(request, response);
+                    if (!result){
+                        return;
+                    }
+                }else {
+                    super.service(req, res);
+                }
+
+                //推送成功后 编辑提交记录
+                compileCommit(request,username);
+            } catch (Exception e) {
+                e.printStackTrace();
+                HttpServletResponse response = (HttpServletResponse) res;
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
 
-            //推送成功后 编辑提交记录
-            compileCommit(request,username);
         }
+
+
 
         @Override
         public void init(ServletConfig config) throws ServletException {
                 setRepositoryResolver(new HttpRepositoryResolver(repositoryServer));
                 setUploadPackFactory(new HttpUploadPackFactory());
-                setReceivePackFactory(new HttpReceivePackFactory());
+                setReceivePackFactory(new HttpReceivePackFactory(repositoryPushRule));
                 super.init(config);
         }
 

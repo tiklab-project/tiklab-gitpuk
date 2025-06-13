@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/authSsh")
-@Api(name = "AuthSshController",desc = "认证")
+//@Api(name = "AuthSshController",desc = "认证")
 public class AuthSshController {
 
     @Autowired

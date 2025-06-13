@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/repositoryBranch")
-@Api(name = "RepositoryBranchController",desc = "数据库存储分支记录管理")
+//@Api(name = "RepositoryBranchController",desc = "数据库存储分支记录管理")
 public class RepositoryBranchController {
 
     private static Logger logger = LoggerFactory.getLogger(RepositoryBranchController.class);

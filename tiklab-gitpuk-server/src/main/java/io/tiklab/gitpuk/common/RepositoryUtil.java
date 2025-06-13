@@ -71,6 +71,8 @@ public class RepositoryUtil {
      * @throws IOException 调取命令行失败
      */
     public static Process process(String path,String order) throws IOException {
+
+
         Runtime runtime=Runtime.getRuntime();
         Process process;
         if (RepositoryUtil.findSystemType()==1){
@@ -101,7 +103,7 @@ public class RepositoryUtil {
      */
     public static Process execOrder(String order,String path) throws IOException {
         Runtime runtime=Runtime.getRuntime();
-        Process process = runtime.exec(order.toString());
+        Process process = runtime.exec(order);
         return process;
     }
 
@@ -275,8 +277,6 @@ public class RepositoryUtil {
      * @return 位置
      */
     public static String SystemTypeAddress(String address) {
-
-
         int systemType = findSystemType();
         if (systemType == 1) {
             return address.replace("/", "\\");
@@ -488,6 +488,16 @@ public class RepositoryUtil {
         map.put("BUILD FAILURE","构建失败！");
         return map;
     }
+
+    /*
+     * go执行命令错误信息
+     * */
+    public static Map<String,String> goProcessError(){
+        Map<String,String> map = new HashMap<>();
+        map.put("typechecking error:","执行失败");
+        return map;
+    }
+
 
 
 

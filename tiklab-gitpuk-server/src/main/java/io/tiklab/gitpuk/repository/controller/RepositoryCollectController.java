@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/repositoryCollect")
-@Api(name = "RepositoryCollectController",desc = "收藏仓库数据")
+//@Api(name = "RepositoryCollectController",desc = "收藏仓库数据")
 public class RepositoryCollectController {
 
     private static Logger logger = LoggerFactory.getLogger(RepositoryCollectController.class);

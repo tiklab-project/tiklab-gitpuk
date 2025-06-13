@@ -36,10 +36,10 @@ public class IntegrationAddress {
     @ApiProperty(name="authType",desc="认证类型 私钥：key、密码：password")
     private String authType="password";
 
-    @ApiProperty(name="account",desc="集成地址")
+    @ApiProperty(name="account",desc="账号")
     private String account;
 
-    @ApiProperty(name="password",desc="集成地址")
+    @ApiProperty(name="password",desc="密码")
     private String password;
 
 

@@ -23,11 +23,11 @@ public class IntegrationAddressEntity {
     @Column(name = "auth_type",notNull = true)
     private String authType;
 
-    @Column(name = "account",notNull = true)
+    @Column(name = "account")
     private String account;
 
 
-    @Column(name = "password",notNull = true)
+    @Column(name = "password")
     private String password;
 
     @Column(name = "create_time")

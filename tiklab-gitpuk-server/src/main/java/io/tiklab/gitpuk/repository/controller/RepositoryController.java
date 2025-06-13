@@ -21,15 +21,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/rpy")
-@Api(name = "RepositoryController",desc = "仓库")
+@Api(name = "仓库",desc = "仓库")
 public class RepositoryController {
     
     @Autowired
     private RepositoryService repositoryServer;
 
     @RequestMapping(path="/createRpy",method = RequestMethod.POST)
-    @ApiMethod(name = "create",desc = "创建仓库")
-    @ApiParam(name = "repository",desc = "repository",required = true)
+    //@ApiMethod(name = "create",desc = "创建仓库")
+    //@ApiParam(name = "repository",desc = "repository",required = true)
     public Result<String> create(@RequestBody @NotNull @Valid Repository repository){
 
         String rpyId = repositoryServer.createRpyData(repository);
@@ -39,8 +39,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/deleteRpy",method = RequestMethod.POST)
-    @ApiMethod(name = "delete",desc = "删除仓库")
-    @ApiParam(name = "rpyId",desc = "仓库id",required = true)
+    //@ApiMethod(name = "delete",desc = "删除仓库")
+    //@ApiParam(name = "rpyId",desc = "仓库id",required = true)
     public Result<Void> delete(@NotNull String rpyId){
 
         repositoryServer.deleteRpy(rpyId);
@@ -49,8 +49,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/updateRpy",method = RequestMethod.POST)
-    @ApiMethod(name = "update",desc = "更新仓库")
-    @ApiParam(name = "repository",desc = "repository",required = true)
+    //@ApiMethod(name = "update",desc = "更新仓库")
+    //@ApiParam(name = "repository",desc = "repository",required = true)
     public Result<Void> update(@RequestBody @NotNull @Valid Repository repository){
 
         repositoryServer.updateRpy(repository);
@@ -60,8 +60,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/findUserRpy",method = RequestMethod.POST)
-    @ApiMethod(name = "findUser",desc = "查询仓库")
-    @ApiParam(name = "userId",desc = "用户id",required = true)
+    //@ApiMethod(name = "findUser",desc = "查询仓库")
+    //@ApiParam(name = "userId",desc = "用户id",required = true)
     public Result<List<Repository>> findUser(@NotNull String userId){
 
         List<Repository> repositoryList = repositoryServer.findUserRpy(userId);
@@ -70,8 +70,8 @@ public class RepositoryController {
     }
 
     @RequestMapping(path="/findRepositoryByUser",method = RequestMethod.POST)
-    @ApiMethod(name = "findRepositoryByUser",desc = "通过用户查询有权限的仓库 Arbess使用")
-    @ApiParam(name = "account",desc = "account",required = true)
+    //@ApiMethod(name = "findRepositoryByUser",desc = "通过用户查询有权限的仓库 其他服务集成使用")
+    //@ApiParam(name = "account",desc = "account",required = true)
     public Result<List<Repository>> findRepositoryByUser(@NotNull String account, @NotNull String password, String dirId){
 
         List<Repository> repositoryList = repositoryServer.findRepositoryByUser(account,password,dirId);
@@ -114,8 +114,8 @@ public class RepositoryController {
     }
 
     @RequestMapping(path="/findRepository",method = RequestMethod.POST)
-    @ApiMethod(name = "findRepository",desc = "通过仓库id 查询")
-    @ApiParam(name = "id",desc = "仓库ID",required = true)
+    //@ApiMethod(name = "findRepository",desc = "通过仓库id 查询")
+    //@ApiParam(name = "id",desc = "仓库ID",required = true)
     public Result<Repository> findRepository(@NotNull String id){
 
         Repository nameRepository = repositoryServer.findRepository(id);
@@ -125,8 +125,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/findRepositoryByName",method = RequestMethod.POST)
-    @ApiMethod(name = "findRepositoryByName",desc = "通过仓库名字或仓库组查询仓库是否存在")
-    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    //@ApiMethod(name = "findRepositoryByName",desc = "通过仓库名字或仓库组查询仓库是否存在")
+    //@ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
     public Result<List<Repository>> findRepositoryByName(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
 
         List<Repository> repositoryByName = repositoryServer.findRepositoryByName(repositoryQuery);
@@ -136,8 +136,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/findRepositoryByAddress",method = RequestMethod.POST)
-    @ApiMethod(name = "findRepositoryByAddress",desc = "通过仓库地址匹配")
-    @ApiParam(name = "address",desc = "address",required = true)
+   // @ApiMethod(name = "findRepositoryByAddress",desc = "通过仓库地址匹配")
+    //@ApiParam(name = "address",desc = "address",required = true)
     public Result<Repository> findRepositoryByAddress( @NotNull String address){
 
         Repository repository= repositoryServer.findRepositoryByAddress(address);
@@ -146,8 +146,8 @@ public class RepositoryController {
     }
 
     @RequestMapping(path="/findGroupRepository",method = RequestMethod.POST)
-    @ApiMethod(name = "findGroupRepository",desc = "条件查询仓库组下面的仓库")
-    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    //@ApiMethod(name = "findGroupRepository",desc = "条件查询仓库组下面的仓库")
+    //@ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
     public Result<List<Repository>> findGroupRepository(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
 
         Pagination<Repository> groupRepository = repositoryServer.findGroupRepository(repositoryQuery);
@@ -157,8 +157,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/deleteRpyByAddress",method = RequestMethod.POST)
-    @ApiMethod(name = "deleteRpyByAddress",desc = "根据路径删除")
-    @ApiParam(name = "address",desc = "仓库id",required = true)
+    //@ApiMethod(name = "deleteRpyByAddress",desc = "根据路径删除")
+    //@ApiParam(name = "address",desc = "仓库id",required = true)
     public Result<Void> deleteRpyByAddress(@NotNull String address){
 
         repositoryServer.deleteRpyByAddress(address);
@@ -168,8 +168,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/findCommitRepository",method = RequestMethod.POST)
-    @ApiMethod(name = "findCommitRepository",desc = "查询用户推送过的仓库")
-    @ApiParam(name = "userId",desc = "用户id",required = true)
+    //@ApiMethod(name = "findCommitRepository",desc = "查询用户推送过的仓库")
+    //@ApiParam(name = "userId",desc = "用户id",required = true)
     public Result<List<Repository>> findCommitRepository(@NotNull String userId){
         List<Repository> repositoryList=repositoryServer.findCommitRepository(userId);
 
@@ -178,8 +178,8 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/findRepositoryListByUser",method = RequestMethod.POST)
-    @ApiMethod(name = "findRepositoryListByUser",desc = "通过用户查看用户有可以查看的仓库")
-    @ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
+    //@ApiMethod(name = "findRepositoryListByUser",desc = "通过用户查看用户有可以查看的仓库")
+    //@ApiParam(name = "repositoryQuery",desc = "repositoryQuery",required = true)
     public Result<Pagination<Repository>> findRepositoryListByUser(@RequestBody @NotNull @Valid RepositoryQuery repositoryQuery){
         Pagination<Repository> repositoryByUser = repositoryServer.findRepositoryListByUser(repositoryQuery);
 
@@ -188,7 +188,7 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/getAddress",method = RequestMethod.POST)
-    @ApiMethod(name = "getAddress",desc = "获取当前服务起ip 或配置的域名")
+    //@ApiMethod(name = "getAddress",desc = "获取当前服务起ip 或配置的域名")
     public Result<String> getAddress(){
         String address=repositoryServer.getAddress();
 
@@ -197,7 +197,7 @@ public class RepositoryController {
 
 
     @RequestMapping(path="/getRepositoryPath",method = RequestMethod.POST)
-    @ApiMethod(name = "getRepositoryPath",desc = "获取仓库地址")
+    //@ApiMethod(name = "getRepositoryPath",desc = "获取仓库地址")
     public Result<String> getRepositoryPath(){
         String address=repositoryServer.getRepositoryPath();
 

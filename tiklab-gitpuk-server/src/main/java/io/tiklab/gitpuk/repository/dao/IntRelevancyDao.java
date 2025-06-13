@@ -72,54 +72,11 @@ public class IntRelevancyDao {
         QueryCondition queryCondition = QueryBuilders.createQuery(IntRelevancyEntity.class)
                 .eq("repositoryId", intRelevancyQuery.getRepositoryId())
                 .eq("relevancyId", intRelevancyQuery.getRelevancyId())
+                .eq("type",intRelevancyQuery.getType())
                 .orders(intRelevancyQuery.getOrderParams())
                 .get();
         return jpaTemplate.findList(queryCondition, IntRelevancyEntity.class);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

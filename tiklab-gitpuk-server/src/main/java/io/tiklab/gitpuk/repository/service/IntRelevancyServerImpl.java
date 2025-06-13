@@ -4,7 +4,6 @@ import io.tiklab.dal.jpa.criterial.condition.DeleteCondition;
 import io.tiklab.dal.jpa.criterial.conditionbuilder.DeleteBuilders;
 import io.tiklab.gitpuk.repository.dao.IntRelevancyDao;
 import io.tiklab.gitpuk.repository.entity.IntRelevancyEntity;
-import io.tiklab.gitpuk.repository.entity.RecordOpenEntity;
 import io.tiklab.gitpuk.repository.model.IntRelevancy;
 import io.tiklab.gitpuk.repository.model.IntRelevancyQuery;
 import io.tiklab.rpc.annotation.Exporter;
@@ -20,7 +19,7 @@ import java.util.List;
 
 @Service
 @Exporter
-public class IntRelevancyServerImpl implements IntRelevancyServer {
+public class IntRelevancyServerImpl implements IntRelevancyService {
 
 
     @Autowired

@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/gitPukUser")
-@Api(name = "GitTokUserController",desc = "xpack 项目的用户")
+//@Api(name = "GitTokUserController",desc = "xpack 项目的用户")
 public class GitTokUserController {
 
     @Autowired

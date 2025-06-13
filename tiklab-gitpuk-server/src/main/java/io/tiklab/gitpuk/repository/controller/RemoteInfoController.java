@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/remoteInfo")
-@Api(name = "RemoteInfoController",desc = "镜像信息管理 ")
+//@Api(name = "RemoteInfoController",desc = "镜像信息管理 ")
 public class RemoteInfoController {
 
     private static Logger logger = LoggerFactory.getLogger(RemoteInfoController.class);

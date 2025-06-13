@@ -1,9 +1,14 @@
+prefix=/opt/pginstaller_16.auto/server/staging_cache/osx.build
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
 Name: libpgtypes
 Description: PostgreSQL libpgtypes library
-Url: http://www.postgresql.org/
-Version: 10.23
+URL: https://www.postgresql.org/
+Version: 16.2
 Requires: 
 Requires.private: 
-Cflags: -I/mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64/include
-Libs: -L/mnt/hgfs/pginstaller.auto/server/staging_cache/linux-x64/lib -lpgtypes
-Libs.private: -L/opt/local/Current/lib -lm
+Cflags: -I${includedir}
+Libs: -L${libdir} -lpgtypes
+Libs.private: -L/opt/local/20220418/lib -L/opt/local/Current_v15/lib -L/opt/local/lib -lpgcommon -lpgport -lm

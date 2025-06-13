@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/mergeCommit")
-@Api(name = "MergeCommitController",desc = "合并请求的分支差异提交")
+//@Api(name = "MergeCommitController",desc = "合并请求的分支差异提交")
 public class MergeCommitController {
 
     private static Logger logger = LoggerFactory.getLogger(MergeCommitController.class);

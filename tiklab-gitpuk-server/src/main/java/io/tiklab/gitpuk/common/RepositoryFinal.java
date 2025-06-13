@@ -7,6 +7,18 @@ public class RepositoryFinal {
      */
     public final static String APP_NAME = "gitpuk";
 
+
+    /**
+     * 流水线
+     */
+    public final static String PIPELINE = "pipeline";
+
+
+    /**
+     * 扫描
+     */
+    public final static String CODE_SCAN = "scan";
+
     /**
      * commitId唯一标识
      */
