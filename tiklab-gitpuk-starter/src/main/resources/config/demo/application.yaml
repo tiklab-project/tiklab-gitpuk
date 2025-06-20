@@ -50,10 +50,7 @@ auth:
 
 
 external:
-  url: http://eas-ce.demo.tiklab.net
-
-
-
+  url:
 
 
 gitPuk:
@@ -61,12 +58,3 @@ gitPuk:
     port: 10000
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
-
-
-# git clone path
-visit:
-  address: ""
-
-#repository config
-repository:
-  address: ${DATA_HOME}/repository

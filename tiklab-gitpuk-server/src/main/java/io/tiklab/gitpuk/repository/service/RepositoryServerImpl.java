@@ -491,6 +491,17 @@ public class RepositoryServerImpl implements RepositoryService {
     }
 
     @Override
+    public Repository findDemoRepository() {
+        List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(new RepositoryQuery().setCategory(1));
+        List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);
+
+        if (CollectionUtils.isNotEmpty(repositoryList)){
+            return repositoryList.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public List<Repository> findRepositoryListByGroup(String groupId) {
         List<RepositoryEntity> repositoryEntityList = repositoryDao.findRepositoryList(new RepositoryQuery().setGroupId(groupId));
         List<Repository> repositoryList = BeanMapper.mapList(repositoryEntityList,Repository.class);

@@ -12,12 +12,8 @@ public class GitPukYamlDataMaServiceImpl implements GitPukYamlDataMaService {
     @Value("${DATA_HOME}")
     private String dataHome;
 
-    @Value("${repository.address}")
-    private String repositoryAddress;
 
-
-
-    @Value("${visit.address:null}")
+    @Value("${external.url:null}")
     private String visitAddress;
 
     @Value("${server.port}")
@@ -38,7 +34,7 @@ public class GitPukYamlDataMaServiceImpl implements GitPukYamlDataMaService {
 
     @Override
     public String repositoryAddress() {
-        return repositoryAddress;
+        return dataHome+"/repository";
     }
 
 

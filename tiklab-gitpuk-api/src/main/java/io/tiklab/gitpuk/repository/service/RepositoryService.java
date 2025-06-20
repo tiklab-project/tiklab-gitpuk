@@ -99,6 +99,12 @@ public interface RepositoryService {
     List<Repository> findRepositoryList(RepositoryQuery repositoryQuery);
 
     /**
+     * 查询演示仓库是否存在
+     *
+     */
+    Repository findDemoRepository();
+
+    /**
      * 通过仓库组id查询仓库
      * @param groupId groupId
      */

@@ -15,6 +15,7 @@ import io.tiklab.toolkit.context.AppContext;
 import io.tiklab.user.user.model.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +43,9 @@ public class InitializeServiceImpl implements InitializeService {
     public void createSampleData() {
         updateRepRole();
         //已经存在演示库就不需要在初始化
-        List<Repository> repositoryList = repositoryServer.findRepositoryList(new RepositoryQuery().setCategory(1));
-        if (CollectionUtils.isNotEmpty(repositoryList)){
+        Repository demoRepository = repositoryServer.findDemoRepository();
+
+        if (ObjectUtils.isNotEmpty(demoRepository)){
             return;
         }
         File zipFile = new File(AppContext.getAppHome()+"/file/sample.zip");

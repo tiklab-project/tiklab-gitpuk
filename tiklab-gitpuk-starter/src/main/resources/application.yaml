@@ -53,7 +53,7 @@ dcs:
 
 
 external:
-  url: http://eas-ce.demo.tiklab.net
+  url: http://gitpuk-ce.demo.tiklab.net
 
 
 gitPuk:
@@ -62,11 +62,3 @@ gitPuk:
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
 
-
-repository:
-  address: ${DATA_HOME}/repository
-
-
-
-visit:
-  address: http://gitpuk-ce.demo.tiklab.net

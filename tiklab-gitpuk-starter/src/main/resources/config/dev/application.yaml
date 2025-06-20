@@ -10,12 +10,12 @@ DATA_HOME: ${user.home}/tiklab/${app.name}
 
 #database config
 jdbc:
-  #driverClassName: org.postgresql.Driver
-  #url: jdbc:postgresql://172.10.1.10:5432/thoughtware-gittok?stringtype=unspecified
-  #username: postgres
-  driverClassName: com.mysql.cj.jdbc.Driver
-  url: jdbc:mysql://172.10.1.10:3306/tiklab_gitpuk?characterEncoding=utf8&useSSL=false
-  username: root
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://172.10.1.10:5432/tiklab-gitpuk?stringtype=unspecified
+  username: postgres
+  #driverClassName: com.mysql.cj.jdbc.Driver
+  #url: jdbc:mysql://172.10.1.10:3306/tiklab_gitpuk?characterEncoding=utf8&useSSL=false
+  #username: root
   password: darth2020
 
 # Enable the embedded database
@@ -47,9 +47,7 @@ dcs:
     expire: 7200
 
 external:
-  url: http://192.168.10.9:8090
-
-
+  url:
 
 
 gitPuk:
@@ -57,11 +55,5 @@ gitPuk:
     port: 10051
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
-
-repository:
-  address: ${DATA_HOME}/repository
-
-visit:
-  address: ""
 
 

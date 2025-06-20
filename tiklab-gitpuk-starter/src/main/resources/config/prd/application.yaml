@@ -47,23 +47,13 @@ dcs:
     expire: 7200
 
 
-
+# External access address
 external:
-  url: http://eas-ce.demo.tiklab.net
+  url: http://gitpuk-ce.demo.tiklab.net
 
-
-
-
-# repository  config
-repository:
-  address: ${DATA_HOME}/repository
 
 gitPuk:
   ssh:
     port: 10000
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
-
-# git clone path
-visit:
-  address: http://gitpuk-ce.demo.tiklab.net
