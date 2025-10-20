@@ -25,6 +25,9 @@ public class CommitFileDiffList {
 
     private int deleteLine;
 
+    private String folderPath;
+
+    private String fileName;
     public int getAddLine() {
         return addLine;
     }
@@ -103,6 +106,22 @@ public class CommitFileDiffList {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public String getFolderPath() {
+        return folderPath;
+    }
+
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
 

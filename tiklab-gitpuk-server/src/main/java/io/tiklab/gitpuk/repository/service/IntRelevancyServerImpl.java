@@ -25,8 +25,7 @@ public class IntRelevancyServerImpl implements IntRelevancyService {
     @Autowired
     private IntRelevancyDao intRelevancyDao;
 
-    @Autowired
-    private JoinTemplate joinTemplate;
+
     /**
      * 创建集成关联
      * @param intRelevancy 信息
@@ -86,7 +85,6 @@ public class IntRelevancyServerImpl implements IntRelevancyService {
     public IntRelevancy findOneIntRelevancy(String IntRelevancyId) {
         IntRelevancyEntity groupEntity = intRelevancyDao.findOneIntRelevancy(IntRelevancyId);
         IntRelevancy intRelevancy = BeanMapper.map(groupEntity, IntRelevancy.class);
-        // joinTemplate.joinQuery(intRelevancy);
         return intRelevancy;
     }
 
@@ -98,7 +96,6 @@ public class IntRelevancyServerImpl implements IntRelevancyService {
     public List<IntRelevancy> findAllIntRelevancy() {
         List<IntRelevancyEntity> groupEntityList = intRelevancyDao.findAllIntRelevancy();
         List<IntRelevancy> list = BeanMapper.mapList(groupEntityList, IntRelevancy.class);
-        // joinTemplate.joinQuery(list);
         if (list == null || list.isEmpty()){
             return Collections.emptyList();
         }
@@ -110,7 +107,6 @@ public class IntRelevancyServerImpl implements IntRelevancyService {
     public List<IntRelevancy> findAllIntRelevancyList(List<String> idList) {
         List<IntRelevancyEntity> groupEntities = intRelevancyDao.findAllIntRelevancyList(idList);
         List<IntRelevancy> list = BeanMapper.mapList(groupEntities, IntRelevancy.class);
-        // joinTemplate.joinQuery(list);
         return list;
     }
 
@@ -118,9 +114,6 @@ public class IntRelevancyServerImpl implements IntRelevancyService {
     public List<IntRelevancy> findIntRelevancyList(IntRelevancyQuery intRelevancyQuery) {
         List<IntRelevancyEntity> intRelevancyEntity =  intRelevancyDao.findIntRelevancyList(intRelevancyQuery);
         List<IntRelevancy> intRelevancyList = BeanMapper.mapList(intRelevancyEntity, IntRelevancy.class);
-
-        joinTemplate.joinQuery(intRelevancyList);
-
 
         return intRelevancyList;
     }

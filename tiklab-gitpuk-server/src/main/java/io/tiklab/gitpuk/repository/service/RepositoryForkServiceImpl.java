@@ -163,7 +163,7 @@ public class RepositoryForkServiceImpl implements RepositoryForkService {
     public RepositoryFork findRepositoryFork(@NotNull String id) {
         RepositoryFork repositoryFork = findOne(id);
 
-        joinTemplate.joinQuery(repositoryFork);
+        joinTemplate.joinQuery(repositoryFork,new String[]{"user"});
 
         return repositoryFork;
     }
@@ -174,7 +174,7 @@ public class RepositoryForkServiceImpl implements RepositoryForkService {
 
         List<RepositoryFork> repositoryForkList =  BeanMapper.mapList(repositoryForkEntityList, RepositoryFork.class);
 
-        joinTemplate.joinQuery(repositoryForkList);
+        joinTemplate.joinQuery(repositoryForkList,new String[]{"user"});
 
 
         return repositoryForkList;
@@ -195,7 +195,7 @@ public class RepositoryForkServiceImpl implements RepositoryForkService {
 
         List<RepositoryFork> openRecordList = BeanMapper.mapList(repositoryForkPage.getDataList(), RepositoryFork.class);
 
-        joinTemplate.joinQuery(openRecordList);
+        joinTemplate.joinQuery(openRecordList,new String[]{"user"});
 
         return PaginationBuilder.build(repositoryForkPage,openRecordList);
     }

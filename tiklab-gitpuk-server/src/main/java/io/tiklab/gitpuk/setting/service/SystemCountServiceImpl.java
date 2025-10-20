@@ -10,7 +10,7 @@ import io.tiklab.privilege.role.service.RoleService;
 import io.tiklab.security.backups.service.BackupsDbService;
 import io.tiklab.user.directory.service.UserDirService;
 import io.tiklab.user.orga.service.OrgaService;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import io.tiklab.user.usergroup.service.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class SystemCountServiceImpl implements SystemCountService{
 
     @Autowired
-    UserService userService;
+    UserProcessor userProcessor;
 
     @Autowired
     OrgaService orgaService;
@@ -55,7 +55,7 @@ public class SystemCountServiceImpl implements SystemCountService{
     public SystemCount collectCount() {
         SystemCount systemCount = new SystemCount();
 
-        Integer userNumber = userService.findUserNumber();
+        Integer userNumber = userProcessor.findUserNumber();
         Integer orgaNumber = orgaService.findOrgaNumber();
         Integer userGroupNumber = userGroupService.findUserGroupNumber();
         Integer roleNumber = roleService.findRoleNumber();

@@ -64,9 +64,11 @@ public class TagServiceImpl implements TagService {
         try {
             GitTagUntil.deleteTag(repositoryAddress,tag.getTagName());
 
+
             //执行webHook
             webHookService.execWebHook(tag.getRpyId(),"deleteTag",tag.getTagName());
         } catch (Exception e) {
+            e.printStackTrace();
             throw new SystemException("删除失败"+e);
         }
     }

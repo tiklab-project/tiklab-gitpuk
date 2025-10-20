@@ -150,13 +150,6 @@
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
-				<dependency>
-					<groupId>io.tiklab</groupId>
-					<artifactId>tiklab-spotbugs</artifactId>
-					<version>${tiklab-spotbugs.version}</version>
-					<type>zip</type>
-					<scope>provided</scope>
-				</dependency>
 			</dependencies>
 			<properties>
 				<assembly>linux</assembly>
@@ -191,13 +184,6 @@
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
-										<artifactItem>
-											<groupId>io.tiklab</groupId>
-											<artifactId>tiklab-spotbugs</artifactId>
-											<version>${tiklab-spotbugs.version}</version>
-											<type>zip</type>
-											<outputDirectory>embbed</outputDirectory>
-										</artifactItem>
 									</artifactItems>
 								</configuration>
 							</execution>
@@ -222,13 +208,6 @@
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-postgresql-windows</artifactId>
 					<version>${tiklab-postgresql.version}</version>
-					<type>zip</type>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>io.tiklab</groupId>
-					<artifactId>tiklab-spotbugs</artifactId>
-					<version>${tiklab-spotbugs.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -266,13 +245,6 @@
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>
-										<artifactItem>
-											<groupId>io.tiklab</groupId>
-											<artifactId>tiklab-spotbugs</artifactId>
-											<version>${tiklab-spotbugs.version}</version>
-											<type>zip</type>
-											<outputDirectory>embbed</outputDirectory>
-										</artifactItem>
 									</artifactItems>
 								</configuration>
 							</execution>
@@ -297,13 +269,6 @@
 					<groupId>io.tiklab</groupId>
 					<artifactId>tiklab-postgresql-mac</artifactId>
 					<version>${tiklab-postgresql.version}</version>
-					<type>zip</type>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>io.tiklab</groupId>
-					<artifactId>tiklab-spotbugs</artifactId>
-					<version>${tiklab-spotbugs.version}</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -338,13 +303,6 @@
 											<groupId>io.tiklab</groupId>
 											<artifactId>tiklab-jdk-mac</artifactId>
 											<version>${tiklab-jdk.version}</version>
-											<type>zip</type>
-											<outputDirectory>embbed</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>io.tiklab</groupId>
-											<artifactId>tiklab-spotbugs</artifactId>
-											<version>${tiklab-spotbugs.version}</version>
 											<type>zip</type>
 											<outputDirectory>embbed</outputDirectory>
 										</artifactItem>

@@ -116,6 +116,9 @@ public class GitPukFinal {
     public static final String MERGE_COMPLETE_DESC = "合并分支";
 
 
+    public static final String REPO_DELETE = "repository_delete";
+    public static final String REPO_UPDATE = "repository_update";
+
     // 代码扫描应用类型
     public static final String SCAN_SONAR = "sonar";
     public static final String SCAN_SPOTBUGS = "spotbugs";

@@ -6,7 +6,7 @@ import io.tiklab.toolkit.beans.annotation.Mapping;
 import io.tiklab.toolkit.beans.annotation.Mappings;
 import io.tiklab.core.BaseModel;
 import io.tiklab.toolkit.join.annotation.Join;
-import io.tiklab.toolkit.join.annotation.JoinQuery;
+import io.tiklab.toolkit.join.annotation.JoinField;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
@@ -25,7 +25,7 @@ public class RecordOpen  extends BaseModel {
     @Mappings({
             @Mapping(source = "repository.rpyId",target = "repositoryId")
     })
-    @JoinQuery(key = "rpyId")
+    @JoinField(key = "rpyId")
     private Repository repository;
 
     @ApiProperty(name="userId",desc="用户id")

@@ -1,5 +1,5 @@
 -- ---------------------------
--- 超级管理员权限
+-- 系统超级管理员权限
 -- ----------------------------
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('7dadb5b5bba6', '111111', '9633d9475886');
 INSERT INTO pcs_prc_role_function ("id", "role_id", "function_id") VALUES ('4f16f78a92c2', '111111', 'dd81bdbb52bc');

@@ -47,7 +47,7 @@ public class IntegratedInController {
 
 
 
-    //查询所有服务端扫描的扫描方案
+    //查询所有服务端未关联的扫描的扫描方案
     @RequestMapping(path="/findScanPlayPage",method = RequestMethod.POST)
     public Result<Object> findScanPlayPage(@RequestBody @NotNull @Valid IntegratedInQuery integratedInQuery){
         Object scanPlayPage = integratedInService.findScanPlayPage(integratedInQuery);

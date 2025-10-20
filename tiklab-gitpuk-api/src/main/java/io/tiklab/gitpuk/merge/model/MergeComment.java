@@ -8,7 +8,7 @@ import io.tiklab.toolkit.beans.annotation.Mapper;
 import io.tiklab.toolkit.beans.annotation.Mapping;
 import io.tiklab.toolkit.beans.annotation.Mappings;
 import io.tiklab.toolkit.join.annotation.Join;
-import io.tiklab.toolkit.join.annotation.JoinQuery;
+import io.tiklab.toolkit.join.annotation.JoinField;
 import io.tiklab.user.user.model.User;
 
 import java.sql.Timestamp;
@@ -34,7 +34,7 @@ public class MergeComment extends BaseModel {
     @Mappings({
             @Mapping(source = "commentUser.id",target = "commentUserId")
     })
-    @JoinQuery(key = "id")
+    @JoinField(key = "id")
     private User commentUser;
 
 
@@ -42,7 +42,7 @@ public class MergeComment extends BaseModel {
     @Mappings({
             @Mapping(source = "replyUser.id",target = "replyUserId")
     })
-    @JoinQuery(key = "id")
+    @JoinField(key = "id")
     private User replyUser;
 
     @ApiProperty(name="data",desc="内容")

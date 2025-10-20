@@ -10,7 +10,7 @@ import io.tiklab.gitpuk.repository.service.RecordCommitService;
 import io.tiklab.gitpuk.repository.service.RepositoryPushRule;
 import io.tiklab.gitpuk.repository.service.RepositoryService;
 import io.tiklab.user.user.model.User;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.http.server.GitServlet;
 
@@ -62,7 +62,7 @@ public class HttpServlet extends GitServlet {
 
 
         @Autowired
-        private UserService userService;
+        private UserProcessor userProcessor;
 
         @Autowired
         private LfsAuthService httpLfsAuthService;
@@ -201,7 +201,7 @@ public class HttpServlet extends GitServlet {
               repositoryServer.compileRepository(repositoryPath);
 
               //添加推送记录
-              User user = userService.findUserByUsername(username,null);
+              User user = userProcessor.findUserByUsername(username,null);
               commitService.updateCommitRecord(requestURI,user.getId(),"http");
           }
         }

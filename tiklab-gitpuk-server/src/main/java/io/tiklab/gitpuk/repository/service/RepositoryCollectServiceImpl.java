@@ -13,7 +13,6 @@ import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.toolkit.beans.BeanMapper;
 import io.tiklab.toolkit.join.JoinTemplate;
 import io.tiklab.user.dmUser.service.DmUserService;
-import io.tiklab.user.user.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,8 +39,6 @@ public class RepositoryCollectServiceImpl implements RepositoryCollectService {
     @Autowired
     private DmUserService dmUserService;
 
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private RepositoryService repositoryServer;

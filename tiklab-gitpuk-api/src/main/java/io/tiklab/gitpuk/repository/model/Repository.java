@@ -4,7 +4,7 @@ import io.tiklab.toolkit.beans.annotation.Mapper;
 import io.tiklab.toolkit.beans.annotation.Mapping;
 import io.tiklab.toolkit.beans.annotation.Mappings;
 import io.tiklab.toolkit.join.annotation.Join;
-import io.tiklab.toolkit.join.annotation.JoinQuery;
+import io.tiklab.toolkit.join.annotation.JoinField;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 import io.tiklab.user.user.model.User;
@@ -24,7 +24,7 @@ public class Repository implements Serializable {
     @Mappings({
             @Mapping(source = "group.groupId",target = "groupId")
     })
-    @JoinQuery(key = "groupId")
+    @JoinField(key = "groupId")
     private RepositoryGroup group;
 
 
@@ -59,7 +59,7 @@ public class Repository implements Serializable {
     @Mappings({
             @Mapping(source = "user.id",target = "userId")
     })
-    @JoinQuery(key = "id")
+    @JoinField(key = "id")
     private User user;
 
 
@@ -128,6 +128,12 @@ public class Repository implements Serializable {
 
     //第一次上传空仓库 不是默认分支且只有一个分支
     private String uniqueBranch;
+
+    //是否允许删除
+    private boolean isDelete;
+
+    //是否允许删除
+    private boolean isUpdate;
 
 
     public String getRpyId() {
@@ -332,43 +338,23 @@ public class Repository implements Serializable {
     public void setSshPath(String sshPath) {
         this.sshPath = sshPath;
     }
+
+    public boolean isDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        isDelete = delete;
+    }
+
+    public boolean isUpdate() {
+        return isUpdate;
+    }
+
+    public void setUpdate(boolean update) {
+        isUpdate = update;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

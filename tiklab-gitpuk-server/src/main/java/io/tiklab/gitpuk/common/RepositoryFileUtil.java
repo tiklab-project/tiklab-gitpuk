@@ -6,15 +6,18 @@ import io.tiklab.gitpuk.file.model.FileFindQuery;
 import io.tiklab.gitpuk.file.model.FileMessage;
 import io.tiklab.gitpuk.file.model.FileTree;
 import io.tiklab.core.exception.ApplicationException;
+import io.tiklab.gitpuk.file.model.FileTreeItem;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -179,27 +182,131 @@ public class RepositoryFileUtil {
      * @return 文件树
      * @throws IOException 仓库不存在
      */
-    public static List<FileTree> findFileTree(String repositoryAddress, FileFindQuery message) throws IOException, GitAPIException {
+    public static List<FileTreeItem> findFileTree(String repositoryAddress, FileFindQuery message) throws IOException, GitAPIException {
         //打开裸仓库
         File rpyFile = new File(repositoryAddress);
         Git git = Git.open(rpyFile);
         Repository repository = git.getRepository();
 
+        FileTree fileTree = new FileTree();
+
+
         //获取分子的提交revTree
-        List<FileTree> list = new ArrayList<>();
+        List<FileTreeItem> list = new ArrayList<>();
         String commitId = message.getRefCode();
         RevTree tree =GitBranchUntil.findBarthCommitRevTree(repository,commitId,message.getRefCodeType());
 
         //TreeWalk，用于遍历Git仓库中的文件和目录。通过使用TreeWalk，我们可以获取指定分支或提交中的文件内容。
         TreeWalk treeWalk = new TreeWalk(repository);
         treeWalk.addTree(tree);
-        treeWalk.setRecursive(true);
+
+        String filterPath = message.getPath();
+
+        // 设置过滤器
+        if (StringUtils.isNotBlank(message.getPath())){
+            if (message.getPath().startsWith("/")){
+                filterPath = StringUtils.substringAfter(filterPath, "/");
+            }
+
+            //刷新查询需要查询到每层父级的文件夹和文件
+            if (("find").equals(message.getFindType())){
+                //添加最父级别的目录
+                findParentFile(repository,tree,list,commitId);
+                filterPath = StringUtils.substringBefore(filterPath, "/");
+            }
+
+            treeWalk.setFilter(PathFilter.create(filterPath));
+        }
+
+        // 客户端传入的路径不为空代表查询文件夹的子集、
+        if (StringUtils.isNotBlank(message.getPath())){
+            treeWalk.setRecursive(true);  //开启递归
+        }else {
+            treeWalk.setRecursive(false); //关闭递归
+        }
         Map<String,String> map = new HashMap<>();
 
+        Map<String,String> treeMap = new HashMap<>();
+        //treeWalk.enterSubtree();
         while (treeWalk.next()) {
-            FileTree fileTree = new FileTree();
             String pathString = treeWalk.getPathString();
 
+            //客户端请求的路径
+            String filePath = message.getPath();
+            String branch = message.getRefCode();
+
+            //查询子目录且首次查询的时候需要查询子目录上面所有父目录的每层数据
+            if (RepositoryUtil.isNoNull(filePath)&&!pathString.startsWith(filePath.substring(1))){
+                String clientBorderPath = filePath.substring(1);
+                String[] split = clientBorderPath.split("/");
+                String bored=split[0];
+
+
+                String type = null;
+                for (int a=0;a<split.length;a++){
+                    FileTreeItem fileTreeItem = new FileTreeItem();
+
+                    //获取当前层的父级目录，需要特殊处理
+                    if (a==split.length-1){
+                        String s = treeMap.get(split[a]);
+                        if (s != null){
+                            continue;
+                        }
+                        treeMap.put(split[a],split[a]);
+
+                        fileTreeItem.setFileName(split[a]);
+
+                        fileTreeItem.setType(Constants.TYPE_TREE);
+                        fileTreeItem.setBorderPath(bored);
+                        String url =  "/code/" + branch  +"/"+ bored+"/"+split[a];
+                        fileTreeItem.setPath(bored+"/"+split[a]);
+                        fileTreeItem.setUrl(url);
+                        fileTreeItem.setFileParent(StringUtils.substringBeforeLast(bored,"/"));
+                        list.add(fileTreeItem);
+                    }else {
+                        if (a>0){
+                            bored+="/"+split[a];
+                        }
+
+                        if (pathString.startsWith(bored)){
+                            String parentFile = StringUtils.substringAfter(pathString, bored+"/");
+                            int i = parentFile.indexOf("/");
+                            if (i >= 0){
+                                //类型为目录
+                                type = Constants.TYPE_TREE;
+
+                                 parentFile = parentFile.substring(0, i);
+                                fileTreeItem.setFileName(parentFile);
+                                String s = treeMap.get(parentFile);
+                                if (s != null){
+                                    continue;
+                                }
+                                treeMap.put(parentFile,parentFile);
+                            }else {
+
+                                //类型为文件
+                                type = Constants.TYPE_BLOB;
+                                fileTreeItem.setFileName(parentFile);
+                            }
+
+                            String types =type.equals("tree")?"code":type;
+                            String url =  "/" + types + "/" + branch +"/"+bored+"/"+ parentFile;
+                            fileTreeItem.setPath(bored+"/"+parentFile);
+                            fileTreeItem.setType(type);
+                            fileTreeItem.setUrl(url);
+                            fileTreeItem.setBorderPath(bored);
+                            fileTreeItem.setFileParent(StringUtils.substringBeforeLast(bored,"/"));
+                            list.add(fileTreeItem);
+                        }
+                    }
+                }
+                continue;
+            }
+
+
+
+            FileTreeItem fileTreeItem = new FileTreeItem();
+            String type = null;
             // 读取文件内容，判断是否是lfs文件
             ObjectId objectId1 = treeWalk.getObjectId(0);
             ObjectLoader loader = repository.open(objectId1);
@@ -210,16 +317,17 @@ public class RepositoryFileUtil {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 String firstLine = reader.readLine();
                 if (firstLine != null && firstLine.contains("https://git-lfs.github.com/spec/v1")){
-                    fileTree.setLfs(true);
+                    fileTreeItem.setLfs(true);
                 }
             }
-            //获取父级路径
-            String file = message.getPath();
-            if (RepositoryUtil.isNoNull(file)){
-                fileTree.setFileParent(file.substring(0,file.lastIndexOf("/")));
+
+            if (RepositoryUtil.isNoNull(filePath)){
+                fileTreeItem.setFileParent(filePath.substring(0,filePath.lastIndexOf("/")));
             }
-            String type = null;
-            if (!RepositoryUtil.isNoNull(file)){
+
+            //客户端不传Path 代表查询的是第一级目录和文件
+            if (StringUtils.isBlank(filePath)){
+
                 int i = pathString.indexOf("/");
                 if (i >= 0){
                     type = Constants.TYPE_TREE;
@@ -228,24 +336,29 @@ public class RepositoryFileUtil {
                     if (s != null){
                         continue;
                     }
-                    fileTree.setFileName(substring);
+                    fileTreeItem.setFileName(substring);
                     map.put(substring,substring);
                 }else {
-                    type = Constants.TYPE_BLOB;
-                    fileTree.setFileName(pathString);
+
+                    //客户端传入的path为空的时候，代表查询的是第一级的父级目录
+                    if (StringUtils.isBlank(filePath)){
+                        type=treeWalk.isSubtree()?Constants.TYPE_TREE:Constants.TYPE_BLOB;
+                    }else {
+                        type = Constants.TYPE_BLOB;
+                    }
+                    fileTreeItem.setFileName(pathString);
                 }
             }
 
-            if (RepositoryUtil.isNoNull(file) && pathString.startsWith(file.substring(1))
-                    && pathString.contains("/")){
-
-                String substring = file.substring(1)+"/";
+            //客户端传Path 代表查询的是子集目录和文件
+            if (RepositoryUtil.isNoNull(filePath)&&pathString.startsWith(filePath.substring(1)) && pathString.contains("/") ){
+                String substring = filePath.substring(1)+"/";
                 String replace = pathString.replace(substring,"");
                 int i = replace.indexOf("/");
                 if (i >= 0){
                     type = Constants.TYPE_TREE;
                     String substring1 = replace.substring(0, i);
-                    fileTree.setFileName(substring1);
+                    fileTreeItem.setFileName(substring1);
                     String s = map.get(substring1);
                     if (s != null){
                         continue;
@@ -253,31 +366,31 @@ public class RepositoryFileUtil {
                     map.put(substring1,substring1);
                 }else {
                     type = Constants.TYPE_BLOB;
-                    fileTree.setFileName(replace);
+                    fileTreeItem.setFileName(replace);
                 }
             }
 
-            String fileName = fileTree.getFileName();
+
+            String fileName = fileTreeItem.getFileName();
             if (fileName == null){
                 continue;
             }
+
             int i = fileName.lastIndexOf(".");
             if (i >= 0){
                 String substring = fileName.substring(i+1);
-                fileTree.setFileType(substring);
+                fileTreeItem.setFileType(substring);
             }
-            fileTree.setType(type);
+            fileTreeItem.setType(type);
             String path;
-            String fileAddress = fileName;
-
-            String branch = message.getRefCode();
 
             ObjectId objectId = GitBranchUntil.findObjectId(repository, branch, message.getRefCodeType());
-            List<Map<String, String>> commitList = GitCommitUntil.gitFileCommitLog(git,objectId.getName(),pathString);
-            if (!commitList.isEmpty()){
-                Map<String, String> fileCommit = commitList.get(0);
-                fileTree.setCommitMessage(fileCommit.get("message"));
-                fileTree.setCommitTime(fileCommit.get("time"));
+
+            //获取单个文件最后的提交信息
+            Map<String, String> fileCommit = GitCommitUntil.gitFileCommitLog(git, objectId.getName(), pathString);
+            if (ObjectUtils.isNotEmpty(fileCommit)){
+                fileTreeItem.setCommitMessage(fileCommit.get("message"));
+                fileTreeItem.setCommitTime(fileCommit.get("time"));
             }
 
         /*    if (("commit").equals(message.getRefCodeType())){
@@ -287,19 +400,52 @@ public class RepositoryFileUtil {
                 branch = branch + RepositoryFinal.TAG;
             }*/
             type =type.equals("tree")?"code":type;
-            if (!RepositoryUtil.isNoNull(file)){
+
+
+            if (!RepositoryUtil.isNoNull(filePath)){
+                //最父级的目录和文件
+                fileTreeItem.setPath(fileName);
+                fileTreeItem.setBorderPath("");
                 path = "/" + type + "/" + branch + "/" + fileName;
             }else {
-                fileAddress = file.substring(1)+"/"+ fileName;
-                path = "/" + type + "/" + branch + file+"/"+ fileName;
+                //子集目录或者文件
+                String fileAddress = filePath.substring(1)+"/"+ fileName;
+                fileTreeItem.setPath(fileAddress);
+                fileTreeItem.setBorderPath(filePath.substring(1));
+                path = "/" + type + "/" + branch + filePath+"/"+ fileName;
             }
-            fileTree.setPath(path);
-            list.add(fileTree);
+            fileTreeItem.setUrl(path);
+
+            list.add(fileTreeItem);
         }
+        fileTree.setItems(list);
         treeWalk.close();
-        list.sort(Comparator.comparing(FileTree::getType).reversed());
+        list.sort(Comparator.comparing(FileTreeItem::getType).reversed());
         git.close();
         return list;
+    }
+
+
+    //查询最父级的文件和目录
+    public static void findParentFile(Repository repository,RevTree tree,List<FileTreeItem> list,String branch) throws IOException {
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(false); //关闭递归
+        while (treeWalk.next()){
+            FileTreeItem fileTreeItem = new FileTreeItem();
+            fileTreeItem.setBorderPath("");
+            String pathString = treeWalk.getPathString();
+            if (treeWalk.isSubtree()) {
+                fileTreeItem.setType(Constants.TYPE_TREE);
+            } else {
+                fileTreeItem.setType(Constants.TYPE_BLOB);
+            }
+            fileTreeItem.setPath(pathString);
+            fileTreeItem.setFileName(pathString);
+            fileTreeItem.setUrl("/code/"+ branch + "/" + pathString);
+            list.add(fileTreeItem);
+        }
+
     }
 
     /**

@@ -206,7 +206,7 @@ public class MergeRequestServiceImpl implements MergeRequestService {
 
         List<MergeRequest> mergeRequestList = BeanMapper.mapList(pagination.getDataList(),MergeRequest.class);
 
-        joinTemplate.joinQuery(mergeRequestList);
+        joinTemplate.joinQuery(mergeRequestList,new String[]{"user"});
 
         if (CollectionUtils.isNotEmpty(mergeRequestList)){
             //查询合并请求是否有冲突

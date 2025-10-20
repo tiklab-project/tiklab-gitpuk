@@ -4,7 +4,7 @@ import io.tiklab.toolkit.beans.annotation.Mapper;
 import io.tiklab.toolkit.beans.annotation.Mapping;
 import io.tiklab.toolkit.beans.annotation.Mappings;
 import io.tiklab.toolkit.join.annotation.Join;
-import io.tiklab.toolkit.join.annotation.JoinQuery;
+import io.tiklab.toolkit.join.annotation.JoinField;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 import io.tiklab.user.user.model.User;
@@ -35,7 +35,7 @@ public class RepositoryGroup implements Serializable {
     @Mappings({
             @Mapping(source = "user.id",target = "userId")
     })
-    @JoinQuery(key = "id")
+    @JoinField(key = "id")
     private User user;
 
     @ApiProperty(name = "rules" ,desc =" 仓库权限 public、private")

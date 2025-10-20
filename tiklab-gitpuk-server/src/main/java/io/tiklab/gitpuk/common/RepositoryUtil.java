@@ -129,6 +129,9 @@ public class RepositoryUtil {
      */
     public static String date(int type,Date date){
         switch (type) {
+            case 1 -> {
+                return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date);
+            }
             case 2 -> {
                 return new SimpleDateFormat("yyyy-MM-dd").format(date);
             }

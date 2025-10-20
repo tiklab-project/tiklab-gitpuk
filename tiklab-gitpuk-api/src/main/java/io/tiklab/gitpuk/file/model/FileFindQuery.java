@@ -23,7 +23,8 @@ public class FileFindQuery{
     private String path;
 
 
-
+    //查询类型 刷新查询带子集的：find、点击查询单层文件的：onclickFind
+    private String findType;
 
 
     public String getRpyId() {
@@ -58,5 +59,13 @@ public class FileFindQuery{
 
     public void setRefCodeType(String refCodeType) {
         this.refCodeType = refCodeType;
+    }
+
+    public String getFindType() {
+        return findType;
+    }
+
+    public void setFindType(String findType) {
+        this.findType = findType;
     }
 }

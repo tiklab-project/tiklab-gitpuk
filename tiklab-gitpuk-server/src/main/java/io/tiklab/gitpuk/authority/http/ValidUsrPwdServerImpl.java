@@ -1,13 +1,13 @@
 package io.tiklab.gitpuk.authority.http;
 
+import io.tiklab.eam.passport.user.service.UserPassportProcessor;
 import io.tiklab.gitpuk.authority.ValidUsrPwdServer;
 import io.tiklab.eam.passport.user.model.UserPassport;
-import io.tiklab.eam.passport.user.service.UserPassportService;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,12 @@ import java.util.List;
 @Service
 public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
 
-    @Autowired
-    private UserPassportService userPassportService;
 
     @Autowired
-    private UserService userService;
+    private UserProcessor userProcessor;
+
+    @Autowired
+    private UserPassportProcessor userPassportProcessor;
 
     @Autowired
     private DmUserService dmUserService;
@@ -40,9 +41,12 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
             userPassport.setAccount(username);
             userPassport.setDirId(id);
 
-            userPassportService.validLogin(userPassport);
+
+            userPassportProcessor.validLogin(userPassport);
             return true;
         } catch (Exception e) {
+            logger.info("校验失败:",e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -54,7 +58,7 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
         userPassport.setAccount(username);
         userPassport.setDirId(id);
 
-        userPassportService.validLogin(userPassport);
+        userPassportProcessor.validLogin(userPassport);
 
 
     }
@@ -62,7 +66,7 @@ public class ValidUsrPwdServerImpl implements ValidUsrPwdServer {
     @Override
     public boolean validUserPrivilege(String username,String repositoryId) {
         //查询用户
-        User user = userService.findUserByUsername(username, null);
+        User user = userProcessor.findUserByUsername(username, null);
         if (ObjectUtils.isEmpty(user)){
             return false;
         }

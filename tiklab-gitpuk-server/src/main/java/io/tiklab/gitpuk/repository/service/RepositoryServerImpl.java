@@ -13,10 +13,19 @@ import io.tiklab.gitpuk.common.git.GitUntil;
 import io.tiklab.gitpuk.repository.dao.RepositoryDao;
 import io.tiklab.gitpuk.repository.entity.RepositoryEntity;
 import io.tiklab.gitpuk.tag.service.TagService;
+
+import io.tiklab.privilege.dmRole.model.DmRoleUser;
+import io.tiklab.privilege.dmRole.model.DmRoleUserQuery;
+import io.tiklab.privilege.dmRole.service.DmRoleService;
+import io.tiklab.privilege.dmRole.service.DmRoleUserService;
+import io.tiklab.privilege.permission.service.PermissionService;
 import io.tiklab.privilege.role.model.PatchUser;
 import io.tiklab.privilege.role.model.RoleUser;
 import io.tiklab.privilege.role.service.RoleFunctionService;
 import io.tiklab.privilege.role.service.RoleUserService;
+import io.tiklab.sourcefare.project.model.Project;
+import io.tiklab.sourcefare.project.model.ProjectCollect;
+import io.tiklab.sourcefare.project.model.ProjectCollectQuery;
 import io.tiklab.toolkit.beans.BeanMapper;
 import io.tiklab.core.exception.ApplicationException;
 import io.tiklab.core.exception.SystemException;
@@ -25,17 +34,13 @@ import io.tiklab.core.page.PaginationBuilder;
 import io.tiklab.eam.common.context.LoginContext;
 import io.tiklab.toolkit.context.AppContext;
 import io.tiklab.toolkit.join.JoinTemplate;
-import io.tiklab.privilege.dmRole.model.DmRoleUser;
-import io.tiklab.privilege.dmRole.model.DmRoleUserQuery;
-import io.tiklab.privilege.dmRole.service.DmRoleService;
-import io.tiklab.privilege.dmRole.service.DmRoleUserService;
 import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.model.UserQuery;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -57,6 +62,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.tiklab.gitpuk.common.GitPukFinal.REPO_DELETE;
+import static io.tiklab.gitpuk.common.GitPukFinal.REPO_UPDATE;
+
 @Service
 @Exporter
 public class RepositoryServerImpl implements RepositoryService {
@@ -76,6 +84,10 @@ public class RepositoryServerImpl implements RepositoryService {
     private DmRoleUserService dmRoleUserService;
 
     @Autowired
+    PermissionService permissionService;
+
+
+    @Autowired
     private DmUserService dmUserService;
 
     @Autowired
@@ -91,7 +103,7 @@ public class RepositoryServerImpl implements RepositoryService {
     GitPukYamlDataMaService yamlDataMaService;
 
     @Autowired
-    private UserService userService;
+    private UserProcessor userProcessor;
 
     @Autowired
     LeadRecordService leadRecordService;
@@ -461,7 +473,7 @@ public class RepositoryServerImpl implements RepositoryService {
         repositoryCloneAddress.setFileAddress(address);
         // String username = System.getProperty("user.name");
         String loginId = LoginContext.getLoginId();
-        User user = userService.findOne(loginId);
+        User user = userProcessor.findOne(loginId);
 
         String http;
         if (StringUtils.isNotEmpty(yamlDataMaService.visitAddress())){
@@ -670,11 +682,11 @@ public class RepositoryServerImpl implements RepositoryService {
     public List<Repository> findRepositoryByUser(String account, String password,String DirId) {
         UserQuery userQuery = new UserQuery();
         userQuery.setName(account);
-        List<User> userList = userService.findUserList(userQuery);
+        List<User> userList = userProcessor.findUserList(userQuery);
         if (CollectionUtils.isEmpty(userList)){
             throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"当前用户:"+account+"不存在");
         }
-        User user = userService.findUserByUsernameByPassWard(account, password);
+        User user = userProcessor.findUserByUsernameByPassWard(account, password);
         if (ObjectUtils.isEmpty(user)){
                 throw new SystemException(GitPukFinal.NOT_FOUNT_EXCEPTION,"当前用户:"+account+"密码错误");
             }
@@ -696,7 +708,16 @@ public class RepositoryServerImpl implements RepositoryService {
             }
             return repositoryList;
     }
+    @Override
+    public List<Repository> findUserRepositoryList(String account, String password, String repName) {
+        logger.info("仓库名字:"+repName);
+        List<Repository> repositoryList = findRepositoryByUser(account, password, "1");
+        if (StringUtils.isNotBlank(repName)){
+            repositoryList = repositoryList.stream().filter(a -> a.getName().contains(repName)).collect(Collectors.toList());
+        }
 
+        return repositoryList;
+    }
 
     @Override
     public String getAddress() {
@@ -795,6 +816,8 @@ public class RepositoryServerImpl implements RepositoryService {
         return PaginationBuilder.build(new Pagination<>(),null);
     }
 
+
+
     @Override
     public String findRepositoryAuth(String rpyId) {
         RepositoryEntity oneRpy = repositoryDao.findOneRpy(rpyId);
@@ -839,13 +862,41 @@ public class RepositoryServerImpl implements RepositoryService {
         }
     }
 
+    @Override
+    public Object findRepositoryNum(String userId) {
+        Map<String, Object> hashMap = new HashMap<>();
+        List<RepositoryEntity> repositoryEntities = repositoryDao.findAllRpy();
 
+        List<Repository> repositoryList =  BeanMapper.mapList(repositoryEntities, Repository.class);
+
+        if (CollectionUtils.isEmpty(repositoryList)){
+            return null;
+        }
+
+        //我创建的数量
+        List<Repository> repositories = repositoryList.stream().filter(a -> a.getUser().getId().equals(userId)).collect(Collectors.toList());
+        int createNum = CollectionUtils.isEmpty(repositories) ? 0 : repositories.size();
+        hashMap.put("createNum",createNum);
+
+        //总数量
+        List<String> projectIds = findHaveAccessRepository(repositoryList, userId,null);
+        hashMap.put("allNum",projectIds.size());
+
+        //收藏数量
+        List<RepositoryCollect> collectList = repositoryCollectService.findRepositoryCollectList(new RepositoryCollectQuery().setUserId(userId));
+        List<String> collectPreIds = collectList.stream().map(RepositoryCollect::getRepositoryId).collect(Collectors.toList());
+        projectIds.retainAll(collectPreIds);
+        hashMap.put("colletNum",projectIds.size());
+
+        return hashMap;
+    }
 
     /**
      *查询有权限的仓库
      */
     public Pagination<Repository> findViewRepository(RepositoryQuery repositoryQuery,List<Repository> AllRepository){
-        List<String> accessRepositoryId = findHaveAccessRepository(AllRepository, repositoryQuery.getUserId(),"all");
+        String userId = repositoryQuery.getUserId();
+        List<String> accessRepositoryId = findHaveAccessRepository(AllRepository, userId,"all");
 
         String[] canViewRpyIdList;
 
@@ -870,12 +921,27 @@ public class RepositoryServerImpl implements RepositoryService {
         if (canViewRpyIdList.length>0){
             Pagination<RepositoryEntity> pagination = repositoryDao.findRepositoryPage(repositoryQuery, canViewRpyIdList);
             List<Repository> repositoryList = BeanMapper.mapList(pagination.getDataList(),Repository.class);
-            joinTemplate.joinQuery(repositoryList);
+            joinTemplate.joinQuery(repositoryList,new String[]{"user"});
+
+            List<String> idList = Arrays.asList(canViewRpyIdList);
+            Map<String, Set<String>> permissions = permissionService.findDomainListPermissions(userId, idList);
+
             for (Repository repository:repositoryList){
                 if (!ObjectUtils.isEmpty(repository.getSize())){
                     String size = RepositoryUtil.formatSize(repository.getSize());
                     repository.setRpySize(size);
                 }
+
+                Set<String> stringSet = permissions.get(repository.getRpyId());
+                if (CollectionUtils.isNotEmpty(stringSet)){
+                    List<String> deletes = stringSet.stream().filter(a -> REPO_DELETE.equals(a)).collect(Collectors.toList());
+                    List<String> updates = stringSet.stream().filter(a -> REPO_UPDATE.equals(a)).collect(Collectors.toList());
+                    boolean delete = CollectionUtils.isNotEmpty(deletes) ? true : false;
+                    boolean update = CollectionUtils.isNotEmpty(updates) ? true : false;
+                    repository.setDelete(delete);
+                    repository.setUpdate(update);
+                }
+
             }
 
             return PaginationBuilder.build(pagination,repositoryList);
@@ -1039,6 +1105,8 @@ public class RepositoryServerImpl implements RepositoryService {
     }
 
 
+
+
     /**
      *操作仓库发送消息
      * @param repository 操作的仓库
@@ -1046,52 +1114,56 @@ public class RepositoryServerImpl implements RepositoryService {
      * @param  updateName 更新名字
      */
     public void sendMessLog(RepositoryEntity repository,String type,String updateName){
-        
-        HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
 
-        map.put("repositoryName", repository.getName());
-        map.put("repositoryId",repository.getRpyId());
-        map.put("action",repository.getName());
-        //删除仓库发送消息和日志
-        if (("delete").equals(type)){
-            map.put("message", repository.getName());
-            map.put("link", GitPukFinal.LOG_RPY_DELETE);
-            map.put("qywxurl",GitPukFinal.LOG_RPY_DELETE);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_DELETE);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_DELETE,"repository");
-        }
+        Thread thread = new Thread() {
+            public void run() {
+                HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
 
-        //更新仓库发送消息和日志
-        if (("update").equals(type)){
-            map.put("message", repository.getName()+"更改为"+updateName);
-            map.put("link", GitPukFinal.LOG_RPY_UPDATE);
-            map.put("qywxurl",GitPukFinal.LOG_RPY_UPDATE);
-            map.put("updateName",repository.getName());
-            map.put("repositoryName",updateName);
-            String replaceAll = repository.getAddress().replaceAll(repository.getName(), updateName);
-            map.put("repositoryPath",replaceAll);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_UPDATE);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_UPDATE,"repository");
-        }
+                map.put("repositoryName", repository.getName());
+                map.put("repositoryId",repository.getRpyId());
+                map.put("action",repository.getName());
+                //删除仓库发送消息和日志
+                if (("delete").equals(type)){
+                    map.put("message", repository.getName());
+                    map.put("link", GitPukFinal.LOG_RPY_DELETE);
+                    map.put("qywxurl",GitPukFinal.LOG_RPY_DELETE);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_DELETE);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_DELETE,"repository");
+                }
 
-        //创建仓库发送消息和日志
-        map.put("repositoryPath",repository.getAddress());
-        if (("create").equals(type)){
-            map.put("message", repository.getName());
-            map.put("link", GitPukFinal.LOG_RPY_CREATE);
-            map.put("qywxurl",GitPukFinal.LOG_RPY_CREATE);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_CREATE);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_CREATE,"repository");
-        }
+                //更新仓库发送消息和日志
+                if (("update").equals(type)){
+                    map.put("message", repository.getName()+"更改为"+updateName);
+                    map.put("link", GitPukFinal.LOG_RPY_UPDATE);
+                    map.put("qywxurl",GitPukFinal.LOG_RPY_UPDATE);
+                    map.put("updateName",repository.getName());
+                    map.put("repositoryName",updateName);
+                    String replaceAll = repository.getAddress().replaceAll(repository.getName(), updateName);
+                    map.put("repositoryPath",replaceAll);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_UPDATE);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_UPDATE,"repository");
+                }
 
-        //重置仓库发送消息和日志
-        if (("reset").equals(type)){
-            map.put("message", repository.getName());
-            map.put("link", GitPukFinal.LOG_RPY_RESET);
-            map.put("qywxurl",GitPukFinal.LOG_RPY_RESET);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_RESET);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_RESET,"repository");
-        }
+                //创建仓库发送消息和日志
+                map.put("repositoryPath",repository.getAddress());
+                if (("create").equals(type)){
+                    map.put("message", repository.getName());
+                    map.put("link", GitPukFinal.LOG_RPY_CREATE);
+                    map.put("qywxurl",GitPukFinal.LOG_RPY_CREATE);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_CREATE);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_CREATE,"repository");
+                }
+
+                //重置仓库发送消息和日志
+                if (("reset").equals(type)){
+                    map.put("message", repository.getName());
+                    map.put("link", GitPukFinal.LOG_RPY_RESET);
+                    map.put("qywxurl",GitPukFinal.LOG_RPY_RESET);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_RESET);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_RESET,"repository");
+                }
+            }};
+        thread.start();
     }
 }
 

@@ -134,7 +134,7 @@ public class RecordOpenServiceImpl implements RecordOpenService {
         List<RecordOpenEntity> openRecordEntityList = recordOpenDao.findRecordOpenList(RecordOpenQuery);
 
         List<RecordOpen> openRecordList = BeanMapper.mapList(openRecordEntityList, RecordOpen.class);
-        joinTemplate.joinQuery(openRecordList);
+        joinTemplate.joinQuery(openRecordList,new String[]{"repository"});
 
         List<RecordOpen> publicRep = openRecordList.stream().filter(a -> ("public").equals(a.getRepository().getRules())).collect(Collectors.toList());
 

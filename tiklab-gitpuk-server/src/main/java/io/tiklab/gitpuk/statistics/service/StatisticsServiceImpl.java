@@ -29,7 +29,7 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.model.UserQuery;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -73,7 +73,7 @@ public class StatisticsServiceImpl implements StatisticsService{
     RepositoryService repositoryService;
 
     @Autowired
-    UserService userService;
+    UserProcessor userProcessor;
 
     @Autowired
     DmUserService dmUserService;
@@ -157,7 +157,7 @@ public class StatisticsServiceImpl implements StatisticsService{
 
         int findNum = statisticsQuery.getFindNum();
 
-        List<User> allUser = userService.findUserList(new UserQuery());
+        List<User> allUser = userProcessor.findUserList(new UserQuery());
         if (CollectionUtils.isEmpty(allUser)){
             logger.info("时间段内所有用户总提交数量统计->没有用户");
            return null;
@@ -572,7 +572,7 @@ public class StatisticsServiceImpl implements StatisticsService{
 
         int findNum = statisticsQuery.getFindNum();
 
-        List<User> allUser = userService.findUserList(new UserQuery());
+        List<User> allUser = userProcessor.findUserList(new UserQuery());
         if (CollectionUtils.isEmpty(allUser)){
             logger.info("时间段内所有仓库用户的合并请求数->没有用户");
             return null;

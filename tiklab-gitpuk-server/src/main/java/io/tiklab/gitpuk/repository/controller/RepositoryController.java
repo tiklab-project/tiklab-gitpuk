@@ -79,6 +79,15 @@ public class RepositoryController {
         return Result.ok(repositoryList);
     }
 
+    @RequestMapping(path="/findUserRepositoryList",method = RequestMethod.POST)
+    //@ApiMethod(name = "findRepositoryByUser",desc = "通过用户查询有权限的仓库 其他服务集成使用")
+    //@ApiParam(name = "account",desc = "account",required = true)
+    public Result<List<Repository>> findUserRepositoryList(@NotNull String account, @NotNull String password, String repName){
+
+        List<Repository> repositoryList = repositoryServer.findUserRepositoryList(account,password,repName);
+
+        return Result.ok(repositoryList);
+    }
 
 
     @RequestMapping(path="/findRepositoryList",method = RequestMethod.POST)
@@ -123,6 +132,13 @@ public class RepositoryController {
         return Result.ok(nameRepository);
     }
 
+    @RequestMapping(path="/findRepositoryNum",method = RequestMethod.POST)
+    @ApiMethod(name = "findProjectNum",desc = "查询项目不通类型的数量")
+    public Result<Object> findProjectNum(@NotNull String userId){
+        Object artifactList = repositoryServer.findRepositoryNum(userId);
+
+        return Result.ok(artifactList);
+    }
 
     @RequestMapping(path="/findRepositoryByName",method = RequestMethod.POST)
     //@ApiMethod(name = "findRepositoryByName",desc = "通过仓库名字或仓库组查询仓库是否存在")
@@ -234,6 +250,7 @@ public class RepositoryController {
 
         return Result.ok(type);
     }
+
 
 
 }

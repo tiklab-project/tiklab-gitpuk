@@ -14,6 +14,7 @@ import io.tiklab.gitpuk.merge.model.MergeCommit;
 import io.tiklab.gitpuk.merge.model.MergeCommitQuery;
 import io.tiklab.gitpuk.merge.service.MergeCommitService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Constants;
@@ -22,6 +23,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -30,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class CommitServerImpl implements CommitServer {
@@ -86,22 +89,7 @@ public class CommitServerImpl implements CommitServer {
         return groupCommit(branchCommit, new ArrayList<>());
     }
 
-    @Override
-    public FileDiffEntry findDiffFileByBranchs(Commit commit) {
-        String rpyId = commit.getRpyId();
-        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
-        FileDiffEntry diffBranchFile;
-        try {
-            Git git = Git.open(new File(repositoryAddress));
 
-            //查询不同分支提交的差异
-            diffBranchFile= GitCommitUntil.findDiffBranchFile(git, commit);
-            git.close();
-        } catch (Exception e) {
-            throw new ApplicationException("提交记录获取失败："+e);
-        }
-        return diffBranchFile;
-    }
 
     @Override
     public List<CommitFileDiff> findDiffBranchFileDetails(Commit commit) {
@@ -267,6 +255,30 @@ public class CommitServerImpl implements CommitServer {
         }
     }
 
+    @Override
+    public FileDiffEntry findDiffFileByBranchs(Commit commit) {
+        String rpyId = commit.getRpyId();
+        String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),rpyId);
+        FileDiffEntry diffBranchFile;
+        try {
+            Git git = Git.open(new File(repositoryAddress));
+
+            //查询不同分支提交的差异
+            diffBranchFile= GitCommitUntil.findDiffBranchFile(git, commit);
+
+
+            List<CommitFileDiffList> diffList = diffBranchFile.getDiffList();
+
+            //构造树结构
+            List<FileDiffTree> diffTreeList = constructorTree(diffList);
+            diffBranchFile.setDiffTreeList(diffTreeList);
+
+            git.close();
+        } catch (Exception e) {
+            throw new ApplicationException("提交记录获取失败："+e);
+        }
+        return diffBranchFile;
+    }
 
     @Override
     public FileDiffEntry findDiffFileByCommitId(Commit commit) {
@@ -274,15 +286,24 @@ public class CommitServerImpl implements CommitServer {
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
         try {
             Git git = Git.open(new File(repositoryAddress));
-
+        
             //获取两个提交差异文件
             FileDiffEntry fileDiffEntry = GitCommitUntil.findDiffFileByCommitId(git, commit.getCommitId());
 
+            List<CommitFileDiffList> diffList = fileDiffEntry.getDiffList();
+
+            //构造树结构
+            List<FileDiffTree> diffTreeList = constructorTree(diffList);
+            fileDiffEntry.setDiffTreeList(diffTreeList);
             return fileDiffEntry;
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
     }
+
+
+
+
 
     /**
      * 提交文件模糊查询
@@ -339,9 +360,16 @@ public class CommitServerImpl implements CommitServer {
     @Override
     public List<CommitFileDiff> findCommitLineFile(CommitFile commit){
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),commit.getRpyId());
+
         try {
+            String refCode;
+            if(("branch").equals(commit.getQueryType())){
+                 refCode = commit.getBranch();
+            }else {
+                refCode=commit.getCommitId();
+            }
             FileMessage  fileMessage = RepositoryFileUtil.readBranchFile(repositoryAddress,
-                    commit.getCommitId(), commit.getPath(), commit.getQueryType());
+                    refCode, commit.getPath(), commit.getQueryType());
 
             String message = fileMessage.getFileMessage();
             String[] split = message.split("\n");
@@ -391,6 +419,138 @@ public class CommitServerImpl implements CommitServer {
         }
     }
 
+    //构造树结构
+    public List<FileDiffTree> constructorTree(List<CommitFileDiffList> diffList){
+        //递归添加parent
+        List<FileDiffTree> diffFileList = new ArrayList<>();
+        for (CommitFileDiffList commitFile:diffList){
+            FileDiffTree diffTree = new FileDiffTree();
+            diffTree.setType(commitFile.getType());
+            diffTree.setFileType("file");
+            diffTree.setFileName(commitFile.getFileName());
+
+            String folderPath = commitFile.getNewFilePath();
+            String[] split = folderPath.split("/");
+            if (split.length>1){
+                addParentBorder(split[0],split,diffFileList,0);
+                diffTree.setFolderPath(folderPath);
+
+                diffTree.setPrentFolder(commitFile.getFolderPath());
+                diffFileList.add(diffTree);
+            }else {
+                diffTree.setFolderPath(folderPath);
+                diffFileList.add(diffTree);
+            }
+        }
+
+        //移除掉.DS_Store文件
+        diffFileList = diffFileList.stream().filter(b -> !(".DS_Store").equals(b.getFileName())).collect(Collectors.toList());
+
+        //通过parent构造树结构
+        List<FileDiffTree> diffTreeList = new ArrayList<>();
+        List<FileDiffTree> fileDiffTrees = diffFileList.stream().filter(a -> StringUtils.isBlank(a.getPrentFolder()))
+                .collect(Collectors.toList());
+        //排序
+        fileDiffTrees=fileDiffTrees.stream()
+                .sorted(Comparator.comparing(FileDiffTree::getFileType,
+                        Comparator.<String>comparingInt(s -> s.equals("tree") ? 0 : (s.equals("file") ? 1 : 2))
+                                .thenComparing(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+
+        for (FileDiffTree diffTree:fileDiffTrees){
+            if (("tree").equals(diffTree.getFileType())){
+                joinTree(diffFileList,diffTree,1);
+            }
+            diffTreeList.add(diffTree);
+        }
+
+        return diffTreeList;
+    }
+
+    /**
+     * 递归添加 Parent目录
+     * @param folderPath folderPath
+     */
+    public void addParentBorder(String folderPath, String [] split,List<FileDiffTree> diffFileList,Integer index){
+        FileDiffTree diffTree = new FileDiffTree();
+        String border = split[index];
+        diffTree.setFileType("tree");
+        diffTree.setFileName(border);
+
+        String s;
+        //第一级文件夹
+        if (index==0){
+            List<FileDiffTree> fileDiffTrees = diffFileList.stream().filter(a -> a.getFileName().equals(border)
+                            && "tree".equals(a.getFileType()))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(fileDiffTrees)){
+                diffTree.setFolderPath(border);
+                diffFileList.add(diffTree);
+            }
+            s=folderPath;
+        }else {
+            //父级别index
+            diffTree.setPrentFolder(folderPath);
+
+            s = folderPath + "/" + split[index];
+            diffTree.setFolderPath(s);
+        }
+
+        int i = split.length - index;
+        if (i>1){
+            List<FileDiffTree> fileDiffTrees = diffFileList.stream().filter(a -> a.getFileName().equals(border)
+                            & s.equals(a.getFolderPath())
+                            && "tree".equals(a.getFileType()))
+                    .collect(Collectors.toList());
+
+            if (CollectionUtils.isEmpty(fileDiffTrees)){
+                diffFileList.add(diffTree);
+            }
+            addParentBorder(s,split,diffFileList,index+1);
+        }
+
+    }
+
+    /**
+     * 通过 Parent目录构造树结构
+     * @param diffTreeList folderPath
+     */
+    public void joinTree(List<FileDiffTree> diffTreeList,FileDiffTree diffTree,Integer index){
+        List<FileDiffTree> fileDiffTrees;
+        if (index==1){
+            fileDiffTrees = diffTreeList.stream()
+                    .filter(a -> (diffTree.getFileName()).equals(a.getPrentFolder()))
+                    .collect(Collectors.toList());
+        }else {
+            fileDiffTrees = diffTreeList.stream()
+                    .filter(a -> (diffTree.getPrentFolder()+"/" +diffTree.getFileName()).equals(a.getPrentFolder()))
+                    .collect(Collectors.toList());
+        }
+
+        //获取文件夹下面所有更改的文件数量
+        if (("tree").equals(diffTree.getFileType())){
+            List<FileDiffTree> fileList = diffTreeList.stream().filter(a -> ("file").equals(a.getFileType()) && org.apache.commons.lang3.StringUtils.isNotBlank( a.getPrentFolder())&&
+                            a.getPrentFolder().startsWith(diffTree.getFolderPath()))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(fileList)){
+                diffTree.setFileNum(fileList.size());
+            }
+        }
+
+        //排序
+        fileDiffTrees=fileDiffTrees.stream()
+                .sorted(Comparator.comparing(FileDiffTree::getFileType,
+                        Comparator.<String>comparingInt(s -> s.equals("tree") ? 0 : (s.equals("file") ? 1 : 2))
+                                .thenComparing(Comparator.naturalOrder())))
+                .collect(Collectors.toList());
+
+        diffTree.setFileDiffTreeList(fileDiffTrees);
+        if (CollectionUtils.isNotEmpty(fileDiffTrees)){
+            for (FileDiffTree fileDiffTree:fileDiffTrees){
+                joinTree(diffTreeList,fileDiffTree,index+1);
+            }
+        }
+    }
 
 
     /**
@@ -479,5 +639,7 @@ public class CommitServerImpl implements CommitServer {
         revCommitMap.put("newRevCommit",newCommit);
         return revCommitMap;
     }
+
+
 
 }

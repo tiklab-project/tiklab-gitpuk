@@ -10,19 +10,17 @@ import io.tiklab.gitpuk.common.RepositoryFinal;
 import io.tiklab.gitpuk.repository.model.IntRelevancy;
 import io.tiklab.gitpuk.repository.model.IntRelevancyQuery;
 import io.tiklab.gitpuk.repository.model.IntegratedInQuery;
-import io.tiklab.gitpuk.setting.model.IntegrationAddress;
 import io.tiklab.gitpuk.setting.service.IntegrationAddressServer;
 import io.tiklab.rpc.client.RpcClient;
 import io.tiklab.rpc.client.config.RpcClientConfig;
 import io.tiklab.rpc.client.router.lookup.FixedLookup;
-import io.tiklab.sourcefare.scan.model.ScanPlay;
-import io.tiklab.sourcefare.scan.model.ScanPlayQuery;
-import io.tiklab.sourcefare.scan.service.ScanPlayService;
+import io.tiklab.sourcefare.project.model.Project;
+import io.tiklab.sourcefare.project.model.ProjectQuery;
+import io.tiklab.sourcefare.project.service.ProjectService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,17 +94,17 @@ public class IntegratedInServiceImpl implements IntegratedInService{
                 .setType("scan"));
 
 
-        ScanPlayService scanPlayService = rpcClient().getBean(ScanPlayService.class, new FixedLookup(address));
-        ScanPlayQuery scanPlayQuery = new ScanPlayQuery();
-        scanPlayQuery.setPageParam(integratedInQuery.getPageParam());
-        scanPlayQuery.setScanWay("server");
+        ProjectService projectService = rpcClient().getBean(ProjectService.class, new FixedLookup(address));
+        ProjectQuery projectQuery = new ProjectQuery();
+        projectQuery.setPageParam(integratedInQuery.getPageParam());
+        projectQuery.setScanWay("server");
         if (!CollectionUtils.isEmpty(relevancyList)){
             List<String> stringList = relevancyList.stream().map(IntRelevancy::getRelevancyId).collect(Collectors.toList());
-            scanPlayQuery.setIds(stringList);
+          //  projectQuery.setIds(stringList);
         }
         try {
-            Pagination<ScanPlay> scanPlayPage = scanPlayService.findScanPlayPage(scanPlayQuery);
-            return scanPlayPage;
+            Pagination<Project> projectPage = projectService.findProjectPage(projectQuery);
+            return projectPage;
         }catch (Exception e){
             throw new ApplicationException(5000,"连接"+address+"失败");
         }
@@ -121,10 +119,10 @@ public class IntegratedInServiceImpl implements IntegratedInService{
         if (address.endsWith("/")){
             address = StringUtils.substringBeforeLast(address, "/");
         }
-        ScanPlayService scanPlayService = rpcClient().getBean(ScanPlayService.class, new FixedLookup(address));
+        ProjectService projectService = rpcClient().getBean(ProjectService.class, new FixedLookup(address));
         try {
-            List<ScanPlay> scanPlays = scanPlayService.findList(integratedInQuery.getRelevancyIdS());
-            return scanPlays;
+            List<Project> projectServiceList = projectService.findList(integratedInQuery.getRelevancyIdS());
+            return projectServiceList;
         }catch (Exception e){
             throw new SystemException(5000,"连接"+address+"失败");
         }

@@ -19,7 +19,6 @@ import io.tiklab.rpc.annotation.Exporter;
 import io.tiklab.user.dmUser.model.DmUser;
 import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
-import io.tiklab.user.user.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,8 +47,6 @@ public class RecordCommitServiceImpl implements RecordCommitService {
     @Autowired
     private DmUserService dmUserService;
 
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private RepositoryService repositoryServer;
@@ -143,7 +140,7 @@ public class RecordCommitServiceImpl implements RecordCommitService {
         //排序后根据仓库去重
         List<RecordCommit> recordCommits = openRecordList.stream().sorted(Comparator.comparing(RecordCommit::getCommitTime).reversed()).
                 collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(a -> a.getRepository().getRpyId()))), ArrayList::new));
-        joinTemplate.joinQuery(recordCommits);
+        joinTemplate.joinQuery(recordCommits,new String[]{"repository"});
         List<RecordCommit> publicRep = recordCommits.stream().filter(a -> ("public").equals(a.getRepository().getRules())).collect(Collectors.toList());
 
         //查询私有库

@@ -1,7 +1,4 @@
-ALTER TABLE rpy_auth_ssh add expire_time varchar(32);
-ALTER TABLE rpy_auth_ssh add fingerprint VARCHAR(64);
-ALTER TABLE rpy_auth_ssh ALTER COLUMN create_time TYPE timestamp USING create_time::timestamp;
-ALTER TABLE rpy_auth_ssh ALTER COLUMN user_time TYPE timestamp USING user_time::timestamp;
+
 
 -- ----------------
 -- 角色功能

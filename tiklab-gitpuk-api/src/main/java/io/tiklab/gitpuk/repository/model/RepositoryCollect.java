@@ -6,7 +6,7 @@ import io.tiklab.toolkit.beans.annotation.Mapper;
 import io.tiklab.toolkit.beans.annotation.Mapping;
 import io.tiklab.toolkit.beans.annotation.Mappings;
 import io.tiklab.toolkit.join.annotation.Join;
-import io.tiklab.toolkit.join.annotation.JoinQuery;
+import io.tiklab.toolkit.join.annotation.JoinField;
 import io.tiklab.user.user.model.User;
 
 import java.io.Serializable;
@@ -33,7 +33,7 @@ public class RepositoryCollect implements Serializable {
     @Mappings({
             @Mapping(source = "user.id",target = "userId")
     })
-    @JoinQuery(key = "user")
+    @JoinField(key = "user")
     private User user;
 
 

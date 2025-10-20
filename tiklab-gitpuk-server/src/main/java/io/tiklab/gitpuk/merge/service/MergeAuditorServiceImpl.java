@@ -15,7 +15,7 @@ import io.tiklab.gitpuk.merge.entity.MergeAuditorEntity;
 import io.tiklab.toolkit.beans.BeanMapper;
 import io.tiklab.toolkit.join.JoinTemplate;
 import io.tiklab.user.user.model.User;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class MergeAuditorServiceImpl implements MergeAuditorService {
     MergeConditionService mergeConditionService;
 
     @Autowired
-    UserService userService;
+    UserProcessor userProcessor;
 
     @Autowired
     GitPukTodoTaskService todoTaskService;
@@ -152,7 +152,7 @@ public class MergeAuditorServiceImpl implements MergeAuditorService {
     public MergeAuditor findMergeAuditor(@NotNull String id) {
         MergeAuditor mergeAuditor = findOne(id);
 
-        joinTemplate.joinQuery(mergeAuditor);
+        joinTemplate.joinQuery(mergeAuditor,new String[]{"user"});
 
         return mergeAuditor;
     }
@@ -163,7 +163,7 @@ public class MergeAuditorServiceImpl implements MergeAuditorService {
 
         List<MergeAuditor> mergeAuditorList =  BeanMapper.mapList(mergeAuditorEntityList,MergeAuditor.class);
 
-        joinTemplate.joinQuery(mergeAuditorList);
+        joinTemplate.joinQuery(mergeAuditorList,new String[]{"user"});
 
         return mergeAuditorList;
     }
@@ -174,7 +174,7 @@ public class MergeAuditorServiceImpl implements MergeAuditorService {
 
         List<MergeAuditor> mergeAuditorList = BeanMapper.mapList(mergeAuditorEntityList,MergeAuditor.class);
 
-        joinTemplate.joinQuery(mergeAuditorList);
+        joinTemplate.joinQuery(mergeAuditorList,new String[]{"user"});
 
         return mergeAuditorList;
     }
@@ -186,7 +186,7 @@ public class MergeAuditorServiceImpl implements MergeAuditorService {
 
         List<MergeAuditor> mergeAuditorList = BeanMapper.mapList(pagination.getDataList(),MergeAuditor.class);
 
-        joinTemplate.joinQuery(mergeAuditorList);
+        joinTemplate.joinQuery(mergeAuditorList,new String[]{"user"});
 
         return PaginationBuilder.build(pagination,mergeAuditorList);
     }
@@ -201,7 +201,7 @@ public class MergeAuditorServiceImpl implements MergeAuditorService {
     public void createCondition(MergeAuditor mergeAuditor,String type){
         MergeCondition mergeCondition = new MergeCondition();
 
-        User auditorUser = userService.findOne(mergeAuditor.getUser().getId());
+        User auditorUser = userProcessor.findOne(mergeAuditor.getUser().getId());
 
         //添加评审人
         if (("create").equals(type)){

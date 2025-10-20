@@ -207,6 +207,13 @@ public interface RepositoryService {
     Pagination<Repository> findRepositoryListByUser(RepositoryQuery repositoryQuery);
 
     /**
+     * 查询用户可以查看的仓库、以及仓库名字模糊查询
+     * @return userId 用户ID
+     */
+
+    List<Repository> findUserRepositoryList(String account, String password, String repName);
+
+    /**
      *查询用户是否有当前项目权限
      * @return userId 用户ID
      */
@@ -237,6 +244,12 @@ public interface RepositoryService {
      * @param  refCode
      */
     String findRefCodeType(String refCode,String repoId);
+
+    /**
+     * 查询仓库类型数量
+     * @param  userId 用户id
+     */
+    Object findRepositoryNum(String userId);
 }
 
 

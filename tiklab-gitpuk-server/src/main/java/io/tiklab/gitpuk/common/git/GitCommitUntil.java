@@ -480,13 +480,13 @@ public class GitCommitUntil {
     }
 
     /**
-     * 获取单个文件的提交历史
+     * 获取单个文件的 最后的提交历史
      * @param git git实例
      * @param file 文件名称
      * @return 提交历史
      * @throws GitAPIException 信息获取失败
      */
-    public static List<Map<String,String>> gitFileCommitLog(Git git,String commitId,String file)
+    public static Map<String,String> gitFileCommitLog(Git git,String commitId,String file)
             throws GitAPIException, IOException {
         List<Map<String,String>> list = new ArrayList<>();
 
@@ -499,17 +499,18 @@ public class GitCommitUntil {
                 .add(revCommits)
                 .addPath(file)
                 .call();
+
+        Map<String,String> map = new HashMap<>();
         for (RevCommit revCommit : log) {
-            Map<String,String> map = new HashMap<>();
             Date date = revCommit.getAuthorIdent().getWhen();
             String message = revCommit.getShortMessage();
 
             map.put("message",message);//转换时间
             map.put("time", RepositoryUtil.time(date,"commit")+"前");
             map.put("date", String.valueOf(date.getTime()));
-            list.add(map);
+            break;
         }
-        return list;
+        return map;
     }
 
     /**
@@ -849,6 +850,22 @@ public class GitCommitUntil {
                 commitFileDiffList.setNewFileType(newMode.toString());
 
 
+                //因为类型为删除的时候，新文件路径为/dev/null，这里直接添加旧路径
+                if (("DELETE").equals(name)){
+                    commitFileDiffList.setNewFilePath(oldPath);
+                }
+
+                //如果是新增，那oldFilePath就为/dev/null;删除文件 newFilePath就为/dev/null
+                String newFilePath = commitFileDiffList.getNewFilePath();
+
+                if (!newFilePath.contains("/")){
+                    commitFileDiffList.setFileName(newFilePath);
+                }else {
+                    String before = StringUtils.substringBeforeLast(newFilePath, "/");
+                    commitFileDiffList.setFolderPath(before);
+                    String filName = StringUtils.substringAfterLast(newFilePath, "/");
+                    commitFileDiffList.setFileName(filName);
+                }
 
                 String path ;
                 //通过文件的后缀获取类型 java、js...
@@ -859,6 +876,8 @@ public class GitCommitUntil {
                     path = oldPath;
                     commitFileDiffList.setFileType(StringUtils.substringAfterLast(oldPath,"/"));
                 }
+
+
 
                 //获取文件差异详情
                 int deleteLine=0;

@@ -33,7 +33,7 @@ auth:
     address: http://192.168.10.15:8080
     web:
       address: http://192.168.10.16:3010
-
+  expire: 86400 # 过期时间，单位秒，默认1天
 #dcs config
 dcs:
   server:
@@ -52,7 +52,7 @@ external:
 
 gitPuk:
   ssh:
-    port: 10051
+    port: 10055
     key: tiklab-gitpuk-starter/file/id_rsa
   file: tiklab-gitpuk-starter/file
 

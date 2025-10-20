@@ -138,3 +138,106 @@ create table rpy_time_task_instance(
        exec_time  varchar(12),
        create_time  timestamp
 );
+
+-- ---------------------------
+-- 密钥ssh表
+-- ----------------------------
+create table rpy_auth_ssh(
+     id                 varchar(12),
+     rpy_id              varchar(12) ,
+     title                varchar(256),
+     create_time          timestamp,
+     user_id              varchar(12) ,
+     user_time            timestamp,
+     value                text,
+     type                 varchar(12),
+     modulus text
+);
+ALTER TABLE rpy_auth_ssh add expire_time varchar(32);
+ALTER TABLE rpy_auth_ssh add fingerprint VARCHAR(64);
+ALTER TABLE rpy_auth_ssh ALTER COLUMN create_time TYPE timestamp USING create_time::timestamp;
+ALTER TABLE rpy_auth_ssh ALTER COLUMN user_time TYPE timestamp USING user_time::timestamp;
+-- ---------------------------
+-- 合并请求
+-- ----------------------------
+create table rpy_merge_request(
+      id                 varchar(12),
+      rpy_id             varchar(12) NOT NULL,
+      title              varchar(256) NOT NULL,
+      merge_origin       varchar(32) NOT NULL,
+      merge_target       varchar(32) NOT NULL,
+      create_user        varchar(12),
+      merge_state       integer,
+      is_clash           integer,
+      value               TEXT,
+      create_time         timestamp
+);
+
+-- ---------------------------
+-- 合并请求动态
+-- ----------------------------
+create table rpy_merge_condition(
+    id                 varchar(12),
+    user_id            varchar(12) NOT NULL,
+    merge_request_id   varchar(12) NOT NULL,
+    repository_id      varchar(12),
+    type  varchar(32) not null,
+    data  varchar(128),
+    create_time timestamp
+);
+
+-- ---------------------------
+-- 合并请求动态的评论
+-- ----------------------------
+create table rpy_merge_comment(
+          id                 varchar(12),
+          merge_condition_id varchar(12) NOT NULL,
+          merge_request_id   varchar(12) NOT NULL,
+          repository_id      varchar(12),
+          comment_user_id      varchar(12),
+          reply_user_id         varchar(12),
+          data  text,
+          create_time timestamp
+);
+-- ---------------------------
+-- 合并完成后的差异commitId
+-- ----------------------------
+create table rpy_merge_commit(
+         id                 varchar(12),
+         merge_request_id   varchar(12) NOT NULL,
+         repository_id      varchar(12),
+         commit_time      timestamp,
+         commit_id   varchar(128) NOT NULL,
+         create_time timestamp
+);
+-- ---------------------------
+-- 仓库收藏
+-- ----------------------------
+create table rpy_repository_collect(
+       id               varchar(12) ,
+       repository_id         varchar(12) NOT NULL,
+       user_id          varchar(12),
+       create_time     timestamp
+);
+-- ---------------------------
+-- 仓库分支
+-- ----------------------------
+create table rpy_repository_branch(
+      id                   varchar(12) ,
+      repository_id        varchar(12) NOT NULL,
+      branch_name          varchar(64),
+      branch_id            varchar(128),
+      create_user          varchar(12),
+      create_time          timestamp
+);
+-- ---------------------------
+-- 合并请求审核人
+-- ----------------------------
+create table rpy_merge_auditor(
+      id                 varchar(12),
+      merge_request_id   varchar(12) NOT NULL,
+      user_id            varchar(12) NOT NULL,
+      repository_id      varchar(12),
+      audit_status        integer,
+      create_time timestamp
+);

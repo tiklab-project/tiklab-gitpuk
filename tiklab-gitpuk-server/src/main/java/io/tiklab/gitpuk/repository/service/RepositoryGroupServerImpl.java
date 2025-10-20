@@ -219,7 +219,7 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
                         }
                     }
                 }else {
-                    joinTemplate.joinQuery(repositoryGroups);
+                    joinTemplate.joinQuery(repositoryGroups,new String[]{"user"});
                 }
                 return PaginationBuilder.build(repositoryGroupPage,repositoryGroups);
             }
@@ -341,40 +341,42 @@ public class RepositoryGroupServerImpl implements RepositoryGroupServer {
      * @param  updateName 更新名字
      */
     public void sendMessLog(RepositoryGroupEntity groupRepository, String type, String updateName){
+        Thread thread = new Thread() {
+            public void run() {
+                HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
 
-        HashMap<String, Object> map = gitTokMessageService.initMessageAndLogMap();
+                map.put("groupId",groupRepository.getGroupId());
+                map.put("action",groupRepository.getName());
+                if (("delete").equals(type)){
+                    map.put("message", groupRepository.getName());
+                    map.put("link", GitPukFinal.GROUP_RPY_DELETE);
+                    map.put("groupName",groupRepository.getName());
+                    map.put("qywxurl",GitPukFinal.GROUP_RPY_DELETE);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_DELETE);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_DELETE,"repositoryGroup");
+                }
 
-        map.put("groupId",groupRepository.getGroupId());
-        map.put("action",groupRepository.getName());
-        if (("delete").equals(type)){
-            map.put("message", groupRepository.getName());
-            map.put("link", GitPukFinal.GROUP_RPY_DELETE);
-            map.put("groupName",groupRepository.getName());
-            map.put("qywxurl",GitPukFinal.GROUP_RPY_DELETE);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_DELETE);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_DELETE,"repositoryGroup");
-        }
+                if (("update").equals(type)){
+                    map.put("message", groupRepository.getName()+"更改为"+updateName);
+                    map.put("link", GitPukFinal.GROUP_RPY_UPDATE);
+                    map.put("groupName",updateName);
+                    map.put("update",groupRepository.getName());
+                    map.put("qywxurl",GitPukFinal.GROUP_RPY_UPDATE);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_UPDATE);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_UPDATE,"repositoryGroup");
+                }
 
-        if (("update").equals(type)){
-            map.put("message", groupRepository.getName()+"更改为"+updateName);
-            map.put("link", GitPukFinal.GROUP_RPY_UPDATE);
-            map.put("groupName",updateName);
-            map.put("update",groupRepository.getName());
-            map.put("qywxurl",GitPukFinal.GROUP_RPY_UPDATE);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_UPDATE);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_UPDATE,"repositoryGroup");
-        }
-
-        if (("create").equals(type)){
-            map.put("message", groupRepository.getName());
-            map.put("link", GitPukFinal.GROUP_RPY_CREATE);
-            map.put("groupName",groupRepository.getName());
-            map.put("qywxurl",GitPukFinal.GROUP_RPY_CREATE);
-            gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_CREATE);
-            gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_CREATE,"repositoryGroup");
-        }
+                if (("create").equals(type)){
+                    map.put("message", groupRepository.getName());
+                    map.put("link", GitPukFinal.GROUP_RPY_CREATE);
+                    map.put("groupName",groupRepository.getName());
+                    map.put("qywxurl",GitPukFinal.GROUP_RPY_CREATE);
+                    gitTokMessageService.deployMessage(map, GitPukFinal.LOG_TYPE_GROUP_CREATE);
+                    gitTokMessageService.deployLog(map, GitPukFinal.LOG_TYPE_GROUP_CREATE,"repositoryGroup");
+                }
+            }};
+        thread.start();
     }
-
 }
 
 

@@ -22,7 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RepositoryFileServerImpl implements RepositoryFileServer {
@@ -98,22 +99,35 @@ public class RepositoryFileServerImpl implements RepositoryFileServer {
         //仓库存储地址
         String repositoryAddress = RepositoryUtil.findRepositoryAddress(yamlDataMaService.repositoryAddress(),message.getRpyId()) ;
 
-        List<FileTree> fileTrees ;
         try {
             //查询仓库分支
             List<Ref> bareRepoBranchList = GitBranchUntil.findBareRepoBranchList(repositoryAddress);
             if (bareRepoBranchList.isEmpty()){
                 return null;
             }
-
+            List<FileTree> arrayList = new ArrayList<>();
             //查询文件
-            fileTrees = RepositoryFileUtil.findFileTree(repositoryAddress,message);
+            List<FileTreeItem> fileTrees = RepositoryFileUtil.findFileTree(repositoryAddress,message);
+
+            //根据文件夹分组
+            Map<String, List<FileTreeItem>> collected = fileTrees.stream().collect(Collectors.groupingBy(a -> a.getBorderPath()));
+            if (ObjectUtils.isNotEmpty(collected)){
+                for (String key :collected.keySet()){
+                    FileTree fileTree = new FileTree();
+                    fileTree.setItems(collected.get(key));
+                    fileTree.setPath(key);
+                    arrayList.add(fileTree);
+                }
+            }
+
+            arrayList.sort(Comparator.comparing(a->a.getPath().length()));
+            return arrayList;
         } catch (IOException e) {
             throw new ApplicationException(GitPukFinal.SYSTEM_EXCEPTION,"仓库信息获取失败：" + e);
         } catch (GitAPIException e) {
             throw new ApplicationException(GitPukFinal.SYSTEM_EXCEPTION, "提交信息获取失败：" + e);
         }
-        return fileTrees;
+
     }
 
 

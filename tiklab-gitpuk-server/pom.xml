@@ -196,7 +196,13 @@
 			<artifactId>tiklab-postin-client</artifactId>
 			<version>${tiklab-postin.version}</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>io.tiklab</groupId>
+            <artifactId>tiklab-dsm-core</artifactId>
+            <version>1.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

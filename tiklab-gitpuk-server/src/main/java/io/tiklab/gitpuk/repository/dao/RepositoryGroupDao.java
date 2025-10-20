@@ -102,8 +102,8 @@ public class RepositoryGroupDao {
         int offset = (pageParam.getCurrentPage() - 1) * pageParam.getPageSize();
 
         //查询数据
-        String sql="SELECT gr.group_id ,gr.name,gr.rules,gr.color,count(re.rpy_id) AS repositoryNum,gr.user_id  FROM rpy_group gr LEFT  JOIN rpy_repository re ON gr.group_id=re.group_id " +
-                " where gr.group_id in (:groupIds) GROUP BY gr.group_id,gr.name,gr.rules,gr.user_id,gr.color LIMIT " +pageParam.getPageSize()+" offset "+offset;
+        String sql="SELECT gr.group_id ,gr.name,gr.rules,gr.color,count(re.rpy_id) AS repositoryNum,gr.user_id,gr.create_time  FROM rpy_group gr LEFT  JOIN rpy_repository re ON gr.group_id=re.group_id " +
+                " where gr.group_id in (:groupIds) GROUP BY gr.group_id,gr.name,gr.rules,gr.user_id,gr.color,gr.create_time LIMIT " +pageParam.getPageSize()+" offset "+offset;
 
         List query = jdbc.query(sql, paramMap, new BeanPropertyRowMapper(RepositoryGroupEntity.class));
         pagination.setDataList(query);

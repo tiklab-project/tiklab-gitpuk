@@ -10,7 +10,7 @@ doc/
 data/
 logs/
 plugin/
-thoughtware-gittork-starter/embbed
-thoughtware-gittork-starter/plugin
+tiklab-gitpuk-starter/embbed/
 gittork-log
 .embbed/
+tiklab-gitpuk-starter/src/main/resources/static/

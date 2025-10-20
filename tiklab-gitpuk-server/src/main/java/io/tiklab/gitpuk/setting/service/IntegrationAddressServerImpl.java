@@ -29,8 +29,6 @@ public class IntegrationAddressServerImpl implements IntegrationAddressServer {
     @Autowired
     private IntegrationAddressDao integrationAddressDao;
 
-    @Autowired
-    private JoinTemplate joinTemplate;
     /**
      * 创建系统集成地址
      * @param integrationAddress 信息
@@ -71,7 +69,6 @@ public class IntegrationAddressServerImpl implements IntegrationAddressServer {
     public IntegrationAddress findOneIntegrationAddress(String IntegrationAddressId) {
         IntegrationAddressEntity groupEntity = integrationAddressDao.findOneIntegrationAddress(IntegrationAddressId);
         IntegrationAddress integrationAddress = BeanMapper.map(groupEntity, IntegrationAddress.class);
-        // joinTemplate.joinQuery(integrationAddress);
         return integrationAddress;
     }
 
@@ -83,7 +80,6 @@ public class IntegrationAddressServerImpl implements IntegrationAddressServer {
     public List<IntegrationAddress> findAllIntegrationAddress() {
         List<IntegrationAddressEntity> groupEntityList = integrationAddressDao.findAllIntegrationAddress();
         List<IntegrationAddress> list = BeanMapper.mapList(groupEntityList, IntegrationAddress.class);
-        // joinTemplate.joinQuery(list);
         if (list == null || list.isEmpty()){
             return Collections.emptyList();
         }
@@ -95,7 +91,6 @@ public class IntegrationAddressServerImpl implements IntegrationAddressServer {
     public List<IntegrationAddress> findAllIntegrationAddressList(List<String> idList) {
         List<IntegrationAddressEntity> groupEntities = integrationAddressDao.findAllIntegrationAddressList(idList);
         List<IntegrationAddress> list = BeanMapper.mapList(groupEntities, IntegrationAddress.class);
-        // joinTemplate.joinQuery(list);
         return list;
     }
 
@@ -103,9 +98,6 @@ public class IntegrationAddressServerImpl implements IntegrationAddressServer {
     public List<IntegrationAddress> findIntegrationAddressList(IntegrationAddressQuery integrationAddressQuery) {
         List<IntegrationAddressEntity> integrationAddressEntity =  integrationAddressDao.findIntegrationAddressList(integrationAddressQuery);
         List<IntegrationAddress> integrationAddressList = BeanMapper.mapList(integrationAddressEntity, IntegrationAddress.class);
-
-        joinTemplate.joinQuery(integrationAddressList);
-
 
         return integrationAddressList;
     }

@@ -13,7 +13,7 @@ import io.tiklab.todotask.todo.model.TaskType;
 import io.tiklab.todotask.todo.service.TaskByTempService;
 import io.tiklab.todotask.todo.service.TaskService;
 import io.tiklab.user.user.model.User;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ import java.util.*;
 public class GitPukTodoTaskServiceImpl implements GitPukTodoTaskService {
 
     @Autowired
-    UserService userService;
+    UserProcessor userProcessor;
 
     @Autowired
     RepositoryService repositoryServer;
@@ -58,7 +58,7 @@ public class GitPukTodoTaskServiceImpl implements GitPukTodoTaskService {
         task.setTodoType(taskType);
 
         String createUserId = LoginContext.getLoginId();
-        User user = userService.findOne(createUserId);
+        User user = userProcessor.findOne(createUserId);
         task.setCreateUser(user);
 
         Repository repository = repositoryServer.findOne(mergeAuditor.getRepositoryId());

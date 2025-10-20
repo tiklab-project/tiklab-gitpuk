@@ -39,6 +39,9 @@ public class FileDiffEntry {
      */
     private  int deleteLine;
 
+    //树结构
+    private List<FileDiffTree> diffTreeList;
+
 
 
 
@@ -98,4 +101,11 @@ public class FileDiffEntry {
         this.parentCommitIds = parentCommitIds;
     }
 
+    public List<FileDiffTree> getDiffTreeList() {
+        return diffTreeList;
+    }
+
+    public void setDiffTreeList(List<FileDiffTree> diffTreeList) {
+        this.diffTreeList = diffTreeList;
+    }
 }

@@ -13,7 +13,7 @@ import io.tiklab.user.dmUser.model.DmUserQuery;
 import io.tiklab.user.dmUser.service.DmUserService;
 import io.tiklab.user.user.model.User;
 import io.tiklab.user.user.model.UserQuery;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class GitPukUserServiceImpl implements GitPukUserService {
 
 
     @Autowired
-    UserService userService;
+    UserProcessor userProcessor;
 
     @Autowired
     DmUserService dmUserService;
@@ -52,7 +52,7 @@ public class GitPukUserServiceImpl implements GitPukUserService {
         }
         userQuery.setStatus(1);
         userQuery.setPageParam(gitPukQuery.getPageParam());
-        Pagination<User> userPage = userService.findUserPage(userQuery);
+        Pagination<User> userPage = userProcessor.findUserPage(userQuery);
 
         List<User> dataList = userPage.getDataList();
         for (User user:dataList){

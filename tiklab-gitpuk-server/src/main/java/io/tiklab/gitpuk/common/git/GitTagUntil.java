@@ -73,7 +73,7 @@ public class GitTagUntil {
         Repository repository = Git.open(new File(repositoryAddress)).getRepository();
         Git git = new Git(repository);
 
-        git.tagDelete().setTags(repositoryAddress,TagName).call();
+        git.tagDelete().setTags(TagName).call();
         git.close();
     }
 

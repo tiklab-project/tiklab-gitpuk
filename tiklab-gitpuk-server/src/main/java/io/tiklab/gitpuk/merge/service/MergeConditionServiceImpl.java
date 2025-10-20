@@ -108,7 +108,7 @@ public class MergeConditionServiceImpl implements MergeConditionService {
 
         List<MergeCondition> mergeConditionList = BeanMapper.mapList(mergeConditionEntityList,MergeCondition.class);
 
-        joinTemplate.joinQuery(mergeConditionList);
+        joinTemplate.joinQuery(mergeConditionList,new String[]{"user"});
 
         List<MergeCondition> collect = mergeConditionList.stream().filter(a -> ("comment").equals(a.getType())).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(collect)&&!("exec").equals(mergeConditionQuery.getFindType())){

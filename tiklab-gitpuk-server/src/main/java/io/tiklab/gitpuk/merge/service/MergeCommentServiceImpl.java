@@ -131,7 +131,7 @@ public class MergeCommentServiceImpl implements MergeCommentService {
 
         List<MergeComment> mergeCommentList = BeanMapper.mapList(mergeCommentEntityList,MergeComment.class);
 
-        joinTemplate.joinQuery(mergeCommentList);
+        joinTemplate.joinQuery(mergeCommentList ,new String[]{"commentUser","replyUser"});
 
         return mergeCommentList;
     }

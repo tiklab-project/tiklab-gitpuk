@@ -8,7 +8,7 @@ import io.tiklab.security.logging.logging.model.Logging;
 import io.tiklab.security.logging.logging.model.LoggingType;
 import io.tiklab.security.logging.logging.service.LoggingByTempService;
 import io.tiklab.user.user.model.User;
-import io.tiklab.user.user.service.UserService;
+import io.tiklab.user.user.service.UserProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +31,7 @@ public class GitPukMessageServiceImpl implements GitPukMessageService {
     LoggingByTempService logService;
 
     @Autowired
-    UserService userService;
+    UserProcessor userProcessor;
 
 
 
@@ -67,7 +67,7 @@ public class GitPukMessageServiceImpl implements GitPukMessageService {
 
         //用户信息
         String userId = LoginContext.getLoginId();
-        User user = userService.findOne(userId);
+        User user = userProcessor.findOne(userId);
 
         log.setUser(user);
         log.setLink(map.get("link").toString());  //跳转地址
@@ -84,7 +84,7 @@ public class GitPukMessageServiceImpl implements GitPukMessageService {
     public HashMap<String,Object> initMessageAndLogMap() {
         HashMap<String,Object> map = new HashMap<>();
         String userId = LoginContext.getLoginId();
-        User user = userService.findOne(userId);
+        User user = userProcessor.findOne(userId);
         String userName = StringUtils.isNotEmpty(user.getNickname()) ? user.getNickname() : user.getName();
 
         map.put("userName", userName);

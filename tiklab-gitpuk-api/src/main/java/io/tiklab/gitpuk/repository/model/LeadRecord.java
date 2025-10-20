@@ -5,7 +5,7 @@ import io.tiklab.toolkit.beans.annotation.Mapper;
 import io.tiklab.toolkit.beans.annotation.Mapping;
 import io.tiklab.toolkit.beans.annotation.Mappings;
 import io.tiklab.toolkit.join.annotation.Join;
-import io.tiklab.toolkit.join.annotation.JoinQuery;
+import io.tiklab.toolkit.join.annotation.JoinField;
 import io.tiklab.postin.annotation.ApiModel;
 import io.tiklab.postin.annotation.ApiProperty;
 
@@ -24,7 +24,7 @@ public class LeadRecord   {
     @Mappings({
             @Mapping(source = "repository.rpyId",target = "rpyId")
     })
-    @JoinQuery(key = "rpyId")
+    @JoinField(key = "rpyId")
     private Repository repository;
 
 
